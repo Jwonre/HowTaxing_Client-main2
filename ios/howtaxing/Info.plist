@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>howtaxing</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	 <dict>
+   <key>CFBundleURLTypes</key>
+	<dict>
+		<key>CFBundleTypeRole</key>
+		<string>Editor</string>
+		<key>CFBundleURLName</key>
+		<string>naver</string>
+		<key>CFBundleURLSchemes</key>
+		<array>
+			<string>howtaxing</string>
+		</array>
+	</dict>
+   <key>CFBundleURLSchemes</key>
+   <array>
+     <string>kakao9b9f977d588a05bbf9d5d2f77a327e8c</string>
+   </array>
+    <key>KAKAO_APP_KEY</key>
+ <string>9b9f977d588a05bbf9d5d2f77a327e8c</string>
+ <key>KAKAO_APP_SCHEME</key> 
+ <string>howtaxing</string>  
+ <key>LSApplicationQueriesSchemes</key>
+ <array>
+   <string>kakaokompassauth</string>
+   <string>storykompassauth</string>
+   <string>kakaolink</string>
+	<string>naversearchapp</string>
+  	<string>naversearchthirdlogin</string>
+ </array>
+ </dict>
+ <key>NMFClientId</key>
+    <string>0wc83sxbri</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>사용자 위치 확인을 위해서 위치 권한이 필요합니다.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>사용자 위치 확인을 위해서 위치 권한이 필요합니다.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>사용자 위치 확인을 위해서 위치 권한이 필요합니다.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>사용자 위치 확인을 위해서 위치 권한이 필요합니다.</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Fonts/Pretendard-Bold.ttf</string>
+		<string>Fonts/Pretendard-Light.ttf</string>
+		<string>Fonts/Pretendard-Medium.ttf</string>
+		<string>Fonts/Pretendard-Regular.ttf</string>
+		<string>Fonts/Pretendard-SemiBold.ttf</string>
+	</array>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+</dict>
+</plist>
