@@ -42,6 +42,9 @@ import ConfirmSheet2 from '../components/bottomSheets/ConfirmSheet2';
 import ConfirmSheet from '../components/bottomSheets/ConfirmSheet';
 import Third from '../screens/Main/Terms/Third';
 import Cert from '../screens/Main/Terms/Cert';
+import Cert2 from '../screens/Main/Terms/Cert2';
+import Privacy2 from '../screens/Main/Terms/Privacy2';
+import Location2 from '../screens/Main/Terms/Location2';
 import HouseDetail from '../screens/Main/HouseDetail';
 import SearchHouseSheet2 from '../components/bottomSheets/SearchHouseSheet2';
 import MapViewListSheet2 from '../components/bottomSheets/MapViewListSheet2';
@@ -94,6 +97,11 @@ const AppNavigator = () => {
           {currentUser ? (
             <Stack.Group>
               <Stack.Screen name="CheckTerms" component={CheckTerms} />
+              <Stack.Group screenOptions={{presentation: 'modal'}}>
+                <Stack.Screen name="Cert2" component={Cert2} />
+                <Stack.Screen name="Privacy2" component={Privacy2} />
+                <Stack.Screen name="Location2" component={Location2} />
+              </Stack.Group>
               <Stack.Screen
                 name="Home"
                 component={Home}

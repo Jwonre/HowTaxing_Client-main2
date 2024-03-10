@@ -1,5 +1,5 @@
 // 취득세 홈페이지
-// 취득세 홈페이지 test
+
 import { TouchableOpacity, useWindowDimensions } from 'react-native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -189,7 +189,7 @@ const CheckTerms = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
-            navigation.goback();
+            navigation.navigate("Login");
           }}>
           <BackIcon />
         </TouchableOpacity>
@@ -305,7 +305,10 @@ const CheckTerms = props => {
         <ListItemTitle>
           [필수] 하우택싱 서비스 이용약관
         </ListItemTitle>
-        <ListItemButton>
+        <ListItemButton
+          onPress={() => {
+            navigation.navigate('Cert2');
+          }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
       </ListItem>
@@ -329,7 +332,10 @@ const CheckTerms = props => {
         <ListItemTitle>
           [필수] 개인정보처리방침
         </ListItemTitle>
-        <ListItemButton>
+        <ListItemButton
+          onPress={() => {
+            navigation.navigate('Privacy2');
+          }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
       </ListItem>
@@ -353,7 +359,10 @@ const CheckTerms = props => {
         <ListItemTitle>
           [필수] 위치정보 이용약관
         </ListItemTitle>
-        <ListItemButton>
+        <ListItemButton
+          onPress={() => {
+            navigation.navigate('Location2');
+          }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
       </ListItem>
@@ -377,19 +386,28 @@ const CheckTerms = props => {
         <ListItemTitle>
           [선택] 마케팅 수신동의
         </ListItemTitle>
-        <ListItemButton>
-          <ListItemButtonText>보기</ListItemButtonText>
-        </ListItemButton>
+
       </ListItem>
-      <ListItem style={{ marginTop: 100 }}>
+      <ListItem style={{ marginTop: 50 }}>
 
       </ListItem>
       <ButtonSection style={{ marginTop: 20 }}>
         <ShadowContainer>
           <Button
             width={width}
+            disabled={!(agreeCert && agreeAge && agreePrivacy && agreeLocation && agreeMarketing)}
             onPress={() => {
               navigation.replace('Home');
+            }}
+            style={{
+              width: width - 80,
+              alignSelf: 'center',
+              marginTop: 20,
+              marginBottom: 50,
+              backgroundColor:
+                agreeCert && agreeAge && agreePrivacy && agreeLocation && agreeMarketing
+                  ? '#2F87FF'
+                  : '#E8EAED',
             }}>
             <ButtonText>시작하기</ButtonText>
           </Button>
@@ -400,3 +418,4 @@ const CheckTerms = props => {
 };
 
 export default CheckTerms;
+

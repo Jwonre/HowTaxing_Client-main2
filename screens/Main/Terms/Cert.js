@@ -275,9 +275,9 @@ const Cert = props => {
               dispatch(
                 setCert({
                   certType,
-                  agreePrivacy,
-                  agreeThird,
-                  agreeCert: true,
+                  agreePrivacy, 
+                  agreeThird, 
+                  agreeCert : true,
                 }),
               );
 

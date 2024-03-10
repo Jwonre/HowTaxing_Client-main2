@@ -268,9 +268,9 @@ const Privacy = props => {
               dispatch(
                 setCert({
                   certType,
-                  agreeCert,
-                  agreeThird,
-                  agreePrivacy: true,
+                  agreeCert, 
+                  agreeThird, 
+                  agreePrivacy : true,
                 }),
               );
               navigation.goBack();

@@ -1,21 +1,16 @@
-// 3자 제공 동의서
+// 개인정보 처리방침
 
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  ScrollView,
-} from 'react-native';
-import React, {useLayoutEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import { TouchableOpacity, useWindowDimensions, ScrollView } from 'react-native';
+import React, { useLayoutEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
 import getFontSize from '../../../utils/getFontSize';
 import DropShadow from 'react-native-drop-shadow';
-import {SheetManager} from 'react-native-actions-sheet';
-import {useDispatch, useSelector} from 'react-redux';
-import {setCert} from '../../../redux/certSlice';
+import { SheetManager } from 'react-native-actions-sheet';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCert } from '../../../redux/certSlice';
+
 const Container = styled.View`
   flex: 1;
   background-color: #fff;
@@ -74,13 +69,12 @@ const ContentText = styled.Text`
   margin-top: 20px;
 `;
 
-const Third = props => {
+const Privacy2 = props => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const {type} = props.route.params;
-  const {width} = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const [activeButton, setActiveButton] = useState(false);
-  const {certType, agreeCert, agreePrivacy, agreeThird} = useSelector(
+  const { certType, agreeCert, agreePrivacy, agreeThird, agreeLocation, agreeAge, agreeMarketing } = useSelector(
     state => state.cert.value,
   );
 
@@ -89,16 +83,9 @@ const Third = props => {
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
-            setTimeout(() => {
-              SheetManager.show('cert', {
-                payload: {
-                  cert: props.route.params.cert,
-                },
-              });
-            }, 300);
           }}>
           <CloseIcon />
         </TouchableOpacity>
@@ -122,12 +109,12 @@ const Third = props => {
     <Container>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingHorizontal: 20, paddingBottom: 80}}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
         // 스크롤이 하단에 도달했을 때
-        onScroll={({nativeEvent}) => {
+        onScroll={({ nativeEvent }) => {
           if (
             nativeEvent.contentOffset.y +
-              nativeEvent.layoutMeasurement.height >=
+            nativeEvent.layoutMeasurement.height >=
             nativeEvent.contentSize.height
           ) {
             setActiveButton(true);
@@ -135,12 +122,8 @@ const Third = props => {
             setActiveButton(false);
           }
         }}>
-        <Title>(필수) 개인정보 제3자 제공 동의</Title>
-        <SubTitle>
-          [필수]{' '}
-          {certType === 'KB' ? 'KB' : certType === 'naver' ? '네이버' : '토스'}{' '}
-          개인정보 제3자 정보제공 동의서
-        </SubTitle>
+        <Title>(필수) 개인정보 수집 및 이용 동의</Title>
+        <SubTitle>[필수] 개인정보 수집 및 이용 동의서</SubTitle>
         <ContentText>
           {`제1장 총칙
 제1조 (목적) 이 약관은 주식회사 하우택싱(이하 “회사”라 합니다)가 운영하는 주택세금계산서비스 “홈페이지”와 하우택싱 “애플리케이션”(이하 “홈페이지”와 “애플리케이션”을 “하우택싱”이라고 합니다)의 서비스 이용 및 제공에 관한 제반 사항의 규정을 목적으로 합니다.
@@ -272,27 +255,23 @@ const Third = props => {
           }}>
           <Button
             width={width}
-            active={activeButton || agreeThird}
-            disabled={!(activeButton || agreeThird)}
+            active={activeButton || agreePrivacy}
+            disabled={!(activeButton || agreePrivacy)}
             onPress={() => {
               dispatch(
                 setCert({
                   certType,
-                  agreeCert, 
-                  agreePrivacy, 
-                  agreeThird : true,
+                  agreeLocation,
+                  agreeCert,
+                  agreeThird,
+                  agreeAge,
+                  agreeMarketing,
+                  agreePrivacy: true,
                 }),
               );
               navigation.goBack();
-              setTimeout(() => {
-                SheetManager.show('cert', {
-                  payload: {
-                    cert: props.route.params.cert,
-                  },
-                });
-              }, 300);
             }}>
-            <ButtonText active={activeButton || agreeThird}>
+            <ButtonText active={activeButton || agreePrivacy}>
               동의하기
             </ButtonText>
           </Button>
@@ -302,4 +281,4 @@ const Third = props => {
   );
 };
 
-export default Third;
+export default Privacy2;
