@@ -1,5 +1,5 @@
 // 취득세 홈페이지
-// 취득세 홈페이지 test
+
 import { TouchableOpacity, useWindowDimensions } from 'react-native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
