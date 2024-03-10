@@ -10,7 +10,6 @@ import HomeIcon from '../../assets/images/home_checkterms.svg';
 import FastImage from 'react-native-fast-image';
 import DropShadow from 'react-native-drop-shadow';
 import getFontSize from '../../utils/getFontSize';
-//import { useSelector } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCert } from '../../redux/certSlice';
 
