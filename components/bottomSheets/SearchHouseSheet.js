@@ -532,7 +532,7 @@ const SearchHouseSheet = props => {
     const chat1 = {
       id: 'apartmentAddress',
       type: 'system',
-      message: '취득하실 주택을 선택해주세요.',
+      message: '을 선택해주세요.',
       progress: 1,
     };
     const chat2 = {

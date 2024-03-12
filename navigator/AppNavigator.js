@@ -96,12 +96,6 @@ const AppNavigator = () => {
         <Stack.Navigator screenOptions={horizontalAnimation}>
           {currentUser ? (
             <Stack.Group>
-              <Stack.Screen name="CheckTerms" component={CheckTerms} />
-              <Stack.Group screenOptions={{presentation: 'modal'}}>
-                <Stack.Screen name="Cert2" component={Cert2} />
-                <Stack.Screen name="Privacy2" component={Privacy2} />
-                <Stack.Screen name="Location2" component={Location2} />
-              </Stack.Group>
               <Stack.Screen
                 name="Home"
                 component={Home}
@@ -157,6 +151,12 @@ const AppNavigator = () => {
           ) : (
             <Stack.Group>
               <Stack.Screen name="Login" component={Login} />
+              <Stack.Screen name="CheckTerms" component={CheckTerms} />
+              <Stack.Group screenOptions={{presentation: 'modal'}}>
+                <Stack.Screen name="Cert2" component={Cert2} />
+                <Stack.Screen name="Privacy2" component={Privacy2} />
+                <Stack.Screen name="Location2" component={Location2} />
+              </Stack.Group>
             </Stack.Group>
           )}
         </Stack.Navigator>

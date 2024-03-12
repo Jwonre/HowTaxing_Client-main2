@@ -7,10 +7,6 @@ const initialState = {
     agreeCert: false,
     agreePrivacy: false,
     agreeThird: false,
-    agreeLocation : false,
-    agreeMarketing : false,
-    agreeAge : false,
-    
   },
 };
 

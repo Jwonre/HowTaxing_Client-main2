@@ -179,12 +179,15 @@ const Login = () => {
     // } else {
     //   console.log('ios only');
     // }
-    dispatch(
-      setCurrentUser({
-        name: '김하우',
-        email: '',
-      }),
-    );
+//    dispatch(
+//        setCurrentUser({
+//          name: '김하우',
+//          email: '',
+//        }),
+//  );
+
+  dispatch(setCurrentUser(null),);
+  navigation.push('CheckTerms');
   };
 
   // 소셜 로그인

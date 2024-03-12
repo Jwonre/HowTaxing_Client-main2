@@ -1,4 +1,3 @@
-// 취득세 홈페이지
 
 import { TouchableOpacity, useWindowDimensions } from 'react-native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
@@ -10,8 +9,6 @@ import HomeIcon from '../../assets/images/home_checkterms.svg';
 import FastImage from 'react-native-fast-image';
 import DropShadow from 'react-native-drop-shadow';
 import getFontSize from '../../utils/getFontSize';
-import { useDispatch, useSelector } from 'react-redux';
-import { setCert } from '../../redux/certSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -164,21 +161,11 @@ const CheckTerms = props => {
   const navigation = useNavigation()
   const { width, height } = useWindowDimensions()
   const cert = props.payload;
-  const { certType, agreeAge, agreeCert, agreePrivacy, agreeLocation, agreeMarketing } = useSelector(
-    state => state.cert.value,
-  )
-
-
-  useEffect(() => {
-    if (cert) {
-      dispatch(
-        setCert({
-          certType: cert,
-        }),
-      );
-    }
-  }, [cert]);
-  const dispatch = useDispatch();
+  const [ agreeAge, setagreeAge ] = useState(false);
+  const [ agreeCert, setagreeCert ] = useState(false);
+  const [ agreePrivacy, setagreePrivacy ] = useState(false);
+  const [ agreeLocation, setagreeLocation ] = useState(false);
+  const [ agreeMarketing, setagreeMarketing ] = useState(false);
 
 
 
@@ -224,27 +211,17 @@ const CheckTerms = props => {
       <ListItem>
         <CheckCircle onPress={() => {
           if (agreeAge && agreeCert && agreePrivacy && agreeLocation && agreeMarketing) {
-            dispatch(
-              setCert({
-                certType,
-                agreeAge: false,
-                agreeCert: false,
-                agreePrivacy: false,
-                agreeLocation: false,
-                agreeMarketing: false,
-              }),
-            );
+            setagreeAge(false)
+            setagreeCert(false)
+            setagreePrivacy(false)
+            setagreeLocation(false)
+            setagreeMarketing(false)
           } else {
-            dispatch(
-              setCert({
-                certType,
-                agreeAge: true,
-                agreeCert: true,
-                agreePrivacy: true,
-                agreeLocation: true,
-                agreeMarketing: true,
-              }),
-            );
+            setagreeAge(true)
+            setagreeCert(true)
+            setagreePrivacy(true)
+            setagreeLocation(true)
+            setagreeMarketing(true)
           }
         }}>
           {agreeAge && agreeCert && agreePrivacy && agreeLocation && agreeMarketing && <CheckOnIcon />}
@@ -268,16 +245,11 @@ const CheckTerms = props => {
       <ListItem style={{ marginTop: 20 }}>
         <CheckCircle
           onPress={() => {
-            dispatch(
-              setCert({
-                certType,
-                agreeCert,
-                agreePrivacy,
-                agreeLocation,
-                agreeMarketing,
-                agreeAge: !agreeAge,
-              }),
-            );
+            if (agreeAge == false) {
+              setagreeAge(true)
+            } else {
+              setagreeAge(false)
+            }
           }}>
           {agreeAge && <CheckOnIcon />}
         </CheckCircle>
@@ -289,16 +261,11 @@ const CheckTerms = props => {
       <ListItem style={{ marginTop: 10 }}>
         <CheckCircle
           onPress={() => {
-            dispatch(
-              setCert({
-                certType,
-                agreeAge,
-                agreePrivacy,
-                agreeLocation,
-                agreeMarketing,
-                agreeCert: !agreeCert,
-              }),
-            );
+            if (agreeCert == false) {
+              setagreeCert(true)
+            } else {
+              setagreeCert(false)
+            }
           }}>
           {agreeCert && <CheckOnIcon />}
         </CheckCircle>
@@ -316,16 +283,11 @@ const CheckTerms = props => {
       <ListItem style={{ marginTop: 10 }}>
         <CheckCircle
           onPress={() => {
-            dispatch(
-              setCert({
-                certType,
-                agreeAge,
-                agreeCert,
-                agreeLocation,
-                agreeMarketing,
-                agreePrivacy: !agreePrivacy,
-              }),
-            );
+            if (agreePrivacy == false) {
+              setagreePrivacy(true)
+            } else {
+              setagreePrivacy(false)
+            }
           }}>
           {agreePrivacy && <CheckOnIcon />}
         </CheckCircle>
@@ -343,16 +305,11 @@ const CheckTerms = props => {
       <ListItem style={{ marginTop: 10 }}>
         <CheckCircle
           onPress={() => {
-            dispatch(
-              setCert({
-                certType,
-                agreeAge,
-                agreeCert,
-                agreePrivacy,
-                agreeMarketing,
-                agreeLocation: !agreeLocation,
-              }),
-            );
+            if (agreeLocation == false) {
+              setagreeLocation(true)
+            } else {
+              setagreeLocation(false)
+            }
           }}>
           {agreeLocation && <CheckOnIcon />}
         </CheckCircle>
@@ -370,16 +327,11 @@ const CheckTerms = props => {
       <ListItem style={{ marginTop: 10 }}>
         <CheckCircle
           onPress={() => {
-            dispatch(
-              setCert({
-                certType,
-                agreeAge,
-                agreeCert,
-                agreePrivacy,
-                agreeLocation,
-                agreeMarketing: !agreeMarketing,
-              }),
-            );
+            if (agreeMarketing == false) {
+              setagreeMarketing(true)
+            } else {
+              setagreeMarketing(false)
+            }
           }}>
           {agreeMarketing && <CheckOnIcon />}
         </CheckCircle>
@@ -395,7 +347,7 @@ const CheckTerms = props => {
         <ShadowContainer>
           <Button
             width={width}
-            disabled={!(agreeCert && agreeAge && agreePrivacy && agreeLocation && agreeMarketing)}
+            disabled={!(agreeCert && agreeAge && agreePrivacy && agreeLocation)}
             onPress={() => {
               navigation.replace('Home');
             }}
@@ -405,7 +357,7 @@ const CheckTerms = props => {
               marginTop: 20,
               marginBottom: 50,
               backgroundColor:
-                agreeCert && agreeAge && agreePrivacy && agreeLocation && agreeMarketing
+                agreeCert && agreeAge && agreePrivacy && agreeLocation
                   ? '#2F87FF'
                   : '#E8EAED',
             }}>
