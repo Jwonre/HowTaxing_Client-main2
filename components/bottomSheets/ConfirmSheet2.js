@@ -1,18 +1,18 @@
 // 양도세 정보 확인하기 시트
 
-import {View, useWindowDimensions, Pressable} from 'react-native';
-import React, {useRef} from 'react';
+import { View, useWindowDimensions, Pressable } from 'react-native';
+import React, { useRef } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import dayjs from 'dayjs';
-import {useDispatch, useSelector} from 'react-redux';
-import {setChatDataList} from '../../redux/chatDataListSlice';
-import axios from 'axios';
-import {setHouseInfo} from '../../redux/houseInfoSlice';
-import {HOUSE_TYPE} from '../../constants/colors';
+import { useDispatch, useSelector } from 'react-redux';
+import { setChatDataList } from '../../redux/chatDataListSlice';
+import { HOUSE_TYPE } from '../../constants/colors';
+import { removeLastModalList } from '../../redux/modalListSlice';
+import numberToKorean from '../../utils/numToKorean';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -43,13 +43,12 @@ const HoustInfoSection = styled.View`
   height: auto;
   background-color: #fff;
   padding: 16px 20px;
-  border-radius: 10px;
+  border-radius: 5px;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  border-width: 1px;
-  border-color: #e8eaed;
   margin-top: 20px;
+  margin-bottom: 20px;
 `;
 
 const HoustInfoTitle = styled.Text`
@@ -72,7 +71,7 @@ const HoustInfoText = styled.Text`
 const HoustInfoBadge = styled.View`
   width: auto;
   margin-right: auto;
-  height: 22px;
+  height: 20px;
   padding: 0 10px;
   border-radius: 11px;
   align-items: center;
@@ -147,7 +146,7 @@ const InfoContentSection = styled.ScrollView.attrs(props => ({
   width: 100%;
   height: auto;
   background-color: #f7f8fa;
-  padding: 10px 20px;
+  padding: 0px 20px;
 `;
 const InfoContentItem = styled.View`
   width: 100%;
@@ -182,12 +181,12 @@ const InfoContentText = styled.Text`
 const ConfirmSheet2 = props => {
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
 
-
+ /* 
   // 양도세 계산
   const calculateTax = () => {
     const data = {
@@ -203,14 +202,14 @@ const ConfirmSheet2 = props => {
         // 성공적인 응답 처리
         const data2 = response.data.data;
 
-        dispatch(setHouseInfo({...houseInfo, ...data2}));
+        dispatch(setHouseInfo({ ...houseInfo, ...data2 }));
       })
       .catch(error => {
         // 오류 처리
         console.error(error);
       });
   };
-
+*/
   return (
     <ActionSheet
       ref={actionSheetRef}
@@ -220,6 +219,9 @@ const ConfirmSheet2 = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
+              const newChatDataList = chatDataList.slice(0, props.payload?.index+1);
+              dispatch(setChatDataList(newChatDataList));
+              dispatch(removeLastModalList());
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -229,6 +231,8 @@ const ConfirmSheet2 = props => {
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
+      closeOnPressBack={false}
+      closeOnTouchBackdrop={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
@@ -245,35 +249,57 @@ const ConfirmSheet2 = props => {
             계산될 수 있어요.
           </SubTitle>
         </ModalInputSection>
-        <HoustInfoSection>
-          <View
-            style={{
-              width: '60%',
-            }}>
-            <HoustInfoBadge
+        <DropShadow
+          style={{
+            width: '100%',
+            shadowColor: 'rgba(0,0,0,0.25)',
+            shadowOffset: {
+              width: 0,
+              height: 20,
+            },
+            shadowOpacity: 0.10,
+            shadowRadius: 10,
+            alignSelf: 'center',
+          }}>
+          <HoustInfoSection>
+            <View
               style={{
-                backgroundColor: HOUSE_TYPE.find(
-                  el => el.id === houseInfo?.houseType,
-                )?.color,
+                width: '60%',
               }}>
-              <HoustInfoBadgeText>
-                {HOUSE_TYPE.find(el => el.id === houseInfo?.houseType)?.name}
-              </HoustInfoBadgeText>
-            </HoustInfoBadge>
-            <HoustInfoTitle>{houseInfo?.houseName}</HoustInfoTitle>
-            <HoustInfoText>{houseInfo?.houseDetailName}</HoustInfoText>
-          </View>
-          <HoustInfoButton
-            onPress={() => {
-              actionSheetRef.current?.hide();
-              props.payload.navigation.navigate('HouseDetail', {
-                item: ownHouseList.find(el => el.houseId === houseInfo.houseId),
-              });
-            }}>
-            <HoustInfoButtonText>자세히 보기</HoustInfoButtonText>
-          </HoustInfoButton>
-        </HoustInfoSection>
+              <HoustInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    el => el.id === houseInfo?.houseType,
+                  )?.color,
+                }}>
+                <HoustInfoBadgeText>
+                  {HOUSE_TYPE.find(el => el.id === houseInfo?.houseType)?.name}
+                </HoustInfoBadgeText>
+              </HoustInfoBadge>
+              <HoustInfoTitle>{houseInfo?.houseName}</HoustInfoTitle>
+              <HoustInfoText>{houseInfo?.houseDetailName}</HoustInfoText>
+            </View>
+            <HoustInfoButton
+              onPress={() => {
+                actionSheetRef.current?.hide();
+                props.payload.navigation.navigate('HouseDetail', {
+                  item: houseInfo,
+                  prevSheet: 'confirm2',
+                  index: props.payload?.index,
+                });
+                
+              }}>
+              <HoustInfoButtonText>자세히 보기</HoustInfoButtonText>
+            </HoustInfoButton>
+          </HoustInfoSection>
+        </DropShadow>
         <InfoContentSection>
+          <InfoContentItem>
+            <InfoContentLabel>필요경비</InfoContentLabel>
+            <InfoContentText>
+              {numberToKorean(Number(houseInfo?.necessaryExpense).toString())} 원
+            </InfoContentText>
+          </InfoContentItem>
           <InfoContentItem>
             <InfoContentLabel>계약일자</InfoContentLabel>
             <InfoContentText>
@@ -283,28 +309,24 @@ const ConfirmSheet2 = props => {
           <InfoContentItem>
             <InfoContentLabel>양도일자</InfoContentLabel>
             <InfoContentText>
-              {dayjs(houseInfo?.saleDate).format('YYYY년 MM월 DD일')}
+              {dayjs(houseInfo?.sellDate).format('YYYY년 MM월 DD일')}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
             <InfoContentLabel>양도가액</InfoContentLabel>
             <InfoContentText>
-              {Number(houseInfo?.saleAmount).toLocaleString()} 원
+              {numberToKorean(Number(houseInfo?.saleAmount).toString())} 원
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
             <InfoContentLabel>실거주기간</InfoContentLabel>
             <InfoContentText>
-              {Math.floor(houseInfo?.livePeriod / 12) > 0 &&
-                `${Math.floor(houseInfo?.livePeriod / 12)}년`}{' '}
-              {houseInfo?.livePeriod % 12 > 0 &&
-                `${houseInfo?.livePeriod % 12}개월`}
-              {houseInfo?.livePeriod === 0 && '0개월'}
+             {((houseInfo?.livePeriodYear === undefined & houseInfo?.livePeriodMonth === undefined)||(houseInfo?.livePeriodYear === 0 & houseInfo?.livePeriodMonth === 0)) ? '거주기간 없음' :houseInfo?.livePeriodYear+'년 '+houseInfo?.livePeriodMonth+'개월'}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
-            <InfoContentLabel>주택 보유 수</InfoContentLabel>
-            <InfoContentText>{ownHouseList.length}채</InfoContentText>
+            <InfoContentLabel style={{ width: '110%' }}>기존 주택 보유 수(양도주택포함)</InfoContentLabel>
+            <InfoContentText>{houseInfo?.ownHouseCnt ? houseInfo?.ownHouseCnt : 0}채</InfoContentText>
           </InfoContentItem>
           <DropShadow
             style={{
@@ -319,7 +341,7 @@ const ConfirmSheet2 = props => {
             }}>
             <ModalButton
               onPress={() => {
-                calculateTax();
+                //calculateTax();
 
                 actionSheetRef.current?.hide();
                 const chat1 = {
@@ -327,6 +349,7 @@ const ConfirmSheet2 = props => {
                   type: 'my',
                   message: '확인 완료',
                 };
+                dispatch(removeLastModalList());
                 dispatch(setChatDataList([...chatDataList, chat1]));
               }}
               style={{
@@ -340,8 +363,8 @@ const ConfirmSheet2 = props => {
           </DropShadow>
         </InfoContentSection>
       </SheetContainer>
-    </ActionSheet>
+    </ActionSheet >
   );
 };
 
-export default ConfirmSheet2;
+export default React.memo(ConfirmSheet2);

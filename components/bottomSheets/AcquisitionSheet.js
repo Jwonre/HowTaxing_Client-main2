@@ -8,20 +8,23 @@ import {
   ScrollView,
   Keyboard,
 } from 'react-native';
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
-import InfoIcon from '../../assets/icons/info_tooltip_ico.svg';
 import Calendar from '../Calendar';
 import numberToKorean from '../../utils/numToKorean';
-import {acquisitionTax} from '../../data/chatData';
-import {useDispatch, useSelector} from 'react-redux';
-import {setHouseInfo} from '../../redux/houseInfoSlice';
-import {setChatDataList} from '../../redux/chatDataListSlice';
+import { acquisitionTax } from '../../data/chatData';
+import { useDispatch, useSelector } from 'react-redux';
+import { setHouseInfo } from '../../redux/houseInfoSlice';
+import { setChatDataList } from '../../redux/chatDataListSlice';
 import dayjs from 'dayjs';
+import CancelCircle from '../../assets/icons/cancel_circle.svg';
+import { LogBox } from 'react-native';
+import { removeLastModalList } from '../../redux/modalListSlice';
+
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -55,15 +58,20 @@ const ModalSubtitle = styled.Text`
   margin: 20px 0;
 `;
 
-const ModalInput = styled.TextInput.attrs(props => ({
-  placeholderTextColor: '#C1C3C5',
-}))`
-  width: 100%;
-  height: 50px;
-  border-radius: 10px;
+const ModalInputContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
   background-color: #f0f3f8;
-  padding: 0 15px;
+  border-radius: 10px;
   margin-top: 10px;
+`;
+
+const StyledInput = styled.TextInput.attrs({
+  placeholderTextColor: '#C1C3C5',
+})`
+  flex: 1;
+  height: 50px;
+  padding: 0 10px;
   font-size: 15px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
@@ -167,25 +175,31 @@ const ButtonText = styled.Text`
   line-height: 20px;
 `;
 
+
+
 const AcquisitionSheet = props => {
+  /*                <TouchableOpacity
+                  activeOpacity={0.8}
+                  hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+                  <InfoIcon />
+                </TouchableOpacity> 취득가액 ? 부분 삭제 */
+
+
+  LogBox.ignoreLogs(['to contain units']);
   const actionSheetRef = useRef(null);
   const _scrollViewRef = useRef(null);
   const dispatch = useDispatch();
-  const {width, height} = useWindowDimensions();
-
+  const { width, height } = useWindowDimensions();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  // 계약일자
-  const [selectedDate, setSelectedDate] = useState(
-    houseInfo?.contractDate ? houseInfo?.contractDate : new Date(),
-  );
-  // 취득일자
-  const [selectedDate2, setSelectedDate2] = useState(
-    houseInfo?.buyDate ? houseInfo?.buyDate : new Date(),
-  );
 
+  // 계약일자
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  // 취득일자
+  const [selectedDate2, setSelectedDate2] = useState(new Date());
   // 취득가액
+  const [currentDate, setCurrentDate] = useState();
   const [acAmount, setAcAmount] = useState(
-    houseInfo?.acAmount ? houseInfo?.acAmount : 550000000,
+    houseInfo?.acAmount ? houseInfo?.acAmount : null,
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const houseInfo = useSelector(state => state.houseInfo.value);
@@ -194,10 +208,25 @@ const AcquisitionSheet = props => {
   // 취득가액 선택 리스트
   const AC_AMOUNT_LIST = [500000000, 100000000, 10000000, 1000000];
 
+
+
+
+
   // 수정하기로 들어온 페이지 이동
   useEffect(() => {
+    //console.log('acAmount:', acAmount);
     if (props.payload?.currentPageIndex) {
       setCurrentPageIndex(props.payload?.currentPageIndex);
+      /*  console.log('currentPageIndex', props.payload?.currentPageIndex);
+        if (props.payload?.currentPageIndex === 1) {
+          houseInfo?.contractDate ? setSelectedDate(houseInfo?.contractDate) : setSelectedDate(new Date());
+          houseInfo?.contractDate ? setSelectedDate2(houseInfo?.buyDate) : setSelectedDate2(new Date());
+  
+        } else if (props.payload?.currentPageIndex === 2) {
+          houseInfo?.contractDate ? setSelectedDate(houseInfo?.contractDate) : setSelectedDate(new Date());
+          houseInfo?.contractDate ? setSelectedDate2(houseInfo?.buyDate) : setSelectedDate2(new Date());
+  
+        }*/
     }
   }, []);
 
@@ -233,11 +262,11 @@ const AcquisitionSheet = props => {
 
   // 초기 진입 시
   useEffect(() => {
-    if (chatDataList.find(el => el.id === 'auiAmontSystem')) {
+    if (chatDataList.find(el => el.id === 'contractDateSystem')) {
       return;
     }
     const chat1 = {
-      id: 'auiAmontSystem',
+      id: 'contractDateSystem',
       type: 'system',
       message: '계약일자를 선택해주세요.',
       select: [
@@ -245,13 +274,15 @@ const AcquisitionSheet = props => {
           id: 'contractDate',
           name: '계약일자 선택하기',
           openSheet: 'acquisition',
-          currentPageIndex: 0,
+          payload: {
+            currentPageIndex: 0,
+          }
         },
       ],
       progress: 2,
     };
-
     dispatch(setChatDataList([...chatDataList, chat1]));
+
   }, []);
 
   return (
@@ -263,6 +294,7 @@ const AcquisitionSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
+              dispatch(removeLastModalList());
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -273,11 +305,13 @@ const AcquisitionSheet = props => {
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
       statusBarTranslucent
+      closeOnPressBack={false}
+      closeOnTouchBackdrop={false}
       containerStyle={{
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: currentPageIndex === 2 ? (isKeyboardVisible ? 230 : 400) : 620,
+        height: currentPageIndex === 2 ? (isKeyboardVisible ? 400 : 420) : 620,
         width: width - 40,
       }}>
       <ScrollView
@@ -292,13 +326,16 @@ const AcquisitionSheet = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>계약일자를 선택해주세요.</ModalTitle>
+            <ModalTitle>취득하실 주택의 매매 계약일을 선택해주세요.</ModalTitle>
             <View
               style={{
                 width: '100%',
                 height: 420,
               }}>
-              <Calendar data={selectedDate} setSelectedDate={setSelectedDate} />
+              <Calendar
+                setSelectedDate={setSelectedDate}
+                currentDate={new Date()}
+              />
             </View>
           </ModalInputSection>
           <ButtonSection
@@ -317,11 +354,13 @@ const AcquisitionSheet = props => {
                 alignSelf: 'center',
               }}>
               <ModalButton
+                active={selectedDate}
+                disabled={!(selectedDate)}
                 onPress={async () => {
                   setCurrentPageIndex(1);
-
+                  setCurrentDate(selectedDate);
                   // 계약일자 업데이트
-                  await dispatch(
+                  dispatch(
                     setHouseInfo({
                       ...houseInfo,
                       contractDate: selectedDate,
@@ -330,11 +369,10 @@ const AcquisitionSheet = props => {
                   const chat2 = {
                     id: 'contractDateMy',
                     type: 'my',
-                    message: dayjs(houseInfo?.contractDate).format(
+                    message: dayjs(selectedDate).format(
                       'YYYY년 MM월 DD일 (ddd)',
                     ),
                   };
-
                   const chat3 = {
                     id: 'acquisitionDateSystem',
                     type: 'system',
@@ -345,19 +383,23 @@ const AcquisitionSheet = props => {
                         name: '취득일자 선택하기',
                         openSheet: 'acquisition',
                         currentPageIndex: 1,
+
                       },
                     ],
+
                     progress: 2,
                   };
-
+                  //console.log('selectedDate2', selectedDate2);
                   dispatch(setChatDataList([...chatDataList, chat2, chat3]));
                 }}
                 style={{
                   width: width - 80,
                   alignSelf: 'center',
                   marginBottom: 50,
+                  backgroundColor: selectedDate ? '#2f87ff' : '#E8EAED',
+                  borderColor: selectedDate ? '#2f87ff' : '#E8EAED',
                 }}>
-                <ModalButtonText>다음으로</ModalButtonText>
+                <ModalButtonText active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ModalButtonText>
               </ModalButton>
             </DropShadow>
           </ButtonSection>
@@ -365,17 +407,17 @@ const AcquisitionSheet = props => {
 
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>취득일자를 선택해주세요.</ModalTitle>
+            <ModalTitle>취득일(소유권이전등기일)을 선택해주세요.</ModalTitle>
             <View
               style={{
                 width: '100%',
                 height: 420,
               }}>
-              <Calendar
-                minDate={new Date()}
-                selectedDate={selectedDate2}
+              {currentPageIndex === 1 && (<Calendar
+                minDate={new Date(selectedDate ? selectedDate : houseInfo?.contractDate)}
                 setSelectedDate={setSelectedDate2}
-              />
+                currentDate={new Date(currentDate ? currentDate : houseInfo?.contractDate)}
+              />)}
             </View>
           </ModalInputSection>
 
@@ -387,6 +429,9 @@ const AcquisitionSheet = props => {
               <Button
                 onPress={() => {
                   setCurrentPageIndex(0);
+                  setSelectedDate2();
+                  const newChatDataList = chatDataList.filter(item => item.id !== 'acquisitionDateSystem').filter(item => item.id !== 'contractDateMy');
+                  dispatch(setChatDataList(newChatDataList));
                 }}
                 style={{
                   backgroundColor: '#fff',
@@ -406,17 +451,16 @@ const AcquisitionSheet = props => {
                   setCurrentPageIndex(2);
 
                   // 취득일자 업데이트
-                  await dispatch(
+                  dispatch(
                     setHouseInfo({
                       ...houseInfo,
-                      acquisitionDate: selectedDate2,
+                      buyDate: selectedDate2,
                     }),
                   );
-
                   const chat4 = {
                     id: 'acquisitionDateMy',
                     type: 'my',
-                    message: dayjs(houseInfo?.acquisitionDate).format(
+                    message: dayjs(selectedDate2).format(
                       'YYYY년 MM월 DD일 (ddd)',
                     ),
                   };
@@ -427,18 +471,27 @@ const AcquisitionSheet = props => {
                     message: '취득가액을 입력해주세요.',
                     select: [
                       {
-                        id: 'contractDate',
+                        id: 'aquiAmountDate',
                         name: '취득가액 선택하기',
                         openSheet: 'acquisition',
                         currentPageIndex: 2,
+
                       },
                     ],
+
                     progress: 2,
                   };
 
                   dispatch(setChatDataList([...chatDataList, chat4, chat1]));
-                }}>
-                <ButtonText>다음으로</ButtonText>
+
+                }}
+                style={{
+                  backgroundColor: selectedDate2 ? '#2f87ff' : '#E8EAED',
+                  borderColor: selectedDate2 ? '#2f87ff' : '#E8EAED',
+                }}
+                active={selectedDate2}
+                disabled={!(selectedDate2)}>
+                <ButtonText active={selectedDate2} style={{ color: selectedDate2 ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>
@@ -460,20 +513,24 @@ const AcquisitionSheet = props => {
                   justifyContent: 'flex-start',
                 }}>
                 <ModalLabel>취득가액</ModalLabel>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}>
-                  <InfoIcon />
-                </TouchableOpacity>
               </View>
-              <ModalInput
-                placeholder="취득가액을 입력해주세요."
-                keyboardType="number-pad"
-                value={acAmount ? acAmount?.toLocaleString() : null}
-                onChangeText={text => {
-                  setAcAmount(Number(text.replace(/[^0-9]/g, '')));
-                }}
-              />
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <ModalInputContainer>
+                  <StyledInput
+                    placeholder="취득가액을 입력해주세요."
+                    keyboardType="number-pad"
+                    value={acAmount ? acAmount.toLocaleString() : null}
+                    onChangeText={text => {
+                      setAcAmount(Number(text.replace(/[^0-9]/g, '')));
+                    }}
+                  />
+                  {(acAmount !== null && acAmount !== 0) && (
+                    <TouchableOpacity onPress={() => setAcAmount(null)}>
+                      <CancelCircle style={{ marginRight: 10 }} width={20} height={20} />
+                    </TouchableOpacity>
+                  )}
+                </ModalInputContainer>
+              </View>
               <View
                 style={{
                   flexDirection: 'row',
@@ -483,11 +540,12 @@ const AcquisitionSheet = props => {
                 }}>
                 {AC_AMOUNT_LIST.map((item, index) => (
                   <ModalSelectButton
+                    key={index}
                     onPress={() => {
                       setAcAmount(prev => prev + item);
                     }}>
                     <ModalSelectButtonText>
-                      {numberToKorean(item)}
+                      {item === 10000000 ? '1천만' : item === 1000000 ? '1백만' : numberToKorean(item)}
                     </ModalSelectButtonText>
                   </ModalSelectButton>
                 ))}
@@ -504,6 +562,8 @@ const AcquisitionSheet = props => {
               }}>
               <Button
                 onPress={() => {
+                  const newChatDataList = chatDataList.filter(item => item.id !== 'aquiAmountSystem').filter(item => item.id !== 'acquisitionDateMy');
+                  dispatch(setChatDataList(newChatDataList));
                   setCurrentPageIndex(1);
                 }}
                 style={{
@@ -525,8 +585,6 @@ const AcquisitionSheet = props => {
                   dispatch(
                     setHouseInfo({
                       ...houseInfo,
-                      contractDate: selectedDate,
-                      buyDate: selectedDate2,
                       acAmount,
                     }),
                   );
@@ -545,17 +603,23 @@ const AcquisitionSheet = props => {
                     },
                   };
                   const chat3 = acquisitionTax.find(el => el.id === 'joint');
-
                   dispatch(setChatDataList([...chatDataList, chat2, chat3]));
-                }}>
-                <ButtonText>다음으로</ButtonText>
+                  dispatch(removeLastModalList());
+                  //  setTimeout(() => { console.log('aquiAmountDate', houseInfo) }, 500);
+                }} style={{
+                  backgroundColor: acAmount ? '#2f87ff' : '#E8EAED',
+                  borderColor: acAmount ? '#2f87ff' : '#E8EAED',
+                }}
+                active={acAmount}
+                disabled={!(acAmount)}>
+                <ButtonText active={acAmount} style={{ color: acAmount ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>
         </SheetContainer>
       </ScrollView>
-    </ActionSheet>
+    </ActionSheet >
   );
 };
 
-export default AcquisitionSheet;
+export default React.memo(AcquisitionSheet);

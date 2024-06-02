@@ -7,11 +7,11 @@ import {
   FlatList,
   Pressable,
   Platform,
-  Alert,
   StyleSheet,
   ScrollView,
+  BackHandler,
 } from 'react-native';
-import React, {useRef, useState, useEffect, useMemo} from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import ActionSheet, {
   SheetManager,
   useScrollHandlers,
@@ -21,16 +21,15 @@ import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import SerchIcon from '../../assets/icons/search_map.svg';
 import WheelPicker from 'react-native-wheely';
-import NaverMapView, {Marker} from 'react-native-nmap';
+import NaverMapView, { Marker } from 'react-native-nmap';
 import DropShadow from 'react-native-drop-shadow';
 import Geolocation from '@react-native-community/geolocation';
 import LocationIcon from '../../assets/icons/my_location_ico.svg';
 import axios from 'axios';
-import {useDispatch, useSelector} from 'react-redux';
-import {check, PERMISSIONS, RESULTS, request} from 'react-native-permissions';
-import {setHouseInfo} from '../../redux/houseInfoSlice';
-import {setChatDataList} from '../../redux/chatDataListSlice';
-import MapView from '../MapView';
+import { useDispatch, useSelector } from 'react-redux';
+import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
+import { setHouseInfo } from '../../redux/houseInfoSlice';
+import { setChatDataList } from '../../redux/chatDataListSlice';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -71,7 +70,7 @@ const ModalAddressInput = styled.TextInput.attrs(props => ({
 
 const ModalInputButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.6,
-  hitSlop: {top: 20, bottom: 20, left: 20, right: 20},
+  hitSlop: { top: 20, bottom: 20, left: 20, right: 20 },
 }))`
   align-items: center;
   justify-content: center;
@@ -274,7 +273,7 @@ const MapViewListSheet = props => {
   const dispatch = useDispatch();
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const scrollHandlers = useScrollHandlers('FlatList-1', actionSheetRef);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [listData, setListData] = useState([]);
@@ -285,8 +284,25 @@ const MapViewListSheet = props => {
   const [hoList, setHoList] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [zoom, setZoom] = useState(20);
-  const [addressArea, setAddressArea] = useState('');
-  const [isMapInit, setIsMapInit] = useState(false);
+
+  const handleBackPress = () => {
+    if(currentPageIndex === 0){
+      actionSheetRef.current?.hide();
+      return true;
+    } else if(currentPageIndex === 1){
+      setCurrentPageIndex(0);
+      return true;
+    }
+  }
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackPress)
+    const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+    dispatch(setChatDataList(newChatDataList));
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress);
+    }
+  }, [handleBackPress]);
 
   const [myPosition, setMyPosition] = useState({
     latitude: 37.5665,
@@ -339,7 +355,7 @@ const MapViewListSheet = props => {
     console.log('getCurrentLocation');
     Geolocation.getCurrentPosition(
       info => {
-        const {latitude, longitude} = info.coords;
+        const { latitude, longitude } = info.coords;
         setMyPosition({
           latitude: Number(latitude),
           longitude: Number(longitude),
@@ -393,7 +409,7 @@ const MapViewListSheet = props => {
         if (parsedData.results.common.errorCode !== '0') {
           SheetManager.show('info', {
             payload: {
-              message: parsedData.results.common.errorMessage,
+              message: '주소 검색 중 오류가 발생했어요.',
               description: parsedData.results.common.errorMessage,
               type: 'error',
             },
@@ -406,7 +422,7 @@ const MapViewListSheet = props => {
         if (!parsedData.results.juso[0]) {
           SheetManager.show('info', {
             payload: {
-              message: '검색 결과가 없습니다.',
+              message: '주소에 대한 정보가 없어요.',
               type: 'error',
             },
           });
@@ -481,8 +497,6 @@ const MapViewListSheet = props => {
           }),
         );
 
-        // console.log(locations);
-
         // list를 현재 위치 기준에서 가까운 순으로 정렬
         const sortedList = locations.sort((a, b) => {
           const aDistance =
@@ -526,7 +540,7 @@ const MapViewListSheet = props => {
         console.log(error);
         SheetManager.show('info', {
           payload: {
-            message: '주소를 찾을 수 없습니다.',
+            message: '주소를 찾을 수 없어요.',
             type: 'error',
           },
         });
@@ -586,15 +600,19 @@ const MapViewListSheet = props => {
     return apartmentNumbers;
   };
   // 아파트 단지 선택 시 상세 정보 가져오기
-  const getHouseDetailInfo = async () => {
+ /* const getHouseDetailInfo = async () => {
     const url = 'http://13.125.194.154:8080/house/detail';
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`
+    };
 
     const data = await axios
       .get(url, {
         params: {
           houseId: '25',
         },
-      })
+      }, { headers: headers })
       .then(function (result) {
         if (result.isError) {
           Alert.alert('검색 결과가 없습니다.');
@@ -608,7 +626,7 @@ const MapViewListSheet = props => {
 
     return data;
   };
-
+*/
   // 페이지 이동
   useEffect(() => {
     scrollViewRef.current?.scrollTo({
@@ -618,7 +636,7 @@ const MapViewListSheet = props => {
   }, [currentPageIndex]);
 
   const MarkerComponent = React.memo(
-    ({item, onSelect}) => {
+    ({ item, onSelect }) => {
       const SIZE =
         item?.COMPLEX_NM1.length < 3
           ? 80
@@ -631,7 +649,7 @@ const MapViewListSheet = props => {
             latitude: item?.latitude ? Number(item?.latitude) : 0,
             longitude: item?.longitude ? Number(item?.longitude) : 0,
           }}
-          anchor={{x: 0, y: 1}}
+          anchor={{ x: 0, y: 1 }}
           minWidth={100}
           width={SIZE}
           height={80}
@@ -647,7 +665,7 @@ const MapViewListSheet = props => {
               shadowRadius: 4,
               overflow: 'visible',
             }}>
-            <View style={{...styles.marker, width: SIZE}}>
+            <View style={{ ...styles.marker, width: SIZE }}>
               <Text style={styles.markerTitle}>{item.COMPLEX_NM1}</Text>
               <Text style={styles.markerSubTitle}>{item.UNIT_CNT}세대</Text>
               <View style={styles.markerTriangle} />
@@ -668,6 +686,8 @@ const MapViewListSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
+              const newChatDataList = chatDataList.slice(0, props.payload?.index+1);
+              dispatch(setChatDataList(newChatDataList));
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -677,6 +697,7 @@ const MapViewListSheet = props => {
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
+      closeOnTouchBackdrop={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
@@ -841,7 +862,7 @@ const MapViewListSheet = props => {
                 </MapSearchResultHeader>
               </View>
             }
-            renderItem={({item, index}) => (
+            renderItem={({ item, index }) => (
               <MapSearchResultItem>
                 <View
                   style={{
@@ -867,7 +888,7 @@ const MapViewListSheet = props => {
                 </View>
                 <MepSearchResultButton
                   onPress={() => {
-                    getDongInfo(item.COMPLEX_PK);
+                    getDongInfo(item?.COMPLEX_PK);
                     setSelectedItem(item);
                     setCurrentPageIndex(1);
                   }}>
@@ -893,7 +914,7 @@ const MapViewListSheet = props => {
             </ApartmentInfoTitle>
           </ApartmentInfoGroup>
           <SelectGroup>
-            <View style={{width: '48%'}}>
+            <View style={{ width: '48%' }}>
               <SelectLabel>동 선택</SelectLabel>
               <PickerContainer>
                 {dongList[0] && (
@@ -924,7 +945,7 @@ const MapViewListSheet = props => {
                 )}
               </PickerContainer>
             </View>
-            <View style={{width: '48%'}}>
+            <View style={{ width: '48%' }}>
               <SelectLabel>호 선택</SelectLabel>
 
               <PickerContainer>
@@ -1018,8 +1039,6 @@ const MapViewListSheet = props => {
                       questionId: 'apartment',
                     };
 
-                    const data = await getHouseDetailInfo();
-                    dispatch(setHouseInfo({...houseInfo, ...data}));
 
                     const chat3 = {
                       id: 'apartmentAddressInfoSystem',
@@ -1028,9 +1047,20 @@ const MapViewListSheet = props => {
                       questionId: 'apartment',
                       progress: 4,
                     };
-
+                    
                     const chatList = [chat, chat1, chat2, chat3];
                     dispatch(setChatDataList([...chatDataList, ...chatList]));
+                    dispatch(setHouseInfo(
+                      {
+                        ...houseInfo
+                        , pubLandPrice: '1200000'
+                        , bdMgtSn: selectedItem?.PNU
+                        , jibunAddr: ''
+                        , roadAddr: selectedItem?.ADRES
+                        , roadAddrRef: ''
+                        , detailAdr: selectedDong ? selectedDong : dongList[0]||'동 '||selectedHo ? selectedHo : hoList[0]||'호'
+                        , houseName: selectedItem?.COMPLEX_NM1
+                      }));
                   } catch (error) {
                     console.error('Error in onPress handler:', error);
                   }

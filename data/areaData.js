@@ -1,8 +1,16 @@
 export const AREA_LIST = [
   {
+    id: 'entire',
+    name: '전체',
+    list: [
+      '전체'
+    ]
+  },
+  {
     id: 'seoul',
     name: '서울특별시',
     list: [
+      '전체',
       '강남구',
       '강동구',
       '강북구',
@@ -34,6 +42,7 @@ export const AREA_LIST = [
     id: 'gyeonggi',
     name: '경기도',
     list: [
+      '전체',
       '가평군',
       '고양시 덕양구',
       '고양시 일산동구',
@@ -82,6 +91,7 @@ export const AREA_LIST = [
     id: 'incheon',
     name: '인천광역시',
     list: [
+      '전체',
       '강화군',
       '계양구',
       '남동구',
@@ -98,6 +108,7 @@ export const AREA_LIST = [
     id: 'gangwon',
     name: '강원도',
     list: [
+      '전체',
       '강릉시',
       '고성군',
       '동해시',
@@ -122,6 +133,7 @@ export const AREA_LIST = [
     id: 'chungbuk',
     name: '충청북도',
     list: [
+      '전체',
       '보은군',
       '괴산군',
       '단양군',
@@ -142,6 +154,7 @@ export const AREA_LIST = [
     id: 'chungnam',
     name: '충청남도',
     list: [
+      '전체',
       '계룡시',
       '공주시',
       '금산군',
@@ -163,12 +176,13 @@ export const AREA_LIST = [
   {
     id: 'daejeon',
     name: '대전광역시',
-    list: ['대덕구', '동구', '서구', '유성구', '중구'],
+    list: ['전체', '대덕구', '동구', '서구', '유성구', '중구'],
   },
   {
     id: 'daegu',
     name: '대구광역시',
     list: [
+      '전체',
       '남구',
       '달서구',
       '달성군',
@@ -188,6 +202,7 @@ export const AREA_LIST = [
     id: 'gyeongbuk',
     name: '경상북도',
     list: [
+      '전체',
       '경산시',
       '경주시',
       '고령군',
@@ -218,6 +233,7 @@ export const AREA_LIST = [
     id: 'gyeongnam',
     name: '경상남도',
     list: [
+      '전체',
       '거제시',
       '거창군',
       '고성군',
@@ -245,12 +261,13 @@ export const AREA_LIST = [
   {
     id: 'ulsan',
     name: '울산광역시',
-    list: ['남구', '동구', '북구', '울주군', '중구'],
+    list: ['전체', '남구', '동구', '북구', '울주군', '중구'],
   },
   {
     id: 'busan',
     name: '부산광역시',
     list: [
+      '전체',
       '강서구',
       '금정구',
       '기장군',
@@ -273,6 +290,7 @@ export const AREA_LIST = [
     id: 'jeonbuk',
     name: '전라북도',
     list: [
+      '전체',
       '고창군',
       '군산시',
       '김제시',
@@ -294,6 +312,7 @@ export const AREA_LIST = [
     id: 'jeonnam',
     name: '전라남도',
     list: [
+      '전체',
       '강진군',
       '고흥군',
       '곡성군',
@@ -321,6 +340,6 @@ export const AREA_LIST = [
   {
     id: 'jeju',
     name: '제주특별자치도',
-    list: ['서귀포시', '제주시'],
+    list: ['전체', '서귀포시', '제주시'],
   },
 ];

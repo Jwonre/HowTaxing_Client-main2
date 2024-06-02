@@ -20,7 +20,7 @@ const HoustInfoSection = styled.View`
 `;
 
 const HoustInfoTitle = styled.Text`
-  width: 100%;
+  width: 105%;
   font-size: ${getFontSize(20)}px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
@@ -39,6 +39,7 @@ const HoustInfoText = styled.Text`
 const HoustInfoBadge = styled.View`
   width: auto;
   margin-right: auto;
+  margin-Bottom: 10px;
   height: 22px;
   padding: 0 10px;
   border-radius: 11px;
@@ -76,7 +77,7 @@ const HoustInfoButtonText = styled.Text`
 `;
 
 const HouseInfo = props => {
-  console.log(props);
+  //console.log(props);
   return (
     <HoustInfoSection>
       <View
@@ -87,10 +88,10 @@ const HouseInfo = props => {
           style={{
             backgroundColor: HOUSE_TYPE.find(
               item => item.id === props.item?.houseType,
-            ).color,
+            )?.color,
           }}>
           <HoustInfoBadgeText>
-            {HOUSE_TYPE.find(item => item.id === props.item?.houseType).name}
+            {HOUSE_TYPE.find(item => item.id === props.item?.houseType)?.name}
           </HoustInfoBadgeText>
         </HoustInfoBadge>
         <HoustInfoTitle>{props.item?.houseName}</HoustInfoTitle>
@@ -101,6 +102,7 @@ const HouseInfo = props => {
           props.navigation.push('HouseDetail', {
             item: props.item,
           });
+         // console.log('houseinfo.js houseinfo', props.item);
         }}>
         <HoustInfoButtonText>자세히 보기</HoustInfoButtonText>
       </HoustInfoButton>

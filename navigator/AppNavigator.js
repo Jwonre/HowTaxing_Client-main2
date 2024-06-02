@@ -1,16 +1,18 @@
-import {View, Text, Platform} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { View, Text, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Screens
 import Login from '../screens/Auth/Login';
 import Home from '../screens/Main/Home';
+import LoginWebview from '../screens/Auth/LoginWebview';
 
 // Redux
-import {useSelector, useDispatch} from 'react-redux';
-import CheckTerms from '../screens/Main/CheckTerms';
+import { useSelector, useDispatch } from 'react-redux';
+
 import Acquisition from '../screens/Main/Acquisition';
+import CheckTerms from '../screens/Main/CheckTerms';
 import GainsTax from '../screens/Main/GainsTax';
 import AcquisitionChat from '../screens/Main/AcquisitionChat';
 import FamilyHouse from '../screens/Main/FamilyHouse';
@@ -23,31 +25,58 @@ import OwnedFamilyHouse from '../screens/Main/OwnedFamilyHouse';
 import DoneSendFamilyHouse from '../screens/Main/DoneSendFamilyHouse';
 import GainsTaxChat from '../screens/Main/GainsTaxChat';
 import Privacy from '../screens/Main/Terms/Privacy';
-import {SheetProvider, registerSheet} from 'react-native-actions-sheet';
+import NetworkAlert from '../screens/Main/NetworkAlert';
+import { SheetProvider, registerSheet } from 'react-native-actions-sheet';
 
 // Action Sheets
 
 import OwnHouseSheet from '../components/bottomSheets/OwnHouseSheet';
 import OwnHouseSheet2 from '../components/bottomSheets/OwnHouseSheet2';
 import GainSheet from '../components/bottomSheets/GainSheet';
+import ExpenseSheet from '../components/bottomSheets/ExpenseSheet';
+import ConsultingSheet from '../components/bottomSheets/ConsultingSheet';
 import DeleteHouseAlert from '../components/bottomSheets/DeleteHouseAlert';
 import InfoAlert from '../components/bottomSheets/InfoAlert';
+import InfoExpense from '../components/bottomSheets/InfoExpense';
+import LogOutSheet from '../components/bottomSheets/LogOutSheet';
 import MapViewListSheet from '../components/bottomSheets/MapViewListSheet';
 import AcquisitionSheet from '../components/bottomSheets/AcquisitionSheet';
 import CertSheet from '../components/bottomSheets/CertSheet';
+import CertSheet2 from '../components/bottomSheets/CertSheet2';
 import JointSheet from '../components/bottomSheets/JointSheet';
+import OwnHouseCountSheet from '../components/bottomSheets/OwnHouseCountSheet';
 import ReviewSheet from '../components/bottomSheets/ReviewSheet';
+import directlivePeriod from '../components/bottomSheets/directlivePeriod';
 import SearchHouseSheet from '../components/bottomSheets/SearchHouseSheet';
 import ConfirmSheet2 from '../components/bottomSheets/ConfirmSheet2';
 import ConfirmSheet from '../components/bottomSheets/ConfirmSheet';
-import Third from '../screens/Main/Terms/Third';
+//import Third from '../screens/Main/Terms/Third';
 import Cert from '../screens/Main/Terms/Cert';
 import Cert2 from '../screens/Main/Terms/Cert2';
+import Cert3 from '../screens/Main/Terms/Cert3';
 import Privacy2 from '../screens/Main/Terms/Privacy2';
+import Privacy3 from '../screens/Main/Terms/Privacy3';
 import Location2 from '../screens/Main/Terms/Location2';
+import Copyright3 from '../screens/Main/Terms/Copyright3';
+import Gov24 from '../screens/Main/Terms/Gov24';
 import HouseDetail from '../screens/Main/HouseDetail';
 import SearchHouseSheet2 from '../components/bottomSheets/SearchHouseSheet2';
 import MapViewListSheet2 from '../components/bottomSheets/MapViewListSheet2';
+import QuestionMarkDefinition from '../components/bottomSheets/QuestionMarkDefinition';
+import ChooseHouseTypeAlert from '../components/bottomSheets/ChooseHouseTypeAlert';
+import ChooseHouseDongHoAlert from '../components/bottomSheets/ChooseHouseDongHoAlert';
+import UpdateAddressAlert from '../components/bottomSheets/UpdateAddressAlert';
+import UpdateHouseDetailNameAlert from '../components/bottomSheets/UpdateHouseDetailNameAlert';
+import UpdateHouseNameAlert from '../components/bottomSheets/UpdateHouseNameAlert';
+import UpdatePubLandPriceAlert from '../components/bottomSheets/UpdatePubLandPriceAlert';
+import UpdateBuyPriceAlert from '../components/bottomSheets/UpdateBuyPriceAlert';
+import UpdateAreaMeterAlert from '../components/bottomSheets/UpdateAreaMeterAlert';
+import UpdateUserProportionAlert from '../components/bottomSheets/UpdateUserProportionAlert';
+import UpdateBuyDateAlert from '../components/bottomSheets/UpdateBuyDateAlert';
+import UpdateContractDateAlert from '../components/bottomSheets/UpdateContractDateAlert';
+//import UpdateBalanceDateAlert from '../components/bottomSheets/UpdateBalanceDateAlert';
+//import UpdateMoveInDateAlert from '../components/bottomSheets/UpdateMoveInDateAlert';
+//import UpdateMoveOutDateAlert from '../components/bottomSheets/UpdateMoveOutDateAlert';
 
 const Stack = createNativeStackNavigator();
 
@@ -56,7 +85,7 @@ const AppNavigator = () => {
 
   const horizontalAnimation = {
     gestureDirection: 'horizontal',
-    cardStyleInterpolator: ({current, layouts}) => {
+    cardStyleInterpolator: ({ current, layouts }) => {
       return {
         cardStyle: {
           transform: [
@@ -79,15 +108,39 @@ const AppNavigator = () => {
     registerSheet('searchHouse2', SearchHouseSheet2);
     registerSheet('acquisition', AcquisitionSheet);
     registerSheet('cert', CertSheet);
+    registerSheet('cert2', CertSheet2);
+    registerSheet('infoExpense', InfoExpense);
     registerSheet('info', InfoAlert);
     registerSheet('joint', JointSheet);
+    registerSheet('ownHouseCount', OwnHouseCountSheet);
     registerSheet('confirm', ConfirmSheet);
     registerSheet('confirm2', ConfirmSheet2);
     registerSheet('own', OwnHouseSheet);
     registerSheet('own2', OwnHouseSheet2);
     registerSheet('gain', GainSheet);
+    registerSheet('Expense', ExpenseSheet);
+    registerSheet('Consulting', ConsultingSheet);
+    registerSheet('directlivePeriod', directlivePeriod);
     registerSheet('review', ReviewSheet);
+    registerSheet('logout', LogOutSheet);
     registerSheet('delete', DeleteHouseAlert);
+    registerSheet('questionMarkDefinition', QuestionMarkDefinition);
+    registerSheet('chooseHouseTypeAlert', ChooseHouseTypeAlert);
+    registerSheet('chooseHouseDongHoAlert', ChooseHouseDongHoAlert);
+    registerSheet('updateAddressAlert', UpdateAddressAlert);
+    registerSheet('updateHouseDetailNameAlert', UpdateHouseDetailNameAlert);
+    registerSheet('updateHouseNameAlert', UpdateHouseNameAlert);
+    registerSheet('updatePubLandPriceAlert', UpdatePubLandPriceAlert);
+    registerSheet('updateBuyPriceAlert', UpdateBuyPriceAlert);
+    registerSheet('updateAreaMeterAlert', UpdateAreaMeterAlert);
+    registerSheet('updateUserProportionAlert', UpdateUserProportionAlert);
+    // registerSheet('updateMoveOutDateAlert', UpdateMoveOutDateAlert);
+    // registerSheet('updateMoveInDateAlert', UpdateMoveInDateAlert);
+    //registerSheet('updateBalanceDateAlert', UpdateBalanceDateAlert);
+    registerSheet('updateBuyDateAlert', UpdateBuyDateAlert);
+    registerSheet('updateContractDateAlert', UpdateContractDateAlert);
+
+
   }, []);
 
   return (
@@ -140,23 +193,34 @@ const AppNavigator = () => {
                 name="AcquisitionChat"
                 component={AcquisitionChat}
               />
+              <Stack.Screen
+                name="NetworkAlert"
+                component={NetworkAlert}
+              />
               <Stack.Screen name="GainsTaxChat" component={GainsTaxChat} />
               <Stack.Screen name="HouseDetail" component={HouseDetail} />
-              <Stack.Group screenOptions={{presentation: 'modal'}}>
+              <Stack.Group screenOptions={{ presentation: 'modal' }}>
                 <Stack.Screen name="Cert" component={Cert} />
                 <Stack.Screen name="Privacy" component={Privacy} />
-                <Stack.Screen name="Third" component={Third} />
+              </Stack.Group>
+              <Stack.Group screenOptions={{ presentation: 'modal' }}>
+                <Stack.Screen name="Cert3" component={Cert3} />
+                <Stack.Screen name="Privacy3" component={Privacy3} />
+                <Stack.Screen name="Copyright3" component={Copyright3} />
+                <Stack.Screen name="Gov24" component={Gov24} />
               </Stack.Group>
             </Stack.Group>
           ) : (
             <Stack.Group>
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="CheckTerms" component={CheckTerms} />
-              <Stack.Group screenOptions={{presentation: 'modal'}}>
+              <Stack.Group screenOptions={{ presentation: 'modal' }}>
                 <Stack.Screen name="Cert2" component={Cert2} />
                 <Stack.Screen name="Privacy2" component={Privacy2} />
                 <Stack.Screen name="Location2" component={Location2} />
               </Stack.Group>
+              <Stack.Screen name="LoginWebview" component={LoginWebview}
+                options={{ headerShown: false }} />
             </Stack.Group>
           )}
         </Stack.Navigator>

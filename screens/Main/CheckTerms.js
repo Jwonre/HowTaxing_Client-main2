@@ -1,6 +1,6 @@
 
 import { TouchableOpacity, useWindowDimensions } from 'react-native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import CheckOnIcon from '../../assets/icons/check_on.svg';
@@ -9,6 +9,8 @@ import HomeIcon from '../../assets/images/home_checkterms.svg';
 import FastImage from 'react-native-fast-image';
 import DropShadow from 'react-native-drop-shadow';
 import getFontSize from '../../utils/getFontSize';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCert } from '../../redux/certSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -81,7 +83,7 @@ const ListItemTitle = styled.Text`
   font-size: ${getFontSize(12)}px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
-  line-height: 15px;
+  line-height: 18px;
 `;
 
 
@@ -160,12 +162,11 @@ const ShadowContainer = styled(DropShadow)`
 const CheckTerms = props => {
   const navigation = useNavigation()
   const { width, height } = useWindowDimensions()
-  const cert = props.payload;
-  const [ agreeAge, setagreeAge ] = useState(false);
-  const [ agreeCert, setagreeCert ] = useState(false);
-  const [ agreePrivacy, setagreePrivacy ] = useState(false);
-  const [ agreeLocation, setagreeLocation ] = useState(false);
-  const [ agreeMarketing, setagreeMarketing ] = useState(false);
+  const dispatch = useDispatch();
+
+  const { agreeAge, agreeCert, agreePrivacy, agreeMarketing, agreeLocation } = useSelector(
+    state => state.cert.value,
+  );
 
 
 
@@ -176,7 +177,7 @@ const CheckTerms = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
-            navigation.navigate("Login");
+            navigation.goBack();
           }}>
           <BackIcon />
         </TouchableOpacity>
@@ -211,17 +212,25 @@ const CheckTerms = props => {
       <ListItem>
         <CheckCircle onPress={() => {
           if (agreeAge && agreeCert && agreePrivacy && agreeLocation && agreeMarketing) {
-            setagreeAge(false)
-            setagreeCert(false)
-            setagreePrivacy(false)
-            setagreeLocation(false)
-            setagreeMarketing(false)
+            dispatch(
+              setCert({
+                agreeAge: false,
+                agreeCert: false,
+                agreePrivacy: false,
+                agreeLocation: false,
+                agreeMarketing: false,
+              }),
+            );
           } else {
-            setagreeAge(true)
-            setagreeCert(true)
-            setagreePrivacy(true)
-            setagreeLocation(true)
-            setagreeMarketing(true)
+            dispatch(
+              setCert({
+                agreeAge: true,
+                agreeCert: true,
+                agreePrivacy: true,
+                agreeLocation: true,
+                agreeMarketing: true,
+              }),
+            );
           }
         }}>
           {agreeAge && agreeCert && agreePrivacy && agreeLocation && agreeMarketing && <CheckOnIcon />}
@@ -242,14 +251,20 @@ const CheckTerms = props => {
           marginTop: 20,
         }}
       />
+
+
       <ListItem style={{ marginTop: 20 }}>
         <CheckCircle
           onPress={() => {
-            if (agreeAge == false) {
-              setagreeAge(true)
-            } else {
-              setagreeAge(false)
-            }
+            dispatch(
+              setCert({
+                agreeAge: !agreeAge,
+                agreeCert,
+                agreePrivacy,
+                agreeLocation,
+                agreeMarketing,
+              }),
+            );
           }}>
           {agreeAge && <CheckOnIcon />}
         </CheckCircle>
@@ -261,11 +276,15 @@ const CheckTerms = props => {
       <ListItem style={{ marginTop: 10 }}>
         <CheckCircle
           onPress={() => {
-            if (agreeCert == false) {
-              setagreeCert(true)
-            } else {
-              setagreeCert(false)
-            }
+            dispatch(
+              setCert({
+                agreeAge,
+                agreeCert: !agreeCert,
+                agreePrivacy,
+                agreeLocation,
+                agreeMarketing,
+              }),
+            );
           }}>
           {agreeCert && <CheckOnIcon />}
         </CheckCircle>
@@ -274,7 +293,8 @@ const CheckTerms = props => {
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
-            navigation.navigate('Cert2');
+            //    console.log('agreeCert', agreeCert)
+            navigation.navigate('Cert2', { agreeCert: agreeCert });
           }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
@@ -283,11 +303,15 @@ const CheckTerms = props => {
       <ListItem style={{ marginTop: 10 }}>
         <CheckCircle
           onPress={() => {
-            if (agreePrivacy == false) {
-              setagreePrivacy(true)
-            } else {
-              setagreePrivacy(false)
-            }
+            dispatch(
+              setCert({
+                agreeAge,
+                agreeCert,
+                agreePrivacy: !agreePrivacy,
+                agreeLocation,
+                agreeMarketing,
+              }),
+            );
           }}>
           {agreePrivacy && <CheckOnIcon />}
         </CheckCircle>
@@ -296,7 +320,7 @@ const CheckTerms = props => {
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
-            navigation.navigate('Privacy2');
+            navigation.navigate('Privacy2', { agreePrivacy: agreePrivacy });
           }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
@@ -305,11 +329,15 @@ const CheckTerms = props => {
       <ListItem style={{ marginTop: 10 }}>
         <CheckCircle
           onPress={() => {
-            if (agreeLocation == false) {
-              setagreeLocation(true)
-            } else {
-              setagreeLocation(false)
-            }
+            dispatch(
+              setCert({
+                agreeAge,
+                agreeCert,
+                agreePrivacy,
+                agreeLocation: !agreeLocation,
+                agreeMarketing,
+              }),
+            );
           }}>
           {agreeLocation && <CheckOnIcon />}
         </CheckCircle>
@@ -318,7 +346,8 @@ const CheckTerms = props => {
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
-            navigation.navigate('Location2');
+            navigation.navigate('Location2', { agreeLocation: agreeLocation });
+
           }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
@@ -327,11 +356,15 @@ const CheckTerms = props => {
       <ListItem style={{ marginTop: 10 }}>
         <CheckCircle
           onPress={() => {
-            if (agreeMarketing == false) {
-              setagreeMarketing(true)
-            } else {
-              setagreeMarketing(false)
-            }
+            dispatch(
+              setCert({
+                agreeAge,
+                agreeCert,
+                agreePrivacy,
+                agreeLocation,
+                agreeMarketing: !agreeMarketing,
+              }),
+            );
           }}>
           {agreeMarketing && <CheckOnIcon />}
         </CheckCircle>
@@ -349,7 +382,7 @@ const CheckTerms = props => {
             width={width}
             disabled={!(agreeCert && agreeAge && agreePrivacy && agreeLocation)}
             onPress={() => {
-              navigation.replace('Home');
+              navigation.navigate('Login', { param: agreeMarketing });
             }}
             style={{
               width: width - 80,

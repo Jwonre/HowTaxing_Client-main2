@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   Linking,
+  BackHandler,
 } from 'react-native';
 import React, {useRef, useState, useEffect, useMemo} from 'react';
 import ActionSheet, {
@@ -295,6 +296,7 @@ const MapViewListSheet2 = props => {
   const [zoom, setZoom] = useState(16);
   const [initMap, setInitMap] = useState(false);
 
+
   const [myPosition, setMyPosition] = useState({
     latitude: null,
     longitude: null,
@@ -423,7 +425,7 @@ const MapViewListSheet2 = props => {
         if (parsedData.results.common.errorCode !== '0') {
           SheetManager.show('info', {
             payload: {
-              message: parsedData.results.common.errorMessage,
+              message: '주소 검색 중 오류가 발생했어요.',
               description: parsedData.results.common.errorMessage,
               type: 'error',
             },
@@ -436,7 +438,7 @@ const MapViewListSheet2 = props => {
         if (!parsedData.results.juso[0]) {
           SheetManager.show('info', {
             payload: {
-              message: '검색 결과가 없습니다.',
+              message: '주소에 대한 정보가 없어요.',
               type: 'error',
             },
           });
@@ -555,7 +557,7 @@ const MapViewListSheet2 = props => {
         console.log(error);
         SheetManager.show('info', {
           payload: {
-            message: '주소를 찾을 수 없습니다.',
+            message: '주소를 찾을 수 없어요.',
             type: 'error',
           },
         });
@@ -711,6 +713,7 @@ const MapViewListSheet2 = props => {
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
+      closeOnTouchBackdrop={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',

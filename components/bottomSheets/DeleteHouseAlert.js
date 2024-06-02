@@ -1,14 +1,15 @@
 // 보유 주택 목록에서 주택 삭제 시 뜨는 시트
 
-import {useWindowDimensions, Pressable} from 'react-native';
-import React, {useRef} from 'react';
-import ActionSheet, {SheetManager} from 'react-native-actions-sheet';
+import { useWindowDimensions, Pressable } from 'react-native';
+import React, { useRef } from 'react';
+import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
-import {useDispatch, useSelector} from 'react-redux';
-import {setOwnHouseList} from '../../redux/ownHouseListSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setOwnHouseList } from '../../redux/ownHouseListSlice';
+import axios from 'axios';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -71,27 +72,73 @@ const ButtonSection = styled.View`
 `;
 
 const DeleteHouseAlert = props => {
-  const {item, navigation, prevSheet} = props.payload;
+  const { item, navigation, prevSheet } = props.payload;
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const ownHouseList = useSelector(state => state.ownHouseList.value);
+  const currentUser = useSelector(state => state.currentUser.value);
 
   // 주택 삭제
-  const deleteHouse = () => {
-    const filteredList = ownHouseList.filter(el => el.houseId !== item.houseId);
-    dispatch(setOwnHouseList(filteredList));
-    actionSheetRef.current?.hide();
-    navigation.goBack();
+  const deleteHouse = async () => {
+    const url = `http://13.125.194.154:8080/house/delete`;
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`
+    };
+    const data = {
+      houseId: item?.houseId === undefined ? '' : item?.houseId,
+    };
 
-    setTimeout(() => {
-      SheetManager.show(prevSheet, {
+    try {
+      const response = await axios.delete(url, { headers: headers, data: data });
+      if (response.data.errYn === 'Y') {
+
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: response.data.errMsg,
+            description: response.data.errMsgDtl,
+            closemodal: true,
+            actionSheetRef: actionSheetRef,
+          },
+        });
+        return;
+
+      } else {
+        const result = response.data;
+      //  console.log('deleteHouse', response);
+      //  console.log('item?.houseId', item?.houseId);
+
+        const filteredList = ownHouseList.filter(el => el.houseId !== item?.houseId);
+        dispatch(setOwnHouseList(filteredList));
+
+        actionSheetRef.current?.hide();
+        navigation.goBack();
+
+        setTimeout(() => {
+          SheetManager.show(prevSheet, {
+            payload: {
+              item: item,
+              navigation: navigation,
+              index: props.payload.index,
+            },
+          });
+        }, 300);
+      }
+
+
+    } catch (error) {
+      SheetManager.show('info', {
         payload: {
-          item: item,
-          navigation: navigation,
+          type: 'error',
+          message: '보유주택 삭제 중 오류가 발생했습니다.',
+          closemodal: true,
+          actionSheetRef: actionSheetRef,
         },
       });
-    }, 300);
+      console.error(error);
+    }
   };
 
   return (
@@ -113,6 +160,7 @@ const DeleteHouseAlert = props => {
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
       statusBarTranslucent
+      closeOnTouchBackdrop={false}
       containerStyle={{
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
@@ -162,7 +210,7 @@ const DeleteHouseAlert = props => {
                 width: (width - 80) / 2,
               }}
               onPress={() => {
-                deleteHouse(item.id);
+                deleteHouse();
               }}>
               <ModalButtonText>네</ModalButtonText>
             </ModalButton>

@@ -1,6 +1,6 @@
 // 취득세 결과애에서 CTA 섹션
 
-import {Linking} from 'react-native';
+import { Linking } from 'react-native';
 import React from 'react';
 import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';
@@ -47,7 +47,7 @@ const CardTitle = styled.Text`
 
 const CardSubTitle = styled.Text`
   font-size: 14px;
-  font-family: Pretendard-Regular;
+  font-family: Bold;
   color: #a3a5a8;
   line-height: 20px;
   text-align: center;
@@ -91,7 +91,7 @@ const SocialButtonIcon = styled.Image.attrs(props => ({
 `;
 
 const openKakaoLink = () => {
-  Linking.openURL('http://pf.kakao.com/_bwWXG');
+  Linking.openURL('http://pf.kakao.com/_jfxgFG');
 };
 
 const CTACard = () => {
@@ -101,7 +101,7 @@ const CTACard = () => {
         style={{
           textAlign: 'center',
         }}>
-        아래의 세금 계산 결과를 주택 전문 세무사에{'\n'}바로 상담해보세요!
+        부동산 전문 세무사에게 상담 받아보세요!
       </CardTitle>
       <CardSubTitle
         style={{
@@ -113,11 +113,9 @@ const CTACard = () => {
         여러분의 세금 절감에 많은 도움이 될거에요.
       </CardSubTitle>
       <ProfileAvatar
-        source={{
-          uri: 'https://cdn.imweb.me/thumbnail/20230328/c3c5b950321c7.jpg',
-        }}
+        source={require('../assets/images/Gookyoung_Yoon.png')}
       />
-      <ProfileName>홍길동 세무사</ProfileName>
+      <ProfileName>윤국녕 세무사</ProfileName>
       <KakaoButton onPress={() => openKakaoLink()}>
         <SocialButtonIcon
           source={require('../assets/images/socialIcon/kakao_ico.png')}

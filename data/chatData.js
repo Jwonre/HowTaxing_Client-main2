@@ -8,6 +8,11 @@ import VillaIcon from '../assets/icons/house/villa.svg';
 import KBICon from '../assets/icons/cert/kb_bank.svg';
 import NaverIcon from '../assets/icons/cert/naver_ico.svg';
 import TossIcon from '../assets/icons/cert/toss_ico.svg';
+import PaycoICon from '../assets/icons/cert/payco_ico.svg';
+import SamsungICon from '../assets/icons/cert/samsung_ico.svg';
+import PASSICon from '../assets/icons/cert/pass_ico.svg';
+import KakaoICon from '../assets/icons/cert/kakao_ico.svg';
+
 
 export const acquisitionTax = [
   {
@@ -16,6 +21,7 @@ export const acquisitionTax = [
     type: 'system',
     message: '취득하실 주택 종류는 무엇인가요?',
     // 진행 상태
+
     progress: 0,
     // 선택지
     select: [
@@ -25,6 +31,7 @@ export const acquisitionTax = [
         icon: <BuildingIcon1 />,
         // 선택시 추가 될 챗 아이템
         select: ['apartment'],
+        //openSheet: 'searchHouse'
       },
       {
         id: 'house',
@@ -48,6 +55,31 @@ export const acquisitionTax = [
     ],
   },
   {
+    id: 'area',
+    type: 'system',
+    message: '전용면적을 제대로 불러오지 못했어요.\n전용면적이 85㎡을 초과하나요?',
+    progress: 1,
+    select: [
+      {
+        id: 'yes',
+        name: '네',
+        select: ['apartmentAddressInfoSystem'],
+      },
+      {
+        id: 'no',
+        name: '아니오',
+        select: ['apartmentAddressInfoSystem'],
+      },
+    ]
+  },
+  {
+    id: 'apartmentAddressInfoSystem',
+    type: 'system',
+    message: '취득하실 주택 정보를 불러왔어요.',
+    questionId: 'apartment',
+    progress: 2,
+  },
+  {
     id: 'apartment',
     type: 'system',
     message:
@@ -57,15 +89,16 @@ export const acquisitionTax = [
       {
         id: 'yes',
         name: '네',
-        openSheet: 'mapViewList',
+        openSheet: 'searchHouse',
       },
       {
         id: 'no',
         name: '아니오',
-        openSheet: 'mapViewList',
+        openSheet: 'searchHouse',
       },
     ],
   },
+
   {
     id: 'ticket',
     type: 'system',
@@ -74,39 +107,41 @@ export const acquisitionTax = [
     progress: 1,
     select: [
       {
-        id: 'yes',
+        id: 'ticketyes',
         name: '네',
         openSheet: 'searchHouse',
       },
       {
-        id: 'no',
+        id: 'ticketno',
         name: '아니오',
         openSheet: 'searchHouse',
       },
     ],
   },
   {
-    id: 'cert',
+    id: 'ownHouse',
     type: 'system',
-    message: '본인인증을 진행하시겠어요?',
-    progress: 2,
+    message: '보유 주택 수를 어떻게 가져올까요?',
+    progress: 4,
     select: [
       {
         id: 'yes',
-        name: '네',
-        select: ['certType'],
+        name: '직접 입력하기',
+        openSheet: 'ownHouseCount',
+
       },
       {
         id: 'no',
-        name: '아니오',
+        name: '본인 인증하기',
+        select: ['certType'],
       },
     ],
   },
   {
     id: 'certType',
     type: 'system',
-    progress: 3,
-    message: '공공기관에서 여러 인증방식을 제공해요. 인증방식을 선택해주세요.',
+    progress: 5,
+    message: '공공기관에서 여러 인증방식을 제공해요.\n인증방식을 선택해주세요.\n청약통장이 없다면 인증이 어려우므로\n보유 중인 주택들을 직접 등록해주세요.',
     select: [
       {
         id: 'KB',
@@ -126,18 +161,23 @@ export const acquisitionTax = [
         icon: <TossIcon />,
         openSheet: 'cert',
       },
+      {
+        id: 'Nosubscriptionaccount',
+        name: '청약통장 미보유',
+        select: ['moment'],
+      },
     ],
   },
   {
     id: 'moreHouse',
     type: 'system',
     message: '취득하실 주택 외 보유 중인 주택이 있나요?',
-    progress: 4,
+    progress: 3,
     select: [
       {
         id: 'yes',
         name: '네',
-        select: ['certInfo', 'cert'],
+        select: ['OwnHouseInfo', 'ownHouse'],
       },
       {
         id: 'no',
@@ -147,14 +187,14 @@ export const acquisitionTax = [
     ],
   },
   {
-    id: 'certInfo',
+    id: 'OwnHouseInfo',
     type: 'system',
     message:
-      '취득하실 주택의 취득세를 계산하기 위해 공공기관에서 보유 중인 주택 정보를 불러오려고 해요.\n따라서 정보를 가져오려면 본인인증이 필수에요.',
+      '취득하실 주택의 취득세를 계산하기\n위해 보유 주택 수가 필요해요.\n공공기관에서 불러오거나\n직접 입력할 수 있어요.',
     progress: 3,
   },
   {
-    id: 'auiAmontSystem',
+    id: 'aquiAmountSystem',
     type: 'system',
     message: '취득가액을 입력해주세요.',
     questionId: 'apartment',
@@ -164,7 +204,7 @@ export const acquisitionTax = [
     id: 'allHouse',
     type: 'system',
     message: '보유 중인 주택을 모두 불러왔어요.',
-    progress: 4,
+    progress: 5,
     select: [
       {
         id: 'ok',
@@ -178,7 +218,7 @@ export const acquisitionTax = [
     type: 'system',
     message: '혹시 공동 소유 예정인가요?',
     questionId: 'apartment',
-    progress: 4,
+    progress: 3,
     select: [
       {
         id: 'only',
@@ -249,7 +289,7 @@ export const gainTax = [
     id: 'hello',
     type: 'system',
     message:
-      '안녕하세요!\n지금부터 양도소득세를 쉽고 정확하게 계산해드릴 거에요.\n저만 믿고 끝까지 잘 따라와 주세요!',
+      '안녕하세요!\n지금부터 양도소득세를 쉽고 정확하게\n계산해드릴 거에요.\n저만 믿고 끝까지 잘 따라와 주세요!',
     progress: 0,
   },
   {
@@ -276,36 +316,20 @@ export const gainTax = [
     type: 'system',
     progress: 10,
     message:
-      '임대사업자에 해당되시면 전문 세무사에게 상담을 문의해보세요.\n어떤 복잡한 상황에도 최선의 결과를 알려주실 거에요.',
+      '임대사업자에 해당되시면\n전문 세무사에게 상담을 문의해보세요.\n어떤 복잡한 상황에도\n최선의 결과를 알려주실 거에요.',
   },
-  {
-    id: 'cert',
-    type: 'system',
-    message: '본인인증을 진행하시겠어요?',
-    progress: 2,
-    select: [
-      {
-        id: 'yes',
-        name: '네',
-        select: ['certType'],
-      },
-      {
-        id: 'no',
-        name: '아니오',
-      },
-    ],
-  },
+
   {
     id: 'getInfoDone',
     type: 'system',
-    progress: 3,
+    progress: 6,
     message: '양도소득세 계산에 필요한 정보들을 모두 수집했어요.',
   },
   {
     id: 'allHouse',
     type: 'system',
     message: '보유 중인 주택을 모두 불러왔어요.',
-    progress: 6,
+    progress: 3,
     select: [
       {
         id: 'ok',
@@ -317,22 +341,72 @@ export const gainTax = [
   {
     id: 'getInfoConfirm',
     type: 'system',
-    progress: 4,
+    progress: 7,
     message:
       '잘못된 정보들로 양도소득세를 계산하면 정확한 결과가 나오지 않을 수 있어요. 모든 정보들이 맞는지 확인해볼까요?',
   },
   {
+    id: 'cert',
+    type: 'system',
+    message: '본인 인증을 진행하시겠어요?',
+    progress: 2,
+    select: [
+      {
+        id: 'yes',
+        name: '네',
+        select: ['certType'],
+
+
+      },
+      {
+        id: 'no',
+        name: '아니오',
+      },
+    ],
+  },
+  {
     id: 'certInfo',
     type: 'system',
-    progress: 4,
+    progress: 2,
     message:
-      '매도하실 주택의 양도소득세를 계산하기 위해 공공기관에서 보유 중인 주택 정보를 불러오려고 해요. 따라서 정보를 가져오려면 본인인증이 필수에요.',
+      '매도하실 주택의 양도소득세를 계산하기 위해\n공공기관에서 보유 중인 주택 정보를 불러오려고\n해요.\n따라서 정보를 가져오려면 본인인증이 필수예요.',
   },
   {
     id: 'certType',
     type: 'system',
     progress: 3,
-    message: '공공기관에서 여러 인증방식을 제공해요. 인증방식을 선택해주세요.',
+    message: '공공기관에서 여러 인증방식을 제공해요.\n인증방식을 선택해주세요.\n청약통장이 없다면 인증이 어려우므로\n보유 중인 주택들을 직접 등록해주세요.',
+    select: [
+      {
+        id: 'KB',
+        name: 'KB 간편인증',
+        icon: <KBICon />,
+        openSheet: 'cert',
+      },
+      {
+        id: 'naver',
+        name: '네이버 간편인증',
+        icon: <NaverIcon />,
+        openSheet: 'cert',
+      },
+      {
+        id: 'toss',
+        name: '토스 인증',
+        icon: <TossIcon />,
+        openSheet: 'cert',
+      },
+      {
+        id: 'Nosubscriptionaccount',
+        name: '청약통장 미보유',
+        select: ['allHouse'],
+      },
+    ],
+  },
+  {
+    id: 'certType12',
+    type: 'system',
+    progress: 3,
+    message: '공공기관에서 여러 인증방식을 제공해요.\n인증방식을 선택해주세요.\n청약통장이 없다면 인증이 어려우므로\n보유 중인 주택들을 직접 등록해주세요.',
     select: [
       {
         id: 'KB',
@@ -355,20 +429,40 @@ export const gainTax = [
     ],
   },
   {
-    id: 'moreHouse',
+    id: 'certType2',
     type: 'system',
-    progress: 5,
-    message: '취득하실 주택 외 보유 중인 주택이 있나요?',
+    progress: 3,
+    message: '공공기관에서 여러 인증방식을 제공해요.\n인증방식을 선택해주세요.',
     select: [
       {
-        id: 'yes',
-        name: '네',
-        select: ['certInfo', 'cert'],
+        id: 'PASS',
+        name: 'PASS 간편인증',
+        icon: <PASSICon />,
+        openSheet: 'cert2',
       },
       {
-        id: 'no',
-        name: '아니오',
-        select: ['getInfoDone', 'getInfoConfirm'],
+        id: 'KAKAO',
+        name: '카카오톡 간편인증',
+        icon: <KakaoICon />,
+        openSheet: 'cert2',
+      },
+      {
+        id: 'PAYCO',
+        name: '페이코 간편인증',
+        icon: <PaycoICon />,
+        openSheet: 'cert2',
+      },
+      {
+        id: 'SAMSUNG',
+        name: '삼성 패스 인증',
+        icon: <SamsungICon />,
+        openSheet: 'cert2',
+      },
+      {
+        id: 'KB',
+        name: 'KB 간편인증',
+        icon: <KBICon />,
+        openSheet: 'cert2',
       },
     ],
   },
@@ -385,10 +479,143 @@ export const gainTax = [
     message: '2년 10개월',
   },
   {
+    id: 'ExpenseInquiry',
+    type: 'system',
+    message: '지금 매도하려는 이 주택을 취득할 때 소요된 필요 경비에 따라 양도소득세가 달라질 수 있어요.',
+    progress: 5,
+  },
+  {
+    id: 'ExpenseAnswer',
+    type: 'system',
+    message: '필요경비를 입력해주세요.',
+    progress: 5,
+    select: [
+      {
+        id: 'ExpenseAmount',
+        name: '필요경비 입력하기',
+        openSheet: 'Expense',
+        currentPageIndex: 0,
+      },
+    ],
+  },
+  {
     id: 'goodbye',
     type: 'system',
     progress: 10,
     message:
       '양도소득세 계산 결과는 마음에 드셨나요?\n곧 대리 신고까지 한 번에 가능하도록 서비스를 개발하고 있어요.\n앞으로도 많은 사랑과 관심 부탁드려요.',
   },
+  {
+    id: 'over12',
+    type: 'system',
+    progress: 5,
+    message:
+      '매도하실 주택의 양도가액이 12억을 초과하는군요. 정확한 양도소득세 계산을 위해서 실거주 기간이 추가로 필요해요. 지금 본인인증을 한 번 더 해야해요.',
+  },
+  {
+    id: 'under12',
+    type: 'system',
+    progress: 5,
+    message:
+      '정확한 양도소득세 계산을 위해서 실거주 기간이 추가로 필요해요. 지금 본인인증을 한 번 더 해야해요.',
+  },
+  {
+    id: 'Acquiredhouse',
+    type: 'system',
+    progress: 4,
+    message:
+      '최근 취득한 주택에 1년 이상\n거주하실 예정인가요?',
+    select: [
+      {
+        id: 'AcquiredhouseY',
+        name: '네',
+        select: ['over12', 'residenceperiod'],
+
+      },
+      {
+        id: 'AcquiredhouseN',
+        name: '아니오',
+        select: ['over12', 'residenceperiod'],
+      },
+    ],
+  },
+  {
+    id: 'Acquiredhouse2',
+    type: 'system',
+    progress: 4,
+    message:
+      '최근 취득한 주택에 1년 이상\n거주하실 예정인가요?',
+    select: [
+      {
+        id: 'AcquiredhouseY',
+        name: '네',
+        select: ['under12', 'residenceperiod'],
+
+      },
+      {
+        id: 'AcquiredhouseN',
+        name: '아니오',
+        select: ['under12', 'residenceperiod'],
+      },
+    ],
+  },
+  {
+    id: 'residenceperiod',
+    type: 'system',
+    progress: 5,
+    message:
+      '실거주 기간을 어떻게 가져올까요?',
+    select: [
+      {
+        id: 'directlivePeriod',
+        name: '직접 입력하기',
+        openSheet: 'directlivePeriod',
+
+      },
+      {
+        id: 'cert2',
+        name: '본인 인증하기',
+        select: ['certType2'],
+      },
+    ],
+  },
+  {
+    id: 'landlord1',
+    user: 'system',
+    message: '상생임대인에 해당하시나요?',
+    progress: 3,
+    select: [
+      {
+        id: 'landlordY',
+        name: '네',
+        select: ['Acquiredhouse2'],
+        key: 'landlord',
+      },
+      {
+        id: 'landlordN',
+        name: '아니오',
+        select: ['Acquiredhouse2'],
+        key: 'landlord',
+      },
+    ],
+  },
+  {
+    id: 'landlord2',
+    user: 'system',
+    message: '상생임대인에 해당하시나요?',
+    progress: 3,
+    select: [
+      {
+        id: 'landlordY',
+        name: '네',
+        select: ['ExpenseInquiry', 'ExpenseAnswer'],
+      },
+      {
+        id: 'landlordN',
+        name: '아니오',
+        select: ['ExpenseInquiry', 'ExpenseAnswer'],
+      },
+    ],
+  }
 ];
+

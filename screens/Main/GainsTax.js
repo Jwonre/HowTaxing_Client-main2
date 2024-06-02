@@ -1,8 +1,8 @@
 // 양도소득세 홈페이지
 
-import {TouchableOpacity, useWindowDimensions} from 'react-native';
-import React, {useLayoutEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import { TouchableOpacity, useWindowDimensions, BackHandler } from 'react-native';
+import React, { useLayoutEffect, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import HomeIcon from '../../assets/images/home_home_lg.svg';
@@ -116,7 +116,7 @@ const Avatar = styled(FastImage).attrs(props => ({
 `;
 
 const ChatBubble = styled.View`
-  width: 75%;
+  width: 80%;   
   height: auto;
   border-radius: 10px;
   background-color: #f0f3f8;
@@ -156,10 +156,25 @@ const ButtonText = styled.Text`
   line-height: 20px;
 `;
 
+
 const GainsTax = () => {
   const navigation = useNavigation();
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
+  const handleBackPress = () => {
+    navigation.goBack();
+    return true;
+  }
+
+
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    }
+
+  }, [handleBackPress]);
   const GAIN_HASHTAG_LIST = [
     '양도소득세 계산',
     '다주택자 세금 컨설팅',
@@ -171,7 +186,7 @@ const GainsTax = () => {
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
           }}>

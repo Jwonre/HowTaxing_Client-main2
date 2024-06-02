@@ -7,18 +7,21 @@ import {
   Pressable,
   ScrollView,
 } from 'react-native';
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import AddCircleIcon from '../../assets/icons/add_circle.svg';
-import FamilyIcon from '../../assets/images/family.svg';
+import AddHouseCircleIcon from '../../assets/icons/add_house_circle.svg';
 import CheckIcon from '../../assets/icons/check.svg';
-import {useDispatch, useSelector} from 'react-redux';
-import {HOUSE_TYPE} from '../../constants/colors';
-import {setChatDataList} from '../../redux/chatDataListSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { HOUSE_TYPE } from '../../constants/colors';
+import { setChatDataList } from '../../redux/chatDataListSlice';
+import { setHouseInfo } from '../../redux/houseInfoSlice';
+import { setModalList,removeLastModalList } from '../../redux/modalListSlice';
+
 
 const SheetContainer = styled.ScrollView.attrs({
   contentContainerStyle: {
@@ -67,7 +70,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
   border-width: 1px;
   border-color: ${props => (props.active ? '#2F87FF' : '#E8EAED')};
   align-self: center;
-  margin-top: 20px;
+  margin-top: 15px;
 `;
 
 const ButtonText = styled.Text`
@@ -100,7 +103,9 @@ const HouseSection = styled.View`
   background-color: #f7f8fa;
 `;
 
-const Card = styled.View`
+const Card = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.8,
+}))`
   width: 180px;
   height: 180px;
   border-radius: 10px;
@@ -140,8 +145,8 @@ const CardTitle = styled.Text.attrs({
   font-size: 15px;
   color: #1b1c1f;
   font-family: Pretendard-Bold;
-  word-break: keep-all;
   line-height: 20px;
+  flex: 1;
 `;
 
 const CardSubTitle = styled.Text`
@@ -176,7 +181,7 @@ const AddButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
   flex-direction: row;
-  width: 140px;
+  width: 285px;
   height: 50px;
   border-radius: 25px;
   justify-content: center;
@@ -197,7 +202,7 @@ const AddButtonText = styled.Text`
 
 const CheckCircleButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
-  hitSlop: {top: 20, bottom: 20, left: 20, right: 20},
+  hitSlop: { top: 20, bottom: 20, left: 20, right: 20 },
 }))`
   width: 20px;
   height: 20px;
@@ -210,22 +215,45 @@ const CheckCircleButton = styled.TouchableOpacity.attrs(props => ({
   right: 10px;
 `;
 
+const EmptyCard = styled.View`
+  width: 335px;
+  height: 180px;
+  border-radius: 10px;
+  background-color: #fff;
+  border-color: #fff;
+  padding: 15px;
+  margin: 40px 20px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const EmptyTitle = styled.Text`
+  font-size: 13px;
+  color: #717274;
+  font-family: Pretendard-SemiBold;
+  line-height: 20px;
+  margin: 3px;
+`;
+
 const OwnHouseSheet = props => {
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
-  const {width, height} = useWindowDimensions();
-
+  const { width, height } = useWindowDimensions();
+  const houseInfo = useSelector(state => state.houseInfo.value);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedList, setSelectedList] = useState([]);
-  const ownHouseList = useSelector(state => state.ownHouseList.value);
-  const chatDataList = useSelector(state => state.chatDataList.value);
-
+  const ownHouseList = useSelector(state => state.ownHouseList?.value);
+  const chatDataList = useSelector(state => state.chatDataList?.value);
+  const modalList = useSelector(state => state.modalList.value);
   const CARD_WIDTH = 180 + 22;
 
+
+
   useEffect(() => {
-    if (ownHouseList.length > 0) {
+    if (ownHouseList?.length > 0) {
       setSelectedList(ownHouseList);
     }
+
   }, []);
 
   return (
@@ -237,6 +265,9 @@ const OwnHouseSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
+              const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+              dispatch(setChatDataList(newChatDataList));
+              dispatch(removeLastModalList());
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -246,6 +277,8 @@ const OwnHouseSheet = props => {
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
+      closeOnTouchBackdrop={false}
+      closeOnPressBack={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
@@ -265,26 +298,169 @@ const OwnHouseSheet = props => {
             주택은 반드시 체크 해제해주세요.
           </InfoMessage>
         </TitleSection>
-        <HouseSection>
-          <ScrollView
-            onScroll={e => {
-              const contentOffset = e.nativeEvent.contentOffset;
-              const pageNum = Math.floor((contentOffset.x / CARD_WIDTH) * 2);
-              setCurrentIndex(pageNum);
-            }}
-            horizontal
-            scrollEventThrottle={16}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingBottom: 30,
-              paddingHorizontal: 20,
-              marginTop: 20,
-            }}>
-            {ownHouseList.map((item, index) => (
+
+        {ownHouseList?.length > 0 ?
+          <HouseSection>
+            <ScrollView
+              onScroll={e => {
+                const contentOffset = e.nativeEvent.contentOffset;
+                const pageNum = Math.floor((contentOffset.x / CARD_WIDTH) * 2);
+                setCurrentIndex(pageNum);
+              }}
+              horizontal
+              scrollEventThrottle={16}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingBottom: 30,
+                paddingHorizontal: 20,
+                marginTop: 20,
+              }}>
+              {ownHouseList?.map((item, index) => (
+                <DropShadow
+                  key={'own' + index}
+                  style={{
+                    shadowColor: '#000',
+                    shadowOffset: {
+                      width: 0,
+                      height: 10,
+                    },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 10,
+                  }}>
+                  <Card
+                    active={selectedList.indexOf(item) > -1}
+                    onPress={() => {
+                      if (selectedList.indexOf(item) > -1) {
+                        setSelectedList(
+                          selectedList.filter(selectedItem => selectedItem !== item),
+                        );
+                      } else {
+                        setSelectedList([...selectedList, item]);
+                      }
+                    }}
+                  >
+                    <CheckCircleButton
+                      active={selectedList.indexOf(item) > -1}
+                      onPress={() => {
+                        if (selectedList.indexOf(item) > -1) {
+                          setSelectedList(
+                            selectedList.filter(selectedItem => selectedItem !== item),
+                          );
+                        } else {
+                          setSelectedList([...selectedList, item]);
+                        }
+                      }}>
+                      {selectedList.indexOf(item) > -1 && <CheckIcon />}
+                    </CheckCircleButton>
+                    <Tag
+                      style={{
+                        backgroundColor: HOUSE_TYPE.find(
+                          color => color.id === item.houseType,
+                        ).color,
+                      }}>
+                      <TagText>
+                        {
+                          HOUSE_TYPE.find(color => color.id === item.houseType)
+                            .name
+                        }
+                      </TagText>
+                    </Tag>
+                    <CardTitle>{item.houseName}</CardTitle>
+                    <CardSubTitle>{item.houseDetailName}</CardSubTitle>
+                    <CardButton
+                      onPress={() => {
+                        actionSheetRef.current?.hide();
+                        dispatch(removeLastModalList());
+                        props.payload.navigation.push(
+                          'OwnedHouseDetail',
+                          { item: item, prevSheet: 'own', index: props.payload.index, },
+                        );
+                        //console.log('detail item', item);
+                      }}>
+                      <CardButtonText>자세히 보기</CardButtonText>
+                    </CardButton>
+                  </Card>
+                </DropShadow>
+              ))}
+            </ScrollView>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                alignSelf: 'center',
+                marginBottom: 20,
+                zIndex: 2,
+              }}>
+              {ownHouseList?.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    setCurrentIndex(index - 1);
+                  }}
+                  activeOpacity={0.6}
+                  hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor:
+                      currentIndex === index ? '#E8EAED' : 'transparent',
+                    borderWidth: 1,
+                    borderColor: '#E8EAED',
+                    marginRight: 10,
+                  }}
+                />
+              ))}
+            </View>
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row',
+              }}>
+              <AddButton
+                width={width}
+                onPress={() => {
+                  actionSheetRef.current?.hide();
+                  dispatch(removeLastModalList());
+                  props.payload.navigation.push('DirectRegister', {
+                    prevChat: 'AcquisitionChat',
+                    prevSheet: 'own',
+                    index: props.payload?.index,
+                    chatDataList: chatDataList,
+                    actionSheetRef: actionSheetRef,
+                  });
+
+                }}>
+                <AddCircleIcon />
+                <AddButtonText>직접 등록하기</AddButtonText>
+              </AddButton>
+
+            </View>
+            <SubTitle
+              style={{
+                color: '#2F87FF',
+                paddingHorizontal: 20,
+                paddingBottom: 20,
+              }}>
+              이미 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
+              불러오지 못한 주택이 있을 경우, 정확한 세금계산이 어려워요.
+            </SubTitle>
+          </HouseSection>
+          :
+          <HouseSection>
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row',
+              }}
+            >
               <DropShadow
-                key={'own' + index}
+                key={'emptyOwnHouse'}
                 style={{
-                  shadowColor: '#000',
+                  shadowColor: 'rgba(0,0,0,0.1)',
                   shadowOffset: {
                     width: 0,
                     height: 10,
@@ -292,125 +468,60 @@ const OwnHouseSheet = props => {
                   shadowOpacity: 0.15,
                   shadowRadius: 10,
                 }}>
-                <Card active={selectedList.indexOf(item) > -1}>
-                  <CheckCircleButton
-                    onPress={() => {
-                      if (selectedList.indexOf(item) > -1) {
-                        setSelectedList(
-                          selectedList.filter(
-                            selectedItem => selectedItem !== item,
-                          ),
-                        );
-                      } else {
-                        setSelectedList([...selectedList, item]);
-                      }
-                    }}>
-                    {selectedList.indexOf(item) > -1 && <CheckIcon />}
-                  </CheckCircleButton>
-                  <Tag
-                    style={{
-                      backgroundColor: HOUSE_TYPE.find(
-                        color => color.id === item.houseType,
-                      ).color,
-                    }}>
-                    <TagText>
-                      {
-                        HOUSE_TYPE.find(color => color.id === item.houseType)
-                          .name
-                      }
-                    </TagText>
-                  </Tag>
-                  <CardTitle>{item.houseName}</CardTitle>
-                  <CardSubTitle>{item.houseDetailName}</CardSubTitle>
-                  <CardButton
+                <EmptyCard>
+                  <AddHouseCircleIcon
                     onPress={() => {
                       actionSheetRef.current?.hide();
-                      props.payload.navigation.push(
-                        'OwnedHouseDetail',
-                        {item: item, prevSheet: 'own'},
-                        'OwnedHouseDetail',
-                      );
-                    }}>
-                    <CardButtonText>자세히 보기</CardButtonText>
-                  </CardButton>
-                </Card>
+                      dispatch(removeLastModalList());
+                      props.payload.navigation.push('DirectRegister', {
+                        prevChat: 'AcquisitionChat',
+                        prevSheet: 'own',
+                        index: props.payload?.index,
+                      });
+                    }} style={{ margin: 20 }}></AddHouseCircleIcon>
+                  <EmptyTitle>
+                    {'보유하신 주택이 없으시거나 불러오지 못했어요.'}
+                  </EmptyTitle>
+                  <EmptyTitle>
+                    {'보유하신 주택이 있으시다면, 직접 등록해주세요.'}
+                  </EmptyTitle>
+                </EmptyCard>
               </DropShadow>
-            ))}
-          </ScrollView>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              alignSelf: 'center',
-              marginBottom: 20,
-              zIndex: 2,
-            }}>
-            {ownHouseList.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  setCurrentIndex(index - 1);
-                }}
-                activeOpacity={0.6}
-                hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor:
-                    currentIndex === index ? '#E8EAED' : 'transparent',
-                  borderWidth: 1,
-                  borderColor: '#E8EAED',
-                  marginRight: 10,
-                }}
-              />
-            ))}
-          </View>
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'row',
-            }}>
-            <AddButton
-              width={width}
-              onPress={() => {
-                actionSheetRef.current?.hide();
+            </View>
 
-                props.payload.navigation.push('DirectRegister', {
-                  prevChat: 'AcquisitionChat',
-                  prevSheet: 'own',
-                });
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row',
               }}>
-              <AddCircleIcon />
-              <AddButtonText>직접 등록하기</AddButtonText>
-            </AddButton>
-            <AddButton
-              width={width}
-              onPress={() => {
-                actionSheetRef.current?.hide();
-                props.payload.navigation.push('FamilyHouse'),
-                  {
+              <AddButton
+                width={width}
+                onPress={() => {
+                  actionSheetRef.current?.hide();
+                  dispatch(removeLastModalList());
+                  props.payload.navigation.push('DirectRegister', {
                     prevChat: 'AcquisitionChat',
                     prevSheet: 'own',
-                  };
-              }}>
-              <FamilyIcon />
-              <AddButtonText>가족주택 등록하기</AddButtonText>
-            </AddButton>
-          </View>
-          <SubTitle
-            style={{
-              color: '#2F87FF',
-              paddingHorizontal: 20,
-              paddingBottom: 20,
-            }}>
-            이미 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
-            불러오지 못한 주택이 있을 경우, 정확한 세금계산이 어려워요.
-          </SubTitle>
-        </HouseSection>
+                    index: props.payload?.index,
+                  });
+                }}>
+                <AddCircleIcon />
+                <AddButtonText>직접 등록하기</AddButtonText>
+              </AddButton>
 
+            </View>
+            <SubTitle
+              style={{
+                color: '#2F87FF',
+                paddingHorizontal: 20,
+                paddingBottom: 20,
+              }}>
+              이미 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
+              불러오지 못한 주택이 있을 경우, 정확한 세금계산이 어려워요.
+            </SubTitle>
+          </HouseSection>
+        }
         <DropShadow
           style={{
             shadowColor: 'rgba(0,0,0,0.1)',
@@ -427,6 +538,12 @@ const OwnHouseSheet = props => {
             active={selectedList.length > 0}
             onPress={() => {
               actionSheetRef.current?.hide();
+
+              const chatItem = {
+                id: 'ownConfirmOK',
+                type: 'my',
+                message: '확인 완료',
+              };
 
               const chat2 = {
                 id: 'palnSale',
@@ -448,7 +565,11 @@ const OwnHouseSheet = props => {
                 ],
               };
 
-              dispatch(setChatDataList([...chatDataList, chat2]));
+              dispatch(setChatDataList([...chatDataList, chatItem, chat2]));
+              dispatch(
+                setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true })
+              );
+              dispatch(removeLastModalList());
             }}>
             <ButtonText active={selectedList.length > 0}>확인하기</ButtonText>
           </Button>

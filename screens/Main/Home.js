@@ -1,22 +1,28 @@
 // 홈 페이지
 
-import {useWindowDimensions, StatusBar} from 'react-native';
-import React, {useLayoutEffect, useEffect} from 'react';
+import { useWindowDimensions, StatusBar, StyleSheet, BackHandler } from 'react-native';
+import React, { useLayoutEffect, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import DropShadow from 'react-native-drop-shadow';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import HomeIcon from '../../assets/images/home_home.svg';
 import SignTagIcon from '../../assets/images/home_signtag.svg';
+import ConSultingIcon from '../../assets/images/home_consulting.svg';
 import getFontSize from '../../utils/getFontSize';
-import {SheetManager} from 'react-native-actions-sheet';
+import { SheetManager } from 'react-native-actions-sheet';
 import ChanelTalkIcon from '../../assets/icons/chaneltalk.svg';
-import {ChannelIO} from 'react-native-channel-plugin';
+import LogOutIcon from '../../assets/icons/logout_circle.svg';
+import { ChannelIO } from 'react-native-channel-plugin';
 import NetInfo from '@react-native-community/netinfo';
-import {useDispatch} from 'react-redux';
-import {setChatDataList} from '../../redux/chatDataListSlice';
-import {setHouseInfo} from '../../redux/houseInfoSlice';
-import {setOwnHouseList} from '../../redux/ownHouseListSlice';
-import {setCert} from '../../redux/certSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setChatDataList } from '../../redux/chatDataListSlice';
+import { setHouseInfo } from '../../redux/houseInfoSlice';
+import { setOwnHouseList } from '../../redux/ownHouseListSlice';
+import { setCert } from '../../redux/certSlice';
+import { setCurrentUser } from '../../redux/currentUserSlice';
+import { setModalList } from '../../redux/modalListSlice';
+import axios from 'axios';
+
 
 const Container = styled.View`
   flex: 1;
@@ -28,10 +34,11 @@ const HelloSection = styled.View`
   padding: 25px;
   justify-content: flex-end;
   align-items: flex-start;
+  margin-top: 40px;
 `;
 
 const HelloText = styled.Text`
-  font-size: ${getFontSize(20)}px;
+  font-size: ${getFontSize(19)}px;
   font-family: Pretendard-Bold;
   color: #222;
   letter-spacing: -0.5px;
@@ -39,7 +46,7 @@ const HelloText = styled.Text`
 `;
 
 const MessageTitle = styled.Text`
-  font-size: ${getFontSize(24)}px;
+  font-size: ${getFontSize(22)}px;
   font-family: Pretendard-Bold;
   color: #222;
   letter-spacing: -0.5px;
@@ -53,7 +60,7 @@ const Card = styled.TouchableOpacity.attrs(props => ({
   height: auto;
   background-color: #fff;
   border-radius: 12px;
-  margin: 10px;
+  margin: 8px;
   padding: 25px;
   justify-content: center;
   align-self: center;
@@ -70,7 +77,7 @@ const Tag = styled.View`
 `;
 
 const TagText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: ${getFontSize(9)}px;
   font-family: Pretendard-Medium;
   color: #fff;
   line-height: 12px;
@@ -78,7 +85,7 @@ const TagText = styled.Text`
 `;
 
 const CardTitle = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: ${getFontSize(14)}px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -93,7 +100,7 @@ const HashTagGroup = styled.View`
 `;
 
 const HashTagText = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: ${getFontSize(11)}px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -114,13 +121,21 @@ const IconView = styled.View`
   border: 1px solid #e8eaed;
 `;
 
-const FloatContainer = styled.View`
+const ChanelTalkIconFloatContainer = styled.View`
   position: absolute;
   bottom: 25px;
   right: 25px;
+
 `;
 
-const FloatButton = styled.TouchableOpacity.attrs(props => ({
+const LogOutIconFloatContainer = styled.View`
+  position: absolute;
+  bottom: 25px;
+  right: 110px;
+
+`;
+
+const ChanelTalkIconFloatButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
   width: 55px;
@@ -130,19 +145,56 @@ const FloatButton = styled.TouchableOpacity.attrs(props => ({
   align-items: center;
   justify-content: center;
 `;
+const LogOutIconFloatButton = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.8,
+}))`
+  width: 55px;
+  height: 55px;
+  border-radius: 30px;
+`;
 
 const ShadowContainer = styled(DropShadow)`
   shadow-color: #ececef;
-  shadow-offset: 0px 8px;
+  shadow-offset: 0px 9px;
   shadow-opacity: 1;
-  shadow-radius: 10px;
+  shadow-radius: 8px;
 `;
 
+const style = StyleSheet.create({
+  LogOutIcon: {
+    marginRight: 85,
+  },
+
+});
+
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
 const Home = () => {
+  const currentUser = useSelector(state => state.currentUser.value);
+  const modalList = useSelector(state => state.modalList.value);
+  const chatDataList = useSelector(state => state.chatDataList.value);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const handleBackPress = () => {
+    console.log('LogOut!');
+    goLogin();
+    return true;
+  }
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    }
+
+  }, [handleBackPress]);
+
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
   useLayoutEffect(() => {
     StatusBar.setBarStyle('dark-content');
@@ -157,7 +209,7 @@ const Home = () => {
     };
 
     ChannelIO.boot(settings).then(result => {
-      console.log('ChannelIO.boot', result);
+      // console.log('ChannelIO.boot', result);
     });
 
     // 기본 채널톡 버튼 숨기기
@@ -168,20 +220,110 @@ const Home = () => {
     };
   }, []);
 
-  useEffect(() => {
-    // 네트워크 연결 확인
-    NetInfo.fetch().then(state => {
-      if (!state?.isConnected) {
+  const handleWithDraw = (accessToken) => {
+    // 요청 헤더
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`
+    };
+
+    // 요청 바디
+
+    axios
+      .post('http://13.125.194.154:8080/user/withdraw', { headers: headers })
+      .then(response => {
+        if (response.data.errYn === 'Y') {
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg,
+              description: response.data.errMsgDtl,
+            },
+          });
+          return;
+        } else {
+          SheetManager.show('info', {
+            payload: {
+              type: 'info',
+              message: '회원탈퇴에 성공했습니다.',
+            },
+          });
+          // 성공적인 응답 처리
+          // const { id } = response.data;
+          //    console.log("1111111", response);
+        }
+      })
+      .catch(error => {
+        // 오류 처리
         SheetManager.show('info', {
           payload: {
-            type: 'info',
-            message:
-              '서버와의 연결이 원활하지 않아요.\n잠시 후 다시 시도해주세요.',
-          },
+            message: '회원탈퇴에 실패했습니다.',
+            description: error?.message,
+            type: 'error',
+          }
         });
+        console.error(error);
+      });
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(setModalList({}));
+      dispatch(setChatDataList([]));
+      dispatch(setHouseInfo(null));
+      dispatch(setOwnHouseList([]));
+      dispatch(
+        setCert({
+          agreeCert: false,
+          agreePrivacy: false,
+          agreeThird: false,
+          agreeAge: false,
+          agreeLocation: false,
+          agreeMarketing: false,
+          agreeCopyright: false,
+          agreeGov24: false
+        }),
+      );
+      // 화면이 포커스를 얻을 때 실행됩니다.
+      return () => { };
+    }, [])
+  );
+
+  useEffect(() => {
+   // console.log('homemodalList', modalList)
+    const unsubscribe = NetInfo.addEventListener(state => {
+      // const newSheetId = 'info';
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        setHasNavigatedBack(false); // 인터넷 연결이 끊어지면 hasNavigatedBack을 false로 설정
+        const keys = Object.keys(modalList);
+        if (keys.length > 0) {
+          for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            const actionSheet = modalList[key];
+            if(actionSheet.index !== undefined) {
+              const newChatDataList = chatDataList.slice(0, actionSheet.index + 1);
+              dispatch(setChatDataList(newChatDataList));
+            }
+            SheetManager.hide(actionSheet.modal);
+          }
+          dispatch(setModalList({}));
+        }
+        setTimeout(() => {
+          navigation.push('NetworkAlert', navigation);
+        }, 300);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBack) { // hasNavigatedBack이 false일 때만 navigation.goBack() 호출
+          navigation.goBack();
+          setHasNavigatedBack(true); // navigation.goBack() 호출 후 hasNavigatedBack을 true로 설정
+        }
       }
     });
-  }, []);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [NetInfo, dispatch, modalList, isConnected, hasNavigatedBack]); // dispatch와 modalList를 의존성 배열에 추가합니다.
 
   const AC_HASHTAG_LIST = [
     '취득세 계산',
@@ -199,29 +341,48 @@ const Home = () => {
     '장기보유특별공제',
   ];
 
-  const stateInit = () => {
-    dispatch(setChatDataList([]));
-    dispatch(setHouseInfo(null));
-    dispatch(setOwnHouseList([]));
-    dispatch(
-      setCert({
-        agreeCert: false,
-        agreePrivacy: false,
-        agreeThird: false,
-      }),
-      
-    );
-  };
+
+  const CONSULTING_HASHTAG_LIST = [
+    '상속세',
+    '증여세',
+    '재산세',
+    '다주택자',
+    '양도소득세 컨설팅',
+    '기타 주택세금',
+  ];
 
   const goAcquisigion = () => {
-    stateInit();
     navigation.push('Acquisition');
   };
 
   const goGainsTax = () => {
-    stateInit();
     navigation.push('GainsTax');
   };
+
+  const goConSulting = () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'Consulting'} }));
+    SheetManager.show('Consulting');
+  };
+
+  const goLogin = () => {
+    SheetManager.show('logout', {
+      payload: {
+        type: 'error',
+        message: '로그아웃을 하시겠어요?',
+        onPress: { handlePress },
+      },
+    });
+
+    return;
+  };
+
+  const handlePress = buttonIndex => {
+    if (buttonIndex === 'YES') {
+      dispatch(setCurrentUser(null));
+    }
+  };
+
 
   return (
     <Container>
@@ -264,7 +425,29 @@ const Home = () => {
           </IconView>
         </Card>
       </ShadowContainer>
-      <FloatContainer>
+
+      <ShadowContainer>
+        <Card width={width} onPress={goConSulting}>
+          <Tag>
+            <TagText>세금 상담</TagText>
+          </Tag>
+          <CardTitle>세금 상담받기</CardTitle>
+          <HashTagGroup
+            style={{
+              width: '70%',
+            }}>
+            {CONSULTING_HASHTAG_LIST.map((item, index) => (
+              <HashTagText key={index}>#{item}</HashTagText>
+            ))}
+          </HashTagGroup>
+          <IconView>
+            <ConSultingIcon />
+          </IconView>
+        </Card>
+      </ShadowContainer>
+
+
+      <ChanelTalkIconFloatContainer>
         <DropShadow
           style={{
             shadowColor: '#2F87FF',
@@ -272,17 +455,40 @@ const Home = () => {
               width: 0,
               height: 4,
             },
-            shadowOpacity: 0.35,
+            shadowOpacity: 0.8,
             shadowRadius: 10,
           }}>
-          <FloatButton
+          <ChanelTalkIconFloatButton
             onPress={() => {
-              ChannelIO.showMessenger();
+              //console.log('currentUser',currentUser.accessToken);
+              handleWithDraw(currentUser.accessToken);
+              dispatch(setCurrentUser(null));
             }}>
             <ChanelTalkIcon />
-          </FloatButton>
+          </ChanelTalkIconFloatButton>
         </DropShadow>
-      </FloatContainer>
+      </ChanelTalkIconFloatContainer>
+      <LogOutIconFloatContainer>
+        <DropShadow
+          style={{
+            shadowColor: '#A3A3A3',
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.80,
+            shadowRadius: 10,
+          }}>
+
+          <LogOutIconFloatButton
+            onPress={() => {
+              console.log('LogOut!');
+              goLogin();
+            }}>
+            <LogOutIcon style={style.LogOutIcon} />
+          </LogOutIconFloatButton>
+        </DropShadow>
+      </LogOutIconFloatContainer>
     </Container>
   );
 };

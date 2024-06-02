@@ -1,14 +1,15 @@
 // 취득세 홈페이지
 
-import {TouchableOpacity, useWindowDimensions} from 'react-native';
-import React, {useLayoutEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import { TouchableOpacity, useWindowDimensions, BackHandler } from 'react-native';
+import React, { useLayoutEffect, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import HomeIcon from '../../assets/images/home_home_lg.svg';
 import FastImage from 'react-native-fast-image';
 import DropShadow from 'react-native-drop-shadow';
 import getFontSize from '../../utils/getFontSize';
+
 
 const Container = styled.View`
   flex: 1;
@@ -169,16 +170,27 @@ const ShadowContainer = styled(DropShadow)`
 
 const Acquisition = () => {
   const navigation = useNavigation();
-  const {width, height} = useWindowDimensions();
-
+  const { width, height } = useWindowDimensions();
   const AC_HASHTAG_LIST = ['취득세 계산', '조정 지역', '주택 매수'];
+  const handleBackPress = () => {
+    navigation.goBack();
+    return true;
+  }
 
+  
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    }
+
+  }, [handleBackPress]);
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
           }}>
@@ -234,7 +246,7 @@ const Acquisition = () => {
           </ChatBubble>
         </ChatItem>
       </ChatSection>
-      <ButtonSection style={{marginTop: 20}}>
+      <ButtonSection>
         <ShadowContainer>
           <Button
             width={width}

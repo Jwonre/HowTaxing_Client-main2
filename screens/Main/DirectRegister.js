@@ -1,12 +1,15 @@
 // 직접 등록 안내 페이지
 
-import {TouchableOpacity, useWindowDimensions} from 'react-native';
-import React, {useLayoutEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import { TouchableOpacity, useWindowDimensions, BackHandler } from 'react-native';
+import React, { useLayoutEffect, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import KeyIcon from '../../assets/images/family_key.svg';
 import DropShadow from 'react-native-drop-shadow';
+import { SheetManager } from 'react-native-actions-sheet';
+import { useDispatch, useSelector } from 'react-redux';
+import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -71,16 +74,39 @@ const ButtonText = styled.Text`
 
 const DirectRegister = props => {
   const navigation = useNavigation();
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+  const modalList = useSelector(state => state.modalList.value);
+  const dispatch = useDispatch();
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
+            if (props.route.params.prevSheet === 'own') {
+              let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+              dispatch(setModalList({ ...modalList, [Modalindex]: { modal: props.route.params?.prevSheet, index: props.route.params?.index } }));
+              SheetManager.show('own', {
+                payload: {
+                  navigation: navigation,
+                  index: props.route.params.index,
+                },
+              });
+            } else {
+              let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+              dispatch(setModalList({ ...modalList, [Modalindex]: { modal: props.route.params?.prevSheet, index: props.route.params?.index } }));
+              SheetManager.show('own2', {
+                payload: {
+                  navigation: navigation,
+                  index: props.route.params.index,
+                },
+              });
+            }
+
+
           }}>
           <BackIcon />
         </TouchableOpacity>
@@ -100,6 +126,40 @@ const DirectRegister = props => {
       },
     });
   }, []);
+
+  useEffect(() => {
+    // 하드웨어 백 버튼 핸들러 정의
+    const handleBackPress = () => {
+      navigation.goBack();
+      if (props.route.params.prevSheet === 'own') {
+        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'own', index: props.route.params.index } }));
+        SheetManager.show('own', {
+          payload: {
+            navigation: navigation,
+            index: props.route.params.index,
+          },
+        });
+      } else {
+        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'own2', index: props.route.params.index } }));
+        SheetManager.show('own2', {
+          payload: {
+            navigation: navigation,
+            index: props.route.params.index,
+          },
+        });
+      }
+      return true;
+    };
+    // 이벤트 리스너 추가
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    };
+  }, [navigation, props.route.params]); // 의존성 배열에 navigation과 params 추가
 
   return (
     <Container>
@@ -132,6 +192,7 @@ const DirectRegister = props => {
             navigation.push('RegisterDirectHouse', {
               prevChat: props.route.params?.prevChat,
               prevSheet: props.route.params?.prevSheet,
+              index: props.route.params?.index,
             });
           }}>
           <ButtonText>등록하기</ButtonText>
@@ -141,4 +202,4 @@ const DirectRegister = props => {
   );
 };
 
-export default DirectRegister;
+export default React.memo(DirectRegister);

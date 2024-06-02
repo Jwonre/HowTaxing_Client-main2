@@ -12,7 +12,7 @@ export const HOUSE_TYPE = [
   {
     id: '3',
     name: '입주권',
-    color: '#EF537D',
+    color: '#A82BC6',
   },
   {
     id: '4',
@@ -22,11 +22,22 @@ export const HOUSE_TYPE = [
   {
     id: '5',
     name: '분양권(주택)',
-    color: '#A82BC6',
+    color: '#EF537D',
   },
   {
     id: '6',
     name: '주택',
     color: '#EF7753',
   },
+  {
+    id: '7',
+    name: '소유자',
+    color: '#2F87FF',
+
+  },
+  {
+    id: '8',
+    name: '필수',
+    color: '#FF7F00',
+  }
 ];

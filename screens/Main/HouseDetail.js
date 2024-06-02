@@ -6,21 +6,23 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   Image,
-  Alert,
+  BackHandler,
 } from 'react-native';
-import React, {useState, useLayoutEffect, useEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import DropShadow from 'react-native-drop-shadow';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import getFontSize from '../../utils/getFontSize';
-import NaverMapView, {Marker} from 'react-native-nmap';
+import NaverMapView, { Marker } from 'react-native-nmap';
 import Switch from 'react-native-draggable-switch';
-import {SheetManager} from 'react-native-actions-sheet';
-import {HOUSE_TYPE} from '../../constants/colors';
+import { useDispatch, useSelector } from 'react-redux';
+import { SheetManager } from 'react-native-actions-sheet';
+import { HOUSE_TYPE } from '../../constants/colors';
 import axios from 'axios';
-import {useSelector} from 'react-redux';
+import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
+import numberToKorean from '../../utils/numToKorean';
 
 const Container = styled.View`
   flex: 1;
@@ -54,7 +56,7 @@ const HoustInfoTitle = styled.Text`
 `;
 
 const HoustInfoText = styled.Text`
-  font-size: ${getFontSize(12)}px;
+font-size: ${getFontSize(12)}px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 20px;
@@ -69,10 +71,11 @@ const HoustInfoBadge = styled.View`
   justify-content: center;
   flex-direction: row;
   margin-right: auto;
+  margin-Bottom: 10px;
 `;
 
 const HoustInfoBadgeText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+font-size: ${getFontSize(10)}px;
   font-family: Pretendard-Medium;
   color: #fff;
   line-height: 12px;
@@ -131,7 +134,7 @@ const InfoContentItem = styled.View`
 `;
 
 const InfoContentLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+font-size: ${getFontSize(12)}px;
   font-family: Pretendard-Regular;
   color: #97989a;
   line-height: 20px;
@@ -148,45 +151,51 @@ const InfoContentText = styled.Text`
 `;
 
 const HouseDetail = props => {
-  const {item, prevSheet} = props.route.params;
+  const { item, prevSheet } = props.route.params;
   const navigation = useNavigation();
-  const {width, height} = useWindowDimensions();
-  const [isMovingInRight, setIsMovingInRight] = useState(false);
-  const houseInfo = useSelector(state => state.houseInfo.value);
+  const { width, height } = useWindowDimensions();
+  const dispatch = useDispatch();
+  const modalList = useSelector(state => state.modalList.value);
+ // const [isMoveInRight, setIsMoveInRight] = useState(false);
 
-  console.log(item);
+ // console.log(item);
   const [location, setLocation] = useState({
     latitude: 37.5326,
     longitude: 127.024612,
   });
-  const [data, setData] = useState(item);
 
   useEffect(() => {
-    getHouseDetailInfo();
+   // console.log('item', item);
+    getAPTLocation(item?.roadAddr);
   }, []);
 
-  const getHouseDetailInfo = async () => {
-    const url = 'http://13.125.194.154:8080/house/detail';
-
-    await axios
-      .get(url, {
-        params: {
-          houseId: item?.houseId ? item.houseId : '25',
+  const handleBackPress = () => {
+    if (props.route.params?.prevSheet) {
+      navigation.goBack();
+      // 시트를 표시하고 기본 동작을 중단
+      
+      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : props.route.params?.prevSheet, index: props.route.params?.index} }));
+      SheetManager.show(props.route.params?.prevSheet, {
+        payload: {
+          navigation,
+          index: props.route.params?.index,
         },
-      })
-      .then(function (result) {
-        if (result.isError) {
-          Alert.alert('주택 정보가 없습니다.');
-          return;
-        }
-        getAPTLocation(result.data.data.roadnmAdr);
-        setData(result.data.data);
-        setIsMovingInRight(result.data.data.isMovingInRight);
-      })
-      .catch(function (error) {
-        console.log(error);
       });
+      return true; // 기본 동작을 중단
+    } else {
+      // 이전 화면으로 돌아가는 기본 동작 수행
+      navigation.goBack();
+      return true; // 기본 동작을 중단
+    }
   };
+  
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    };
+  }, [handleBackPress]);
 
   const getAPTLocation = async address => {
     const API_KEY = 'e094e49e35c61a9da896785b6fee020a';
@@ -223,15 +232,19 @@ const HouseDetail = props => {
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
             if (!props.route.params?.prevSheet) {
               return;
             } else {
+              
+      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : props.route.params?.prevSheet, index: props.route.params?.index} }));
               SheetManager.show(props.route.params?.prevSheet, {
                 payload: {
                   navigation,
+                  index: props.route.params?.index,
                 },
               });
             }
@@ -266,15 +279,15 @@ const HouseDetail = props => {
               <HoustInfoBadge
                 style={{
                   backgroundColor: HOUSE_TYPE.find(
-                    color => color.id === data?.houseType,
+                    color => color.id === item?.houseType,
                   ).color,
                 }}>
                 <HoustInfoBadgeText>
-                  {HOUSE_TYPE.find(color => color.id === data?.houseType).name}
+                  {HOUSE_TYPE.find(color => color.id === item?.houseType).name}
                 </HoustInfoBadgeText>
               </HoustInfoBadge>
-              <HoustInfoTitle>{data?.houseName}</HoustInfoTitle>
-              <HoustInfoText>{data?.houseDetailName}</HoustInfoText>
+              <HoustInfoTitle>{item?.houseName}</HoustInfoTitle>
+              <HoustInfoText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'left' }}>{item?.houseDetailName}</HoustInfoText>
             </HoustInfoSection>
             <MapContainer>
               <NaverMapView
@@ -285,7 +298,7 @@ const HouseDetail = props => {
                   borderRadius: 20,
                 }}
                 showsMyLocationButton={false}
-                center={{...location, zoom: 16}}
+                center={{ ...location, zoom: 16 }}
                 zoomControl={false}
                 rotateGesturesEnabled={false}
                 scrollGesturesEnabled={false}
@@ -327,53 +340,47 @@ const HouseDetail = props => {
             <InfoContentItem>
               <InfoContentLabel>주택유형</InfoContentLabel>
               <InfoContentText>
-                {HOUSE_TYPE.find(color => color.id === data.houseType).name}
+                {HOUSE_TYPE.find(color => color.id === item?.houseType).name}
               </InfoContentText>
             </InfoContentItem>
             <InfoContentItem>
-              <InfoContentLabel>주소</InfoContentLabel>
-              <InfoContentText>{data?.roadnmAdr}</InfoContentText>
+              <InfoContentLabel>주소      </InfoContentLabel>
+              <InfoContentText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{item?.roadAddr}</InfoContentText>
             </InfoContentItem>
             <InfoContentItem>
               <InfoContentLabel>상세주소</InfoContentLabel>
-              <InfoContentText>{data?.detailAdr}</InfoContentText>
+              <InfoContentText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{item?.houseName}</InfoContentText>
             </InfoContentItem>
             <InfoContentItem>
               <InfoContentLabel>동호수</InfoContentLabel>
-              <InfoContentText>{data?.houseDetailName}</InfoContentText>
+              <InfoContentText>{item?.detailAdr}</InfoContentText>
             </InfoContentItem>
             <InfoContentItem>
-              <InfoContentLabel>공시지가</InfoContentLabel>
+              <InfoContentLabel>공시가격</InfoContentLabel>
               <InfoContentText>
-                {Number(data?.pubLandPrice)?.toLocaleString()} 원
+                {item?.pubLandPrice ? numberToKorean(Number(item?.pubLandPrice)?.toString()) + '원' : (item?.isPubLandPriceOver100Mil === true ? '1억원 초과' : item?.isPubLandPriceOver100Mil === undefined ? '' : '1억원 이하')}
               </InfoContentText>
             </InfoContentItem>
             <InfoContentItem>
-              <InfoContentLabel>KB시세</InfoContentLabel>
-              <InfoContentText>
-                {Number(data?.kbMktPrice)?.toLocaleString()} 원
-              </InfoContentText>
-            </InfoContentItem>
-            <InfoContentItem>
-              <InfoContentLabel>전용면적</InfoContentLabel>
+              <InfoContentLabel>계약면적</InfoContentLabel>
               <View
                 style={{
                   marginLeft: 'auto',
                 }}>
-                <InfoContentText>{data?.areaPyung}평형</InfoContentText>
-                <InfoContentText
+                <InfoContentText>{item?.area ? item?.area  + 'm2' : (item?.isAreaOver85 === true ? '국민평형(85m2) 초과' : item?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}</InfoContentText>
+                {item?.area !== 0 ||undefined && <InfoContentText
                   style={{
                     fontSize: 10,
                     color: '#A3A5A8',
                   }}>
-                  {data?.areaMeter}m2
-                </InfoContentText>
+                  {item?.area + 'm2'}
+                </InfoContentText>}
               </View>
             </InfoContentItem>
           </InfoContentSection>
           <InputSection>
-            <Paper>
-              <View
+          <Paper>
+            <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -397,7 +404,7 @@ const HouseDetail = props => {
                   본인
                 </InfoContentLabel>
                 <InfoContentText>
-                  {Number(data?.ownerCnt) > 1 && (
+                  {Number(item?.ownerCnt) > 1 && (
                     <Text
                       style={{
                         color: '#B5283B',
@@ -405,14 +412,14 @@ const HouseDetail = props => {
                       공동명의{'  '}
                     </Text>
                   )}
-                  {data?.userProportion}%
+                  {item?.userProportion}%
                 </InfoContentText>
               </InfoContentItem>
-              {Number(data?.ownerCnt) > 1 &&
-                new Array(Number(data?.ownerCnt) - 1)
+              {Number(item?.ownerCnt) > 1 &&
+                new Array(Number(item?.ownerCnt) - 1)
                   .fill(0)
                   .map((item, index) => (
-                    <InfoContentItem>
+                    <InfoContentItem key={index}>
                       <InfoContentLabel
                         style={{
                           color: '#1B1C1F',
@@ -427,7 +434,7 @@ const HouseDetail = props => {
                           }}>
                           공동명의{'  '}
                         </Text>
-                        {data[`owner${index + 1}Proportion`]}%
+                        {50}%
                       </InfoContentText>
                     </InfoContentItem>
                   ))}
@@ -438,15 +445,16 @@ const HouseDetail = props => {
               <Switch
                 width={50}
                 height={28}
-                value={isMovingInRight}
+                value={item?.isMoveInRight}
                 circleStyle={{
                   width: 20,
                   height: 20,
                   borderRadius: 12,
                   backgroundColor: '#fff',
                 }}
-                onValueChange={isSwitchOn => {
-                  setIsMovingInRight(isSwitchOn);
+                onValueChange={value => {
+                  //setIsMoveInRight(value);
+
                 }}
                 activeColor="#2F87FF"
                 disabledColor="#E8EAED"
@@ -459,4 +467,4 @@ const HouseDetail = props => {
   );
 };
 
-export default HouseDetail;
+export default React.memo(HouseDetail);

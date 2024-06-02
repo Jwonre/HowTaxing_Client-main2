@@ -1,6 +1,6 @@
 // 취득세 결과에서 설명 섹션
 
-import {View, Text} from 'react-native';
+import {View} from 'react-native';
 import React from 'react';
 import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';

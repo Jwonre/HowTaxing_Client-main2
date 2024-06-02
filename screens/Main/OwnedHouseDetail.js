@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // 보유 주택 상세 정보 페이지
 
 import {
@@ -6,21 +7,27 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   Image,
-  Alert,
   BackHandler,
 } from 'react-native';
-import React, {useState, useLayoutEffect, useEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import Switch from 'react-native-draggable-switch';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
+import EditGreyIcon from '../../assets/icons/edit_grey.svg';
 import styled from 'styled-components';
 import DropShadow from 'react-native-drop-shadow';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import getFontSize from '../../utils/getFontSize';
-import NaverMapView, {Marker} from 'react-native-nmap';
-import Switch from 'react-native-draggable-switch';
-import {SheetManager} from 'react-native-actions-sheet';
-import {HOUSE_TYPE} from '../../constants/colors';
+import NaverMapView, { Marker } from 'react-native-nmap';
+import { SheetManager } from 'react-native-actions-sheet';
+import { HOUSE_TYPE } from '../../constants/colors';
+import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import { editOwnHouseList } from '../../redux/ownHouseListSlice';
+import dayjs from 'dayjs';
+import { setModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
+import numberToKorean from '../../utils/numToKorean';
 
 const Container = styled.View`
   flex: 1;
@@ -69,6 +76,7 @@ const HoustInfoBadge = styled.View`
   justify-content: center;
   flex-direction: row;
   margin-right: auto;
+  margin-bottom: 10px;
 `;
 
 const HoustInfoBadgeText = styled.Text`
@@ -79,10 +87,29 @@ const HoustInfoBadgeText = styled.Text`
   letter-spacing: -0.5px;
 `;
 
+const NecessaryInfoBadge = styled.View`
+  width: auto;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 11px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  margin-right: 10px;
+`;
+
+const NecessaryInfoBadgeText = styled.Text`
+  font-size: ${getFontSize(10)}px;
+  font-family: Pretendard-Medium;
+  color: #fff;
+  line-height: 12px;
+  letter-spacing: -0.5px;
+`;
+
 const InputSection = styled.View`
   flex: 1;
   background-color: #f7f8fa;
-  padding: 20px;
+  padding: 0px 20px;
 `;
 
 const Paper = styled.View`
@@ -96,9 +123,9 @@ const Paper = styled.View`
 `;
 
 const Label = styled.Text`
-  font-size: 13px;
-  font-family: Pretendard-Medium;
-  color: #1b1c1f;
+font-size: ${getFontSize(12)}px;
+font-family: Pretendard-Regular;
+color: #97989a;
   line-height: 16px;
   margin-bottom: 10px;
 `;
@@ -144,91 +171,533 @@ const InfoContentText = styled.Text`
   color: #1b1c1f;
   line-height: 20px;
   margin-left: auto;
+  margin-right: 20px;
   text-align: right;
+
 `;
 
-const OwnedHouseDetail = props => {
-  const {item, prevSheet} = props.route.params;
-  const navigation = useNavigation();
-  const {width, height} = useWindowDimensions();
-  const [movingInRight, setMovingInRight] = useState(false);
 
+const OwnedHouseDetail = props => {
+  const { item, prevSheet } = props.route.params;
+  const navigation = useNavigation();
+  const { width, height } = useWindowDimensions();
+  const currentUser = useSelector(state => state.currentUser.value);
+  const modalList = useSelector(state => state.modalList.value);
   const [location, setLocation] = useState({
     latitude: 37.5326,
     longitude: 127.024612,
   });
-  const [data, setData] = useState(item);
+  const [pData, setpData] = useState(item);
+  const [data, setData] = useState(null);
+  const ownHouseList = useSelector(state => state.ownHouseList.value);
+  const dispatch = useDispatch();
+
+
 
   useEffect(() => {
-    getHouseDetailInfo();
+    //console.log('props?.payload?.prevSheet', prevSheet)
+    /*if (item?.houseId !== '222') {*/
+    if (prevSheet) {
+      getHouseDetailInfo();
+    }
+
+    /* } else {
+       getHouseDirectDetailInfo();
+ 
+     }*/
   }, []);
 
-  const getHouseDetailInfo = async () => {
-    const url = 'http://13.125.194.154:8080/house/detail';
+  /* useEffect(() => {
+     console.log('초기 data', data);
+   }, [data]);*/
+  //  useEffect(() => {
+  //  }, [movingInRight]);
 
-    await axios
-      .get(url, {
-        params: {
-          houseId: item?.houseId ? item.houseId : '25',
-        },
-      })
-      .then(function (result) {
-        if (result.isError) {
-          Alert.alert('주택 정보가 없습니다.');
-          return;
-        }
-        getAPTLocation(result.data.data.roadnmAdr);
-        setData(result.data.data);
-        setMovingInRight(result.data.data.movingInRight);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+
+
+
+
+
+  const handleHouseChange = async (target, newMoveInRight) => {
+    //console.log('[OwnedHouseDetail]onValueChange Yn', newMoveInRight);
+    //console.log('[OwnedHouseDetail]handleHouseChange tempMovingInRight:', tempMovingInRight);
+    //const MIR = (newMoveInRight === null ? tempMovingInRight : newMoveInRight);
+    //tempMovingInRight = MIR;
+    //setMovingInRight(MIR);
+
+    //console.log('[OwnedHouseDetail]handleHouseChange tempMovingInRight:', MIR);
+    //console.log('[OwnedHouseDetail]handleHouseChange MIR:', tempMovingInRight);
+    //console.log('[OwnedHouseDetail]handleHouseChange data:', data);
+    //console.log('[OwnedHouseDetail]handleHouseChange target:', target);
+    /* if (
+       data.area !== target.area ||
+       data.balanceDate !== target.balanceDate ||
+       data.bdMgtSn !== target.bdMgtSn ||
+       data.buyDate !== target.buyDate ||
+       data.buyPrice !== target.buyPrice ||
+       data.contractDate !== target.contractDate ||
+       data.destruction !== target.destruction ||
+       data.detailAdr !== target.detailAdr ||
+       data.houseId !== target.houseId ||
+       data.houseName !== target.houseName ||
+       data.houseType !== target.houseType ||
+       data.jibunAddr !== target.jibunAddr ||
+       data.kbMktPrice !== target.kbMktPrice ||
+       data.moveInRight !== MIR ||
+       data.ownerCnt !== target.ownerCnt ||
+       data.pubLandPrice !== target.pubLandPrice ||
+       data.roadAddr !== target.roadAddr ||
+       data.roadAddrRef !== target.roadAddrRef ||
+       data.userProportion !== target.userProportion
+     ) {*/
+    dispatch(editOwnHouseList(target));
+    // console.log('edit own house list', ownHouseList);
+    //console.log('MIR', MIR);
+    //target.isMoveInRight = MIR;
+    //console.log('target', target);
+    setData(target);
+    //await 
+    /* if (data?.houseId !== '222') {      }*/
+    putHouseDetailInfoUpdate(newMoveInRight);
+
+    //부모창의 정보와 자식창의 정보를 맞춰주는 코드(API 반영시 제거)
+    // setpData({ 'houseDetailName': target.houseDetailName, 'houseId': pData.houseId, 'houseName': target.houseName, 'houseType': target.houseType, 'userId': pData.userId });
+
+    //API CALL: 상세정보 update
+    //putHouseDetailInfoUpdate();
+
+
+
+    //   }
+
+
   };
+  const putHouseDetailInfoUpdate = async (newMoveInRight) => {
 
-  const getAPTLocation = async address => {
-    const API_KEY = 'e094e49e35c61a9da896785b6fee020a';
-    const config = {
-      headers: {
-        Authorization: `KakaoAK ${API_KEY}`,
-      },
-    }; // 헤더 설정
-    const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURI(
-      address,
-    )}`;
+    // houseId | Long | 주택ID
+    // houseType | String | 주택유형
+    // houseName | String | 주택명
+    // detailAdr | String | 상세주소
+    // contractDate | LocalDate | 계약일자
+    // balanceDate | LocalDate | 잔금지급일자
+    // buyDate | LocalDate | 취득일자
+    // moveInDate | LocalDate | 전입일자
+    // moveOutDate | LocalDate | 전출일자
+    // buyPrice | Long | 취득금액
+    // pubLandPrice | Long | 공시지가
+    // kbMktPrice | Long | KB시세
+    // jibunAddr | String | 지번주소
+    // roadAddr | String | 도로명주소
+    // roadAddrRef | String | 도로명주소참고항목
+    // bdMgtSn | String | 건물관리번호
+    // admCd | String | 행정구역코드
+    // rnMgtSn | String | 도로명코드
+    // area | String | 전용면적
+    // isDestruction | boolean | 멸실여부
+    // ownerCnt | Integer | 소유자수
+    // userProportion | Integer | 본인지분비율
+    // moveInRight | boolean | 입주권여부
 
-    await axios
-      .get(url, config)
-      .then(function (result) {
-        setLocation({
-          latitude: Number(result.data.documents[0].y),
-          longitude: Number(result.data.documents[0].x),
-        });
-      })
-      .catch(function (error) {
-        console.log(error);
+    const url = 'http://13.125.194.154:8080/house/modify';
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`
+    };
+
+    const param = {
+      houseId: data?.houseId === undefined ? '' : data?.houseId,
+      houseType: data?.houseType === undefined ? '' : data?.houseType,
+      houseName: data?.houseName === undefined ? '' : data?.houseName,
+      detailAdr: data?.detailAdr === undefined ? '' : data?.detailAdr,
+      contractDate: data?.contractDate === undefined ? '' : data?.contractDate,
+      balanceDate: data?.balanceDate === undefined ? '' : data?.balanceDate,
+      buyDate: data?.buyDate === undefined ? '' : data?.buyDate,
+      moveInDate: data?.moveInDate === undefined ? '' : data?.moveInDate,
+      moveOutDate: data?.moveOutDate === undefined ? '' : data?.moveOutDate,
+      buyPrice: data?.buyPrice === undefined ? '' : data?.buyPrice,
+      pubLandPrice: data?.pubLandPrice === undefined ? '' : data?.pubLandPrice,
+      kbMktPrice: data?.kbMktPrice === undefined ? '' : data?.kbMktPrice,
+      jibunAddr: data?.jibunAddr === undefined ? '' : data?.jibunAddr,
+      roadAddr: data?.roadAddr === undefined ? '' : data?.roadAddr,
+      roadAddrRef: data?.roadAddrRef === undefined ? '' : data?.roadAddrRef,
+      bdMgtSn: data?.bdMgtSn === undefined ? '' : data?.bdMgtSn,
+      admCd: data?.admCd === undefined ? '' : data?.admCd,
+      rnMgtSn: data?.rnMgtSn === undefined ? '' : data?.rnMgtSn,
+      area: data?.area === undefined ? '' : data?.area,
+      isDestruction: data?.destruction === undefined ? '' : data?.destruction,
+      ownerCnt: data?.ownerCnt === undefined ? '' : data?.ownerCnt,
+      userProportion: data?.userProportion === undefined ? '' : data?.userProportion,
+      isMoveInRight: newMoveInRight === undefined ? '' : newMoveInRight,
+    };
+
+    //console.log('[OwnedHouseDetail]headers:', headers);
+    //console.log('[OwnedHouseDetail]param:', param);
+    try {
+      // console.log('before data', data);
+      const response = await axios.put(url, param, { headers: headers });
+      //  console.log('[OwnedHouseDetail]update response:', response);
+      //  console.log('[OwnedHouseDetail]update response.data:', response.data);
+      if (response.data.errYn === 'Y') {
+        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
         SheetManager.show('info', {
           payload: {
-            message: '주소를 찾을 수 없습니다.',
             type: 'error',
+            message: response.data.errMsg,
+            description: response.data.errMsgDtl,
           },
         });
+        return;
+      } else {
+        const p = param;
+        //console.log('after data', param)
+        setData(null);
+        setData(p);
+      }
+    } catch (e) {
+      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
+      // 오류 처리
+      SheetManager.show('info', {
+        payload: {
+          message: '보유주택 수정 중 오류가 발생했습니다.',
+          description: e?.message,
+          type: 'error',
+        },
       });
+      console.log('에러', e);
+    }
+
+
   };
 
+
+  /*const getHouseDirectDetailInfo = async () => {
+    console.log('[OwnedHouseDetail] direct item', item)
+    await getAPTLocation(item?.roadAddr);
+    setData(item);
+    tempMovingInRight = item?.moveInRight;
+    setMovingInRight(tempMovingInRight);
+
+  };*/
+
+  const getHouseDetailInfo = async () => {
+    try {
+      const url = `http://13.125.194.154:8080/house/detail?houseId=${pData?.houseId}`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.accessToken}`,
+      };
+
+      //console.log('[OwnedHouseDetail] getHouseDetailInfo pData:', pData);
+
+      const response = await axios.get(url, { headers });
+      if (response.data.errYn === 'Y') {
+        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: response.data.errMsg,
+            description: response.data.errMsgDtl,
+          },
+        });
+        return;
+
+      } else {
+        const houseDetails = response.data.data;
+        //console.log('houseDetails', houseDetails);
+        await getAPTLocation(houseDetails.roadAddr);
+        setData(houseDetails);
+        //const tempMovingInRight = houseDetails.isMoveInRight;
+        //setMovingInRight(tempMovingInRight);
+
+        //console.log('[OwnedHouseDetail] getHouseDetailInfo tempMovingInRight:', tempMovingInRight);
+        //console.log('[OwnedHouseDetail] getHouseDetailInfo movingInRight:', movingInRight);
+      }
+
+    } catch (error) {
+      // console.error('[OwnedHouseDetail] getHouseDetailInfo Error:', error);
+      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
+      SheetManager.show('info', {
+        payload: {
+          message: '보유주택 상세조회 중 오류가 발생했습니다.',
+          description: error?.message,
+          type: 'error',
+        },
+      });
+    }
+  };
+
+  const getAPTLocation = async (address) => {
+    try {
+      const API_KEY = 'e094e49e35c61a9da896785b6fee020a';
+      const config = {
+        headers: {
+          Authorization: `KakaoAK ${API_KEY}`,
+        },
+      };
+      const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURI(
+        address
+      )}`;
+
+      const response = await axios.get(url, config);
+      const firstDocument = response.data.documents[0];
+      setLocation({
+        latitude: Number(firstDocument.y),
+        longitude: Number(firstDocument.x),
+      });
+    } catch (error) {
+      console.error(error);
+      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
+      SheetManager.show('info', {
+        payload: {
+          message: '주소를 찾을 수 없습니다.',
+          description: error?.message,
+          type: 'error',
+        },
+      });
+    }
+  };
+
+  const updateHouseName = async () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateHouseNameAlert' } }));
+    await SheetManager.show('updateHouseNameAlert', {
+      payload: {
+        navigation,
+        data,
+        prevSheet,
+        handleHouseChange,
+      },
+    });
+
+  };
+
+  const updateHouseType = async () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'chooseHouseTypeAlert' } }));
+    await SheetManager.show('chooseHouseTypeAlert', {
+      payload: {
+        navigation,
+        data,
+        prevSheet,
+        handleHouseChange,
+      },
+    });
+  };
+
+  const updateAddress = async () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateAddressAlert' } }));
+    await SheetManager.show('updateAddressAlert', {
+      payload: {
+        navigation,
+        data,
+        prevSheet,
+        handleHouseChange,
+        getAPTLocation,
+      },
+    });
+
+    // 네트워크 연결 상태를 확인합니다.
+    const networkState = await NetInfo.fetch();
+
+    // 네트워크가 연결되어 있을 때만 updateHouseDetailName() 함수를 실행합니다.
+    if (networkState.isConnected) {
+      await updateHouseDetailName();
+    }
+  };
+  const updateHouseDetailName = async () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateHouseDetailNameAlert' } }));
+    await SheetManager.show('updateHouseDetailNameAlert', {
+      payload: {
+        navigation,
+        data,
+        prevSheet,
+        handleHouseChange,
+      },
+    });
+
+  };
+
+  const updateContractDate = async () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateContractDateAlert' } }));
+    await SheetManager.show('updateContractDateAlert', {
+      payload: {
+        navigation,
+        data,
+        prevSheet,
+        handleHouseChange,
+      },
+    });
+
+  };
+
+  const updateBuyDate = async () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateBuyDateAlert' } }));
+    await SheetManager.show('updateBuyDateAlert', {
+      payload: {
+        navigation,
+        data,
+        prevSheet,
+        handleHouseChange,
+      },
+    });
+
+  };
+  const updateBuyPrice = async () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateBuyPriceAlert' } }));
+    await SheetManager.show('updateBuyPriceAlert', {
+      payload: {
+        navigation,
+        data,
+        prevSheet,
+        handleHouseChange,
+      },
+    });
+
+  };
+
+
+  /*
+    const updateBalanceDate = async () => {
+      await SheetManager.show('updateBalanceDateAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+  
+  
+    };
+  
+    const updateMoveInDate = async () => {
+      await SheetManager.show('updateMoveInDateAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+  
+    };
+  
+    const updateMoveOutDate = async () => {
+      await SheetManager.show('updateMoveOutDateAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+    };
+  
+  */
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
+            //  console.log('초기 data', data)
+            if ((data?.houseType === '' || data?.houseType === null || data?.houseType === undefined)) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'info',
+                  message: '주택유형을 입력해 주세요.',
+                },
+              }); return;
+            }
+            else if ((data?.roadAddr === '' || data?.roadAddr === null || data?.roadAddr === undefined)) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'info',
+                  message: '주소를 검색해 주세요.',
+                },
+              }); return;
+            }
+            else if ((data?.detailAdr === '' || data?.detailAdr === null || data?.detailAdr === undefined)) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'info',
+                  message: '상세주소를 입력해 주세요.',
+                },
+              }); return;
+            }
+            else if ((data?.jibunAddr === '' || data?.jibunAddr === null || data?.jibunAddr === undefined)) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'info',
+                  message: '지번주소가 없어요.\n주소를 다시 검색해 주세요.',
+                },
+              }); return;
+            }
+            else if ((data?.roadAddr === '' || data?.roadAddr === null || data?.roadAddr === undefined)) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'info',
+                  message: '도로명주소가 없어요.\n주소를 다시 검색해 주세요.',
+                },
+              }); return;
+            }
+            else if ((data?.bdMgtSn === '' || data?.bdMgtSn === null || data?.bdMgtSn === undefined)) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'info',
+                  message: '건물관리번호가 없어요.\n주소를 다시 검색해 주세요.',
+                },
+              }); return;
+            }
+            else if ((props.route.params?.prevSheet == 'own2') && (data?.contractDate === '' || data?.contractDate === null || data?.contractDate === undefined)) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'info',
+                  message: '계약일자를 입력해 주세요.',
+                },
+              }); return;
+            }
+            else if ((props.route.params?.prevSheet == 'own2') && (data?.buyDate === '' || data?.buyDate === null || data?.buyDate === undefined)) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'info',
+                  message: '취득일자를 입력해 주세요.',
+                },
+              }); return;
+            }
+            else if ((props.route.params?.prevSheet == 'own2') && (data?.buyPrice === '' || data?.buyPrice === null || data?.buyPrice === undefined || data?.buyPrice === undefined || data?.buyPrice === 0)) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'info',
+                  message: '취득금액을 입력해 주세요.',
+                },
+              }); return;
+            }
+            if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
+              dispatch(editOwnHouseList({ isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
+            }
+
             navigation.goBack();
             if (!props.route.params?.prevSheet) return;
-            console.log(props.route.params?.prevSheet);
+            //console.log(props.route.params?.prevSheet);
+
+            let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+            dispatch(setModalList({ ...modalList, [Modalindex]: { modal: props.route.params?.prevSheet, index: props.route.params?.index } }));
             SheetManager.show(props.route.params?.prevSheet, {
               payload: {
                 navigation,
+                index: props.route.params.index
               },
             });
           }}>
@@ -238,8 +707,10 @@ const OwnedHouseDetail = props => {
       headerRight: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
+            let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+            dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'delete' } }));
             SheetManager.show('delete', {
               payload: {
                 title: '주택 삭제',
@@ -247,10 +718,12 @@ const OwnedHouseDetail = props => {
                 content: '주택을 삭제하시겠습니까?',
                 confirmText: '삭제',
                 cancelText: '취소',
-                item,
+                item: item,
                 prevSheet,
+                index: props.route.params.index,
               },
             });
+
           }}>
           <Text
             style={{
@@ -276,20 +749,98 @@ const OwnedHouseDetail = props => {
         letterSpacing: -0.8,
       },
     });
-  }, [props.route.params?.prevSheet]);
+  }, [props.route.params?.prevSheet, data]);
 
   useEffect(() => {
     // 하드웨어 백 버튼 핸들러 정의
     const handleBackPress = () => {
-      navigation.goBack();
-      if (props.route.params?.prevSheet) {
-        SheetManager.show(props.route.params.prevSheet, {
+      if ((data?.houseType === '' || data?.houseType === null || data?.houseType === undefined)) {
+        SheetManager.show('info', {
           payload: {
-            navigation,
+            type: 'info',
+            message: '주택유형을 입력해 주세요.',
           },
-        });
+        }); return true;
       }
-      return true; // 이벤트를 여기서 처리했음을 나타냄
+      else if ((data?.roadAddr === '' || data?.roadAddr === null || data?.roadAddr === undefined)) {
+        SheetManager.show('info', {
+          payload: {
+            type: 'info',
+            message: '주소를 검색해 주세요.',
+          },
+        }); return true;
+      }
+      else if ((data?.detailAdr === '' || data?.detailAdr === null || data?.detailAdr === undefined)) {
+        SheetManager.show('info', {
+          payload: {
+            type: 'info',
+            message: '상세주소를 입력해 주세요.',
+          },
+        }); return true;
+      }
+      else if ((data?.jibunAddr === '' || data?.jibunAddr === null || data?.jibunAddr === undefined)) {
+        SheetManager.show('info', {
+          payload: {
+            type: 'info',
+            message: '지번주소가 없어요.\n주소를 다시 검색해 주세요.',
+          },
+        }); return true;
+      }
+      else if ((data?.roadAddr === '' || data?.roadAddr === null || data?.roadAddr === undefined)) {
+        SheetManager.show('info', {
+          payload: {
+            type: 'info',
+            message: '도로명주소가 없어요.\n주소를 다시 검색해 주세요.',
+          },
+        }); return true;
+      }
+      else if ((data?.bdMgtSn === '' || data?.bdMgtSn === null || data?.bdMgtSn === undefined)) {
+        SheetManager.show('info', {
+          payload: {
+            type: 'info',
+            message: '건물관리번호가 없어요.\n주소를 다시 검색해 주세요.',
+          },
+        }); return true;
+      }
+      else if ((props.route.params?.prevSheet == 'own2') && (data?.contractDate === '' || data?.contractDate === null || data?.contractDate === undefined)) {
+        SheetManager.show('info', {
+          payload: {
+            type: 'info',
+            message: '계약일자를 입력해 주세요.',
+          },
+        }); return true;
+      }
+      else if ((props.route.params?.prevSheet == 'own2') && (data?.buyDate === '' || data?.buyDate === null || data?.buyDate === undefined)) {
+        SheetManager.show('info', {
+          payload: {
+            type: 'info',
+            message: '취득일자를 입력해 주세요.',
+          },
+        }); return true;
+      }
+      else if ((props.route.params?.prevSheet == 'own2') && (data?.buyPrice === '' || data?.buyPrice === null || data?.buyPrice === undefined || data?.buyPrice === undefined || data?.buyPrice === 0)) {
+        SheetManager.show('info', {
+          payload: {
+            type: 'info',
+            message: '취득금액을 입력해 주세요.',
+          },
+        }); return true;
+      }
+      if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
+        dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
+      }
+      navigation.goBack();
+      if (!props.route.params?.prevSheet) return true;
+      //console.log(props.route.params?.prevSheet);
+      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: props.route.params?.prevSheet, index: props.route.params?.index } }));
+      SheetManager.show(props.route.params?.prevSheet, {
+        payload: {
+          navigation,
+          index: props.route.params.index
+        },
+      });
+      return true;
     };
 
     // 이벤트 리스너 추가
@@ -299,7 +850,11 @@ const OwnedHouseDetail = props => {
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
     };
-  }, [navigation, props.route.params]); // 의존성 배열에 navigation과 params 추가
+  }, [navigation, props.route.params, data]); // 의존성 배열에 navigation과 params 추가
+
+
+
+
 
   return (
     <Container>
@@ -313,15 +868,15 @@ const OwnedHouseDetail = props => {
               <HoustInfoBadge
                 style={{
                   backgroundColor: HOUSE_TYPE.find(
-                    color => color.id === item.houseType,
+                    color => color.id === (data?.houseType === undefined ? pData?.houseType : data?.houseType),
                   ).color,
                 }}>
                 <HoustInfoBadgeText>
-                  {HOUSE_TYPE.find(color => color.id === item.houseType).name}
+                  {HOUSE_TYPE.find(color => color.id === (data?.houseType === undefined ? pData?.houseType : data?.houseType)).name}
                 </HoustInfoBadgeText>
               </HoustInfoBadge>
               <HoustInfoTitle>{data?.houseName}</HoustInfoTitle>
-              <HoustInfoText>{data?.houseDetailName}</HoustInfoText>
+              <HoustInfoText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'left' }}>{data?.detailAdr}</HoustInfoText>
             </HoustInfoSection>
             <MapContainer>
               <NaverMapView
@@ -332,9 +887,10 @@ const OwnedHouseDetail = props => {
                   borderRadius: 20,
                 }}
                 showsMyLocationButton={false}
-                center={{...location, zoom: 16}}
+                center={{ ...location, zoom: 16 }}
                 zoomControl={false}
                 rotateGesturesEnabled={false}
+                closeOnPressBack={false}
                 scrollGesturesEnabled={false}
                 pitchEnabled={false}
                 zoomEnabled={false}
@@ -372,50 +928,204 @@ const OwnedHouseDetail = props => {
           </HouseSection>
           <InfoContentSection>
             <InfoContentItem>
+              <InfoContentLabel>주택명</InfoContentLabel>
+              <InfoContentText>
+                {data?.houseName ? data?.houseName : ''}
+              </InfoContentText>
+              <TouchableOpacity
+                activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  updateHouseName();
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
+            </InfoContentItem>
+            <InfoContentItem>
+              <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>
               <InfoContentLabel>주택유형</InfoContentLabel>
               <InfoContentText>
-                {HOUSE_TYPE.find(color => color.id === item.houseType).name}
+                {HOUSE_TYPE.find(color => color.id === (data?.houseType === undefined ? pData?.houseType : data?.houseType)).name}
               </InfoContentText>
+              <TouchableOpacity
+                activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  updateHouseType();
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
             </InfoContentItem>
             <InfoContentItem>
-              <InfoContentLabel>주소</InfoContentLabel>
-              <InfoContentText>{data?.roadnmAdr}</InfoContentText>
+              <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>
+              <InfoContentLabel>주소      </InfoContentLabel>
+              <InfoContentText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{data?.roadAddr}</InfoContentText>
+              <TouchableOpacity activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  updateAddress();
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
             </InfoContentItem>
             <InfoContentItem>
+              <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>
               <InfoContentLabel>상세주소</InfoContentLabel>
-              <InfoContentText>{data?.detailAdr}</InfoContentText>
+              <InfoContentText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{data?.detailAdr}</InfoContentText>
+              <TouchableOpacity activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  updateHouseDetailName();
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
             </InfoContentItem>
+
             <InfoContentItem>
-              <InfoContentLabel>동호수</InfoContentLabel>
-              <InfoContentText>{data?.houseDetailName}</InfoContentText>
-            </InfoContentItem>
-            <InfoContentItem>
-              <InfoContentLabel>공시지가</InfoContentLabel>
+              <InfoContentLabel>공시가격</InfoContentLabel>
               <InfoContentText>
-                {Number(data?.pubLandPrice)?.toLocaleString()} 원
+                {data?.pubLandPrice ? numberToKorean(Number(data?.pubLandPrice)?.toString()) + '원' : (data?.isPubLandPriceOver100Mil === true ? '1억원 초과' : data?.isPubLandPriceOver100Mil === undefined ? '' : '1억원 이하')}
               </InfoContentText>
+              <TouchableOpacity activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                  dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updatePubLandPriceAlert' } }));
+                  SheetManager.show('updatePubLandPriceAlert', {
+                    payload: {
+                      navigation,
+                      data,
+                      prevSheet,
+                      handleHouseChange,
+                    },
+                  });
+                  // console.log('after data', data);
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
             </InfoContentItem>
             <InfoContentItem>
-              <InfoContentLabel>KB시세</InfoContentLabel>
-              <InfoContentText>
-                {Number(data?.kbMktPrice)?.toLocaleString()} 원
-              </InfoContentText>
+              {(prevSheet === 'own2') && <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>}
+              <InfoContentLabel>계약일자</InfoContentLabel>
+              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{data?.contractDate ? dayjs(data?.contractDate).format(
+                'YYYY년 MM월 DD일',
+              ) : ''}</InfoContentText>
+              <TouchableOpacity activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  updateContractDate();
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
             </InfoContentItem>
             <InfoContentItem>
-              <InfoContentLabel>전용면적</InfoContentLabel>
+              <InfoContentLabel>계약면적</InfoContentLabel>
               <View
                 style={{
                   marginLeft: 'auto',
                 }}>
-                <InfoContentText>{data?.areaPyung}평형</InfoContentText>
-                <InfoContentText
-                  style={{
-                    fontSize: 10,
-                    color: '#A3A5A8',
-                  }}>
-                  {data?.areaMeter}m2
+                <InfoContentText>
+                  {data?.area ? data?.area + 'm2' : (data?.isAreaOver85 === true ? '국민평형(85m2) 초과' : data?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}
                 </InfoContentText>
               </View>
+              <TouchableOpacity activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                  dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateAreaMeterAlert' } }));
+                  SheetManager.show('updateAreaMeterAlert', {
+                    payload: {
+                      navigation,
+                      data,
+                      prevSheet,
+                      handleHouseChange,
+                    },
+                  });
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
+            </InfoContentItem>
+            <InfoContentItem>
+              {(prevSheet === 'own2') && <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>}
+              <InfoContentLabel>취득일자</InfoContentLabel>
+              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{data?.buyDate ? dayjs(data?.buyDate).format(
+                'YYYY년 MM월 DD일',
+              ) : ''}</InfoContentText>
+              <TouchableOpacity activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  updateBuyDate();
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
+            </InfoContentItem>
+            <InfoContentItem>
+              {(prevSheet === 'own2') && <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>}
+              <InfoContentLabel>취득금액</InfoContentLabel>
+              <InfoContentText>
+                {data?.buyPrice ? numberToKorean(Number(data?.buyPrice)?.toString()) + '원' : ''}
+              </InfoContentText>
+              <TouchableOpacity activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  updateBuyPrice();
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
             </InfoContentItem>
           </InfoContentSection>
           <InputSection>
@@ -424,7 +1134,7 @@ const OwnedHouseDetail = props => {
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  marginBottom: 10,
+                  marginBottom: 20,
                   justifyContent: 'space-between',
                 }}>
                 <Label
@@ -433,15 +1143,30 @@ const OwnedHouseDetail = props => {
                   }}>
                   소유자
                 </Label>
+                <TouchableOpacity activeOpacity={0.6}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  onPress={() => {
+                    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateUserProportionAlert' } }));
+                    SheetManager.show('updateUserProportionAlert', {
+                      payload: {
+                        navigation,
+                        data,
+                        prevSheet,
+                        handleHouseChange,
+                      },
+                    });
+                  }}>
+                  <EditGreyIcon></EditGreyIcon>
+                </TouchableOpacity>
               </View>
-
               <InfoContentItem>
                 <InfoContentLabel
                   style={{
                     color: '#1B1C1F',
-                    fontSize: getFontSize(14),
+                    fontSize: getFontSize(13),
                   }}>
-                  본인
+                  소유자1
                 </InfoContentLabel>
                 <InfoContentText>
                   {Number(data?.ownerCnt) > 1 && (
@@ -458,51 +1183,71 @@ const OwnedHouseDetail = props => {
               {Number(data?.ownerCnt) > 1 &&
                 new Array(Number(data?.ownerCnt) - 1)
                   .fill(0)
-                  .map((item, index) => (
-                    <InfoContentItem>
-                      <InfoContentLabel
-                        style={{
-                          color: '#1B1C1F',
-                          fontSize: getFontSize(14),
-                        }}>
-                        소유자{index + 1}
-                      </InfoContentLabel>
-                      <InfoContentText>
-                        <Text
+                  .map((data, index) => (
+                    <View key={index}>
+                      <InfoContentItem>
+                        <InfoContentLabel
                           style={{
-                            color: '#B5283B',
+                            color: '#1B1C1F',
+                            fontSize: getFontSize(13),
                           }}>
-                          공동명의{'  '}
-                        </Text>
-                        {data[`owner${index + 1}Proportion`]}%
-                      </InfoContentText>
-                    </InfoContentItem>
-                  ))}
+                          소유자{(index + 1) + 1}
+                        </InfoContentLabel>
+                        <InfoContentText>
+                          <Text
+                            style={{
+                              color: '#B5283B',
+                            }}>
+                            공동명의{'  '}
+                          </Text>
+                          {50}%
+                        </InfoContentText>
+                      </InfoContentItem>
+                      <InfoContentItem style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                        <Text style={{
+                          color: '#A3A5A8',
+                          fontSize: getFontSize(13),
+                        }}>최대 2명까지만 등록이 가능해요</Text>
+                      </InfoContentItem>
+                    </View>
+                  ))
+              }
             </Paper>
             <InfoContentItem>
               <InfoContentLabel>입주권 여부</InfoContentLabel>
               <Switch
+
                 width={50}
                 height={28}
-                value={movingInRight}
+                value={data?.isMoveInRight}
                 circleStyle={{
                   width: 20,
                   height: 20,
                   borderRadius: 12,
                   backgroundColor: '#fff',
                 }}
-                onValueChange={isSwitchOn => {
-                  setMovingInRight(isSwitchOn);
+
+                onValueChange={(Yn) => {
+                  if (Yn === undefined) {
+                    handleHouseChange(data, data?.isMoveInRight);
+                  } else {
+                    handleHouseChange(data, Yn);
+                  }
                 }}
+
                 activeColor="#2F87FF"
                 disabledColor="#E8EAED"
+
               />
             </InfoContentItem>
           </InputSection>
         </>
       </KeyboardAwareScrollView>
-    </Container>
+    </Container >
   );
 };
 
-export default OwnedHouseDetail;
+export default React.memo(OwnedHouseDetail);

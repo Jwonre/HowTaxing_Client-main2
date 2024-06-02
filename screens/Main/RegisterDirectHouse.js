@@ -8,24 +8,27 @@ import {
   ScrollView,
   BackHandler,
 } from 'react-native';
-import React, {useEffect, useState, useLayoutEffect, useRef} from 'react';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import DropShadow from 'react-native-drop-shadow';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Switch from 'react-native-draggable-switch';
+import axios from 'axios';
+import getFontSize from '../../utils/getFontSize';
+import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
 
 // Icons
 import BuildingIcon1 from '../../assets/icons/house/building_type1_ico.svg';
-import BuildingIcon2 from '../../assets/icons/house/building_type2_ico.svg';
 import HouseIcon from '../../assets/icons/house/house.svg';
 import VillaIcon from '../../assets/icons/house/villa.svg';
 import SearchIcon from '../../assets/icons/search_ico.svg';
 import KeyIcon from '../../assets/images/family_key.svg';
-import {useDispatch, useSelector} from 'react-redux';
-import {SheetManager} from 'react-native-actions-sheet';
-import {setOwnHouseList} from '../../redux/ownHouseListSlice';
-import {setDirectRegister} from '../../redux/directRegisterSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { SheetManager } from 'react-native-actions-sheet';
+import { setOwnHouseList } from '../../redux/ownHouseListSlice';
+import { setDirectRegister } from '../../redux/directRegisterSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -155,37 +158,105 @@ const SelectButtonText = styled.Text`
   margin-top: 8px;
 `;
 
+const InfoContentItem = styled.View`
+  width: 100%;
+  height: 56px;
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 0 18px;
+  margin-bottom: 10px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-width: 1px;
+  border-color: #e8eaed;
+`;
+
+const InfoContentLabel = styled.Text`
+  font-size: ${getFontSize(12)}px;
+  font-family: Pretendard-Regular;
+  color: #97989a;
+  line-height: 20px;
+  letter-spacing: -0.3px;
+`;
+
+
+
+
+
+
 const RegisterDirectHouse = props => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const addressInputRef = useRef(null);
   const addressDetailInputRef = useRef(null);
   const [selectedHouseType, setSelectedHouseType] = useState('1');
-
-  const [data, setData] = useState(null);
-  const ownHouseList = useSelector(state => state.ownHouseList.value);
+  const [isMoveInRight, setIsMoveInRight] = useState(false);
+  const modalList = useSelector(state => state.modalList.value);
   const currentUser = useSelector(state => state.currentUser.value);
   const [prevChat, setPrevChat] = useState(null);
   const [prevSheet, setPrevSheet] = useState(null);
-  const {houseName, address, addressDetail} = useSelector(
+  const directRegister = useSelector(
     state => state.directRegister.value,
   );
+
+
+  const getOwnlist = async () => {
+    var prevSheetNum = '';
+    if (prevSheet === 'gainsTax') {
+      prevSheetNum = '02';
+    } else {
+      prevSheetNum = '01';
+    }
+    const url = `http://13.125.194.154:8080/house/list?calcType=${prevSheetNum}`
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`
+    };
+    await axios
+      .get(url, { headers: headers })
+      .then(response => {
+        const result = response.data;
+        const list = result.data.list === undefined ? null : result.data.list;
+        if (result.isError) {
+          Alert.alert('검색 결과가 없습니다.');
+          return;
+        }
+        dispatch(
+          setOwnHouseList([
+            ...list,
+          ]),
+        );
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
+            /*         if (props.route.params?.prevSheet) {
+                       SheetManager.show(props.route.params.prevSheet, {
+                         payload: {
+                           navigation,
+                           index: props.route.params.index
+                         },
+                       });
+                     }*/
             dispatch(
               setDirectRegister({
                 houseName: '',
                 address: '',
                 addressDetail: '',
+                bdMgtSn: '',
               }),
             );
           }}>
@@ -220,11 +291,20 @@ const RegisterDirectHouse = props => {
     // 하드웨어 백 버튼 핸들러 정의
     const handleBackPress = () => {
       navigation.goBack();
+      /*    if (props.route.params?.prevSheet) {
+            SheetManager.show(props.route.params.prevSheet, {
+              payload: {
+                navigation,
+                index: props.route.params.index
+              },
+            });
+          }*/
       dispatch(
         setDirectRegister({
           houseName: '',
           address: '',
           addressDetail: '',
+          bdMgtSn: '',
         }),
       );
       return true;
@@ -255,12 +335,110 @@ const RegisterDirectHouse = props => {
       name: '연립 · 다세대',
       icon: <VillaIcon />,
     },
-    {
-      id: '3',
-      name: '입주권',
-      icon: <BuildingIcon2 />,
-    },
   ];
+
+  const successRegister = async () => {
+    await getOwnlist();
+
+    navigation.navigate(prevChat);
+    setTimeout(() => {
+      
+      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: props.route.params?.prevSheet, index: props.route.params?.index } }));
+      SheetManager.show(
+        prevSheet ? prevSheet : props.route.params?.prevSheet,
+        {
+          payload: {
+            navigation,
+            index: props.route.params?.index,
+          },
+        },
+      );
+    }, 300);
+    dispatch(
+      setDirectRegister({
+        houseName: '',
+        address: '',
+        addressDetail: '',
+        bdMgtSn: '',
+      }),
+    );
+  };
+
+  const registerDirectHouse = async () => {
+
+    const accessToken = currentUser.accessToken;
+    // 요청 헤더
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`
+    };
+
+    // 요청 바디
+    const data = {
+      // houseType | String | 주택유형
+      // houseName | String | 주택명
+      // detailAdr | String | 상세주소
+      // jibunAddr | String | 지번주소
+      // roadAddr | String | 도로명주소
+      // roadAddrRef | String | 도로명주소참고항목
+      // bdMgtSn | String | 건물관리번호
+      // admCd | String | 행정구역코드
+      // rnMgtSn | String | 도로명코드
+      houseType: HOUSE_TYPE.find(
+        el => el.id === selectedHouseType,
+      ).id,
+      houseName: directRegister.houseName,
+      detailAdr: directRegister.addressDetail,
+      jibunAddr: directRegister.jibunAddr,
+      roadAddr: directRegister.address,
+      roadAddrRef: '',
+      bdMgtSn: directRegister.bdMgtSn,
+      admCd: directRegister.admCd,
+      rnMgtSn: directRegister.rnMgtSn,
+
+      //입주권여부
+      isMoveInRight: isMoveInRight,
+    };
+    //successRegister();
+
+    axios
+      .post('http://13.125.194.154:8080/house/regist', data, { headers: headers })
+      .then(async response => {
+        if (response.data.errYn === 'Y') {
+          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+          dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info'} }));
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg,
+              description: response.data.errMsgDtl,
+            },
+          });
+          return;
+
+        } else {
+          await successRegister();
+        }
+        // 성공적인 응답 처리
+        // const { id } = response.data;
+
+
+      })
+      .catch(error => {
+        // 오류 처리
+        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info'} }));
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: '보유주택 등록 중 오류가 발생했습니다.',
+          },
+        });
+        console.error(error);
+      });
+
+  };
 
   return (
     <Container>
@@ -325,13 +503,14 @@ const RegisterDirectHouse = props => {
                     fontSize: 13,
                     color: '#1B1C1F',
                   }}
-                  value={address}
+                  value={directRegister.address}
                   onChangeText={text => {
                     dispatch(
                       setDirectRegister({
-                        houseName,
+                        ...directRegister,
+                        houseName: directRegister.houseName,
                         address: text,
-                        addressDetail,
+                        addressDetail: directRegister.addressDetail,
                       }),
                     );
                   }}
@@ -344,23 +523,29 @@ const RegisterDirectHouse = props => {
                     addressDetailInputRef.current.focus();
                   }}
                   onFocus={() => {
-                    console.log('focus', selectedHouseType);
+                    //  console.log('focus', selectedHouseType);
                     if (selectedHouseType === '1') {
-                      SheetManager.show('mapViewList2', {
-                        payload: {
-                          prevScreen: 'RegisterDirectHouse',
-                          prevChat: props.route.params?.prevChat,
-                          prevSheet: props.route.params?.prevSheet,
-                          navigation: navigation,
-                        },
-                      });
-                    } else {
+                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'searchHouse2'} }));
                       SheetManager.show('searchHouse2', {
                         payload: {
                           prevScreen: 'RegisterDirectHouse',
                           prevChat: props.route.params?.prevChat,
                           prevSheet: props.route.params?.prevSheet,
                           navigation: navigation,
+                          index: props.route.params?.index,
+                        },
+                      });
+                    } else {
+                        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'searchHouse2'} }));
+                      SheetManager.show('searchHouse2', {
+                        payload: {
+                          prevScreen: 'RegisterDirectHouse',
+                          prevChat: props.route.params?.prevChat,
+                          prevSheet: props.route.params?.prevSheet,
+                          navigation: navigation,
+                          index: props.route.params?.index,
                         },
                       });
                     }
@@ -375,7 +560,7 @@ const RegisterDirectHouse = props => {
                     right: 20,
                   }}
                   onPress={() => {
-                    if (selectedHouseType === '1') {
+                    /*if (selectedHouseType === '1') {
                       SheetManager.show('mapViewList2', {
                         payload: {
                           prevScreen: 'RegisterDirectHouse',
@@ -384,13 +569,17 @@ const RegisterDirectHouse = props => {
                           navigation: navigation,
                         },
                       });
-                    } else {
+                    } else */
+                    {
+                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'searchHouse2'} }));
                       SheetManager.show('searchHouse2', {
                         payload: {
                           prevScreen: 'RegisterDirectHouse',
                           prevChat: props.route.params?.prevChat,
                           prevSheet: props.route.params?.prevSheet,
                           navigation: navigation,
+                          index: props.route.params?.index,
                         },
                       });
                     }
@@ -414,12 +603,13 @@ const RegisterDirectHouse = props => {
                     fontSize: 13,
                     color: '#1B1C1F',
                   }}
-                  value={addressDetail}
+                  value={directRegister.addressDetail}
                   onChangeText={text => {
                     dispatch(
                       setDirectRegister({
-                        houseName,
-                        address,
+                        ...directRegister,
+                        houseName: directRegister.houseName,
+                        address: directRegister.address,
                         addressDetail: text,
                       }),
                     );
@@ -432,6 +622,27 @@ const RegisterDirectHouse = props => {
                 />
               </InputContainer>
             </Paper>
+            <InfoContentItem>
+              <InfoContentLabel>입주권 여부</InfoContentLabel>
+
+              <Switch
+                width={50}
+                height={28}
+                value={isMoveInRight}
+                circleStyle={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: 12,
+                  backgroundColor: '#fff',
+                }}
+                onValueChange={isSwitchOn => {
+                  setIsMoveInRight(isSwitchOn);
+                  // console.log('directRegister', directRegister);
+                }}
+                activeColor="#2F87FF"
+                disabledColor="#E8EAED"
+              />
+            </InfoContentItem>
           </InputSection>
           <DropShadow
             style={{
@@ -444,46 +655,13 @@ const RegisterDirectHouse = props => {
               shadowRadius: 4,
             }}>
             <Button
-              active={selectedHouseType && address && addressDetail}
+              disabled={!selectedHouseType || !directRegister.address || !directRegister.addressDetail}
+              active={selectedHouseType && directRegister.address && directRegister.addressDetail}
               width={width}
-              onPress={async () => {
-                await dispatch(
-                  setOwnHouseList([
-                    ...ownHouseList,
-                    {
-                      houseId: '222',
-                      userId: currentUser?.userId,
-                      houseType: HOUSE_TYPE.find(
-                        el => el.id === selectedHouseType,
-                      ).id,
-                      houseName: houseName,
-                      houseDetailName: addressDetail,
-                    },
-                  ]),
-                );
-
-                navigation.navigate(prevChat);
-                setTimeout(() => {
-                  SheetManager.show(
-                    prevSheet ? prevSheet : props.route.params?.prevSheet,
-                    {
-                      payload: {
-                        navigation,
-                      },
-                    },
-                  );
-                }, 300);
-                dispatch(
-                  setDirectRegister({
-                    houseName: '',
-                    address: '',
-                    addressDetail: '',
-                  }),
-                );
-              }}>
+              onPress={registerDirectHouse}>
               <ButtonText
-                disabled={!selectedHouseType || !address || !addressDetail}
-                active={selectedHouseType && address && addressDetail}>
+                disabled={!selectedHouseType || !directRegister.address || !directRegister.addressDetail}
+                active={selectedHouseType && directRegister.address && directRegister.addressDetail}>
                 등록하기
               </ButtonText>
             </Button>

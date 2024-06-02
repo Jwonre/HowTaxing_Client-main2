@@ -1,14 +1,19 @@
 // 정보 또는 경고 알림창 컴포넌트
 
-import {useWindowDimensions, Pressable} from 'react-native';
-import React, {useRef, useState} from 'react';
+import { useWindowDimensions, Pressable, ActivityIndicator, ScrollView, Linking } from 'react-native';
+import React, { useRef, useState } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
 import InfoCircleIcon from '../../assets/icons/info_circle.svg';
+import { setCurrentUser } from '../../redux/currentUserSlice';
+import { View } from 'react-native-animatable';
+import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
+
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -25,15 +30,21 @@ const ModalTitle = styled.Text`
   line-height: 26px;
   text-align: center;
   margin-top: 20px;
+  margin-Bottom: 15px;
 `;
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: ${getFontSize(12)}px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
-  line-height: 26px;
-  margin-top: 10px;
-  text-align: center;
+  line-height: 15px;
+  text-align: left;
+  padding: 20px;
+  background-color: #F5F7FA;
+  border-radius: 5px;
+  border-color: #F5F7FA;
+  border-width: 60px;
+
 `;
 
 const ModalContentSection = styled.View`
@@ -52,6 +63,34 @@ const ModalHeader = styled.View`
   align-items: center;
   justify-content: flex-end;
   padding: 0px 20px;
+`;
+
+const KakaoButton = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.8,
+}))`
+  flex-direction: row;
+  width: 90%;
+  height: 50px;
+  border-radius: 25px;
+  background-color: #fbe54d;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+`;
+
+const KakaoButtonText = styled.Text`
+  font-size: 15px;
+  font-family: Pretendard-Regular;
+  color: #3b1f1e;
+  line-height: 20px;
+`;
+
+const SocialButtonIcon = styled.Image.attrs(props => ({
+  resizeMode: 'contain',
+}))`
+  width: 22px;
+  height: 20px;
+  margin-right: 16px;
 `;
 
 const ButtonSection = styled.View`
@@ -84,12 +123,26 @@ const ButtonText = styled.Text`
   line-height: 20px;
 `;
 
+
 const InfoAlert = props => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const actionSheetRef = useRef(null);
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const [errorMessage, setErrorMessage] = useState('');
-  console.log('props', props);
+  const [buttonText, setButtonText] = useState('자세히');
+  const modalList = useSelector(state => state.modalList.value);
+  //console.log('[InfoAlert] props', props);
+
+  const toggleText = () => {
+    if (buttonText === '자세히') {
+      setButtonText('간단히');
+      setErrorMessage(props?.payload?.description); // 에러 메시지 설정
+    } else {
+      setButtonText('자세히');
+      setErrorMessage(''); // 에러 메시지 제거
+    }
+  };
 
   return (
     <ActionSheet
@@ -97,79 +150,209 @@ const InfoAlert = props => {
       headerAlwaysVisible
       CustomHeaderComponent={
         <ModalHeader>
-          <Pressable
+          {(props?.payload?.id !== 'WaitingCert') && <Pressable
             hitSlop={20}
             onPress={() => {
               actionSheetRef.current?.hide();
+              if (props?.payload?.closemodal === true) {
+                props?.payload?.actionSheetRef.current?.hide();
+              } else if (props?.payload?.closeSheet === true) {
+                props?.payload?.navigation.goBack();
+              }
+              if (props?.payload?.networkisConnected === false) {
+                if(props?.payload?.CheckTerms === true){
+                  navigation.navigate('Login')
+                }
+              }
+              dispatch(removeLastModalList());
             }}>
             <CloseIcon width={16} height={16} />
-          </Pressable>
+          </Pressable>}
         </ModalHeader>
       }
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
+      closeOnPressBack={props?.payload?.id === 'WaitingCert' ? false : true}
+      closeOnTouchBackdrop={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: errorMessage ? 310 : 280,
-        width: width - 40,
+        height: errorMessage ? (props?.payload?.id === 'calculation' ? 450 : 410) : props?.payload?.id === 'WaitingCert' ? 250 : props?.payload?.type === 'error' ? (props?.payload?.id === 'calculation' ? 350 : 300) : 300,
+        width: width - 40
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
-          <InfoCircleIcon
+          {(props?.payload?.id !== 'WaitingCert') && <InfoCircleIcon
             style={{
-              color: props?.payload?.type === 'info' ? '#2F87FF' : '#FF7401',
+              color: props?.payload?.type === 'error' ? '#FF7401' : '#2F87FF',
             }}
-          />
+          />}
+
+          {(props?.payload?.id === 'WaitingCert') && <View
+            style={{
+              //height: height + 100,
+              alignItems: 'center',
+            }}>
+            <ActivityIndicator
+              size={60}
+              color="#A2C62B"
+              animating
+              style={{ marginTop: -5 }}
+            />
+          </View>}
           <ModalTitle>{props?.payload?.message}</ModalTitle>
-          {errorMessage && <ModalDescription>{errorMessage}</ModalDescription>}
+          {errorMessage && <ScrollView style={{ marginHorizontal: 20, maxHeight: 120 }}
+            showsVerticalScrollIndicator={false}><ModalDescription>{errorMessage}</ModalDescription></ScrollView>}
         </ModalContentSection>
 
+
         <ButtonSection>
-          {props?.payload?.type === 'error' && (
-            <Button
-              onPress={() => {
-                setErrorMessage(props?.payload?.description);
-              }}
-              style={{
-                width: 130,
-                backgroundColor: '#fff',
-                borderColor: '#E8EAED',
-                marginRight: 10,
-              }}>
-              <ButtonText
-                style={{
-                  color: '#717274',
-                }}>
-                자세히
-              </ButtonText>
-            </Button>
-          )}
-          <DropShadow
+          {(props?.payload?.type == 'info' || props?.payload?.type == 'error') && (<View
             style={{
-              shadowColor: 'rgba(0,0,0,0.25)',
-              shadowOffset: {
-                width: 0,
-                height: 4,
-              },
-              shadowOpacity: 0.15,
-              shadowRadius: 2,
-              alignSelf: 'center',
-              width: 130,
-            }}>
-            <Button
-              onPress={() => {
-                actionSheetRef.current?.hide();
-              }}>
-              <ButtonText>확인하기</ButtonText>
-            </Button>
-          </DropShadow>
+              width: '90%',
+              flexDirection: 'column',
+              alignContent: 'center'
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignContent: 'center'
+              }}
+            >
+              {(props?.payload?.type === 'error' && props?.payload?.description) && (
+                <Button
+                  onPress={() => {
+                    toggleText();
+                  }}
+                  style={{
+                    width: 130,
+                    backgroundColor: '#fff',
+                    borderColor: '#E8EAED',
+                    marginRight: 10,
+                  }}
+                >
+                  <ButtonText
+                    style={{
+                      color: '#717274',
+                    }}
+                  >
+                    {buttonText}
+                  </ButtonText>
+                </Button>
+
+              )}
+
+
+
+              <DropShadow
+                style={{
+                  shadowColor: 'rgba(0,0,0,0.25)',
+                  shadowOffset: {
+                    width: 0,
+                    height: 4,
+                  },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 2,
+                  alignSelf: 'center',
+                  width: 130,
+                }}>
+                <Button
+                  onPress={() => {
+                    actionSheetRef.current?.hide();
+                    if (props?.payload?.closemodal === true) {
+                      props?.payload?.actionSheetRef.current?.hide();
+                    } else if (props?.payload?.closeSheet === true) {
+                      props?.payload?.navigation.goBack();
+                    }
+                    if (props?.payload?.networkisConnected === false) {
+                      if(props?.payload?.CheckTerms === true){
+                        navigation.navigate('Login')
+                      }
+                    }
+                    dispatch(removeLastModalList());
+                  }}>
+                  <ButtonText>확인하기</ButtonText>
+                </Button>
+              </DropShadow>
+
+            </View>
+            {(props?.payload?.type == 'error' && props?.payload?.id == 'calculation') &&
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <KakaoButton
+                  onPress={() => Linking.openURL('http://pf.kakao.com/_jfxgFG')}>
+                  <SocialButtonIcon
+                    source={require('../../assets/images/socialIcon/kakao_ico.png')}
+                  />
+                  <KakaoButtonText>카카오톡으로 상담하기</KakaoButtonText>
+                </KakaoButton>
+              </View>}
+          </View>)}
+          {(props?.payload?.type == 'backHome') &&
+            <View
+              style={{
+                flexDirection: 'row',
+                alignContent: 'center'
+              }}
+            >
+              <DropShadow
+                style={{
+                  flexDirection: 'row',
+                  alignContent: 'center',
+                  shadowColor: 'rgba(0,0,0,0.25)',
+                  shadowOffset: {
+                    width: 0,
+                    height: 4,
+                  },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 2,
+                  alignSelf: 'center',
+                  width: 130,
+                  marginRight: 10,
+
+                }}>
+                <Button
+                  onPress={() => {
+                    console.log(modalList);
+                    actionSheetRef.current?.hide();
+                    dispatch(removeLastModalList());
+                  }}
+                  style={{ backgroundColor: '#fff', borderColor: '#E8EAED' }}>
+                  <ButtonText style={{ color: '#717274' }}>아니오</ButtonText>
+                </Button>
+              </DropShadow>
+              <DropShadow
+                style={{
+                  flexDirection: 'row',
+                  alignContent: 'center',
+                  shadowColor: 'rgba(0,0,0,0.25)',
+                  shadowOffset: {
+                    width: 0,
+                    height: 4,
+                  },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 2,
+                  alignSelf: 'center',
+                  width: 130,
+
+                }}>
+                <Button
+                  onPress={() => {
+                    dispatch(setModalList([]));
+                    actionSheetRef.current?.hide();
+                    props?.payload?.navigation.goBack();
+                  }}>
+                  <ButtonText>네</ButtonText>
+                </Button>
+              </DropShadow>
+            </View>}
         </ButtonSection>
       </SheetContainer>
-    </ActionSheet>
+    </ActionSheet >
   );
 };
 

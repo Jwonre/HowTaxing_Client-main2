@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   ScrollView,
+  BackHandler
 } from 'react-native';
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useLayoutEffect, useState, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
@@ -83,6 +84,26 @@ const Third = props => {
   const {certType, agreeCert, agreePrivacy, agreeThird} = useSelector(
     state => state.cert.value,
   );
+  const handleBackPress = () => {
+    navigation.goBack();
+    setTimeout(() => {
+      SheetManager.show('cert', {
+        payload: {
+          cert: props.route.params.cert,
+          index : props.route.params.index
+        },
+      });
+    }, 300);
+    return true;
+  };
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    };
+  }, [handleBackPress]);
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -96,6 +117,7 @@ const Third = props => {
               SheetManager.show('cert', {
                 payload: {
                   cert: props.route.params.cert,
+                  index : props.route.params.index
                 },
               });
             }, 300);
@@ -128,7 +150,7 @@ const Third = props => {
           if (
             nativeEvent.contentOffset.y +
               nativeEvent.layoutMeasurement.height >=
-            nativeEvent.contentSize.height
+            nativeEvent.contentSize.height - 1
           ) {
             setActiveButton(true);
           } else {
@@ -293,7 +315,7 @@ const Third = props => {
               }, 300);
             }}>
             <ButtonText active={activeButton || agreeThird}>
-              동의하기
+            동의 후 인증하기
             </ButtonText>
           </Button>
         </DropShadow>

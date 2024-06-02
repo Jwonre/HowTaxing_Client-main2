@@ -1,10 +1,17 @@
 // 양도세 결과 중 양도세섹션
 
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+  View
+} from 'react-native';
 import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';
 import * as Animatable from 'react-native-animatable';
-import {useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import { setHouseInfo } from '../redux/houseInfoSlice';
+import { HOUSE_TYPE } from '../constants/colors';
+import { SheetManager } from 'react-native-actions-sheet';
 
 const Card = styled(Animatable.View).attrs(props => ({
   animation: 'fadeInUp',
@@ -64,151 +71,270 @@ const Divider = styled.View`
   margin-bottom: 10px;
 `;
 
-const TaxCard2 = () => {
+const Tag = styled.View`
+  flex-direction: row;
+  margin-right: auto;
+  width: 71px;
+  height: 22px;
+  background-color: #1fc9a8;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  padding: 0 10px;
+  margin-bottom: 10px;
+  align-self: flex-start;
+`;
+
+const TagText = styled.Text`
+  font-size: 10px;
+  font-family: Pretendard-Medium;
+  color: #fff;
+  line-height: 20px;
+`;
+
+const TagText2 = styled.Text`
+  font-size: 12.5px;
+  font-family: Pretendard-Medium;
+  color: #2F87FF;
+  line-height: 28px;
+  font-weight: bold;
+`;
+
+
+const TaxCard2 = props => {
   const houseInfo = useSelector(state => state.houseInfo.value);
+  const currentUser = useSelector(state => state.currentUser.value);
+  const dispatch = useDispatch();
+  const [Pdata, setPData] = useState({});
 
+  useEffect(() => {
+    getTaxCard2Info();
+  }, []);
+
+  const getTaxCard2Info = async () => {
+    const data = {
+      houseId : houseInfo.houseId  === undefined ? '' : houseInfo.houseId ,
+      sellContractDate : houseInfo.contractDate === undefined ? '' : houseInfo.contractDate,
+      sellDate : houseInfo.sellDate === undefined ? '' : houseInfo.sellDate,
+      sellPrice : houseInfo.saleAmount === undefined ? '' : houseInfo.saleAmount,
+      necExpensePrice : houseInfo.necessaryExpense === undefined ? '' : houseInfo.necessaryExpense,
+      isWWLandLord :  houseInfo.isLandlord === undefined ? '' : houseInfo.isLandlord,
+      stayPeriodYear : houseInfo.livePeriodYear === undefined ? '' : houseInfo.livePeriodYear,
+      stayPeriodMonth : houseInfo.livePeriodMonth === undefined ? '' : houseInfo.livePeriodMonth,
+      planAnswer : null,
+      //houseInfo.planAnswer === undefined ? '' : houseInfo.planAnswer
+    };
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`
+    };
+    axios
+      .post('http://13.125.194.154:8080/calculation/sellResult', data, { headers: headers })
+      .then(response => {
+       // console.log('양도소득세 계산 중:', response.data);
+        // 성공적인 응답 처리
+       // console.log('양도소득세 파라미터', data);
+        if (response.data.errYn === 'Y') {
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg,
+              description: response.data.errMsgDtl,
+              closeSheet: true,
+              navigation: props?.navigation,
+            },
+          });
+        //  console.log('양도소득세 결과', response.data);
+        } else {
+          const data = response.data.data;
+        //  console.log('양도소득세 결과', data);
+          setPData(data.list);
+          dispatch(setHouseInfo({ ...houseInfo, ...data.list[0] }));
+        }
+
+
+      })
+      .catch(error => {
+        // 오류 처리
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: '양도소득세 계산 중 오류가 발생했습니다.',
+            description: '양도소득세 계산 중 오류가 발생했습니다. 원하시면 주택\n전문 세무사와 상담을 연결시켜드릴게요. 아래 상담하\n기 버튼을 눌러보세요.',
+            id: 'calculation',
+            closeSheet: true,
+            navigation: props?.navigation,
+          },
+        });
+        console.error(error);
+      });
+  };
   return (
-    <Card>
-      <InfoContentItem>
-        <InfoContentLabel>양도소득세 합계</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#2F87FF',
-            fontFamily: 'Pretendard-Medium',
-          }}>
-          {Number(houseInfo.totTaxPrice).toLocaleString()} 원
-        </InfoContentText>
-      </InfoContentItem>
-      <InfoContentItem>
-        <InfoContentLabel>양도소득세</InfoContentLabel>
-        <InfoContentText
-          style={{
-            fontFamily: 'Pretendard-Medium',
-          }}>
-          {Number(houseInfo.sellTaxPrice).toLocaleString()} 원
-        </InfoContentText>
-      </InfoContentItem>
-      <InfoContentItem>
-        <InfoContentLabel>지방소득세</InfoContentLabel>
-        <InfoContentText
-          style={{
-            fontFamily: 'Pretendard-Medium',
-          }}>
-          {Number(houseInfo.lclTaxPrice).toLocaleString()} 원
-        </InfoContentText>
-      </InfoContentItem>
-      <SubContainer>
-        <InfoContentLabel>양도가액</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.buyPrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <SubContainer>
-        <InfoContentLabel>취득가액</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.buyPrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <SubContainer>
-        <InfoContentLabel>필요경비</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.necExpense).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <Divider />
-      <SubContainer>
-        <InfoContentLabel>양도차익</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.sellDiffPrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <SubContainer>
-        <InfoContentLabel>비과세 양도차익</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.nonTaxPrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <SubContainer>
-        <InfoContentLabel>과세 대상 양도차익</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.sellGainPrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <Divider />
-      <SubContainer>
-        <InfoContentLabel>장기보유특별공제</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.sellGainPrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <SubContainer>
-        <InfoContentLabel>양도소득금액</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.sellGainPrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <Divider />
-      <SubContainer>
-        <InfoContentLabel>기본공제</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.basicDeducPrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <SubContainer>
-        <InfoContentLabel>과세표준</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {Number(houseInfo.taxBasePrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
-      <SubContainer>
-        <InfoContentLabel>세율</InfoContentLabel>
-        <InfoContentText
-          style={{
-            color: '#A3A5A8',
-          }}>
-          {houseInfo.taxRate} %
-        </InfoContentText>
-      </SubContainer>
-      <SubContainer>
-        <InfoContentLabel>누진공제</InfoContentLabel>
-        <InfoContentText style={{color: '#A3A5A8'}}>
-          {Number(houseInfo.progPrice).toLocaleString()} 원
-        </InfoContentText>
-      </SubContainer>
+    //    {dataList, whrjs, pData, currentUser} = houseInfo, dataList?.map((data, index) => {
+    //     for(let i = 0; i < 2; i++) { key={index} data={data}
+    Array.from({ length: Pdata.length }).map((_, index) => (
 
-      <Divider />
-    </Card>
-  );
+      <Card key={index}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
+          <Tag
+            style={{
+              backgroundColor: HOUSE_TYPE.find(
+                color => color.id === '7',
+              ).color,
+            }}>
+            <TagText>
+              {
+                HOUSE_TYPE.find(color => color.id === '7')
+                  .name + (index + 1)
+              }
+            </TagText>
+          </Tag>
+          <TagText2>
+            지분율 : {Number(Pdata.length === 1 ? 100 : 50)}%
+          </TagText2>
+        </View>
+        <InfoContentItem>
+          <InfoContentLabel>총 납부세액</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#2F87FF',
+              fontFamily: 'Pretendard-Medium',
+            }}>
+            {Number(houseInfo?.totalTaxPrice).toLocaleString()} 원
+          </InfoContentText>
+        </InfoContentItem>
+        <InfoContentItem>
+          <InfoContentLabel>양도소득세</InfoContentLabel>
+          <InfoContentText
+            style={{
+              fontFamily: 'Pretendard-Medium',
+            }}>
+            {Number(houseInfo?.sellTaxPrice).toLocaleString()} 원
+          </InfoContentText>
+        </InfoContentItem>
+        <InfoContentItem>
+          <InfoContentLabel>지방소득세</InfoContentLabel>
+          <InfoContentText
+            style={{
+              fontFamily: 'Pretendard-Medium',
+            }}>
+            {Number(houseInfo?.localTaxPrice).toLocaleString()} 원
+          </InfoContentText>
+        </InfoContentItem>
+        <SubContainer>
+          <InfoContentLabel>양도가액</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.sellPrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <SubContainer>
+          <InfoContentLabel>취득가액</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.buyPrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <SubContainer>
+          <InfoContentLabel>필요경비</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.necExpensePrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <Divider />
+        <SubContainer>
+          <InfoContentLabel>양도차익</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.sellProfitPrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <SubContainer>
+          <InfoContentLabel>비과세 양도차익</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.nonTaxablePrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <SubContainer>
+          <InfoContentLabel>과세 대상 양도차익</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.taxablePrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <Divider />
+        <SubContainer>
+          <InfoContentLabel>장기보유특별공제</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.longDeductionPrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <SubContainer>
+          <InfoContentLabel>양도소득금액</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.sellIncomePrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <Divider />
+        <SubContainer>
+          <InfoContentLabel>기본공제</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.basicDeductionPrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <SubContainer>
+          <InfoContentLabel>과세표준</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {Number(houseInfo?.taxableStdPrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+        <SubContainer>
+          <InfoContentLabel>세율</InfoContentLabel>
+          <InfoContentText
+            style={{
+              color: '#A3A5A8',
+            }}>
+            {houseInfo?.sellTaxRate+'%'}
+          </InfoContentText>
+        </SubContainer>
+        <SubContainer>
+          <InfoContentLabel>누진공제</InfoContentLabel>
+          <InfoContentText style={{ color: '#A3A5A8' }}>
+            {Number(houseInfo?.progDeductionPrice).toLocaleString()} 원
+          </InfoContentText>
+        </SubContainer>
+
+        <Divider />
+      </Card>
+
+    )));
 };
+
 
 export default TaxCard2;

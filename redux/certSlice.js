@@ -4,9 +4,15 @@ import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
   value: {
+    certType: null,
     agreeCert: false,
     agreePrivacy: false,
     agreeThird: false,
+    agreeAge: false,
+    agreeLocation: false,
+    agreeMarketing: false,
+    agreeCopyright: false,
+    agreeGov24: false
   },
 };
 

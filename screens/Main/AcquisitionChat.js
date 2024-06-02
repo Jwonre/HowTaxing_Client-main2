@@ -8,18 +8,21 @@ import {
   useWindowDimensions,
   ActivityIndicator,
   Animated,
+  BackHandler,
 } from 'react-native';
-import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import FastImage from 'react-native-fast-image';
 import * as Animatable from 'react-native-animatable';
-import {Modalize} from 'react-native-modalize';
+import { Modalize } from 'react-native-modalize';
 import DropShadow from 'react-native-drop-shadow';
 import getFontSize from '../../utils/getFontSize';
-import {acquisitionTax} from '../../data/chatData';
-import {HOUSE_TYPE} from '../../constants/colors';
-import {SheetManager} from 'react-native-actions-sheet';
+import { acquisitionTax } from '../../data/chatData';
+import { HOUSE_TYPE } from '../../constants/colors';
+import { SheetManager } from 'react-native-actions-sheet';
+import axios from 'axios';
+import numberToKorean from '../../utils/numToKorean';
 
 // Icons
 import PencilIcon from '../../assets/icons/pencil.svg';
@@ -32,9 +35,11 @@ import HouseInfo from '../../components/HouseInfo';
 import EditIcon from '../../assets/icons/edit.svg';
 
 // Redux
-import {useDispatch, useSelector} from 'react-redux';
-import {setChatDataList} from '../../redux/chatDataListSlice';
-import {setHouseInfo} from '../../redux/houseInfoSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setChatDataList } from '../../redux/chatDataListSlice';
+import { setHouseInfo, clearHouseInfo } from '../../redux/houseInfoSlice';
+import { setOwnHouseList } from '../../redux/ownHouseListSlice';
+import { setModalList } from '../../redux/modalListSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -83,7 +88,7 @@ const ChatBubble = styled.View`
 `;
 
 const ChatBubbleText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: ${getFontSize(14)}px;
   font-family: Pretendard-SemiBold;
   color: #000;
   line-height: 30px;
@@ -136,7 +141,7 @@ const MyChatBubble = styled.View`
 `;
 
 const MyChatBubbleText = styled.Text`
-  font-size: 15px;
+  font-size: 14px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 24px;
@@ -144,7 +149,7 @@ const MyChatBubbleText = styled.Text`
 `;
 
 const EditButton = styled.Pressable.attrs(props => ({
-  hitSlop: {top: 20, bottom: 20, left: 20, right: 20},
+  hitSlop: { top: 20, bottom: 20, left: 20, right: 20 },
 }))`
   width: 20px;
   height: 20px;
@@ -202,14 +207,14 @@ const HouseInfoCardSubTitle = styled.Text`
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
-  margin-top: 15px;
-  margin-bottom: 6px;
+  margin-top: 10px;
+  margin-bottom: 5px;
   text-align: center;
 `;
 
 const HouseInfoCardListItem = styled.View`
   width: 100%;
-  height: 48px;
+  height: 55px;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -231,7 +236,7 @@ const HouseInfoListLabel = styled.Text`
 `;
 
 const HouseInfoListValue = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: ${getFontSize(13)}px;
   font-family: Pretendard-Bold;
   color: #2f87ff;
   line-height: 20px;
@@ -241,22 +246,106 @@ const HouseInfoListValue = styled.Text`
 const AcquisitionChat = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const modalizeRef = useRef(null);
   const flatlistRef = useRef(null);
   const progress = useRef(new Animated.Value(0)).current;
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const [isEditing, setIsEditing] = useState(false);
+  const currentUser = useSelector(state => state.currentUser.value);
+  const modalList = useSelector(state => state.modalList.value);
+
+
+  const onQuestionMarkPress = (type) => {
+    //.log('ques');
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'questionMarkDefinition' } }));
+    SheetManager.show('questionMarkDefinition', {
+      payload: {
+        type: type,
+      },
+    });
+
+    return;
+  };
+  const getOwnlist = async () => {
+    const url = `http://13.125.194.154:8080/house/list?calcType=01`
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`
+    };
+    await axios
+      .get(url,
+        { headers: headers }
+      )
+      .then(response => {
+        if (response.data.errYn === 'Y') {
+          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+          dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg,
+              description: response.data.errMsgDtl,
+            },
+          });
+          return;
+        } else {
+          const result = response.data;
+          const list = result.data.list === undefined ? null : result.data.list;
+          // console.log('[getOwnlist]list:', list);
+          dispatch(
+            setOwnHouseList([
+              ...list,
+            ]),
+          );
+        }
+
+      })
+      .catch(function (error) {
+        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
+        SheetManager.show('info', {
+          payload: {
+            message: '보유주택을 불러오는데 문제가 발생했습니다.',
+            description: error?.message,
+            type: 'error',
+          }
+        });
+        console.log(error);
+      });
+  };
+
+  const handleBackPress = () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
+    SheetManager.show('info', {
+      payload: {
+        type: 'backHome',
+        message: '첫 화면으로 돌아가시겠어요?',
+        navigation: navigation,
+      },
+    });
+    return true;
+  }
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    }
+
+  }, [handleBackPress,]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
+            dispatch(clearHouseInfo());
           }}>
           <CloseIcon />
         </TouchableOpacity>
@@ -278,8 +367,10 @@ const AcquisitionChat = () => {
   }, []);
 
   useEffect(() => {
+    //console.log('modalList', modalList);
     const helloChatItem = acquisitionTax.find(el => el.id === 'type');
     dispatch(setChatDataList([helloChatItem]));
+
   }, []);
 
   useEffect(() => {
@@ -302,7 +393,7 @@ const AcquisitionChat = () => {
     }
     if (chatDataList[chatDataList.length - 1]?.id !== 'cta') {
       setTimeout(() => {
-        flatlistRef.current.scrollToEnd({
+        flatlistRef.current?.scrollToEnd({
           animated: true,
           duration: 600,
         });
@@ -311,28 +402,41 @@ const AcquisitionChat = () => {
   }, [chatDataList]);
 
   // 나의 챗 버블 렌더링
-  const renderMyChatItem = ({item, index}) => {
+  const renderMyChatItem = ({ item, index }) => {
     return (
       <>
         <MyChatItem>
-          <MyChatBubble>
+          {item?.message !== '보유 주택 확인하기' && <MyChatBubble>
             <MyChatBubbleText>
-              {item?.message === '확인하기' ||
-              item?.message === '보유 주택 확인하기'
+              {item?.message === '확인하기'
                 ? '확인 완료'
                 : item?.message}
             </MyChatBubbleText>
-            {item?.id !== 'confirmDone' && (
+            {!((item?.id === 'apartmentAddress' || item?.id === 'ownConfirmOK2') && item?.type === 'my') && (
               <EditButton
                 onPress={() => {
                   setIsEditing(true);
-                  const newChatDataList = chatDataList.slice(0, index);
+                  //console.log('item?.id', item?.id);
+                  //console.log('item?.type', item?.type);
+                  if (item?.id === 'ownConfirmOK' && item?.type === 'my') {
+                    var newChatDataList = chatDataList.slice(0, index - 1);
+                  } else {
+                    var newChatDataList = chatDataList.slice(0, index);
+                  }
                   dispatch(setChatDataList(newChatDataList));
+                  //console.log('chatDataList last', chatDataList[chatDataList.length - 1]?.id);
+                  if (chatDataList[chatDataList.length - 1]?.id === 'apartmentAddress') {
+                    dispatch(clearHouseInfo());
+
+                  }
+
+
                 }}>
                 <PencilIcon />
               </EditButton>
             )}
           </MyChatBubble>
+          }
         </MyChatItem>
         {item?.id === 'getInfoConfirmOK' && (
           <DropShadow
@@ -379,7 +483,8 @@ const AcquisitionChat = () => {
             </ModalButton>
           </DropShadow>
         )}
-        {item?.id === 'ownConfirmOK' && (
+
+        {(item?.id === 'ownConfirmOK' || item?.id === 'ownConfirmOK2') && (
           <View
             style={{
               width: width - 40,
@@ -447,11 +552,11 @@ const AcquisitionChat = () => {
                       lineHeight: 13,
                       letterSpacing: -0.5,
                     }}>
-                    매도예정
+                    취득예정
                   </Text>
                 </View>
               </View>
-              <Text
+              <Text ellipsizeMode='tail' numberOfLines={1}
                 style={{
                   fontSize: getFontSize(15),
                   fontFamily: 'Pretendard-Bold',
@@ -459,14 +564,18 @@ const AcquisitionChat = () => {
                   lineHeight: 20,
                   letterSpacing: -0.5,
                   marginTop: 10,
+                  flex: 1, textAlign: 'left',
+                  width: 170
                 }}>
                 {houseInfo?.houseName}
               </Text>
-              <Text
+              <Text ellipsizeMode='tail' numberOfLines={1}
                 style={{
                   fontSize: 13,
                   fontFamily: 'Pretendard-Regular',
                   marginTop: 4,
+                  flex: 1, textAlign: 'left',
+                  width: 170
                 }}>
                 {houseInfo?.houseDetailName}
               </Text>
@@ -474,11 +583,25 @@ const AcquisitionChat = () => {
             <TouchableOpacity
               onPress={() => {
                 navigation.push(
-                  'OwnHouseDetail',
+                  'HouseDetail',
                   {
-                    item: houseInfo,
+                    item: {
+                      prevSheet: 'AcquisitionChat',
+                      houseType: houseInfo.houseType,
+                      detailAdr: houseInfo.detailAdr,
+                      houseName: houseInfo.houseName,
+                      roadAddr: houseInfo.roadAddr,
+                      houseDetailName: houseInfo.houseDetailName,
+                      pubLandPrice: houseInfo.pubLandPrice,
+                      isPubLandPriceOver100Mil: houseInfo.isPubLandPriceOver100Mil,
+                      area: houseInfo.area,
+                      isAreaOver85: houseInfo.isAreaOver85,
+                      ownerCnt: houseInfo.ownerCnt,
+                      userProportion: houseInfo.userProportion,
+                      isMoveInRight: houseInfo.isMoveInRight,
+                    },
                   },
-                  'OwnHouseDetail',
+                  'HouseDetail',
                 );
               }}
               activeOpacity={0.8}
@@ -524,16 +647,22 @@ const AcquisitionChat = () => {
   };
 
   // 시스템 챗 버블 렌더링
-  const renderSystemChatItem = ({item, index}) => {
+  const renderSystemChatItem = ({ item, index }) => {
+    // console.log('renderSystemChatItem item', item.id);
     if (item?.id === 'goodbye') {
-      setTimeout(() => {
-        SheetManager.show('review', {
-          payload: {
-            questionId: 'goodbye',
-            navigation: navigation,
-          },
-        });
-      }, 1000);
+      // modalList에 'review'가 없는 경우에만 추가합니다.
+      if (!Object.values(modalList).some(modal => modal.modal === 'review')) {
+        setTimeout(() => {
+          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'review'} }));
+          SheetManager.show('review', {
+            payload: {
+              questionId: 'goodbye',
+              navigation: navigation,
+            },
+          });
+        }, 1000);
+      }
     }
 
     // CTA
@@ -545,7 +674,7 @@ const AcquisitionChat = () => {
           }}>
           <CTACard />
           <HouseInfo item={houseInfo} navigation={navigation} />
-          <TaxCard />
+          <TaxCard navigation={navigation} />
           <TaxInfoCard />
           <DropShadow
             style={{
@@ -565,6 +694,7 @@ const AcquisitionChat = () => {
                   el => el.id === 'goodbye',
                 );
                 dispatch(setChatDataList([googByeItem]));
+                dispatch(clearHouseInfo());
               }}
               style={{
                 width: width - 40,
@@ -589,36 +719,6 @@ const AcquisitionChat = () => {
             />
             <ChatBubble>
               <ChatBubbleText>{item?.message}</ChatBubbleText>
-              {item?.id === 'confirm' && (
-                <DropShadow
-                  style={{
-                    shadowColor: 'rgba(0,0,0,0.25)',
-                    shadowOffset: {
-                      width: 0,
-                      height: 4,
-                    },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 4,
-                    alignSelf: 'center',
-                  }}>
-                  <ModalButton
-                    disabled={index < chatDataList.length - 1}
-                    onPress={() => {
-                      SheetManager.show('acquisition', {
-                        payload: {
-                          questionId: item?.id,
-                        },
-                      });
-                    }}
-                    style={{
-                      width: width - 80,
-                      alignSelf: 'center',
-                      marginTop: 20,
-                    }}>
-                    <ModalButtonText>확인하기</ModalButtonText>
-                  </ModalButton>
-                </DropShadow>
-              )}
               {item?.select && (
                 <SelectButtonGroup>
                   {item?.select.map((item2, index2) => (
@@ -646,10 +746,12 @@ const AcquisitionChat = () => {
                         if (
                           item.id === 'contractDateSystem' ||
                           item.id === 'acquisitionDateSystem' ||
-                          item.id === 'aquiAmountSystem'
+                          item.id === 'aquiAmountSystem' ||
+                          item.id === 'apartmentAddressSystem'
                         ) {
-                          console.log('contractDateSystem');
+                          //console.log(item.id);
                         } else {
+                          // console.log(item.id);
                           dispatch(
                             setChatDataList([
                               ...chatDataList,
@@ -658,63 +760,222 @@ const AcquisitionChat = () => {
                             ]),
                           );
                         }
-
-                        if (item.id === 'cert' && item2.id === 'no') {
-                          const moreHouseIndex = chatDataList.findIndex(
-                            el => el.id === 'moreHouse',
-                          );
-                          const newChatDataList = chatDataList.slice(
-                            0,
-                            moreHouseIndex + 1,
-                          );
-
-                          dispatch(setChatDataList(newChatDataList));
+                        /*
+                                                if (item2.id === 'OwnHouseCountresult') {
+                                                  const OwnHouseCountresultIndex = chatDataList.findIndex(
+                                                    el => el.id === 'getInfoDone',
+                                                  );
+                                                  const newChatDataList = chatDataList.slice(
+                                                    0,
+                                                    OwnHouseCountresultIndex + 1,
+                                                  );
+                        
+                                                  dispatch(setChatDataList(newChatDataList));
+                                                }
+                        */
+                        if (item.id === 'type') {
+                          //console.log('item2?.name', item2?.name);
+                          if ((item2?.name === '아파트')) {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                houseType: '1'
+                              }));
+                          } else if ((item2?.name === '단독주택 · 다가구')) {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                houseType: '4'
+                              }));
+                          } else if ((item2?.name === '연립 · 다세대')) {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                houseType: '2'
+                              }));
+                          } else {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                houseType: '3'
+                              }));
+                          }
+                          //  console.log('houseType', houseInfo)
                         }
 
-                        if (item.id === 'type') {
-                          console.log('type', item2.name);
+
+                        if (item.id === 'ticket' && item.type === 'system') {
                           dispatch(
                             setHouseInfo({
                               ...houseInfo,
+                              isDestruction:
+                                item2.name === '네'
+                                  ? true
+                                  : false,
+                              isMoveInRight:
+                                item2.name === '네'
+                                  ? true
+                                  : false,
                               houseType:
-                                item2.name === '아파트'
-                                  ? '1'
-                                  : item2.name === '단독주택 · 다가구'
-                                  ? '4'
-                                  : item2.name === '연립 · 다세대'
-                                  ? '2'
-                                  : '5',
+                                item2.name === '네'
+                                  ? '3'
+                                  : '6',
                             }),
                           );
                         }
 
+                        if (item.id === 'certType' && item.type === 'system') {
+                          if (item2.id === 'Nosubscriptionaccount') {
+                            getOwnlist();
+                          };
+                        }
+
+                        if (item.id === 'pubLandPrice' && item.type === 'system') {
+                          if (item2.id === 'yes') {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                isPubLandPriceOver100Mil: true
+                              }),);
+                          } else {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                isPubLandPriceOver100Mil: false
+                              }),);
+                          }
+                        }
+
+
+                        if (item.id === 'area' && item.type === 'system') {
+                          if (item2.id === 'yes') {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                isAreaOver85: true
+                              }),);
+                          } else {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                isAreaOver85: false
+                              }),);
+                          }
+                        }
+
+
+                        if (item.id === 'apartment' && item.type === 'system') {
+                          if (item2.id === 'yes') {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                houseType: '1'
+                              }),);
+                          } else {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                houseType: '1'
+                              }),);
+                          }
+                        }
+
+                        if (item.id === 'palnSale') {
+                          if (houseInfo?.isDestruction === undefined && houseInfo?.isMoveInRight === undefined) {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                hasSellPlan:
+                                  item2.id === 'planSaleYes'
+                                    ? true
+                                    : false,
+                                isDestruction: false,
+                                isMoveInRight: false,
+                              }),
+
+                            );
+                          } else {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                hasSellPlan:
+                                  item2.id === 'planSaleYes'
+                                    ? true
+                                    : false,
+                              }),
+                            );
+                          }
+                        }
+
+
+                        if (item2.id === 'only' && item2.type === 'my') {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              ownerCnt: 1,
+                              userProportion: 100,
+                            }),
+                          );
+                        }
+
+                        if (item.id === 'moreHouse' && item2.id === 'no') {
+                          if (houseInfo?.isDestruction === undefined && houseInfo?.isMoveInRight === undefined) {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                hasSellPlan: false,
+                                isDestruction: false,
+                                isMoveInRight: false,
+                                isOwnHouseCntRegist: true,
+                                ownHouseCnt: 0,
+                              }),
+                            );
+                          } else {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                hasSellPlan: false,
+                                isOwnHouseCntRegist: true,
+                                ownHouseCnt: 0,
+                              }),
+                            );
+                          }
+
+                        }
+
                         if (item2?.openSheet) {
-                          console.log('openSheet');
+                          // console.log('openSheet');
+                          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : item2.openSheet, index: index} }));
                           SheetManager.show(item2.openSheet, {
                             payload: {
                               navigation: navigation,
                               data: item2.id,
+                              data2: item.id,
+                              index,
                               currentPageIndex: item2?.currentPageIndex,
                             },
                           });
+
+
                         }
 
                         // 매도 계획 여부
-                        if (item2.id === 'planSaleYes') {
-                          dispatch(
-                            setHouseInfo({
-                              ...houseInfo,
-                              planSale: true,
-                            }),
-                          );
-                        } else if (item2.id === 'planSaleNo') {
-                          dispatch(
-                            setHouseInfo({
-                              ...houseInfo,
-                              planSale: false,
-                            }),
-                          );
-                        }
+                        /* if (item2.id === 'planSaleYes') {
+                           dispatch(
+                             setHouseInfo({
+                               ...houseInfo,
+                               planSale: true,
+                             }),
+                           );
+                         } else if (item2.id === 'planSaleNo') {
+                           dispatch(
+                             setHouseInfo({
+                               ...houseInfo,
+                               planSale: false,
+                             }),
+                           );
+                         }*/
                       }}>
                       {item2?.icon ? item2.icon : null}
                       <SelectButtonText>{item2?.name}</SelectButtonText>
@@ -726,10 +987,13 @@ const AcquisitionChat = () => {
                 <SelectButton
                   disabled={index < chatDataList.length - 1}
                   onPress={() => {
+                    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'confirm', index} }));
                     SheetManager.show('confirm', {
                       payload: {
                         questionId: item?.id,
                         navigation: navigation,
+                        index,
                       },
                     });
                   }}
@@ -774,32 +1038,25 @@ const AcquisitionChat = () => {
               <HouseInfoCard width={width}>
                 <HouseInfoCardTitle>주택 정보</HouseInfoCardTitle>
                 <HouseInfoCardSubTitle>
-                  {houseInfo?.houseName} {houseInfo?.houseDetailName}
+                  {houseInfo?.houseName} {houseInfo?.detailAdr ? houseInfo?.detailAdr : (houseInfo?.houseDetailName ? '' : '')}
                 </HouseInfoCardSubTitle>
+
                 <HouseInfoCardListItem>
                   <View
                     style={{
                       flexDirection: 'row',
                       alignItems: 'center',
                     }}>
-                    <HouseInfoListLabel>KB시세</HouseInfoListLabel>
-                    <QuestionIcon />
+                    <HouseInfoListLabel>공시가격</HouseInfoListLabel>
+                    <QuestionIcon
+                      onPress={e => {
+                        const type = '공시가격';
+                        onQuestionMarkPress(type, e);
+                      }}
+                    />
                   </View>
                   <HouseInfoListValue>
-                    {Number(houseInfo?.kbMktPrice).toLocaleString()}원
-                  </HouseInfoListValue>
-                </HouseInfoCardListItem>
-                <HouseInfoCardListItem>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}>
-                    <HouseInfoListLabel>공시지가</HouseInfoListLabel>
-                    <QuestionIcon />
-                  </View>
-                  <HouseInfoListValue>
-                    {Number(houseInfo?.pubLandPrice).toLocaleString()}원
+                    {(houseInfo?.hasPubLandPrice === false || houseInfo?.hasPubLandPrice === undefined) ? (houseInfo?.isPubLandPriceOver100Mil ? '1억원 초과' : '1억원 이하') : numberToKorean(Number(houseInfo?.pubLandPrice).toString()) + '원'}
                   </HouseInfoListValue>
                 </HouseInfoCardListItem>
                 <HouseInfoCardListItem>
@@ -809,11 +1066,30 @@ const AcquisitionChat = () => {
                       alignItems: 'center',
                     }}>
                     <HouseInfoListLabel>전용면적</HouseInfoListLabel>
-                    <QuestionIcon />
+                    <QuestionIcon
+                      onPress={e => {
+                        const type = '전용면적';
+                        onQuestionMarkPress(type, e);
+                        // console.log('houseName', houseInfo?.houseName);
+                      }}
+                    />
                   </View>
-                  <HouseInfoListValue>
-                    {houseInfo?.areaMeter}㎡ ({houseInfo?.areaPyung}평)
-                  </HouseInfoListValue>
+                  <View
+                    style={{
+                      marginLeft: 'auto',
+                    }}>
+                    <HouseInfoListValue>
+                      {(houseInfo?.hasArea === false || houseInfo?.hasArea === undefined) ? (houseInfo?.isAreaOver85 ? '국민평형(85㎡) 초과' : '국민평형(85㎡) 이하') : (houseInfo?.isAreaOver85 ? '국민평형(85㎡) 초과' : '국민평형(85㎡) 이하')}
+                    </HouseInfoListValue>
+                    {houseInfo?.hasArea && <HouseInfoListValue
+                      style={{
+                        fontSize: 10,
+                        color: '#A3A5A8',
+                        lineHeight: 8,
+                      }}>
+                      {'\n' + houseInfo?.area + '㎡'}
+                    </HouseInfoListValue>}
+                  </View>
                 </HouseInfoCardListItem>
                 <DropShadow
                   style={{
@@ -829,12 +1105,17 @@ const AcquisitionChat = () => {
                   <ModalButton
                     disabled={index < chatDataList.length - 1}
                     onPress={() => {
+                      // console.log('다음으로 houseInfo', houseInfo);
+                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'acquisition', index: index } }));
                       SheetManager.show('acquisition', {
                         payload: {
                           questionId: item?.id,
                           navigation,
+                          index,
                         },
                       });
+
                     }}
                     style={{
                       width: width - 80,
@@ -845,7 +1126,7 @@ const AcquisitionChat = () => {
                   </ModalButton>
                 </DropShadow>
               </HouseInfoCard>
-            </DropShadow>
+            </DropShadow >
           )}
         </>
       );
@@ -859,8 +1140,8 @@ const AcquisitionChat = () => {
           style={{
             backgroundColor:
               chatDataList[chatDataList.length - 1]?.id === 'cta' ||
-              chatDataList[chatDataList.length - 1]?.id === 'calculating' ||
-              chatDataList[chatDataList.length - 1]?.id === 'goodbye'
+                chatDataList[chatDataList.length - 1]?.id === 'calculating' ||
+                chatDataList[chatDataList.length - 1]?.id === 'goodbye'
                 ? '#A2C62B'
                 : '#2F87FF',
             width: progress.interpolate({
@@ -875,7 +1156,7 @@ const AcquisitionChat = () => {
         ref={flatlistRef}
         data={chatDataList}
         keyExtractor={(item, index) => {
-          `chat-${index}`;
+          return `chat-${index}`;
         }}
         style={{
           width: '100%',
@@ -885,10 +1166,11 @@ const AcquisitionChat = () => {
           flexGrow: 1,
         }}
         showsVerticalScrollIndicator={false}
-        renderItem={({item, index}) =>
+        renderItem={({ item, index }) =>
           item?.type === 'my'
-            ? renderMyChatItem({item, index})
-            : renderSystemChatItem({item, index})
+            ? renderMyChatItem({ item, index })
+            : renderSystemChatItem({ item, index })
+
         }
       />
       <Modalize
@@ -902,9 +1184,10 @@ const AcquisitionChat = () => {
         withHandle={false}>
         <TouchableOpacity
           activeOpacity={0.8}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             modalizeRef.current?.close();
+
           }}
           style={{
             alignSelf: 'flex-end',
@@ -918,4 +1201,4 @@ const AcquisitionChat = () => {
   );
 };
 
-export default AcquisitionChat;
+export default React.memo(AcquisitionChat);

@@ -9,20 +9,24 @@ import {
   ActivityIndicator,
   Linking,
   Animated,
+  BackHandler,
 } from 'react-native';
-import React, {useEffect, useState, useLayoutEffect, useRef} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import FastImage from 'react-native-fast-image';
 import * as Animatable from 'react-native-animatable';
-import {Modalize} from 'react-native-modalize';
+import { Modalize } from 'react-native-modalize';
 import DropShadow from 'react-native-drop-shadow';
 import getFontSize from '../../utils/getFontSize';
-import {gainTax} from '../../data/chatData';
-import {HOUSE_TYPE} from '../../constants/colors';
-import {SheetManager} from 'react-native-actions-sheet';
+import { gainTax } from '../../data/chatData';
+import { HOUSE_TYPE } from '../../constants/colors';
+import { SheetManager } from 'react-native-actions-sheet';
 import QuestionIcon from '../../assets/icons/question.svg';
 import CTACard from '../../components/CTACard';
+import InfoIcon from '../../assets/icons/info_tooltip_ico.svg';
+import axios from 'axios';
+import numberToKorean from '../../utils/numToKorean';
 
 // Icons
 import PencilIcon from '../../assets/icons/pencil.svg';
@@ -32,10 +36,13 @@ import HouseInfo from '../../components/HouseInfo';
 import EditIcon from '../../assets/icons/edit.svg';
 
 // Redux
-import {useDispatch, useSelector} from 'react-redux';
-import {setChatDataList} from '../../redux/chatDataListSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setChatDataList } from '../../redux/chatDataListSlice';
 import TaxCard2 from '../../components/TaxCard2';
 import TaxInfoCard2 from '../../components/TaxInfoCard2';
+import { setHouseInfo } from '../../redux/houseInfoSlice';
+import { setOwnHouseList } from '../../redux/ownHouseListSlice';
+import { setModalList } from '../../redux/modalListSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -84,7 +91,7 @@ const ChatBubble = styled.View`
 `;
 
 const ChatBubbleText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: ${getFontSize(14)}px;
   font-family: Pretendard-SemiBold;
   color: #000;
   line-height: 30px;
@@ -137,7 +144,7 @@ const MyChatBubble = styled.View`
 `;
 
 const MyChatBubbleText = styled.Text`
-  font-size: 15px;
+  font-size: 14px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 24px;
@@ -145,7 +152,7 @@ const MyChatBubbleText = styled.Text`
 `;
 
 const EditButton = styled.Pressable.attrs(props => ({
-  hitSlop: {top: 20, bottom: 20, left: 20, right: 20},
+  hitSlop: { top: 20, bottom: 20, left: 20, right: 20 },
 }))`
   width: 20px;
   height: 20px;
@@ -290,8 +297,8 @@ const HouseInfoCardSubTitle = styled.Text`
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
-  margin-top: 15px;
-  margin-bottom: 6px;
+  margin-top: 10px;
+  margin-bottom: 5px;
   text-align: center;
 `;
 
@@ -319,7 +326,7 @@ const HouseInfoListLabel = styled.Text`
 `;
 
 const HouseInfoListValue = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: ${getFontSize(13)}px;
   font-family: Pretendard-Bold;
   color: #2f87ff;
   line-height: 20px;
@@ -329,20 +336,71 @@ const HouseInfoListValue = styled.Text`
 const GainsTaxChat = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const modalizeRef = useRef(null);
   const flatlistRef = useRef(null);
   const progress = useRef(new Animated.Value(0)).current;
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const [isEditing, setIsEditing] = useState(false);
+  const currentUser = useSelector(state => state.currentUser.value);
+  const modalList = useSelector(state => state.modalList.value);
+
+  const getOwnlist = async () => {
+    const url = `http://13.125.194.154:8080/house/list?calcType=02`
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`
+    };
+    await axios
+      .get(url, { headers: headers })
+      .then(response => {
+        // console.log('[getOwnlist]response:', response.data);
+        const result = response.data;
+        const list = result.data.list === undefined ? null : result.data.list;
+        if (result.isError) {
+          Alert.alert('검색 결과가 없습니다.');
+          return;
+        }
+        //  console.log('[getOwnlist]list:', list);
+        dispatch(
+          setOwnHouseList([
+            ...list,
+          ]),
+        );
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
+  const handleBackPress = () => {
+    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
+    SheetManager.show('info', {
+      payload: {
+        type: 'backHome',
+        message: '첫 화면으로 돌아가시겠어요?',
+        navigation: navigation,
+      },
+    });
+    return true;
+  }
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    }
+
+  }, [handleBackPress,]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
           }}>
@@ -392,7 +450,7 @@ const GainsTaxChat = () => {
     }
     if (chatDataList[chatDataList.length - 1]?.id !== 'cta2') {
       setTimeout(() => {
-        flatlistRef.current.scrollToEnd({
+        flatlistRef.current?.scrollToEnd({
           animated: true,
           duration: 600,
         });
@@ -400,13 +458,16 @@ const GainsTaxChat = () => {
     }
   }, [chatDataList]);
 
-  const renderMyChatItem = ({item, index}) => {
+  const renderMyChatItem = ({ item, index }) => {
     if (item?.openSheet) {
-      console.log('openSheet');
+      //  console.log('openSheet');
+      //let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+      // dispatch(setModalList({ ...modalList, [Modalindex]: item.openSheet }));
       SheetManager.show(item.openSheet, {
         payload: {
           navigation: navigation,
           isGainsTax: true,
+          index,
         },
       });
     }
@@ -417,11 +478,11 @@ const GainsTaxChat = () => {
           <MyChatBubble>
             <MyChatBubbleText>
               {item?.message === '확인하기' ||
-              item?.message === '보유 주택 확인하기'
+                item?.message === '보유 주택 확인하기'
                 ? '확인 완료'
                 : item?.message}
             </MyChatBubbleText>
-            {item?.id !== 'confirmDone' && (
+            {(
               <EditButton
                 onPress={() => {
                   setIsEditing(true);
@@ -501,6 +562,7 @@ const GainsTaxChat = () => {
                   style={{
                     width: 'auto',
                     height: 22,
+                    overflow: 'hidden',
                     backgroundColor: HOUSE_TYPE.find(
                       el => el.id === houseInfo?.houseType,
                     )?.color,
@@ -547,7 +609,7 @@ const GainsTaxChat = () => {
                   </Text>
                 </View>
               </View>
-              <Text
+              <Text ellipsizeMode='tail' numberOfLines={1}
                 style={{
                   fontSize: getFontSize(15),
                   fontFamily: 'Pretendard-Bold',
@@ -555,20 +617,25 @@ const GainsTaxChat = () => {
                   lineHeight: 20,
                   letterSpacing: -0.5,
                   marginTop: 10,
+                  flex: 1, textAlign: 'left',
+                  width: 170
                 }}>
                 {houseInfo?.houseName}
               </Text>
-              <Text
+              <Text ellipsizeMode='tail' numberOfLines={1}
                 style={{
                   fontSize: 13,
                   fontFamily: 'Pretendard-Regular',
                   marginTop: 4,
+                  flex: 1, textAlign: 'left',
+                  width: 170
                 }}>
                 {houseInfo?.houseDetailName}
               </Text>
             </View>
             <TouchableOpacity
               onPress={() => {
+                //  console.log('gain houseinfo', houseInfo);
                 navigation.push(
                   'HouseDetail',
                   {
@@ -619,9 +686,12 @@ const GainsTaxChat = () => {
     );
   };
 
-  const renderSystemChatItem = ({item, index}) => {
-    if (item?.id === 'goodbye') {
+  const renderSystemChatItem = ({ item, index }) => {if (item?.id === 'goodbye') {
+    // modalList에 'review'가 없는 경우에만 추가합니다.
+    if (!Object.values(modalList).some(modal => modal.modal === 'review')) {
       setTimeout(() => {
+        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'review'} }));
         SheetManager.show('review', {
           payload: {
             questionId: 'goodbye',
@@ -630,6 +700,7 @@ const GainsTaxChat = () => {
         });
       }, 1000);
     }
+  }
 
     if (item?.id === 'cta2') {
       return (
@@ -639,7 +710,7 @@ const GainsTaxChat = () => {
           }}>
           <CTACard />
           <HouseInfo item={houseInfo} navigation={navigation} />
-          <TaxCard2 />
+          <TaxCard2 navigation={navigation} />
           <TaxInfoCard2 />
           <DropShadow
             style={{
@@ -679,39 +750,35 @@ const GainsTaxChat = () => {
                 uri: 'https://dnvefa72aowie.cloudfront.net/business-profile/bizPlatform/profile/40388181/1674021254765/MWJlMWNjOGNiMDMzMzE0ZTUwM2ZiZTllZjJkOTZiMGViYTgzNDQxNTE0YWY4ZDU0ZWI3MWQ1N2MzMWU5ZTdmYS5qcGc=.jpeg?q=95&s=1440x1440&t=inside',
               }}
             />
-            <ChatBubble>
-              <ChatBubbleText>{item?.message}</ChatBubbleText>
-              {item?.id === 'confirm' && (
-                <DropShadow
-                  style={{
-                    shadowColor: 'rgba(0,0,0,0.25)',
-                    shadowOffset: {
-                      width: 0,
-                      height: 4,
-                    },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 4,
-                    alignSelf: 'center',
-                  }}>
-                  <ModalButton
-                    disabled={index < chatDataList.length - 1}
+            <ChatBubble style={{ width: item?.id === 'certInfo' ? '95%' : '80%' }}>
+              <View style={{
+                width: '101%',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <ChatBubbleText>{item?.message}</ChatBubbleText>
+                {(item?.id === 'landlord1' || item?.id === 'landlord2') && <TouchableOpacity
+                  activeOpacity={0.8}
+                  hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+                  <InfoIcon
                     onPress={() => {
-                      SheetManager.show('gain', {
+                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'infoExpense'} }));
+                      SheetManager.show('infoExpense', {
                         payload: {
-                          questionId: item?.id,
+                          Title: "상생임대인제도",
+                          Description: "임대차 가격 인상 자제 유도 및 양도세 실거주\n의무 충족을 위한 자가 이주 과정에서의 연\n쇄적 임차인 퇴거 방지를 위해 임대료를 일정\n기준 이하로 올리는 임대인에게 혜택을 제공\n하는 제도, 그 제도에 따른 임대인을 의미해요.\n\n아래 조건들에 해당할 때 해당 제도를 활용할\n수 있어요.",
+                          Detail: "① 신규(갱신) 임대차계약의 임대보증금 또는 임대료 증가\n율이 직전 임대차계약 대비 5% 이하일 것 \n② 신규(갱신) 임대차계약이 2021.12.20~2024.12.31\n사이에 체결되었을 것\n③ 직전 임대차계약에 따른 임대기간이 1년 6개월 이상일\n것\n④ 신규(갱신) 임대차계약에 따른 임대기간이 2년 이상일\n것",
+                          height: 570,
                         },
                       });
                     }}
-                    style={{
-                      width: width - 80,
-                      alignSelf: 'center',
-                      marginTop: 20,
-                    }}>
-                    <ModalButtonText>확인하기</ModalButtonText>
-                  </ModalButton>
-                </DropShadow>
-              )}
+                  />
+                </TouchableOpacity>
+                }
 
+              </View>
               {item?.select && (
                 <SelectButtonGroup>
                   {item?.select.map((item2, index2) => (
@@ -752,12 +819,19 @@ const GainsTaxChat = () => {
                           }
                         }
 
+
                         if (
                           item.id === 'contractDateSystem' ||
                           item.id === 'saleDateSystem' ||
                           item.id === 'saleAmountSystem'
                         ) {
-                          console.log('contractDateSystem');
+                          //     console.log('contractDateSystem');
+                        } else if (item.id === 'ExpenseAnswer') {
+                          //     console.log('ExpenseAnswer');
+                        } else if (item.id === 'residenceperiod' && item2.id === 'directlivePeriod') {
+                          //    console.log('directlivePeriod');
+                        } else if (item.id === 'sellDateSystem') {
+                          //    console.log('sellDateSystem');
                         } else {
                           dispatch(
                             setChatDataList([
@@ -767,13 +841,56 @@ const GainsTaxChat = () => {
                             ]),
                           );
                         }
+                        //  console.log('item2.id : ', item2.id);
+                        //  console.log('index2 : ', index2);
+                        if (item2.id == 'landlordY') {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              isLandlord: true,
+                            }),
+                          );
+                        } else if (item2.id == 'landlordN') {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              isLandlord: false,
+                            }),
+                          );
+                        }
+                        //         console.log('landlordhouseInfo',houseInfo)
+                        if (item2.id == 'AcquiredhouseY') {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              isAcquiredhouse: true,
+                            }),
+                          );
+                        } else if (item2.id == 'AcquiredhouseN') {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              isAcquiredhouse: false,
+                            }),
+                          );
+                        }
+
+                        if (item.id === 'certType' && item.type === 'system') {
+                          if (item2.id === 'Nosubscriptionaccount') {
+                            getOwnlist();
+                          };
+                        }
+                        //  console.log('item2?.openSheet : ', item2?.openSheet)
                         if (item2?.openSheet) {
+                          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : item2.openSheet, index: index} }));
                           SheetManager.show(item2.openSheet, {
                             payload: {
                               navigation: navigation,
                               data: item2.id,
                               isGainsTax: true,
                               currentPageIndex: item2?.currentPageIndex,
+                              index,
                             },
                           });
                         }
@@ -788,10 +905,13 @@ const GainsTaxChat = () => {
                 <SelectButton
                   disabled={index < chatDataList.length - 1}
                   onPress={() => {
+                    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'confirm2', index: index} }));
                     SheetManager.show('confirm2', {
                       payload: {
                         questionId: item?.id,
                         navigation: navigation,
+                        index,
                       },
                     });
                   }}
@@ -814,17 +934,15 @@ const GainsTaxChat = () => {
                   style={{
                     textAlign: 'center',
                   }}>
-                  계산 결과를 전문 세무사에게 바로 상담해보세요.
+                  부동산 전문 세무사에게 상담 받아보세요!
                 </ChatBubbleText>
                 <ProfileAvatar
-                  source={{
-                    uri: 'https://dnvefa72aowie.cloudfront.net/business-profile/bizPlatform/profile/40388181/1674021254765/MWJlMWNjOGNiMDMzMzE0ZTUwM2ZiZTllZjJkOTZiMGViYTgzNDQxNTE0YWY4ZDU0ZWI3MWQ1N2MzMWU5ZTdmYS5qcGc=.jpeg?q=95&s=1440x1440&t=inside',
-                  }}
+                  source={require('../../assets/images/Gookyoung_Yoon.png')}
                 />
-                <ProfileName>홍길동 세무사</ProfileName>
-                <ProfileEmail>joosebak@joosaebak.co.kr</ProfileEmail>
+                <ProfileName>윤국녕 세무사</ProfileName>
+                <ProfileEmail>ilbitax86@naver.com</ProfileEmail>
                 <KakaoButton
-                  onPress={() => Linking.openURL('http://pf.kakao.com/_bwWXG')}>
+                  onPress={() => Linking.openURL('http://pf.kakao.com/_jfxgFG')}>
                   <SocialButtonIcon
                     source={require('../../assets/images/socialIcon/kakao_ico.png')}
                   />
@@ -909,11 +1027,11 @@ const GainsTaxChat = () => {
                       flexDirection: 'row',
                       alignItems: 'center',
                     }}>
-                    <HouseInfoListLabel>공시지가</HouseInfoListLabel>
+                    <HouseInfoListLabel>공시가격</HouseInfoListLabel>
                     <QuestionIcon />
                   </View>
                   <HouseInfoListValue>
-                    {Number(houseInfo?.pubLandPrice).toLocaleString()}원
+                    {numberToKorean(Number(houseInfo?.pubLandPrice).toString())}원
                   </HouseInfoListValue>
                 </HouseInfoCardListItem>
                 <HouseInfoCardListItem>
@@ -943,11 +1061,14 @@ const GainsTaxChat = () => {
                   <ModalButton
                     disabled={index < chatDataList.length - 1}
                     onPress={() => {
-                      console.log('next');
+                      // console.log('next');
+                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
+                      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'gain', index: index} }));
                       SheetManager.show('gain', {
                         payload: {
                           questionId: item?.id,
                           navigation,
+                          index,
                         },
                       });
                     }}
@@ -974,8 +1095,8 @@ const GainsTaxChat = () => {
           style={{
             backgroundColor:
               chatDataList[chatDataList.length - 1]?.id === 'cta2' ||
-              chatDataList[chatDataList.length - 1]?.id === 'calulating' ||
-              chatDataList[chatDataList.length - 1]?.id === 'goobye'
+                chatDataList[chatDataList.length - 1]?.id === 'calulating' ||
+                chatDataList[chatDataList.length - 1]?.id === 'goodbye'
                 ? '#A2C62B'
                 : '#2F87FF',
             width: progress.interpolate({
@@ -990,7 +1111,7 @@ const GainsTaxChat = () => {
         ref={flatlistRef}
         data={chatDataList}
         keyExtractor={(item, index) => {
-          `chat-${index}`;
+          return `chat-${index}`;
         }}
         style={{
           width: '100%',
@@ -1000,10 +1121,10 @@ const GainsTaxChat = () => {
           flexGrow: 1,
         }}
         showsVerticalScrollIndicator={false}
-        renderItem={({item, index}) =>
+        renderItem={({ item, index }) =>
           item?.type === 'my'
-            ? renderMyChatItem({item, index})
-            : renderSystemChatItem({item, index})
+            ? renderMyChatItem({ item, index })
+            : renderSystemChatItem({ item, index })
         }
       />
       <Modalize
@@ -1017,7 +1138,7 @@ const GainsTaxChat = () => {
         withHandle={false}>
         <TouchableOpacity
           activeOpacity={0.8}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             modalizeRef.current?.close();
           }}
@@ -1033,4 +1154,4 @@ const GainsTaxChat = () => {
   );
 };
 
-export default GainsTaxChat;
+export default React.memo(GainsTaxChat);

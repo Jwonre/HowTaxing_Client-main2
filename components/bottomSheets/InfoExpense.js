@@ -1,0 +1,174 @@
+// 정보 또는 경고 알림창 컴포넌트
+
+import { useWindowDimensions, Pressable } from 'react-native';
+import React, { useRef, useState } from 'react';
+import ActionSheet from 'react-native-actions-sheet';
+import styled from 'styled-components';
+import getFontSize from '../../utils/getFontSize';
+import CloseIcon from '../../assets/icons/close_button.svg';
+import DropShadow from 'react-native-drop-shadow';
+import { useDispatch } from 'react-redux';
+import { removeLastModalList } from '../../redux/modalListSlice';
+
+const SheetContainer = styled.View`
+  flex: 1;
+  background-color: #fff;
+  width: ${props => props.width - 40}px;
+  height: auto;
+`;
+
+const ModalTitle = styled.Text`
+  width: 100%;
+  font-size: ${getFontSize(17)}px;
+  font-family: Bold;
+  color: #1b1c1f;
+  line-height: 26px;
+  text-align: center;
+  margin-bottom: 10px;
+`;
+
+
+const BoldText = styled.Text`
+  font-family: Pretendard-Bold;
+  font-weight: 600;
+`;
+
+const ModalDescription = styled.Text`
+  font-size: ${getFontSize(14)}px;
+  font-family: Bold;
+  width: 78%;
+  color: #1b1c1f;
+  line-height: 22px;
+  margin-top: 10px;
+  text-align: left;
+`;
+
+const Modaldetail = styled.Text`
+  width: 110%;
+  font-size: ${getFontSize(11)}px;
+  font-family: Bold;
+  color: #1b1c1f;
+  line-height: 20px;
+  margin-top: 15px;
+  text-align: left;
+  padding: 0px 48px;
+  margin-bottom: 10px;
+`;
+
+const ModalContentSection = styled.View`
+  width: 100%;
+  height: auto;
+  margin-top: 10px;
+  background-color: #fff;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ModalHeader = styled.View`
+  width: 100%;
+  height: 50px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0px 20px;
+`;
+
+const ButtonSection = styled.View`
+  width: 100%;
+  height: auto;
+  background-color: #fff;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const Button = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.8,
+}))`
+  width: 100%;
+  height: 50px;
+  border-radius: 25px;
+  background-color: #2f87ff;
+  align-items: center;
+  justify-content: center;
+  border-width: 1px;
+  border-color: #2f87ff;
+`;
+
+const ButtonText = styled.Text`
+  font-size: ${getFontSize(16)}px;
+  font-family: Pretendard-Bold;
+  color: #fff;
+  line-height: 20px;
+`;
+
+const InfoExpense = props => {
+  const actionSheetRef = useRef(null);
+  const dispatch = useDispatch();
+  const { width, height } = useWindowDimensions();
+ // console.log('[InfoSimple] props', props);
+
+  return (
+    <ActionSheet
+      ref={actionSheetRef}
+      headerAlwaysVisible
+      CustomHeaderComponent={
+        <ModalHeader>
+          <Pressable
+            hitSlop={20}
+            onPress={() => {
+              dispatch(removeLastModalList());
+              actionSheetRef.current?.hide();
+            }}>
+            <CloseIcon width={16} height={16} />
+          </Pressable>
+        </ModalHeader>
+      }
+      overlayColor="#111"
+      defaultOverlayOpacity={0.7}
+      closeOnTouchBackdrop={false}
+      gestureEnabled={false}
+      statusBarTranslucent
+      containerStyle={{
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        height: props.payload?.height,
+        width: width - 40,
+      }}>
+      <SheetContainer width={width}>
+        <ModalContentSection>
+          <ModalTitle><BoldText>{props.payload?.Title}</BoldText>란?</ModalTitle>
+          <ModalDescription>{props.payload?.Description}</ModalDescription>
+          {props.payload?.Title === '상생임대인제도' && <Modaldetail>{props.payload?.Detail}</Modaldetail>}
+        </ModalContentSection>
+
+        <ButtonSection>
+          <DropShadow
+            style={{
+              shadowColor: 'rgba(0,0,0,0.25)',
+              shadowOffset: {
+                width: 0,
+                height: 4,
+              },
+              shadowOpacity: 0.15,
+              shadowRadius: 2,
+              alignSelf: 'center',
+              width: 285,
+            }}>
+            <Button
+              onPress={() => {
+                dispatch(removeLastModalList());
+                actionSheetRef.current?.hide();
+              }}>
+              <ButtonText>돌아가기</ButtonText>
+            </Button>
+          </DropShadow>
+        </ButtonSection>
+      </SheetContainer>
+    </ActionSheet>
+  );
+};
+
+export default InfoExpense;

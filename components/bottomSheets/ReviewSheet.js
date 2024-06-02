@@ -1,15 +1,15 @@
 // 리뷰 작성 시트
 
-import {useWindowDimensions, Pressable} from 'react-native';
-import React, {useRef, useState, useEffect} from 'react';
+import { useWindowDimensions, Pressable, Keyboard, ScrollView } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-
+import { useDispatch, useSelector } from 'react-redux';
 const SheetContainer = styled.View`
   flex: 1;
   background-color: #fff;
@@ -96,16 +96,26 @@ const StarButton = styled.TouchableOpacity.attrs(props => ({
   border-color: #f9cc26;
 `;
 
+const ReviewItem = styled.View`
+  width: 100%;
+  height: auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom-width: 1px;
+  border-bottom-color: #e8eaed;
+`;  // 세미콜론 추가
+
 const ReviewInput = styled.TextInput.attrs(props => ({
   placeholderTextColor: '#C1C3C5',
   verticalAlign: 'top',
 }))`
-  width: ${props => props.width - 80}px;
+  width: ${props => props.width - 80}px;  
   height: 120px;
   border-radius: 10px;
   background-color: #f5f7fa;
-  padding: 15px;
-  margin-top: 20px;
+  padding: 15px; 
   font-size: 15px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
@@ -113,14 +123,37 @@ const ReviewInput = styled.TextInput.attrs(props => ({
   text-align: left;
   align-self: center;
   text-align-vertical: top;
+  overflow: hidden; 
 `;
 
 const ReviewSheet = props => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const actionSheetRef = useRef(null);
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const [score, setScore] = useState(5);
   const [reviewText, setReviewText] = useState('');
+  const [keyboardShow, setKeyboardShow] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardShow(true); // or some other action
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardShow(false); // or some other action
+      },
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   const uploadReview = async () => {
     const data = {
@@ -133,7 +166,7 @@ const ReviewSheet = props => {
     await axios
       .post(url, data)
       .then(res => {
-        console.log(res);
+        // console.log(res);
       })
       .catch(err => {
         console.log(err);
@@ -157,13 +190,14 @@ const ReviewSheet = props => {
       }
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
+      closeOnTouchBackdrop={false}
       gestureEnabled={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 460,
+        height: keyboardShow ? 500 : 460,
         width: width - 40,
       }}>
       <SheetContainer width={width}>
@@ -184,7 +218,11 @@ const ReviewSheet = props => {
               />
             ))}
           </StarSection>
-          <ReviewInput width={width} placeholder="리뷰를 작성해주세요" />
+          <ReviewItem>
+            <ScrollView>
+              <ReviewInput multiline={true} width={width} placeholder="리뷰를 작성해주세요" />
+            </ScrollView>
+          </ReviewItem>
         </ModalInputSection>
 
         <ButtonSection>
@@ -230,7 +268,7 @@ const ReviewSheet = props => {
           </DropShadow>
         </ButtonSection>
       </SheetContainer>
-    </ActionSheet>
+    </ActionSheet >
   );
 };
 

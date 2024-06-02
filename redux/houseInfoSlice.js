@@ -13,10 +13,13 @@ export const houseInfoSlice = createSlice({
     setHouseInfo: (state, action) => {
       state.value = action.payload;
     },
+    clearHouseInfo: (state) => {
+      state.value = null; // value를 null로 초기화
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const {setHouseInfo} = houseInfoSlice.actions;
+export const {setHouseInfo, clearHouseInfo} = houseInfoSlice.actions;
 
 export default houseInfoSlice.reducer;

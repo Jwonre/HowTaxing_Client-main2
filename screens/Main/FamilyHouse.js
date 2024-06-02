@@ -73,7 +73,7 @@ const FamilyHouse = props => {
   const navigation = useNavigation();
   const {width, height} = useWindowDimensions();
 
-  console.log(props.route.params?.prevChat);
+ // console.log(props.route.params?.prevChat);
 
   useLayoutEffect(() => {
     navigation.setOptions({

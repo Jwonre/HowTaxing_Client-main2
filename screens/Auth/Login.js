@@ -1,19 +1,13 @@
-import {StatusBar, useWindowDimensions} from 'react-native';
-import React, {useEffect, useLayoutEffect} from 'react';
+import { StatusBar, useWindowDimensions, WebView, Linking } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import styled from 'styled-components';
-import {useNavigation} from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import getFontSize from '../../utils/getFontSize';
-import {login} from '@react-native-seoul/kakao-login';
-import NaverLogin from '@react-native-seoul/naver-login';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {
-  appleAuth,
-  appleAuthAndroid,
-} from '@invertase/react-native-apple-authentication';
-import {useDispatch} from 'react-redux';
-import {setCurrentUser} from '../../redux/currentUserSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCurrentUser } from '../../redux/currentUserSlice';
 import axios from 'axios';
-import {SheetManager} from 'react-native-actions-sheet';
+import { SheetManager } from 'react-native-actions-sheet';
+import NetInfo from '@react-native-community/netinfo';
 
 const Container = styled.ImageBackground.attrs(props => ({
   source: require('../../assets/images/loginBG.png'),
@@ -42,6 +36,7 @@ const SocialButton = styled.TouchableOpacity.attrs(props => ({
   padding: 10px;
   margin: 5px;
   margin-top: 8px;
+  line-heght: 20px;
 `;
 
 const SocialButtonText = styled.Text`
@@ -50,13 +45,12 @@ const SocialButtonText = styled.Text`
   font-family: Pretendard-Regular;
   line-height: 20px;
   letter-spacing: -0.3px;
-`;
-
+`
 const SocialButtonIcon = styled.Image.attrs(props => ({
   resizeMode: 'contain',
 }))`
-  width: 22px;
-  height: 20px;
+  width: 20px;
+  height: 50px;
   margin-right: 10px;
 `;
 
@@ -91,9 +85,83 @@ const Overlay = styled.View`
 `;
 
 const Login = () => {
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const navigation = useNavigation();
+  const route = useRoute();
   const dispatch = useDispatch();
+  //const [isConnected, setIsConnected] = useState(true);
+  const agreeMarketing = route.params;
+
+  const handleWebViewMessage = async (event) => {
+    const tokens = temp(event);
+    // console.log('Login:', event.nativeEvent.data);
+    if (event.nativeEvent.data.role === 'GUEST') {
+      //약관확인 화면으로 이동 후 약관 동의 완료시 handleSignUp 진행
+      navigation.push('CheckTerms');
+      handleSignUp(event.nativeEvent.data.accessToken);
+    } else {
+      //   console.log('Login token:', tokens[0]);
+      const tokenObject = { 'accessToken': tokens[0], 'refreshToken': tokens[1] };
+      //   console.log('Login tokenObject:', tokenObject);
+      dispatch(setCurrentUser(tokenObject));
+    }
+  };
+
+  const temp = (event) => {
+    const accessToken = event.nativeEvent.data.accessToken;
+    const refreshToken = event.nativeEvent.data.refreshToken;
+    return [accessToken, refreshToken];
+  }
+
+  const handleSignUp = (accessToken) => {
+    // 요청 헤더
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`
+    };
+
+    // 요청 바디
+    const data = {
+      mktAgr: agreeMarketing,
+
+    };
+
+    axios
+      .post('http://13.125.194.154:8080/user/signUp', data, { headers: headers })
+      .then(response => {
+        if (response.data.errYn === 'Y') {
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg,
+              description: response.data.errMsgDtl,
+            },
+          });
+          return;
+        } else {
+          SheetManager.show('info', {
+            payload: {
+              type: 'success',
+              message: '회원가입에 성공했습니다.',
+            },
+          });
+          // 성공적인 응답 처리
+          // const { id } = response.data;
+          //    console.log("1111111", response);
+        }
+      })
+      .catch(error => {
+        // 오류 처리
+        SheetManager.show('info', {
+          payload: {
+            message: '회원가입에 실패했습니다.',
+            description: error?.message,
+            type: 'error',
+          }
+        });
+        console.error(error);
+      });
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -101,37 +169,59 @@ const Login = () => {
     });
   }, [navigation]);
 
+
+
   // 카카오 로그인
   const onKakaoLogin = async () => {
-    const {accessToken} = await login();
-
+    /*const { accessToken } = await login();
+   
     if (accessToken) {
       socialLogin(0, accessToken);
     }
+  */
+    NetInfo.addEventListener(state => { 
+      if (!state.isConnected) { 
+        console.log('isConnected', state.isConnected);
+        setIsConnected(false);
+      }
+    });
+    navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'kakao', });
+
+
   };
 
   // 네이버 로그인
   const onNaverLogin = async () => {
+    /*
     await NaverLogin.login({
       appName: '하우택싱',
       consumerKey: 'orG8AAE8iHfRSoiySAbv',
       consumerSecret: 'DEn_pJGqup',
       serviceUrlScheme: 'howtaxing',
     }).then(async res => {
-      const {accessToken} = res?.successResponse;
-
+      const { accessToken } = res?.successResponse;
+   
       console.log('accessToken', accessToken);
-
+   
       if (accessToken) {
         socialLogin(1, accessToken);
       }
     });
+    */
+    NetInfo.addEventListener(state => { 
+      if (!state.isConnected) { 
+        setIsConnected(false);
+      }
+    });
+    navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'naver', });
+
   };
 
   // 구글 로그인
   const onGoogleLogin = async () => {
+    /*
     await GoogleSignin.hasPlayServices();
-
+   
     const GOOGLE_CLIENT_ID =
       '797361358853-j9mpkpnq9bgrnmahi46dgkb5loufk5bg.apps.googleusercontent.com';
     GoogleSignin.configure({
@@ -141,14 +231,21 @@ const Login = () => {
     try {
       await GoogleSignin.signIn();
       const user = await GoogleSignin.getTokens();
-
+   
       const accessToken = user.accessToken;
       console.log('accessToken', accessToken);
-
+   
       socialLogin(2, accessToken);
     } catch (error) {
       console.log('error', error);
     }
+  */
+    NetInfo.addEventListener(state => { 
+      if (!state.isConnected) { 
+        setIsConnected(false);
+      }
+    });
+    navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'google', });
   };
 
   // 애플 로그인
@@ -179,15 +276,15 @@ const Login = () => {
     // } else {
     //   console.log('ios only');
     // }
-//    dispatch(
-//        setCurrentUser({
-//          name: '김하우',
-//          email: '',
-//        }),
-//  );
+    //    dispatch(
+    //      setCurrentUser({
+    //        name: '김하우',
+    //        email: '',
+    //      }),
+    //    );
 
-  dispatch(setCurrentUser(null),);
-  navigation.push('CheckTerms');
+    dispatch(setCurrentUser(null));
+    navigation.push('CheckTerms');
   };
 
   // 소셜 로그인
@@ -200,22 +297,31 @@ const Login = () => {
     axios
       .post('http://13.125.194.154:8080/user/socialLogin', data)
       .then(response => {
-        if (response.data.isError) {
+        if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: '로그인에 실패했습니다.',
-              description: response.data.errMsg,
+              message: response.data.errMsg,
+              description: response.data.errMsgDtl,
             },
           });
           return;
+        } else {
+          const { id } = response.data;
+          getUserData(id);
         }
         // 성공적인 응답 처리
-        const {id} = response.data;
-        getUserData(id);
+
       })
       .catch(error => {
         // 오류 처리
+        SheetManager.show('info', {
+          payload: {
+            message: '로그인에 실패했습니다.',
+            description: error?.message,
+            type: 'error',
+          }
+        });
         console.error(error);
       });
   };
@@ -226,7 +332,7 @@ const Login = () => {
       .get(`http://13.125.194.154:8080/user/${id}`)
       .then(response => {
         // 성공적인 응답 처리
-        console.log(response.data);
+        // console.log(response.data);
         const userData = response.data;
         dispatch(setCurrentUser(userData));
       })
@@ -249,12 +355,14 @@ const Login = () => {
         <SocialButton
           onPress={onKakaoLogin}
           width={width}
+          height={60}
           style={{
             backgroundColor: '#FBE54D',
           }}>
           <SocialButtonText
             style={{
               color: '#3B1F1E',
+              height: 20,
             }}>
             <SocialButtonIcon
               source={require('../../assets/images/socialIcon/kakao_ico.png')}

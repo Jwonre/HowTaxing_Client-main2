@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Pressable,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
@@ -16,10 +16,11 @@ import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import MinusIcon from '../../assets/icons/minus.svg';
 import PlusIcon from '../../assets/icons/plus.svg';
-import {useDispatch, useSelector} from 'react-redux';
-import {setHouseInfo} from '../../redux/houseInfoSlice';
-import {setChatDataList} from '../../redux/chatDataListSlice';
-import {acquisitionTax} from '../../data/chatData';
+import { useDispatch, useSelector } from 'react-redux';
+import { setHouseInfo } from '../../redux/houseInfoSlice';
+import { setChatDataList } from '../../redux/chatDataListSlice';
+import { removeLastModalList } from '../../redux/modalListSlice';
+import { acquisitionTax } from '../../data/chatData';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -83,7 +84,7 @@ const ButtonSection = styled.View`
 const JointSheet = props => {
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
-  const {width, height} = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const [personCount, setPersonCount] = useState(2);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
@@ -97,6 +98,9 @@ const JointSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
+              const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+              dispatch(setChatDataList(newChatDataList));
+              dispatch(removeLastModalList());
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -104,8 +108,10 @@ const JointSheet = props => {
         </ModalHeader>
       }
       overlayColor="#111"
+      closeOnPressBack={false}
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
+      closeOnTouchBackdrop={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
@@ -130,6 +136,11 @@ const JointSheet = props => {
               onPress={() => {
                 if (personCount > 2) {
                   setPersonCount(personCount - 1);
+                } else if (personCount === 2) {
+                  setPersonCount(2);
+                }
+                if (personCount < 2) {
+                  setPersonCount(personCount + 1);
                 }
               }}
               style={{
@@ -156,7 +167,14 @@ const JointSheet = props => {
 
             <TouchableOpacity
               onPress={() => {
-                setPersonCount(personCount + 1);
+                if (personCount > 2) {
+                  setPersonCount(personCount - 1);
+                } else if (personCount === 2) {
+                  setPersonCount(2);
+                }
+                if (personCount < 2) {
+                  setPersonCount(personCount + 1);
+                }
               }}
               style={{
                 width: 60,
@@ -189,13 +207,13 @@ const JointSheet = props => {
             <ModalButton
               onPress={() => {
                 dispatch(
-                  setHouseInfo({...houseInfo, personCount: personCount}),
+                  setHouseInfo({ ...houseInfo, ownerCnt: personCount, userProportion: personCount===1 ? 100 : 50 })
                 );
                 actionSheetRef.current?.hide();
                 const chat = {
                   id: 'jointSystem',
                   type: 'system',
-                  message: '공동 소유자가 몇 명인가요?',
+                  message: '총 공동 소유자가 몇 명 인가요?',
                   questionId: 'apartment',
                   progress: 5,
                 };
@@ -208,7 +226,9 @@ const JointSheet = props => {
                 const chat2 = acquisitionTax.find(el => el.id === 'moreHouse');
                 dispatch(
                   setChatDataList([...chatDataList, chat, chat1, chat2]),
+
                 );
+                dispatch(removeLastModalList());
               }}
               style={{
                 width: width - 80,
