@@ -1,4 +1,4 @@
-// 보유 주택 목록에서 공시지가 수정 선택시 뜨는 팝업
+// 보유 주택 목록에서 공시가격 수정 선택시 뜨는 팝업
 
 import {
   View,
@@ -179,12 +179,12 @@ const UpdateBuyPriceAlert = props => {
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  // 공시지가
+  // 공시가격
   const [buyPrice, setBuyPrice] = useState(
     data?.buyPrice ? data?.buyPrice : null,
   );
 
-  // 공시지가 선택 리스트
+  // 공시가격 선택 리스트
   const AC_BUYPRICE_LIST = [500000000, 100000000, 10000000, 1000000];
 
 
@@ -262,12 +262,12 @@ const UpdateBuyPriceAlert = props => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
               }}>
-              <ModalLabel>취득가액</ModalLabel>
+              <ModalLabel>취득금액</ModalLabel>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <ModalInputContainer>
                 <StyledInput
-                  placeholder="취득가액을 입력해주세요."
+                  placeholder="취득금액을 입력해주세요."
                   keyboardType="number-pad"
                   value={buyPrice ? buyPrice?.toLocaleString() : null}
                   onChangeText={text => {

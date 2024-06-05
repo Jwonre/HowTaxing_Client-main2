@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Animated,
   BackHandler,
+  Linking,
 } from 'react-native';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -180,6 +181,91 @@ const ModalButtonText = styled.Text`
   line-height: 20px;
 `;
 
+const Card = styled(Animatable.View).attrs(props => ({
+  animation: 'fadeInUp',
+}))`
+  width: ${props => props.width - 40}px;
+  height: auto;
+  padding: 20px 25px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #e8eaed;
+`;
+
+const ProfileAvatar = styled(FastImage).attrs(props => ({
+  resizeMode: 'cover',
+}))`
+  width: 110px;
+  height: 110px;
+  border-radius: 55px;
+  background-color: '#F0F3F8';
+  align-self: center;
+  margin: 15px 0;
+`;
+const ProfileName = styled.Text`
+  font-size: 15px;
+  font-family: Pretendard-Medium;
+  color: #1b1c1f;
+  line-height: 20px;
+  text-align: center;
+`;
+
+const ProfileEmail = styled.Text`
+  font-size: 13px;
+  font-family: Pretendard-Regular;
+  color: #717274;
+  line-height: 20px;
+  margin-top: 5px;
+  text-align: center;
+`;
+
+const KakaoButton = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.8,
+}))`
+  flex-direction: row;
+  width: 100%;
+  height: 50px;
+  border-radius: 25px;
+  background-color: #fbe54d;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15px;
+`;
+
+const KakaoButtonText = styled.Text`
+  font-size: 15px;
+  font-family: Pretendard-Regular;
+  color: #3b1f1e;
+  line-height: 20px;
+`;
+
+const SocialButtonIcon = styled.Image.attrs(props => ({
+  resizeMode: 'contain',
+}))`
+  width: 22px;
+  height: 20px;
+  margin-right: 16px;
+`;
+const Button = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.6,
+}))`
+  width: ${props => props.width - 40}px;
+  height: 60px;
+  border-radius: 30px;
+  background-color: #2f87ff;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  align-self: center;
+`;
+
+const ButtonText = styled.Text`
+  font-size: 18px;
+  font-family: Pretendard-Bold;
+  color: #fff;
+  line-height: 20px;
+`;
+
 const HouseInfoCard = styled.View`
   width: ${props => props.width - 40}px;
   height: auto;
@@ -305,7 +391,7 @@ const AcquisitionChat = () => {
       })
       .catch(function (error) {
         let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
+        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
         SheetManager.show('info', {
           payload: {
             message: '보유주택을 불러오는데 문제가 발생했습니다.',
@@ -319,7 +405,7 @@ const AcquisitionChat = () => {
 
   const handleBackPress = () => {
     let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
+    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
     SheetManager.show('info', {
       payload: {
         type: 'backHome',
@@ -654,7 +740,7 @@ const AcquisitionChat = () => {
       if (!Object.values(modalList).some(modal => modal.modal === 'review')) {
         setTimeout(() => {
           let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'review'} }));
+          dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'review' } }));
           SheetManager.show('review', {
             payload: {
               questionId: 'goodbye',
@@ -812,14 +898,7 @@ const AcquisitionChat = () => {
                                 item2.name === '네'
                                   ? true
                                   : false,
-                              isMoveInRight:
-                                item2.name === '네'
-                                  ? true
-                                  : false,
-                              houseType:
-                                item2.name === '네'
-                                  ? '3'
-                                  : '6',
+                              isMoveInRight: true,
                             }),
                           );
                         }
@@ -946,7 +1025,7 @@ const AcquisitionChat = () => {
                         if (item2?.openSheet) {
                           // console.log('openSheet');
                           let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : item2.openSheet, index: index} }));
+                          dispatch(setModalList({ ...modalList, [Modalindex]: { modal: item2.openSheet, index: index } }));
                           SheetManager.show(item2.openSheet, {
                             payload: {
                               navigation: navigation,
@@ -988,7 +1067,7 @@ const AcquisitionChat = () => {
                   disabled={index < chatDataList.length - 1}
                   onPress={() => {
                     let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'confirm', index} }));
+                    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'confirm', index } }));
                     SheetManager.show('confirm', {
                       payload: {
                         questionId: item?.id,
@@ -1005,6 +1084,57 @@ const AcquisitionChat = () => {
               )}
             </ChatBubble>
           </ChatItem>
+          {item?.id === 'destruction' && (
+            <>
+              <Card
+                style={{
+                  width: width - 40,
+                  alignSelf: 'center',
+                }}>
+                <ChatBubbleText
+                  style={{
+                    textAlign: 'center',
+                  }}>
+                  계산 결과를 전문 세무사에게 바로 상담해보세요.
+                </ChatBubbleText>
+                <ProfileAvatar
+                  source={require('../../assets/images/Gookyoung_Yoon.png')}
+                />
+                <ProfileName>윤국녕 세무사</ProfileName>
+                <ProfileEmail>ilbitax86@naver.com</ProfileEmail>
+                <KakaoButton
+                  onPress={() => Linking.openURL('http://pf.kakao.com/_jfxgFG')}>
+                  <SocialButtonIcon
+                    source={require('../../assets/images/socialIcon/kakao_ico.png')}
+                  />
+                  <KakaoButtonText>카카오톡으로 상담하기</KakaoButtonText>
+                </KakaoButton>
+              </Card>
+              <DropShadow
+                style={{
+                  shadowColor: 'rgba(0,0,0,0.25)',
+                  shadowOffset: {
+                    width: 0,
+                    height: 4,
+                  },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 4,
+                }}>
+                <Button
+                  width={width}
+                  style={{
+                    marginBottom: 20,
+                  }}
+                  onPress={() => {
+                    navigation.goBack();
+                  }}>
+                  <ButtonText>돌아가기</ButtonText>
+                </Button>
+              </DropShadow>
+            </>
+          )
+          }
+
           {item?.id === 'calculating' && (
             <View
               style={{

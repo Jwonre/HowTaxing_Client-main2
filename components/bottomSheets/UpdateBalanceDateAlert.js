@@ -1,4 +1,4 @@
-// 보유 주택 목록에서 공시지가 수정 선택시 뜨는 팝업
+// 보유 주택 목록에서 공시가격 수정 선택시 뜨는 팝업
 
 import {
   View,
@@ -180,12 +180,12 @@ const UpdateBalanceDateAlert = props => {
   );
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  // 공시지가
+  // 공시가격
   const [pubLandPrice, setPubLandPrice] = useState(
     data?.pubLandPrice ? data?.pubLandPrice : 550000000,
   );
 
-  // 공시지가 선택 리스트
+  // 공시가격 선택 리스트
   const AC_PUBLANDPRICE_LIST = [500000000, 100000000, 10000000, 1000000];
 
 

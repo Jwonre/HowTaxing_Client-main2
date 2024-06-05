@@ -1,4 +1,4 @@
-// 공시지가 정의 설명 팝업(? 아이콘 누른경우)
+// 공시가격 정의 설명 팝업(? 아이콘 누른경우)
 
 import { useWindowDimensions, Pressable } from 'react-native';
 import React, { useRef, useState } from 'react';

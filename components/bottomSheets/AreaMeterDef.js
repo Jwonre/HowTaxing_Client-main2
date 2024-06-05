@@ -1,4 +1,4 @@
-// 공시지가 의미설명(?눌렀을 때)
+// 공시가격 의미설명(?눌렀을 때)
 
 import { View, useWindowDimensions, Pressable, BackHandler } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';

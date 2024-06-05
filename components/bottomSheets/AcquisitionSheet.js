@@ -37,7 +37,17 @@ const ModalTitle = styled.Text`
   font-size: ${getFontSize(17)}px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
-  line-height: 26px;
+  line-height: 20px;
+  text-align: center;
+`;
+
+
+const InfoMessage = styled.Text`
+  font-size: ${getFontSize(15)}px;
+  font-family: Pretendard-Medium;
+  color: #A3A5A8;
+  line-height: 23px;
+  margin-top: 18px;
   text-align: center;
 `;
 
@@ -182,7 +192,7 @@ const AcquisitionSheet = props => {
                   activeOpacity={0.8}
                   hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                   <InfoIcon />
-                </TouchableOpacity> 취득가액 ? 부분 삭제 */
+                </TouchableOpacity> 취득금액 ? 부분 삭제 */
 
 
   LogBox.ignoreLogs(['to contain units']);
@@ -196,7 +206,7 @@ const AcquisitionSheet = props => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   // 취득일자
   const [selectedDate2, setSelectedDate2] = useState(new Date());
-  // 취득가액
+  // 취득금액
   const [currentDate, setCurrentDate] = useState();
   const [acAmount, setAcAmount] = useState(
     houseInfo?.acAmount ? houseInfo?.acAmount : null,
@@ -205,7 +215,7 @@ const AcquisitionSheet = props => {
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
 
-  // 취득가액 선택 리스트
+  // 취득금액 선택 리스트
   const AC_AMOUNT_LIST = [500000000, 100000000, 10000000, 1000000];
 
 
@@ -311,7 +321,7 @@ const AcquisitionSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: currentPageIndex === 2 ? (isKeyboardVisible ? 400 : 420) : 620,
+        height: currentPageIndex === 2 ? (isKeyboardVisible ? 400 : 420) : 670,
         width: width - 40,
       }}>
       <ScrollView
@@ -326,7 +336,10 @@ const AcquisitionSheet = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>취득하실 주택의 매매 계약일을 선택해주세요.</ModalTitle>
+            <ModalTitle>계약일자를 선택해주세요.</ModalTitle>
+            <InfoMessage>
+                취득하실 주택의 매매 계약일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
+            </InfoMessage>
             <View
               style={{
                 width: '100%',
@@ -407,7 +420,10 @@ const AcquisitionSheet = props => {
 
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>취득일(소유권이전등기일)을 선택해주세요.</ModalTitle>
+            <ModalTitle>취득일자를 선택해주세요.</ModalTitle>
+            <InfoMessage>
+                취득하실 주택의 취득예정일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
+            </InfoMessage>
             <View
               style={{
                 width: '100%',
@@ -468,11 +484,11 @@ const AcquisitionSheet = props => {
                   const chat1 = {
                     id: 'aquiAmountSystem',
                     type: 'system',
-                    message: '취득가액을 입력해주세요.',
+                    message: '취득금액을 입력해주세요.',
                     select: [
                       {
                         id: 'aquiAmountDate',
-                        name: '취득가액 선택하기',
+                        name: '취득금액 선택하기',
                         openSheet: 'acquisition',
                         currentPageIndex: 2,
 
@@ -499,7 +515,7 @@ const AcquisitionSheet = props => {
 
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>취득가액을 입력해주세요.</ModalTitle>
+            <ModalTitle>취득금액을 입력해주세요.</ModalTitle>
             <ModalSubtitle>{numberToKorean(acAmount)}원</ModalSubtitle>
             <View
               style={{
@@ -512,12 +528,12 @@ const AcquisitionSheet = props => {
                   alignItems: 'center',
                   justifyContent: 'flex-start',
                 }}>
-                <ModalLabel>취득가액</ModalLabel>
+                <ModalLabel>취득금액</ModalLabel>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <ModalInputContainer>
                   <StyledInput
-                    placeholder="취득가액을 입력해주세요."
+                    placeholder="취득금액을 입력해주세요."
                     keyboardType="number-pad"
                     value={acAmount ? acAmount.toLocaleString() : null}
                     onChangeText={text => {

@@ -313,7 +313,7 @@ const ConfirmSheet2 = props => {
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
-            <InfoContentLabel>양도가액</InfoContentLabel>
+            <InfoContentLabel>양도금액</InfoContentLabel>
             <InfoContentText>
               {numberToKorean(Number(houseInfo?.saleAmount).toString())} 원
             </InfoContentText>

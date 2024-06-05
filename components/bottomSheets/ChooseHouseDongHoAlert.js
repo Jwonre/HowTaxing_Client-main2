@@ -537,7 +537,7 @@ const ChooseHouseDongHoAlert = props => {
     const chatpubLandPrice = {
       id: 'pubLandPrice',
       type: 'system',
-      message: '공시지가를 제대로 불러오지 못했어요.\n공시지가가 1억원을 초과하나요?',
+      message: '공시가격를 제대로 불러오지 못했어요.\n공시가격가 1억원을 초과하나요?',
       progress: 1,
       select: [
         {

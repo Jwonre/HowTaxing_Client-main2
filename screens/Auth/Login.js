@@ -182,7 +182,6 @@ const Login = () => {
     NetInfo.addEventListener(state => { 
       if (!state.isConnected) { 
         console.log('isConnected', state.isConnected);
-        setIsConnected(false);
       }
     });
     navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'kakao', });
@@ -210,7 +209,6 @@ const Login = () => {
     */
     NetInfo.addEventListener(state => { 
       if (!state.isConnected) { 
-        setIsConnected(false);
       }
     });
     navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'naver', });
@@ -242,7 +240,6 @@ const Login = () => {
   */
     NetInfo.addEventListener(state => { 
       if (!state.isConnected) { 
-        setIsConnected(false);
       }
     });
     navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'google', });

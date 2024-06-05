@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';
 import dayjs from 'dayjs';
 import ArrowIcon from '../assets/icons/previous_arrow_ico.svg';
+import WheelPicker from 'react-native-wheely';
 
 const CalendarSection = styled.View`
   width: 100%;
@@ -28,25 +29,77 @@ const ModalSubtitle = styled.Text`
   text-align: center;
   margin: 20px 0;
 `;
+const SelectGroup = styled.View`
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 10px 20px;
+`;
 
+
+const SelectLabel = styled.Text`
+  font-size: ${getFontSize(12)}px;
+  font-family: Pretendard-Medium;
+  color: #1b1c1f;
+  line-height: 20px;
+`;
+
+const PickerContainer = styled.View`
+  width: 100%; 
+  height: 300;
+  background-color: #f5f7fa;
+  border-radius: 10px;
+  margin-top: 10px;
+  align-items: center;
+  justify-content: center;
+`;
 const Calendar = props => {
- // console.log('props.currentDate', props.currentDate);
+  // console.log('props.currentDate', props.currentDate);
   //console.log('props.currentDate', props.currentDate);
   //console.log('props.selectedDate', props.selectedDate);
-  const [currentDate, setCurrentDate] = useState(props.currentDate !== undefined ? new Date(props.currentDate): new Date());
+  const [currentDate, setCurrentDate] = useState(props.currentDate !== undefined ? new Date(props.currentDate) : new Date());
   const [calendarData, setCalendarData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate): null);
-  const [viewMode, setViewMode] = useState('day');
-   //console.log('selectedDate', selectedDate);
+  const [selectedDate, setSelectedDate] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate) : null);
+  const [selectedYear, setSelectedYear] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate).getFullYear() : null);
+  const [selectedMonth, setSelectedMonth] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate).getMonth() : null);
+  const currentyear = currentDate.getFullYear();
+  const years = [];
+  for (let i = currentyear - 50; i <= currentyear + 50; i++) {
+    years.push(i);
+  }
+  const currentmonth = currentDate.getMonth();
+  const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  const getDaysInMonth = (month, year) => {
+    let date = new Date(year, month, 1);
+    let days = [];
+    while (date.getMonth() === month) {
+      days.push(date.getDate());
+      date.setDate(date.getDate() + 1);
+    }
+    return days;
+  };
+  const [daysInMonth, setDaysInMonth] =  useState(selectedMonth ? getDaysInMonth(selectedMonth, selectedYear ? selectedYear : currentyear) : getDaysInMonth(currentmonth, selectedYear ? selectedYear : currentyear));
+
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  //const [viewMode, setViewMode] = useState('day');
+  console.log('currentDate', currentDate);
+  console.log('currentyear', currentyear);
+  console.log('currentmonth', currentmonth);
+  console.log('SelectedYear', selectedYear);
+  console.log('SelectedMonth', selectedMonth);
+  console.log('daysInMonths', daysInMonth);
   useEffect(() => {
-    generateDatesInRange('day');
-   //console.log('currentDate', currentDate);
+    //console.log('currentDate', currentDate);
+    setCurrentPageIndex(0);
+    generateDatesInRange();
   }, [currentDate]);
 
   useEffect(() => {
     props.setSelectedDate(selectedDate);
     //console.log('viewMode', viewMode);
-   // console.log('    currentDate.getMonth()', currentDate.getMonth());
+    // console.log('    currentDate.getMonth()', currentDate.getMonth());
 
   }, [selectedDate]);
 
@@ -67,7 +120,18 @@ const Calendar = props => {
       </View>
     );
   };
+  const generateDatesInRange = () => {
+    const dates = [];
+    for (
+      let date = new Date(firstSunday);
+      date <= lastSaturday;
+      date.setDate(date.getDate() + 1)
+    ) {
+      dates.push(new Date(date));
+    }
 
+    setCalendarData(dates);
+  };
   const firstDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
@@ -78,29 +142,6 @@ const Calendar = props => {
     currentDate.getMonth() + 1,
     0,
   );
-
-  const firstMonthOfYear = new Date(
-    currentDate.getFullYear(),
-    0,
-    currentDate.getDate(),
-  );
-  const lastMonthOfYear = new Date(
-    currentDate.getFullYear(),
-    11,
-    currentDate.getDate(),
-  );
-
-  const firstYear = new Date(
-    new Date().getFullYear() - 100, 
-    currentDate.getMonth(),
-    currentDate.getDate(),
-  );
-  const lastYear = new Date(
-    new Date().getFullYear() + 50,
-    currentDate.getMonth(),
-    currentDate.getDate(),
-  );
-
   // 주의 첫 번째 일요일 찾기
   const firstSunday = new Date(firstDayOfMonth);
   firstSunday.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
@@ -119,7 +160,7 @@ const Calendar = props => {
         disabled={props.minDate ? isPast : false}
         onPress={() => {
           setSelectedDate(item);
-         // console.log('item', item);
+          // console.log('item', item);
         }}
         style={{
           flex: 1,
@@ -164,135 +205,6 @@ const Calendar = props => {
     );
   };
 
-  const renderMonth = ({ item }) => {
-    const isSelected = item.toDateString() === selectedDate?.toDateString();
-    return (
-      <Pressable
-        onPress={() => {
-          setCurrentDate(item);
-          generateDatesInRange('day');
-          setViewMode('day');
-        }}
-        style={{
-          flex: 1,
-          backgroundColor: '#fff',
-          height: 90,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-        <View
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: 21,
-            backgroundColor: isSelected ? '#1B1C1F' : '#fff',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <Text
-            style={[
-              {
-                fontSize: 18,
-                fontFamily: 'Pretendard-Regular',
-                color: isSelected ? '#fff' : '#CFD1D5',
-                textAlign: 'center',
-              },
-              {
-                color: isSelected
-                  ? '#fff'
-                  : '#545463',
-              }
-
-            ]}>
-            {item.getMonth() + 1 + '월'}
-          </Text>
-        </View>
-      </Pressable>
-    );
-  };
-
-  const renderYear = ({ item }) => {
-    const isSelected = item.toDateString() === selectedDate?.toDateString();
-    return (
-      <Pressable
-        //  disabled={props.minDate ? isPast : false}
-        onPress={() => {
-        //  setCurrentDate(item);
-        //  console.log('year->month item',item);
-          setViewMode('month');
-          generateDatesInRange('month');
-
-        }}
-        style={{
-          flex: 1,
-          backgroundColor: '#fff',
-          height: 42,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-        <View
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: 21,
-            backgroundColor: isSelected ? '#1B1C1F' : '#fff',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <Text
-            style={[
-              {
-                fontSize: 16,
-                fontFamily: 'Pretendard-Regular',
-                color: isSelected ? '#fff' : '#CFD1D5',
-                textAlign: 'center',
-              },
-              {
-                color: isSelected
-                  ? '#fff'
-                  : '#545463',
-              }
-            ]}>
-            {item.getFullYear()}
-          </Text>
-        </View>
-      </Pressable>
-    );
-  };
-  const generateDatesInRange = (viewMode) => {
-    const dates = [];
-    if (viewMode === 'day') {
-      for (
-        let date = new Date(firstSunday);
-        date <= lastSaturday;
-        date.setDate(date.getDate() + 1)
-      ) {
-        dates.push(new Date(date));
-      }
-    } else if (viewMode === 'month') {
-      for (
-        let Months = new Date(firstMonthOfYear);
-        Months <= lastMonthOfYear;
-        Months.setMonth(Months.getMonth() + 1)
-      ) {
-        dates.push(new Date(Months));
-      }
-    } else if (viewMode === 'year') {
-      for (
-        let year = new Date(firstYear);
-        year <= lastYear;
-        year.setFullYear(year.getFullYear() + 1)
-      ) {
-        dates.push(new Date(year));
-      }
-
-
-    };
-    //console.log('firstMonthOfYear', firstMonthOfYear);
-   //console.log('lastMonthOfYear', lastMonthOfYear);
-    //console.log('dates', dates);
-    setCalendarData(dates);
-  };
   return (
     <View
       style={{
@@ -300,9 +212,9 @@ const Calendar = props => {
         backgroundColor: '#fff',
       }}>
       <ModalSubtitle>
-      {(viewMode === 'day') && (  dayjs(selectedDate !== null ? selectedDate : new Date()).format('YYYY년 MM월 DD일'))}
+        {dayjs(selectedDate !== null ? selectedDate : new Date()).format('YYYY년 MM월 DD일')}
       </ModalSubtitle>
-      <View
+      {currentPageIndex === 0 && (<><View
         style={{
           width: '100%',
           borderTopWidth: 1,
@@ -311,13 +223,13 @@ const Calendar = props => {
         }}>
         <View
           style={{
-            width: viewMode === 'day' ? 200 : null,
+            width: 200,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
             alignSelf: 'center',
           }}>
-          {(viewMode === 'day') && (<TouchableOpacity
+          <TouchableOpacity
             activeOpacity={0.8}
             hitSlop={{
               top: 20,
@@ -329,10 +241,9 @@ const Calendar = props => {
               (setCurrentDate(dayjs(currentDate).subtract(1, 'M').toDate()));
             }}>
             <ArrowIcon />
-          </TouchableOpacity>)}
-          {(viewMode === 'day') && (<ModalSubtitle onPress={() => { setViewMode('month'); generateDatesInRange('month'); }}>{dayjs(currentDate).format('YYYY.MM')}</ModalSubtitle>)}
-          {(viewMode === 'month') && (<ModalSubtitle onPress={() => { setViewMode('year'); generateDatesInRange('year'); }}>{dayjs(currentDate).format('YYYY')}</ModalSubtitle>)}
-          {(viewMode === 'day') && (<TouchableOpacity
+          </TouchableOpacity>
+          <ModalSubtitle onPress={() => { setCurrentPageIndex(1) }}>{dayjs(currentDate).format('YYYY.MM')}</ModalSubtitle>
+          <TouchableOpacity
             activeOpacity={0.8}
             hitSlop={{
               top: 20,
@@ -348,43 +259,131 @@ const Calendar = props => {
                 transform: [{ rotate: '180deg' }],
               }}
             />
-          </TouchableOpacity>)}
+          </TouchableOpacity>
         </View>
       </View>
-      {(viewMode === 'day') && (<CalendarHeader />)}
-      <CalendarSection>
-        {(viewMode === 'day') && (<FlatList
-          key={currentDate.getDate()}
-          scrollEnabled={false}
-          data={calendarData}
-          numColumns={7}
-          keyExtractor={item => item.toISOString()}
-          renderItem={renderDay}
-          columnWrapperStyle={{
-            justifyContent: 'space-between',
-          }}
-        />)}
-        {(viewMode === 'month') && (<FlatList
-          scrollEnabled={false}
-          data={calendarData}
-          numColumns={4}
-          keyExtractor={item => item.toISOString()}
-          renderItem={renderMonth}
-          columnWrapperStyle={{
-            justifyContent: 'space-between',
-          }}
-        />)}
-        {(viewMode === 'year') && (<FlatList
-          scrollEnabled={true}
-          data={calendarData}
-          numColumns={4}
-          keyExtractor={item => item.toISOString()}
-          renderItem={renderYear}
-          columnWrapperStyle={{
-            justifyContent: 'space-between',
-          }}
-        />)}
-      </CalendarSection>
+
+        <CalendarHeader />
+        <CalendarSection>
+          <FlatList
+            key={currentDate.getMonth()}
+            scrollEnabled={false}
+            data={calendarData}
+            numColumns={7}
+            keyExtractor={item => item.toISOString()}
+            renderItem={renderDay}
+            columnWrapperStyle={{
+              justifyContent: 'space-between',
+            }}
+          />
+        </CalendarSection></>)}
+      {currentPageIndex === 1 && (<><View
+        style={{
+          width: '100%',
+          borderTopWidth: 1,
+          borderTopColor: '#E8EAED',
+          paddingHorizontal: 10,
+        }}>
+        <SelectGroup>
+          <View style={{ width: '40%', marginRight: 10 }}>
+            <SelectLabel>연도 선택</SelectLabel>
+            <PickerContainer>
+              <WheelPicker
+                selectedIndex={
+                  selectedDate !== null ? years.indexOf(selectedDate.getFullYear()) : years.indexOf(currentDate.getFullYear())
+                }
+                containerStyle={{
+                  width: 120,
+                  height: 440,
+                  borderRadius: 10,
+                }}
+                itemTextStyle={{
+                  fontFamily: 'Pretendard-Regular',
+                  fontSize: getFontSize(18),
+                  color: '#1B1C1F',
+                }}
+                selectedIndicatorStyle={{
+                  backgroundColor: 'transparent',
+                }}
+                itemHeight={40}
+                options={years}
+                onChange={index => {
+                  setSelectedYear(years[index]);
+                  setSelectedDate(new Date(years[index] , selectedMonth !== null ? selectedMonth : currentmonth, selectedDate !== null ? selectedDate.getDate() : currentDate.getDate()) );
+                }}
+                visibleRest={5}
+              />
+
+            </PickerContainer>
+          </View>
+          <View style={{ width: '27%', marginRight: 10 }}>
+            <SelectLabel>월 선택</SelectLabel>
+            <PickerContainer>
+              <WheelPicker
+                selectedIndex={
+                  selectedDate !== null ? months.indexOf(selectedDate.getMonth()+1) : months.indexOf(currentDate.getMonth()+1)
+                }
+                containerStyle={{
+                  width: 120,
+                  height: 440,
+                  borderRadius: 10,
+                }}
+                itemTextStyle={{
+                  fontFamily: 'Pretendard-Regular',
+                  fontSize: getFontSize(18),
+                  color: '#1B1C1F',
+                }}
+                selectedIndicatorStyle={{
+                  backgroundColor: 'transparent',
+                }}
+                itemHeight={40}
+                options={months}
+                onChange={index => {
+                  const monthIndex = months[index]-1;
+                  setSelectedMonth(monthIndex);
+                  setDaysInMonth(getDaysInMonth(monthIndex, selectedYear ? selectedYear : currentyear));
+                  setSelectedDate( new Date(selectedYear !== null ? selectedYear : currentyear , monthIndex, selectedDate !== null ? selectedDate.getDate() : currentDate.getDate()) );
+                }}
+                visibleRest={5}
+              />
+
+            </PickerContainer>
+          </View>
+          <View style={{ width: '27%', marginRight: 10 }}>
+            <SelectLabel>일 선택</SelectLabel>
+            <PickerContainer>
+              <WheelPicker
+                key={daysInMonth}
+                selectedIndex={
+                  selectedDate !== null ? daysInMonth.indexOf(selectedDate.getDate()) : daysInMonth.indexOf(currentDate.getDate())
+                }
+                containerStyle={{
+                  width: 120,
+                  height: 440,
+                  borderRadius: 10,
+                }}
+                itemTextStyle={{
+                  fontFamily: 'Pretendard-Regular',
+                  fontSize: getFontSize(18),
+                  color: '#1B1C1F',
+                }}
+                selectedIndicatorStyle={{
+                  backgroundColor: 'transparent',
+                }}
+                itemHeight={40}
+                options={daysInMonth}
+                onChange={index => {
+                  setSelectedDate( new Date(selectedYear !== null ? selectedYear : currentyear , selectedMonth !== null ? selectedMonth : currentmonth, daysInMonth[index]) );
+                }}
+                visibleRest={5}
+              />
+
+            </PickerContainer>
+          </View>
+        </SelectGroup>
+      </View>
+
+      </>)}
     </View>
   );
 };

@@ -109,7 +109,7 @@ export const acquisitionTax = [
       {
         id: 'ticketyes',
         name: '네',
-        openSheet: 'searchHouse',
+        select: ['destruction'],
       },
       {
         id: 'ticketno',
@@ -117,6 +117,13 @@ export const acquisitionTax = [
         openSheet: 'searchHouse',
       },
     ],
+  },
+  {
+    id: 'destruction',
+    type: 'system',
+    message:
+      '멸실된 입주권을 취득하실 예정이라면\n전문 세무사에게 상담을 문의해보세요.\n어떤 복잡한 상황에도\n최선의 결과를 알려주실 거에요.',
+    progress: 10,
   },
   {
     id: 'ownHouse',
@@ -196,7 +203,7 @@ export const acquisitionTax = [
   {
     id: 'aquiAmountSystem',
     type: 'system',
-    message: '취득가액을 입력해주세요.',
+    message: '취득금액을 입력해주세요.',
     questionId: 'apartment',
     progress: 4,
   },
@@ -510,7 +517,7 @@ export const gainTax = [
     type: 'system',
     progress: 5,
     message:
-      '매도하실 주택의 양도가액이 12억을 초과하는군요. 정확한 양도소득세 계산을 위해서 실거주 기간이 추가로 필요해요. 지금 본인인증을 한 번 더 해야해요.',
+      '매도하실 주택의 양도금액이 12억을 초과하는군요. 정확한 양도소득세 계산을 위해서 실거주 기간이 추가로 필요해요. 지금 본인인증을 한 번 더 해야해요.',
   },
   {
     id: 'under12',

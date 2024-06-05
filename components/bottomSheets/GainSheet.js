@@ -38,7 +38,16 @@ const ModalTitle = styled.Text`
   font-size: ${getFontSize(17)}px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
-  line-height: 26px;
+  line-height: 20px;
+  text-align: center;
+`;
+
+const InfoMessage = styled.Text`
+  font-size: ${getFontSize(15)}px;
+  font-family: Pretendard-Medium;
+  color: #A3A5A8;
+  line-height: 23px;
+  margin-top: 18px;
   text-align: center;
 `;
 
@@ -192,7 +201,7 @@ const GainSheet = props => {
 
   const [currentDate, setCurrentDate] = useState();
 
-  // 양도가액
+  // 양도금액
   const [saleAmount, setAcAmount] = useState(
     houseInfo?.saleAmount ? houseInfo?.saleAmount : 0,
   );
@@ -201,7 +210,7 @@ const GainSheet = props => {
   const chatDataList = useSelector(state => state.chatDataList.value);
 
 
-  // 양도가액 선택 리스트
+  // 양도금액 선택 리스트
   const AC_AMOUNT_LIST = [500000000, 100000000, 10000000, 1000000];
   // 페이지 이동
   useEffect(() => {
@@ -293,7 +302,7 @@ const GainSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: currentPageIndex === 2 ? (isKeyboardVisible ? 230 : 400) : 600,
+        height: currentPageIndex === 2 ? (isKeyboardVisible ? 230 : 400) : 660,
         width: width - 40,
       }}>
       <ScrollView
@@ -308,7 +317,10 @@ const GainSheet = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>양도하실 주택의 매매 계약일을 선택해주세요.</ModalTitle>
+            <ModalTitle>계약일자를 선택해주세요.</ModalTitle>
+            <InfoMessage>
+                양도하실 주택의 매매 계약일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
+            </InfoMessage>
             <View
               style={{
                 width: '100%',
@@ -388,7 +400,10 @@ const GainSheet = props => {
 
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>실제 양도일을 선택해주세요.</ModalTitle>
+            <ModalTitle>양도일자를 선택해주세요.</ModalTitle>
+            <InfoMessage>
+                양도하실 주택의 양도예정일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
+            </InfoMessage>
             <View
               style={{
                 width: '100%',
@@ -451,11 +466,11 @@ const GainSheet = props => {
                   const chat5 = {
                     id: 'saleAmountSystem',
                     type: 'system',
-                    message: '양도가액을 입력해주세요.',
+                    message: '양도금액을 입력해주세요.',
                     select: [
                       {
                         id: 'saleAmount',
-                        name: '양도가액 입력하기',
+                        name: '양도금액 입력하기',
                         openSheet: 'gain',
                         currentPageIndex: 2,
                       },
@@ -479,7 +494,7 @@ const GainSheet = props => {
 
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>양도가액을 입력해주세요.</ModalTitle>
+            <ModalTitle>양도금액을 입력해주세요.</ModalTitle>
             <ModalSubtitle>{numberToKorean(saleAmount)}원</ModalSubtitle>
             <View
               style={{
@@ -492,11 +507,11 @@ const GainSheet = props => {
                   alignItems: 'center',
                   justifyContent: 'flex-start',
                 }}>
-                <ModalLabel>양도가액</ModalLabel>
+                <ModalLabel>양도금액</ModalLabel>
               </View>
               <ModalInputContainer>
                 <StyledInput
-                  placeholder="양도가액을 입력해주세요."
+                  placeholder="양도금액을 입력해주세요."
                   keyboardType="number-pad"
                   value={saleAmount ? saleAmount.toLocaleString() : null}
                   onChangeText={text => {

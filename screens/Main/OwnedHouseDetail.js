@@ -284,7 +284,7 @@ const OwnedHouseDetail = props => {
     // moveInDate | LocalDate | 전입일자
     // moveOutDate | LocalDate | 전출일자
     // buyPrice | Long | 취득금액
-    // pubLandPrice | Long | 공시지가
+    // pubLandPrice | Long | 공시가격
     // kbMktPrice | Long | KB시세
     // jibunAddr | String | 지번주소
     // roadAddr | String | 도로명주소

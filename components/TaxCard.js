@@ -214,7 +214,7 @@ const TaxCard = props => {
           </InfoContentText>
         </InfoContentItem>
         <SubContainer>
-          <InfoContentLabel>취득가액</InfoContentLabel>
+          <InfoContentLabel>취득금액</InfoContentLabel>
           <InfoContentText
             style={{
               color: '#A3A5A8',

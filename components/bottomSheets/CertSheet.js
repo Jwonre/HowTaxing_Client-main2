@@ -739,6 +739,7 @@ const CertSheet = props => {
       {currentPageIndex === 1 && (
         <KeyboardAwareScrollView
           style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
+          extraScrollHeight={100}
         >
           <SheetContainer width={width}>
             <ModalInputSection>
@@ -847,6 +848,7 @@ const CertSheet = props => {
       {currentPageIndex === 2 && (
         <KeyboardAwareScrollView
           style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
+          extraScrollHeight={100}
         >
           <SheetContainer width={width}>
             <ModalInputSection>
@@ -957,6 +959,7 @@ const CertSheet = props => {
         currentPageIndex === 3 && (
           <KeyboardAwareScrollView
             style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
+            extraScrollHeight={100}
           >
             <SheetContainer width={width}>
               <ModalInputSection>

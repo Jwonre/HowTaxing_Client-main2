@@ -1,4 +1,4 @@
-// 공시지가_전용면적 정의 설명 팝업(? 아이콘 누른경우)
+// 공시가격_전용면적 정의 설명 팝업(? 아이콘 누른경우)
 
 import { useWindowDimensions, Pressable } from 'react-native';
 import React, { useRef, useState } from 'react';
@@ -107,7 +107,7 @@ const PubLandPriceDef = props => {
  // console.log('props', props);
 
   const title =
-    props.payload.type === '전용면적' ? '전용면적' : '공시지가';
+    props.payload.type === '전용면적' ? '전용면적' : '공시가격';
 
  // const middleMessage = '아래의 조건에 해당하시는 상황을 의미해요.';
   const message =
@@ -145,7 +145,7 @@ const PubLandPriceDef = props => {
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
-          <ModalTitle><BoldText>{title}</BoldText>{props.payload.type === '전용면적' ? '이란?' : '란?'}</ModalTitle>
+          <ModalTitle><BoldText>{title}</BoldText>{'이란?'}</ModalTitle>
           <ModalDescription>{message}</ModalDescription>
         </ModalContentSection>
 

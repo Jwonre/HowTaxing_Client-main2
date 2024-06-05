@@ -1,4 +1,4 @@
-// 보유 주택 목록에서 공시지가 수정 선택시 뜨는 팝업
+// 보유 주택 목록에서 공시가격 수정 선택시 뜨는 팝업
 
 import {
   View,
@@ -162,12 +162,12 @@ const UpdatePubLandPriceAlert = props => {
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  // 공시지가
+  // 공시가격
   const [pubLandPrice, setPubLandPrice] = useState(
     data?.pubLandPrice ? data?.pubLandPrice : 0,
   );
 
-  // 공시지가 선택 리스트
+  // 공시가격 선택 리스트
   const AC_PUBLANDPRICE_LIST = [500000000, 100000000, 10000000, 1000000];
 
 
@@ -232,7 +232,7 @@ const UpdatePubLandPriceAlert = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>공시지가를 입력해주세요.</ModalTitle>
+          <ModalTitle>공시가격를 입력해주세요.</ModalTitle>
           <ModalSubtitle>{numberToKorean(pubLandPrice)}원</ModalSubtitle>
           <View
             style={{
@@ -245,13 +245,13 @@ const UpdatePubLandPriceAlert = props => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
               }}>
-              <ModalLabel>공시지가</ModalLabel>
+              <ModalLabel>공시가격</ModalLabel>
 
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <ModalInputContainer>
                 <StyledInput
-                  placeholder="공시지가를 입력해주세요."
+                  placeholder="공시가격를 입력해주세요."
                   keyboardType="number-pad"
                   value={pubLandPrice ? pubLandPrice?.toLocaleString() : null}
                   onChangeText={text => {

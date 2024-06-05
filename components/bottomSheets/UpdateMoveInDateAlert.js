@@ -1,4 +1,4 @@
-// 보유 주택 목록에서 공시지가 수정 선택시 뜨는 팝업
+// 보유 주택 목록에서 공시가격 수정 선택시 뜨는 팝업
 
 import {
   View,
@@ -106,7 +106,7 @@ const UpdateMoveInDateAlert = props => {
   const [selectedDate, setSelectedDate] = useState(new Date(),
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  // 공시지가
+  // 공시가격
 
 
 
