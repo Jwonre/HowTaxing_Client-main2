@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';
 import * as Animatable from 'react-native-animatable';
 import FastImage from 'react-native-fast-image';
+import NetInfo from "@react-native-community/netinfo";
 
 const Card = styled(Animatable.View).attrs(props => ({
   animation: 'fadeInUp',
@@ -90,11 +91,39 @@ const SocialButtonIcon = styled.Image.attrs(props => ({
   margin-right: 16px;
 `;
 
-const openKakaoLink = () => {
-  Linking.openURL('http://pf.kakao.com/_jfxgFG');
+const openKakaoLink = async () => {
+  const state = await NetInfo.fetch();
+  const canProceed = await handleNetInfoChange(state);
+  if (canProceed) {
+
+    Linking.openURL('http://pf.kakao.com/_jfxgFG');
+  }
 };
 
 const CTACard = () => {
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
+
   return (
     <Card>
       <CardTitle

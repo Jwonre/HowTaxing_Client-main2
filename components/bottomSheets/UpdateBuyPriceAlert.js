@@ -16,7 +16,8 @@ import DropShadow from 'react-native-drop-shadow';
 import { useDispatch, useSelector } from 'react-redux';
 import numberToKorean from '../../utils/numToKorean';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
-import { removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
+
 import { LogBox } from 'react-native';
 
 const SheetContainer = styled.View`
@@ -98,23 +99,6 @@ const ModalInputSection = styled.View`
   background-color: #fff;
 `;
 
-const ModalButton = styled.TouchableOpacity.attrs(props => ({
-  activeOpacity: 0.8,
-}))`
-  width: 48%;
-  height: 50px;
-  border-radius: 25px;
-  background-color: #2f87ff;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
-  font-family: Pretendard-SemiBold;
-  color: #fff;
-  line-height: 20px;
-`;
 
 const ModalHeader = styled.View`
   width: 100%;
@@ -174,7 +158,9 @@ const ButtonText = styled.Text`
 const UpdateBuyPriceAlert = props => {
   LogBox.ignoreLogs(['to contain units']);
   const { handleHouseChange, data, navigation, prevSheet } = props.payload;
-
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const dispatch = useDispatch();
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
@@ -186,6 +172,25 @@ const UpdateBuyPriceAlert = props => {
 
   // 공시가격 선택 리스트
   const AC_BUYPRICE_LIST = [500000000, 100000000, 10000000, 1000000];
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
 
 
   // 키보드 이벤트
@@ -210,13 +215,16 @@ const UpdateBuyPriceAlert = props => {
   }, []);
 
   const nextHandler = async () => {
-
-    var p = data;
-    p.buyPrice = buyPrice;
-    //console.log('[UpdatebuyPriceAlert]nextHandler p:', p);
-    await handleHouseChange(p, p?.isMoveInRight);
-    dispatch(removeLastModalList());
-    actionSheetRef.current?.hide();
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      var p = data;
+      p.buyPrice = buyPrice;
+      //console.log('[UpdatebuyPriceAlert]nextHandler p:', p);
+      await handleHouseChange(p, p?.isMoveInRight);
+       
+      actionSheetRef.current?.hide();
+    }
   };
 
   return (
@@ -228,7 +236,7 @@ const UpdateBuyPriceAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -250,7 +258,7 @@ const UpdateBuyPriceAlert = props => {
       <SheetContainer width={width}>
         <ModalInputSection>
           <ModalTitle>취득 당시 취득금액을 입력해주세요.</ModalTitle>
-          <ModalSubtitle>{numberToKorean(buyPrice)}원</ModalSubtitle>
+          <ModalSubtitle>{numberToKorean(buyPrice)}{(buyPrice !== null && buyPrice !== 0) ? '원' : ' '}</ModalSubtitle>
           <View
             style={{
               paddingHorizontal: 20,

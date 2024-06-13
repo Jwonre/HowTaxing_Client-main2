@@ -8,8 +8,8 @@ import {
   Image,
   BackHandler,
 } from 'react-native';
-import React, { useState, useLayoutEffect, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useLayoutEffect, useEffect, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import DropShadow from 'react-native-drop-shadow';
@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SheetManager } from 'react-native-actions-sheet';
 import { HOUSE_TYPE } from '../../constants/colors';
 import axios from 'axios';
-import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
+  
 import numberToKorean from '../../utils/numToKorean';
 
 const Container = styled.View`
@@ -155,47 +155,46 @@ const HouseDetail = props => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const dispatch = useDispatch();
-  const modalList = useSelector(state => state.modalList.value);
- // const [isMoveInRight, setIsMoveInRight] = useState(false);
+   
+  // const [isMoveInRight, setIsMoveInRight] = useState(false);
 
- // console.log(item);
+  // console.log(item);
   const [location, setLocation] = useState({
     latitude: 37.5326,
     longitude: 127.024612,
   });
 
   useEffect(() => {
-   // console.log('item', item);
+    // console.log('item', item);
     getAPTLocation(item?.roadAddr);
   }, []);
 
   const handleBackPress = () => {
-    if (props.route.params?.prevSheet) {
-      navigation.goBack();
+    const { prevSheet, index } = props.route.params;
+    navigation.goBack();
+    if (prevSheet) {
       // 시트를 표시하고 기본 동작을 중단
-      
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : props.route.params?.prevSheet, index: props.route.params?.index} }));
-      SheetManager.show(props.route.params?.prevSheet, {
+      SheetManager.show(prevSheet, {
         payload: {
           navigation,
-          index: props.route.params?.index,
+          index,
         },
       });
-      return true; // 기본 동작을 중단
-    } else {
-      // 이전 화면으로 돌아가는 기본 동작 수행
-      navigation.goBack();
-      return true; // 기본 동작을 중단
     }
+    // 이전 화면으로 돌아가는 기본 동작 수행
+    return true; // 기본 동작을 중단
   };
-  
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
-    };
-  }, [handleBackPress]);
+
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      };
+    }, [handleBackPress])
+  );
+
+
 
   const getAPTLocation = async address => {
     const API_KEY = 'e094e49e35c61a9da896785b6fee020a';
@@ -222,6 +221,7 @@ const HouseDetail = props => {
           payload: {
             message: '주소를 찾을 수 없습니다.',
             type: 'error',
+            buttontext: '확인하기',
           },
         });
       });
@@ -238,10 +238,8 @@ const HouseDetail = props => {
             if (!props.route.params?.prevSheet) {
               return;
             } else {
-              
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : props.route.params?.prevSheet, index: props.route.params?.index} }));
-              SheetManager.show(props.route.params?.prevSheet, {
+
+               SheetManager.show(props.route.params?.prevSheet, {
                 payload: {
                   navigation,
                   index: props.route.params?.index,
@@ -367,8 +365,8 @@ const HouseDetail = props => {
                 style={{
                   marginLeft: 'auto',
                 }}>
-                <InfoContentText>{item?.area ? item?.area  + 'm2' : (item?.isAreaOver85 === true ? '국민평형(85m2) 초과' : item?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}</InfoContentText>
-                {item?.area !== 0 ||undefined && <InfoContentText
+                <InfoContentText>{item?.area ? item?.area + 'm2' : (item?.isAreaOver85 === true ? '국민평형(85m2) 초과' : item?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}</InfoContentText>
+                {item?.area !== 0 || undefined && <InfoContentText
                   style={{
                     fontSize: 10,
                     color: '#A3A5A8',
@@ -379,8 +377,8 @@ const HouseDetail = props => {
             </InfoContentItem>
           </InfoContentSection>
           <InputSection>
-          <Paper>
-            <View
+            <Paper>
+              <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',

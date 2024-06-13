@@ -84,12 +84,12 @@ const Calendar = props => {
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   //const [viewMode, setViewMode] = useState('day');
-  console.log('currentDate', currentDate);
-  console.log('currentyear', currentyear);
-  console.log('currentmonth', currentmonth);
-  console.log('SelectedYear', selectedYear);
-  console.log('SelectedMonth', selectedMonth);
-  console.log('daysInMonths', daysInMonth);
+  //console.log('currentDate', currentDate);
+  //console.log('currentyear', currentyear);
+  //console.log('currentmonth', currentmonth);
+  //console.log('SelectedYear', selectedYear);
+  //console.log('SelectedMonth', selectedMonth);
+  //console.log('daysInMonths', daysInMonth);
   useEffect(() => {
     //console.log('currentDate', currentDate);
     setCurrentPageIndex(0);

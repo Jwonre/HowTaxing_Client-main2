@@ -23,7 +23,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
-import { removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo"
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -131,12 +131,10 @@ const ChooseHouseDongHoAlert = props => {
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
   const { width, height } = useWindowDimensions();
-  const scrollHandlers = useScrollHandlers('FlatList-1', actionSheetRef);
   const [isLastPage, setIsLastPage] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [listData, setListData] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const ownHouseList = useSelector(state => state.ownHouseList.value);
   const [dongList, setDongList] = useState([]);
   const [hoList, setHoList] = useState([]);
   const [selectedDong, setSelectedDong] = useState('');
@@ -145,12 +143,34 @@ const ChooseHouseDongHoAlert = props => {
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const currentUser = useSelector(state => state.currentUser.value);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
 
   useEffect(() => {
-   // console.log('props.payload?.item', props.payload.currentPageIndex.selectedItem);
-   // console.log('props.payload?.dongList', props.payload.currentPageIndex.dongList);
-  //  console.log('props.payload?.hoList', props.payload.currentPageIndex.hoList);
-   // console.log('props.payload?.currentPageIndex', props.payload);
+    // console.log('props.payload?.item', props.payload.currentPageIndex.selectedItem);
+    // console.log('props.payload?.dongList', props.payload.currentPageIndex.dongList);
+    //  console.log('props.payload?.hoList', props.payload.currentPageIndex.hoList);
+    // console.log('props.payload?.currentPageIndex', props.payload);
     setDongList(props.payload.currentPageIndex.dongList);
     setHoList(props.payload.currentPageIndex.hoList);
 
@@ -241,8 +261,6 @@ const ChooseHouseDongHoAlert = props => {
       const response = await axios.post(url, data, { headers: headers });
       //console.log('Holist response :', response.data.data.dongHoList);
       if (response.data.errYn === 'Y') {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
         SheetManager.show('info', {
           payload: {
             type: 'error',
@@ -250,6 +268,7 @@ const ChooseHouseDongHoAlert = props => {
             description: response.data.errMsgDtl,
             closemodal: true,
             actionSheetRef: actionSheetRef,
+            buttontext: '확인하기',
           },
         });
         return;
@@ -261,14 +280,13 @@ const ChooseHouseDongHoAlert = props => {
       }
 
     } catch (error) {
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
       SheetManager.show('info', {
         type: 'error',
         message: error?.errMsg,
         errorMessage: error?.errCode,
         closemodal: true,
         actionSheetRef: actionSheetRef,
+        buttontext: '확인하기',
       });
       console.log(error);
     }
@@ -317,13 +335,12 @@ const ChooseHouseDongHoAlert = props => {
       const data = response.data.data;
       //    console.log('gongsiData return', data);
       if (response.data.errYn === 'Y') {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
         SheetManager.show('info', {
           payload: {
             type: 'error',
             message: response.data.errMsg,
             description: response.data.errMsgDtl,
+            buttontext: '확인하기',
           },
         });
 
@@ -340,7 +357,7 @@ const ChooseHouseDongHoAlert = props => {
         };
       } else {
         const successresult = await successResponse(data, detail2);
-     //   console.log('successresult', successresult);
+        //   console.log('successresult', successresult);
         return {
           isPubLandPriceOver100Mil: successresult.isPubLandPriceOver100Mil,
           isAreaOver85: successresult.isAreaOver85,
@@ -355,6 +372,7 @@ const ChooseHouseDongHoAlert = props => {
         errorMessage: error?.errCode,
         closemodal: true,
         actionSheetRef: actionSheetRef,
+        buttontext: '확인하기',
       });
       return {
         isPubLandPriceOver100Mil: undefined,
@@ -515,81 +533,84 @@ const ChooseHouseDongHoAlert = props => {
 
 
   const nextHandler = async () => {
-    actionSheetRef.current?.hide();
-    var detailAddress2 = (selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : '') + (selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : '');
-    const chat3 = {
-      id: 'apartmentAddressInfoSystem',
-      type: 'system',
-      message: '취득하실 주택 정보를 불러왔어요.',
-      questionId: 'apartment',
-      progress: 2,
-    };
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      actionSheetRef.current?.hide();
+      var detailAddress2 = (selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : '') + (selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : '');
+      const chat3 = {
+        id: 'apartmentAddressInfoSystem',
+        type: 'system',
+        message: '취득하실 주택 정보를 불러왔어요.',
+        questionId: 'apartment',
+        progress: 2,
+      };
 
-    const chat5 = {
-      id: 'apartmentAddressMy',
-      type: 'my',
-      message: detailAddress2,
-      questionId: 'apartment',
-    };
+      const chat5 = {
+        id: 'apartmentAddressMy',
+        type: 'my',
+        message: detailAddress2,
+        questionId: 'apartment',
+      };
 
 
 
-    const chatpubLandPrice = {
-      id: 'pubLandPrice',
-      type: 'system',
-      message: '공시가격를 제대로 불러오지 못했어요.\n공시가격가 1억원을 초과하나요?',
-      progress: 1,
-      select: [
-        {
-          id: 'yes',
-          name: '네',
-          select: ['area'],
-        },
-        {
-          id: 'no',
-          name: '아니요',
-          select: ['area'],
-        },
-      ]
+      const chatpubLandPrice = {
+        id: 'pubLandPrice',
+        type: 'system',
+        message: '공시가격를 제대로 불러오지 못했어요.\n공시가격이 1억원을 초과하나요?',
+        progress: 1,
+        select: [
+          {
+            id: 'yes',
+            name: '네',
+            select: ['area'],
+          },
+          {
+            id: 'no',
+            name: '아니요',
+            select: ['area'],
+          },
+        ]
 
+      }
+
+      const chatarea = {
+        id: 'area',
+        type: 'system',
+        message: '전용면적을 제대로 불러오지 못했어요.\n전용면적이 85㎡을 초과하나요?.',
+        progress: 1,
+        select: [
+          {
+            id: 'yes',
+            name: '네',
+            select: ['apartmentAddressInfoSystem'],
+
+
+          },
+          {
+            id: 'no',
+            name: '아니오',
+            select: ['apartmentAddressInfoSystem'],
+
+
+          },
+        ]
+
+      }
+
+      //리스트 초기화부분
+
+      const gongsireturn = await getGongSiData(selectedItem, selectedDong, dongList[0], selectedHo, hoList[0], detailAddress2);
+      if (gongsireturn?.result) {
+        const chatList =
+          (gongsireturn?.isPubLandPriceOver100Mil !== undefined ? (gongsireturn?.isAreaOver85 !== undefined ? [chat5, chat3] : [chat5, chatarea]) : [chat5, chatpubLandPrice]);
+        dispatch(setChatDataList([...chatDataList, ...chatList]));
+
+      } else {
+
+      }
     }
-
-    const chatarea = {
-      id: 'area',
-      type: 'system',
-      message: '전용면적을 제대로 불러오지 못했어요.\n전용면적이 85㎡을 초과하나요?.',
-      progress: 1,
-      select: [
-        {
-          id: 'yes',
-          name: '네',
-          select: ['apartmentAddressInfoSystem'],
-
-
-        },
-        {
-          id: 'no',
-          name: '아니오',
-          select: ['apartmentAddressInfoSystem'],
-
-
-        },
-      ]
-
-    }
-
-    //리스트 초기화부분
-
-    const gongsireturn = await getGongSiData(selectedItem, selectedDong, dongList[0], selectedHo, hoList[0], detailAddress2);
-    if (gongsireturn?.result) {
-      const chatList =
-        (gongsireturn?.isPubLandPriceOver100Mil !== undefined ? (gongsireturn?.isAreaOver85 !== undefined ? [chat5, chat3] : [chat5, chatarea]) : [chat5, chatpubLandPrice]);
-      dispatch(setChatDataList([...chatDataList, ...chatList]));
-      dispatch(removeLastModalList());
-    } else {
-      dispatch(removeLastModalList());
-    }
-
 
   };
 
@@ -609,7 +630,7 @@ const ChooseHouseDongHoAlert = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-              dispatch(removeLastModalList());
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />

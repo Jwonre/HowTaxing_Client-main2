@@ -22,7 +22,7 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { gainTax } from '../../data/chatData';
 import { SheetManager } from 'react-native-actions-sheet';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
-import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
+  
 
 
 const SheetContainer = styled.View`
@@ -181,7 +181,7 @@ const ExpenseSheet = props => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-  const modalList = useSelector(state => state.modalList.value);
+   
 
   // 필요경비금액 선택 리스트
   const AC_AMOUNT_LIST = [50000000, 10000000, 5000000, 1000000];
@@ -244,7 +244,7 @@ const ExpenseSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -280,7 +280,7 @@ const ExpenseSheet = props => {
             <InfoMessage>
               * 적합한 증빙 없이 현금(계좌이체)으로{'\n'}지출한 필요경비는 인정받지 못할 수 있습니다.
             </InfoMessage>
-            <ModalSubtitle>{numberToKorean(ExpenseAmount)}원</ModalSubtitle>
+            <ModalSubtitle>{numberToKorean(ExpenseAmount)}{(ExpenseAmount !== null && ExpenseAmount !== 0) ? '원' : ' '}</ModalSubtitle>
 
             <View
               style={{
@@ -299,9 +299,7 @@ const ExpenseSheet = props => {
                   hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                   <InfoIcon
                     onPress={() => {
-                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'infoExpense' } }));
-                      SheetManager.show('infoExpense', {
+                       SheetManager.show('infoExpense', {
                         payload: {
                           Title: "필요경비",
                           Description: "부동산을 취득할 때부터 매매할 때까지 발생\n하는 비용 중 소득세법에서 인정하는 비용들을\n말해요. 취득세, 중개수수료, 보일러 교체비용\n등이 해당돼요. 양도소득세는 양도차익이 클\n수록 세금이 많아지므로 필요경비 금액이 커질\n수록 세금은 줄어들게 돼요.",
@@ -417,7 +415,7 @@ const ExpenseSheet = props => {
 
                   const chat3 = gainTax.find(el => el.id === 'getInfoDone');
                   const chat4 = gainTax.find(el => el.id === 'getInfoConfirm');
-                  dispatch(removeLastModalList());
+                   
                   dispatch(setChatDataList([...chatDataList, chatList, chat3, chat4]));
                 }} style={{
                   backgroundColor: ExpenseAmount ? '#2f87ff' : '#E8EAED',

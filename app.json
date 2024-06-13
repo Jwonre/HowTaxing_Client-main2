@@ -1,4 +1,15 @@
 {
   "name": "howtaxing",
-  "displayName": "howtaxing"
+  "displayName": "howtaxing",
+  "plugins": [
+    [
+      "@react-native-kakao/core",
+      {
+        "NativeAppKey": "9b9f977d588a05bbf9d5d2f77a327e8c",
+        "android": {
+          "authCodeHandlerActivity": true
+        }
+      }
+    ]
+  ]
 }

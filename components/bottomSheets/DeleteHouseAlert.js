@@ -10,6 +10,7 @@ import DropShadow from 'react-native-drop-shadow';
 import { useDispatch, useSelector } from 'react-redux';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
 import axios from 'axios';
+import NetInfo from "@react-native-community/netinfo"
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -78,66 +79,93 @@ const DeleteHouseAlert = props => {
   const { width, height } = useWindowDimensions();
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const currentUser = useSelector(state => state.currentUser.value);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
   // 주택 삭제
   const deleteHouse = async () => {
-    const url = `http://13.125.194.154:8080/house/delete`;
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${currentUser.accessToken}`
-    };
-    const data = {
-      houseId: item?.houseId === undefined ? '' : item?.houseId,
-    };
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      const url = `http://13.125.194.154:8080/house/delete`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.accessToken}`
+      };
+      const data = {
+        houseId: item?.houseId === undefined ? '' : item?.houseId,
+      };
 
-    try {
-      const response = await axios.delete(url, { headers: headers, data: data });
-      if (response.data.errYn === 'Y') {
+      try {
+        const response = await axios.delete(url, { headers: headers, data: data });
+        if (response.data.errYn === 'Y') {
 
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg,
+              description: response.data.errMsgDtl,
+              closemodal: true,
+              actionSheetRef: actionSheetRef,
+              buttontext: '확인하기',
+            },
+          });
+          return;
+
+        } else {
+          const result = response.data;
+          //  console.log('deleteHouse', response);
+          //  console.log('item?.houseId', item?.houseId);
+
+          const filteredList = ownHouseList.filter(el => el.houseId !== item?.houseId);
+          dispatch(setOwnHouseList(filteredList));
+
+          actionSheetRef.current?.hide();
+          navigation.goBack();
+
+          setTimeout(() => {
+            SheetManager.show(prevSheet, {
+              payload: {
+                item: item,
+                navigation: navigation,
+                index: props.payload.index,
+              },
+            });
+          }, 300);
+        }
+
+
+      } catch (error) {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: '보유주택 삭제 중 오류가 발생했습니다.',
             closemodal: true,
             actionSheetRef: actionSheetRef,
+            buttontext: '확인하기',
           },
         });
-        return;
-
-      } else {
-        const result = response.data;
-      //  console.log('deleteHouse', response);
-      //  console.log('item?.houseId', item?.houseId);
-
-        const filteredList = ownHouseList.filter(el => el.houseId !== item?.houseId);
-        dispatch(setOwnHouseList(filteredList));
-
-        actionSheetRef.current?.hide();
-        navigation.goBack();
-
-        setTimeout(() => {
-          SheetManager.show(prevSheet, {
-            payload: {
-              item: item,
-              navigation: navigation,
-              index: props.payload.index,
-            },
-          });
-        }, 300);
+        console.error(error);
       }
-
-
-    } catch (error) {
-      SheetManager.show('info', {
-        payload: {
-          type: 'error',
-          message: '보유주택 삭제 중 오류가 발생했습니다.',
-          closemodal: true,
-          actionSheetRef: actionSheetRef,
-        },
-      });
-      console.error(error);
     }
   };
 

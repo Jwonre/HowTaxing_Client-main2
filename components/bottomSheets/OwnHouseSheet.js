@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { HOUSE_TYPE } from '../../constants/colors';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
-import { setModalList,removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
 
 
 const SheetContainer = styled.ScrollView.attrs({
@@ -244,9 +244,29 @@ const OwnHouseSheet = props => {
   const [selectedList, setSelectedList] = useState([]);
   const ownHouseList = useSelector(state => state.ownHouseList?.value);
   const chatDataList = useSelector(state => state.chatDataList?.value);
-  const modalList = useSelector(state => state.modalList.value);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const CARD_WIDTH = 180 + 22;
 
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
 
   useEffect(() => {
@@ -267,7 +287,6 @@ const OwnHouseSheet = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-              dispatch(removeLastModalList());
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -359,23 +378,24 @@ const OwnHouseSheet = props => {
                         ).color,
                       }}>
                       <TagText>
-                        {
-                          HOUSE_TYPE.find(color => color.id === item.houseType)
-                            .name
-                        }
+                        {HOUSE_TYPE.find(color => color.id === item.houseType).name}
                       </TagText>
                     </Tag>
                     <CardTitle>{item.houseName}</CardTitle>
                     <CardSubTitle>{item.houseDetailName}</CardSubTitle>
                     <CardButton
-                      onPress={() => {
-                        actionSheetRef.current?.hide();
-                        dispatch(removeLastModalList());
-                        props.payload.navigation.push(
-                          'OwnedHouseDetail',
-                          { item: item, prevSheet: 'own', index: props.payload.index, },
-                        );
-                        //console.log('detail item', item);
+                      onPress={async () => {
+                        const state = await NetInfo.fetch();
+                        const canProceed = await handleNetInfoChange(state);
+                        if (canProceed) {
+                          actionSheetRef.current?.hide();
+
+                          props.payload.navigation.push(
+                            'OwnedHouseDetail',
+                            { item: item, prevSheet: 'own', index: props.payload.index, },
+                          );
+                          //console.log('detail item', item);
+                        }
                       }}>
                       <CardButtonText>자세히 보기</CardButtonText>
                     </CardButton>
@@ -421,17 +441,20 @@ const OwnHouseSheet = props => {
               }}>
               <AddButton
                 width={width}
-                onPress={() => {
-                  actionSheetRef.current?.hide();
-                  dispatch(removeLastModalList());
-                  props.payload.navigation.push('DirectRegister', {
-                    prevChat: 'AcquisitionChat',
-                    prevSheet: 'own',
-                    index: props.payload?.index,
-                    chatDataList: chatDataList,
-                    actionSheetRef: actionSheetRef,
-                  });
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    actionSheetRef.current?.hide();
 
+                    props.payload.navigation.push('DirectRegister', {
+                      prevChat: 'AcquisitionChat',
+                      prevSheet: 'own',
+                      index: props.payload?.index,
+                      chatDataList: chatDataList,
+                      actionSheetRef: actionSheetRef,
+                    });
+                  }
                 }}>
                 <AddCircleIcon />
                 <AddButtonText>직접 등록하기</AddButtonText>
@@ -470,14 +493,18 @@ const OwnHouseSheet = props => {
                 }}>
                 <EmptyCard>
                   <AddHouseCircleIcon
-                    onPress={() => {
-                      actionSheetRef.current?.hide();
-                      dispatch(removeLastModalList());
-                      props.payload.navigation.push('DirectRegister', {
-                        prevChat: 'AcquisitionChat',
-                        prevSheet: 'own',
-                        index: props.payload?.index,
-                      });
+                    onPress={async () => {
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        actionSheetRef.current?.hide();
+
+                        props.payload.navigation.push('DirectRegister', {
+                          prevChat: 'AcquisitionChat',
+                          prevSheet: 'own',
+                          index: props.payload?.index,
+                        });
+                      }
                     }} style={{ margin: 20 }}></AddHouseCircleIcon>
                   <EmptyTitle>
                     {'보유하신 주택이 없으시거나 불러오지 못했어요.'}
@@ -497,14 +524,18 @@ const OwnHouseSheet = props => {
               }}>
               <AddButton
                 width={width}
-                onPress={() => {
-                  actionSheetRef.current?.hide();
-                  dispatch(removeLastModalList());
-                  props.payload.navigation.push('DirectRegister', {
-                    prevChat: 'AcquisitionChat',
-                    prevSheet: 'own',
-                    index: props.payload?.index,
-                  });
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    actionSheetRef.current?.hide();
+
+                    props.payload.navigation.push('DirectRegister', {
+                      prevChat: 'AcquisitionChat',
+                      prevSheet: 'own',
+                      index: props.payload?.index,
+                    });
+                  }
                 }}>
                 <AddCircleIcon />
                 <AddButtonText>직접 등록하기</AddButtonText>
@@ -536,40 +567,43 @@ const OwnHouseSheet = props => {
             disabled={selectedList.length === 0}
             width={width}
             active={selectedList.length > 0}
-            onPress={() => {
-              actionSheetRef.current?.hide();
+            onPress={async() => {
+              const state = await NetInfo.fetch();
+              const canProceed = await handleNetInfoChange(state);
+              if (canProceed) {
+                actionSheetRef.current?.hide();
 
-              const chatItem = {
-                id: 'ownConfirmOK',
-                type: 'my',
-                message: '확인 완료',
-              };
+                const chatItem = {
+                  id: 'ownConfirmOK',
+                  type: 'my',
+                  message: '확인 완료',
+                };
 
-              const chat2 = {
-                id: 'palnSale',
-                type: 'system',
-                progress: 6,
-                message:
-                  '종전주택 매도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 매도 계획이 있나요?',
-                select: [
-                  {
-                    id: 'planSaleYes',
-                    name: '3년 이내 매도 계획',
-                    select: ['getInfoDone', 'getInfoConfirm'],
-                  },
-                  {
-                    id: 'planSaleNo',
-                    name: '매도 계획 없음',
-                    select: ['getInfoDone', 'getInfoConfirm'],
-                  },
-                ],
-              };
+                const chat2 = {
+                  id: 'palnSale',
+                  type: 'system',
+                  progress: 6,
+                  message:
+                    '종전주택 매도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 매도 계획이 있나요?',
+                  select: [
+                    {
+                      id: 'planSaleYes',
+                      name: '3년 이내 매도 계획',
+                      select: ['getInfoDone', 'getInfoConfirm'],
+                    },
+                    {
+                      id: 'planSaleNo',
+                      name: '매도 계획 없음',
+                      select: ['getInfoDone', 'getInfoConfirm'],
+                    },
+                  ],
+                };
 
-              dispatch(setChatDataList([...chatDataList, chatItem, chat2]));
-              dispatch(
-                setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true })
-              );
-              dispatch(removeLastModalList());
+                dispatch(setChatDataList([...chatDataList, chatItem, chat2]));
+                dispatch(
+                  setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true })
+                );
+              }
             }}>
             <ButtonText active={selectedList.length > 0}>확인하기</ButtonText>
           </Button>

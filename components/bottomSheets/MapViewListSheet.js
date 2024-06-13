@@ -412,6 +412,7 @@ const MapViewListSheet = props => {
               message: '주소 검색 중 오류가 발생했어요.',
               description: parsedData.results.common.errorMessage,
               type: 'error',
+              buttontext: '확인하기',
             },
           });
           return;
@@ -424,6 +425,7 @@ const MapViewListSheet = props => {
             payload: {
               message: '주소에 대한 정보가 없어요.',
               type: 'error',
+              buttontext: '확인하기',
             },
           });
           return;
@@ -542,6 +544,7 @@ const MapViewListSheet = props => {
           payload: {
             message: '주소를 찾을 수 없어요.',
             type: 'error',
+            buttontext: '확인하기',
           },
         });
       });

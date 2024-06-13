@@ -14,7 +14,7 @@ import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import FastImage from 'react-native-fast-image';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo"
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -111,8 +111,12 @@ const SocialButtonIcon = styled.Image.attrs(props => ({
   
 `;
 
-const openKakaoLink = () => {
-  Linking.openURL('http://pf.kakao.com/_jfxgFG');
+const openKakaoLink = async () => {
+  const state = await NetInfo.fetch();
+  const canProceed = await handleNetInfoChange(state);
+  if (canProceed) {
+    Linking.openURL('http://pf.kakao.com/_jfxgFG');
+  }
 };
 
 const ConsultingSheet = props => {
@@ -121,7 +125,27 @@ const ConsultingSheet = props => {
   const dispatch = useDispatch();
   const { width, height } = useWindowDimensions();
   // 필요경비금액
-  const houseInfo = useSelector(state => state.houseInfo.value);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
 
   return (
@@ -133,7 +157,7 @@ const ConsultingSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -166,8 +190,8 @@ const ConsultingSheet = props => {
         <SheetContainer width={width}>
           <ModalInputSection>
             <ModalTitle>부동산 전문 세무사에게 상담 받아보세요!</ModalTitle>
-            <InfoMessage>
-            취득세/양도소득세/증여세/상속세 등{'\n'}여러분의 세금을 확 줄여드릴게요.
+            <InfoMessage styled={{ height: 'auto', minHeight: 30 }}>
+              취득세/양도소득세/증여세/상속세 등{'\n'}여러분의 세금을 확 줄여드릴게요.
             </InfoMessage>
             <ProfileAvatar
               source={require('../../assets/images/Gookyoung_Yoon.png')}

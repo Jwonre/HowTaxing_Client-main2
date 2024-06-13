@@ -1,14 +1,15 @@
-// 공시가격_전용면적 정의 설명 팝업(? 아이콘 누른경우)
+// 정보 또는 경고 알림창 컴포넌트
 
-import { useWindowDimensions, Pressable,View } from 'react-native';
+import { useWindowDimensions, Pressable, View, ScrollView, Linking } from 'react-native';
 import React, { useRef, useState } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
   
+
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -16,41 +17,37 @@ const SheetContainer = styled.View`
   width: ${props => props.width - 40}px;
   height: auto;
 `;
-const ModalContentSection = styled.View`
-  width: 100%;
-  height: auto;
-  background-color: #fff;
-  align-items: center;
-  text-align: center;
-  justify-content: center;
 
-`;
 const ModalTitle = styled.Text`
   width: 80%;
   font-size: ${getFontSize(17)}px;
-  font-family: Bold;
+  font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
   text-align: center;
-`;
 
-const BoldText = styled.Text`
-  font-family: Pretendard-Bold;
-  font-weight: 600;
 `;
-
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(14)}px;
-  font-family: Bold;
-  width: 75%;
-  color: #1b1c1f;
-  line-height: 22px;
-  margin-top: 15px;
+  width: 80%;
+  font-size: ${getFontSize(15)}px;
+  font-family: Pretendard-Regular;
+  font-weight: 500;
+  color: #a3a5a8;
+  line-height: 25px;
   text-align: left;
+  padding: 20px;
+
 `;
 
-
+const ModalContentSection = styled.View`
+  width: 100%;
+  height: auto;
+  margin-top: 10px;
+  background-color: #fff;
+  align-items: center;
+  justify-content: center;
+`;
 
 const ModalHeader = styled.View`
   width: 100%;
@@ -66,9 +63,9 @@ const ButtonSection = styled.View`
   height: auto;
   background-color: #fff;
   align-items: center;
-   flex-direction: row;
+  flex-direction: row;
   justify-content: center;
-  padding: 20px;
+  padding: 10px;
 `;
 
 const Button = styled.TouchableOpacity.attrs(props => ({
@@ -82,7 +79,6 @@ const Button = styled.TouchableOpacity.attrs(props => ({
   justify-content: center;
   border-width: 1px;
   border-color: #2f87ff;
-  margin-top: 10px;
 `;
 
 const ButtonText = styled.Text`
@@ -92,21 +88,13 @@ const ButtonText = styled.Text`
   line-height: 20px;
 `;
 
-const PubLandPriceDef = props => {
+
+const InfoAppinformation = () => {
   const dispatch = useDispatch();
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
-  
- // console.log('props', props);
 
-  const title =
-    props.payload.type === '전용면적' ? '전용면적' : '공시가격';
 
- // const middleMessage = '아래의 조건에 해당하시는 상황을 의미해요.';
-  const message =
-    props.payload.type === '전용면적'
-      ? '우리가 실제 거주하는 기본 면적이라고 이해\n하면 돼요. 아파트의 경우 방과 거실, 화장실,\n주방 등 그 집에 사는 사람이 독립해 사용할\n수 있는 공간을 말해요.'
-      : '국토교통부장관이 전국의 개별 토지중 지가\n대표성 등이 있는 약58만 필지를 선정·조사\n하여 공시하는 것으로서 매년 1월 1일 기준\n표준지의 단위면적당 가격을 말해요.';
 
   return (
     <ActionSheet
@@ -117,8 +105,8 @@ const PubLandPriceDef = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
               actionSheetRef.current?.hide();
+               
             }}>
             <CloseIcon width={16} height={16} />
           </Pressable>
@@ -127,19 +115,22 @@ const PubLandPriceDef = props => {
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
+      closeOnPressBack={true}
       closeOnTouchBackdrop={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: props.payload.type === '전용면적' ? 300 : 300,
-        width: width - 40,
+        height: 280,
+        width: width - 40
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
-          <ModalTitle><BoldText>{title}</BoldText>{'이란?'}</ModalTitle>
-          <View styled={{marginTop: 15}}><ModalDescription>{message}</ModalDescription></View>
+          <ModalTitle>하우택싱 서비스 정보를 알려드릴게요.</ModalTitle>
+          <ModalDescription>
+            어플리케이션 버젼 : 1.001{'\n'}사업자등록번호 : 1000000000
+          </ModalDescription>
         </ModalContentSection>
 
         <ButtonSection>
@@ -157,17 +148,17 @@ const PubLandPriceDef = props => {
             }}>
             <Button
               onPress={() => {
-                console.log('GoBack');
-                 
                 actionSheetRef.current?.hide();
+                 
               }}>
               <ButtonText>돌아가기</ButtonText>
             </Button>
           </DropShadow>
+
         </ButtonSection>
       </SheetContainer>
-    </ActionSheet>
+    </ActionSheet >
   );
 };
 
-export default PubLandPriceDef;
+export default InfoAppinformation;

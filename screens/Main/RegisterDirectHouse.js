@@ -8,8 +8,8 @@ import {
   ScrollView,
   BackHandler,
 } from 'react-native';
-import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState, useLayoutEffect, useRef, useCallback } from 'react';
+import { useIsFocused, useNavigation, useFocusEffect } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import DropShadow from 'react-native-drop-shadow';
@@ -17,7 +17,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Switch from 'react-native-draggable-switch';
 import axios from 'axios';
 import getFontSize from '../../utils/getFontSize';
-import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
+
 
 // Icons
 import BuildingIcon1 from '../../assets/icons/house/building_type1_ico.svg';
@@ -188,20 +189,39 @@ const InfoContentLabel = styled.Text`
 const RegisterDirectHouse = props => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const isFocused = useIsFocused();
   const { width, height } = useWindowDimensions();
   const addressInputRef = useRef(null);
   const addressDetailInputRef = useRef(null);
   const [selectedHouseType, setSelectedHouseType] = useState('1');
   const [isMoveInRight, setIsMoveInRight] = useState(false);
-  const modalList = useSelector(state => state.modalList.value);
+
   const currentUser = useSelector(state => state.currentUser.value);
   const [prevChat, setPrevChat] = useState(null);
   const [prevSheet, setPrevSheet] = useState(null);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const directRegister = useSelector(
     state => state.directRegister.value,
   );
 
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
   const getOwnlist = async () => {
     var prevSheetNum = '';
@@ -287,42 +307,43 @@ const RegisterDirectHouse = props => {
     }
   }, []);
 
-  useEffect(() => {
-    // 하드웨어 백 버튼 핸들러 정의
-    const handleBackPress = () => {
-      navigation.goBack();
-      /*    if (props.route.params?.prevSheet) {
-            SheetManager.show(props.route.params.prevSheet, {
-              payload: {
-                navigation,
-                index: props.route.params.index
-              },
-            });
-          }*/
-      dispatch(
-        setDirectRegister({
-          houseName: '',
-          address: '',
-          addressDetail: '',
-          bdMgtSn: '',
-        }),
-      );
-      return true;
-    };
+  useFocusEffect(
+    useCallback(() => {
+      // 하드웨어 백 버튼 핸들러 정의
+      const handleBackPress = () => {
+        navigation.goBack();
+        /*    if (props.route.params?.prevSheet) {
+              SheetManager.show(props.route.params.prevSheet, {
+                payload: {
+                  navigation,
+                  index: props.route.params.index
+                },
+              });
+            }*/
+        dispatch(
+          setDirectRegister({
+            houseName: '',
+            address: '',
+            addressDetail: '',
+            bdMgtSn: '',
+          }),
+        );
+        return true;
+      };
 
-    // 이벤트 리스너 추가
-    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+      // 이벤트 리스너 추가
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress);
 
-    // 컴포넌트 언마운트 시 이벤트 리스너 제거
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
-    };
-  }, [navigation, props.route.params]); // 의존성 배열에 navigation과 params 추가
+      // 컴포넌트 언마운트 시 이벤트 리스너 제거
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      };
+    }, [navigation, props.route.params])); // 의존성 배열에 navigation과 params 추가
 
   const HOUSE_TYPE = [
     {
       id: '1',
-      name: '아파트',
+      name: '아파트 · 오피스텔',
       icon: <BuildingIcon1 />,
     },
     {
@@ -342,9 +363,7 @@ const RegisterDirectHouse = props => {
 
     navigation.navigate(prevChat);
     setTimeout(() => {
-      
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: props.route.params?.prevSheet, index: props.route.params?.index } }));
+
       SheetManager.show(
         prevSheet ? prevSheet : props.route.params?.prevSheet,
         {
@@ -366,78 +385,78 @@ const RegisterDirectHouse = props => {
   };
 
   const registerDirectHouse = async () => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      const accessToken = currentUser.accessToken;
+      // 요청 헤더
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      };
 
-    const accessToken = currentUser.accessToken;
-    // 요청 헤더
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`
-    };
+      // 요청 바디
+      const data = {
+        // houseType | String | 주택유형
+        // houseName | String | 주택명
+        // detailAdr | String | 상세주소
+        // jibunAddr | String | 지번주소
+        // roadAddr | String | 도로명주소
+        // roadAddrRef | String | 도로명주소참고항목
+        // bdMgtSn | String | 건물관리번호
+        // admCd | String | 행정구역코드
+        // rnMgtSn | String | 도로명코드
+        houseType: HOUSE_TYPE.find(
+          el => el.id === selectedHouseType,
+        ).id,
+        houseName: directRegister.houseName,
+        detailAdr: directRegister.addressDetail,
+        jibunAddr: directRegister.jibunAddr,
+        roadAddr: directRegister.address,
+        roadAddrRef: '',
+        bdMgtSn: directRegister.bdMgtSn,
+        admCd: directRegister.admCd,
+        rnMgtSn: directRegister.rnMgtSn,
 
-    // 요청 바디
-    const data = {
-      // houseType | String | 주택유형
-      // houseName | String | 주택명
-      // detailAdr | String | 상세주소
-      // jibunAddr | String | 지번주소
-      // roadAddr | String | 도로명주소
-      // roadAddrRef | String | 도로명주소참고항목
-      // bdMgtSn | String | 건물관리번호
-      // admCd | String | 행정구역코드
-      // rnMgtSn | String | 도로명코드
-      houseType: HOUSE_TYPE.find(
-        el => el.id === selectedHouseType,
-      ).id,
-      houseName: directRegister.houseName,
-      detailAdr: directRegister.addressDetail,
-      jibunAddr: directRegister.jibunAddr,
-      roadAddr: directRegister.address,
-      roadAddrRef: '',
-      bdMgtSn: directRegister.bdMgtSn,
-      admCd: directRegister.admCd,
-      rnMgtSn: directRegister.rnMgtSn,
+        //입주권여부
+        isMoveInRight: isMoveInRight,
+      };
+      //successRegister();
 
-      //입주권여부
-      isMoveInRight: isMoveInRight,
-    };
-    //successRegister();
+      axios
+        .post('http://13.125.194.154:8080/house/regist', data, { headers: headers })
+        .then(async response => {
+          if (response.data.errYn === 'Y') {
+            SheetManager.show('info', {
+              payload: {
+                type: 'error',
+                message: response.data.errMsg,
+                description: response.data.errMsgDtl,
+                buttontext: '확인하기',
+              },
+            });
+            return;
 
-    axios
-      .post('http://13.125.194.154:8080/house/regist', data, { headers: headers })
-      .then(async response => {
-        if (response.data.errYn === 'Y') {
-          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-          dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info'} }));
+          } else {
+            await successRegister();
+          }
+          // 성공적인 응답 처리
+          // const { id } = response.data;
+
+
+        })
+        .catch(error => {
+          // 오류 처리
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: '보유주택 등록 중 오류가 발생했습니다.',
+              buttontext: '확인하기',
             },
           });
-          return;
-
-        } else {
-          await successRegister();
-        }
-        // 성공적인 응답 처리
-        // const { id } = response.data;
-
-
-      })
-      .catch(error => {
-        // 오류 처리
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info'} }));
-        SheetManager.show('info', {
-          payload: {
-            type: 'error',
-            message: '보유주택 등록 중 오류가 발생했습니다.',
-          },
+          console.error(error);
         });
-        console.error(error);
-      });
-
+    }
   };
 
   return (
@@ -525,8 +544,6 @@ const RegisterDirectHouse = props => {
                   onFocus={() => {
                     //  console.log('focus', selectedHouseType);
                     if (selectedHouseType === '1') {
-                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'searchHouse2'} }));
                       SheetManager.show('searchHouse2', {
                         payload: {
                           prevScreen: 'RegisterDirectHouse',
@@ -537,8 +554,6 @@ const RegisterDirectHouse = props => {
                         },
                       });
                     } else {
-                        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'searchHouse2'} }));
                       SheetManager.show('searchHouse2', {
                         payload: {
                           prevScreen: 'RegisterDirectHouse',
@@ -559,7 +574,7 @@ const RegisterDirectHouse = props => {
                     left: 20,
                     right: 20,
                   }}
-                  onPress={() => {
+                  onPress={async () => {
                     /*if (selectedHouseType === '1') {
                       SheetManager.show('mapViewList2', {
                         payload: {
@@ -571,17 +586,19 @@ const RegisterDirectHouse = props => {
                       });
                     } else */
                     {
-                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'searchHouse2'} }));
-                      SheetManager.show('searchHouse2', {
-                        payload: {
-                          prevScreen: 'RegisterDirectHouse',
-                          prevChat: props.route.params?.prevChat,
-                          prevSheet: props.route.params?.prevSheet,
-                          navigation: navigation,
-                          index: props.route.params?.index,
-                        },
-                      });
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        SheetManager.show('searchHouse2', {
+                          payload: {
+                            prevScreen: 'RegisterDirectHouse',
+                            prevChat: props.route.params?.prevChat,
+                            prevSheet: props.route.params?.prevSheet,
+                            navigation: navigation,
+                            index: props.route.params?.index,
+                          },
+                        });
+                      }
                     }
                   }}>
                   <SearchIcon />

@@ -26,7 +26,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { AREA_LIST } from '../../data/areaData';
-import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
+import { useNavigation } from '@react-navigation/native';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -331,8 +332,10 @@ const SearchHouseSheet = props => {
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const currentUser = useSelector(state => state.currentUser.value);
-  const modalList = useSelector(state => state.modalList.value);
-
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+  const navigation = useNavigation();
 
 
   useEffect(() => {
@@ -355,9 +358,26 @@ const SearchHouseSheet = props => {
     };
 
   }, []);
-  function getType(variable) {
-    return typeof variable;
-  }
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
+
   // 주소 검색
   const getAddress = async (Area, Area2, searchtext) => {
     /*      const API_KEY = 'U01TX0FVVEgyMDIzMTIxNDE2MDk0NTExNDM1NzY=';
@@ -434,8 +454,6 @@ const SearchHouseSheet = props => {
       .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
-          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
           SheetManager.show('info', {
             payload: {
               type: 'error',
@@ -443,6 +461,7 @@ const SearchHouseSheet = props => {
               description: response.data.errMsgDtl,
               closemodal: true,
               actionSheetRef: actionSheetRef,
+              buttontext: '확인하기',
             },
           });
           const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -453,12 +472,11 @@ const SearchHouseSheet = props => {
           const list = response.data.data.jusoList;
           //     console.log('response', response.data.data)
           if (list.length === 0) {
-            let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-            dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
             SheetManager.show('info', {
               payload: {
                 type: 'error',
                 message: '검색 결과가 없어요.',
+                buttontext: '확인하기',
               },
             });
           } else {
@@ -476,6 +494,7 @@ const SearchHouseSheet = props => {
           errorMessage: error?.errCode,
           closemodal: true,
           actionSheetRef: actionSheetRef,
+          buttontext: '확인하기',
         });
         console.error(error);
       });
@@ -565,8 +584,6 @@ const SearchHouseSheet = props => {
       .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
-          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
           SheetManager.show('info', {
             payload: {
               type: 'error',
@@ -574,6 +591,7 @@ const SearchHouseSheet = props => {
               description: response.data.errMsgDtl,
               closemodal: true,
               actionSheetRef: actionSheetRef,
+              buttontext: '확인하기',
             },
           });
           const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -584,12 +602,11 @@ const SearchHouseSheet = props => {
           const list = response.data.data.jusoList;
           //  console.log('response', response.data.data)
           if (list.length === 0) {
-            let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-            dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
             SheetManager.show('info', {
               payload: {
                 type: 'error',
                 message: '검색 결과가 없어요.',
+                buttontext: '확인하기',
               },
             });
           } else if (list.length < 5) {
@@ -602,14 +619,13 @@ const SearchHouseSheet = props => {
 
       })
       .catch(function (error) {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
         SheetManager.show('info', {
           type: 'error',
           message: error?.errMsg,
           errorMessage: error?.errCode,
           closemodal: true,
           actionSheetRef: actionSheetRef,
+          buttontext: '확인하기',
         });
         console.log(error);
 
@@ -640,8 +656,6 @@ const SearchHouseSheet = props => {
       const response = await axios.post(url, data, { headers: headers });
       //console.log('Holist response :', response.data.data.dongHoList);
       if (response.data.errYn === 'Y') {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
         SheetManager.show('info', {
           payload: {
             type: 'error',
@@ -649,6 +663,7 @@ const SearchHouseSheet = props => {
             description: response.data.errMsgDtl,
             closemodal: true,
             actionSheetRef: actionSheetRef,
+            buttontext: '확인하기',
           },
         });
         const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -662,14 +677,13 @@ const SearchHouseSheet = props => {
       }
 
     } catch (error) {
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
       SheetManager.show('info', {
         type: 'error',
         message: error?.errMsg,
         errorMessage: error?.errCode,
         closemodal: true,
         actionSheetRef: actionSheetRef,
+        buttontext: '확인하기',
       });
       console.log(error);
     }
@@ -694,8 +708,6 @@ const SearchHouseSheet = props => {
     try {
       const response = await axios.post(url, data, { headers: headers });
       if (response.data.errYn === 'Y') {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
         SheetManager.show('info', {
           payload: {
             type: 'error',
@@ -703,6 +715,7 @@ const SearchHouseSheet = props => {
             description: response.data.errMsgDtl,
             closemodal: true,
             actionSheetRef: actionSheetRef,
+            buttontext: '확인하기',
           },
         });
         const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -716,14 +729,13 @@ const SearchHouseSheet = props => {
         return donglist[0];
       }
     } catch (error) {
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
       SheetManager.show('info', {
         type: 'error',
         message: error?.errMsg,
         errorMessage: error?.errCode,
         closemodal: true,
         actionSheetRef: actionSheetRef,
+        buttontext: '확인하기',
       });
       console.log(error);
       return 'dongerror';
@@ -775,13 +787,12 @@ const SearchHouseSheet = props => {
       //console.log('gongsiData', data);
       //    console.log('gongsiData return', data);
       if (response.data.errYn === 'Y') {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
         SheetManager.show('info', {
           payload: {
             type: 'error',
             message: response.data.errMsg,
             description: response.data.errMsgDtl,
+            buttontext: '확인하기',
           },
         });
 
@@ -799,7 +810,6 @@ const SearchHouseSheet = props => {
         return {
           isPubLandPriceOver100Mil: undefined,
           isAreaOver85: undefined,
-          result: true,
         };
       } else {
         const successresult = await successResponse(data, detail, detail2);
@@ -807,15 +817,21 @@ const SearchHouseSheet = props => {
         return {
           isPubLandPriceOver100Mil: successresult.isPubLandPriceOver100Mil,
           isAreaOver85: successresult.isAreaOver85,
-          result: true,
         };
       }
     } catch (error) {        // 오류 처리
       console.error(error);
+      SheetManager.show('info', {
+        payload: {
+          type: 'error',
+          message: '공시가격과 전용면적을 불러오는데 실패했어요. ',
+          description: response.data.errMsg + ' ' + response.data.errMsgDtasdfl,
+          buttontext: '확인하기',
+        },
+      });
       return {
         isPubLandPriceOver100Mil: undefined,
         isAreaOver85: undefined,
-        result: false,
       };
     }
   };
@@ -1020,134 +1036,161 @@ const SearchHouseSheet = props => {
         console.log('currentPageIndex', currentPageIndex);
         console.log('selectedDong', selectedDong);
         console.log('dongList[0]', dongList[0]);*/
-    var detailAddress2 = '';
-    if (currentPageIndex === 1) {
-      detailAddress2 = (selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : '') + (selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : '');
-    } else {
-      detailAddress2 = '';
-    }
+    const state = await NetInfo.fetch();
+    const canProceed = handleNetInfoChange(state);
+    if (canProceed) {
+      var detailAddress2 = '';
+      if (currentPageIndex === 1) {
+        detailAddress2 = (selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : '') + (selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : '');
+      } else {
+        detailAddress2 = '';
+      }
 
-    actionSheetRef.current?.hide();
+      actionSheetRef.current?.hide();
 
-    const chat1 = {
-      id: 'apartmentAddress',
-      type: 'system',
-      message: '취득하실 주택을 선택해주세요.',
-      progress: 1,
-    };
+      const chat1 = {
+        id: 'apartmentAddress',
+        type: 'system',
+        message: '취득하실 주택을 선택해주세요.',
+        progress: 1,
+      };
 
-    const chat2 = {
-      id: 'apartmentAddress',
-      type: 'my',
-      message:
-        props.payload?.data !== 'villa' && props.payload?.data2 !== 'apartment'
-          ? address + ' ' + detailAddress
-          : props.payload?.data === 'villa' ? (detailAddress2 == '' ? selectedItem?.bdNm + ' ' + (detailAddress2 ? detailAddress2 : detailAddress) : selectedItem?.bdNm)
-            : (detailAddress2 == '' ? selectedItem?.bdNm + ' ' + (detailAddress2 ? detailAddress2 : detailAddress) : selectedItem?.bdNm)
-    };
-
-
+      const chat2 = {
+        id: 'apartmentAddress',
+        type: 'my',
+        message:
+          props.payload?.data !== 'villa' && props.payload?.data2 !== 'apartment'
+            ? address + ' ' + detailAddress
+            : props.payload?.data === 'villa' ? (detailAddress2 == '' ? selectedItem?.bdNm + ' ' + (detailAddress2 ? detailAddress2 : detailAddress) : selectedItem?.bdNm)
+              : (detailAddress2 == '' ? selectedItem?.bdNm + ' ' + (detailAddress2 ? detailAddress2 : detailAddress) : selectedItem?.bdNm)
+      };
 
 
-    const chat3 = {
-      id: 'apartmentAddressInfoSystem',
-      type: 'system',
-      message: '취득하실 주택 정보를 불러왔어요.',
-      questionId: 'apartment',
-      progress: 2,
-    };
 
-    const chat4 = {
-      id: 'apartmentAddressSystem',
-      type: 'system',
-      message: '취득하실 주택 동과 호를 선택해주세요.',
-      questionId: 'apartment',
-      progress: 3,
-      select: [
-        {
-          id: 'yes',
-          name: '선택하기',
-          openSheet: 'chooseHouseDongHoAlert',
 
-          currentPageIndex: {
-            selectedItem: selectedItem,
-            dongList: dongList,
-            hoList: hoList,
+      const chat3 = {
+        id: 'apartmentAddressInfoSystem',
+        type: 'system',
+        message: '취득하실 주택 정보를 불러왔어요.',
+        questionId: 'apartment',
+        progress: 2,
+      };
+
+      const chat4_1 = {
+        id: 'apartmentAddressSystem',
+        type: 'system',
+        message: '취득하실 주택 동과 호를 선택해주세요.',
+        questionId: 'apartment',
+        progress: 3,
+        select: [
+          {
+            id: 'yes',
+            name: '선택하기',
+            openSheet: 'chooseHouseDongHoAlert',
+
+            currentPageIndex: {
+              selectedItem: selectedItem,
+              dongList: dongList,
+              hoList: hoList,
+            },
+          }
+        ],
+      };
+
+      const chat4_2 = {
+        id: 'apartmentAddressSystem',
+        type: 'system',
+        message: '취득하실 주택 동과 호를 선택해주세요.',
+        questionId: 'apartment',
+        progress: 3,
+      };
+
+      const chat5 = {
+        id: 'apartmentAddressMy',
+        type: 'my',
+        message: detailAddress2,
+        questionId: 'apartment',
+      };
+
+
+
+      const chatpubLandPrice = {
+        id: 'pubLandPrice',
+        type: 'system',
+        message: '공시가격를 제대로 불러오지 못했어요.\n공시가격이 1억원을 초과하나요?',
+        progress: 1,
+        select: [
+          {
+            id: 'yes',
+            name: '네',
+            select: ['area'],
           },
-        }
-      ],
-    };
+          {
+            id: 'no',
+            name: '아니요',
+            select: ['area'],
+          },
+        ]
 
-    const chat5 = {
-      id: 'apartmentAddressMy',
-      type: 'my',
-      message: detailAddress2,
-      questionId: 'apartment',
-    };
+      }
 
-
-
-    const chatpubLandPrice = {
-      id: 'pubLandPrice',
-      type: 'system',
-      message: '공시가격를 제대로 불러오지 못했어요.\n공시가격가 1억원을 초과하나요?',
-      progress: 1,
-      select: [
-        {
-          id: 'yes',
-          name: '네',
-          select: ['area'],
-        },
-        {
-          id: 'no',
-          name: '아니요',
-          select: ['area'],
-        },
-      ]
-
-    }
-
-    const chatarea = {
-      id: 'area',
-      type: 'system',
-      message: '전용면적을 제대로 불러오지 못했어요.\n전용면적이 85㎡을 초과하나요?.',
-      progress: 1,
-      select: [
-        {
-          id: 'yes',
-          name: '네',
-          select: ['apartmentAddressInfoSystem'],
+      const chatarea = {
+        id: 'area',
+        type: 'system',
+        message: '전용면적을 제대로 불러오지 못했어요.\n전용면적이 85㎡을 초과하나요?.',
+        progress: 1,
+        select: [
+          {
+            id: 'yes',
+            name: '네',
+            select: ['apartmentAddressInfoSystem'],
 
 
-        },
-        {
-          id: 'no',
-          name: '아니오',
-          select: ['apartmentAddressInfoSystem'],
+          },
+          {
+            id: 'no',
+            name: '아니오',
+            select: ['apartmentAddressInfoSystem'],
 
 
-        },
-      ]
+          },
+        ]
 
-    }
+      }
 
-    //리스트 초기화부분
-    //  console.log('selecteditem', selectedItem);
-    const gongsireturn = await getGongSiData(selectedItem, selectedDong, dongList[0], selectedHo, hoList[0], detailAddress, detailAddress2);
-    if (gongsireturn?.result) {
+      //리스트 초기화부분
+      //  console.log('selecteditem', selectedItem);
+      const gongsireturn = await getGongSiData(selectedItem, selectedDong, dongList[0], selectedHo, hoList[0], detailAddress, detailAddress2);
+      const isVilla = props.payload?.data === 'villa';
+      const isApartmentOrTicket = props.payload?.data2 === 'apartment' || props.payload?.data === 'ticketyes' || props.payload?.data === 'ticketno' || props.payload?.data === 'house';
+      const isAddressEmpty = detailAddress || detailAddress2 == '';
+      const isPubLandPriceOver100Mil = gongsireturn?.isPubLandPriceOver100Mil !== undefined;
+      const isAreaOver85 = gongsireturn?.isAreaOver85 !== undefined;
 
-      const chatList =
-        props.payload?.data === 'villa' && (detailAddress || detailAddress2 == '')
-          ? (gongsireturn?.isPubLandPriceOver100Mil !== undefined ? (gongsireturn?.isAreaOver85 !== undefined ? [chat1, chat2, chat3] : [chat1, chat2, chatarea]) : [chat1, chat2, chatpubLandPrice])
-          : (detailAddress || detailAddress2 == '') && (props.payload?.data2 === 'apartment' || props.payload?.data === 'ticketyes' || props.payload?.data === 'ticketno' || props.payload?.data === 'house')
-            ? (gongsireturn?.isPubLandPriceOver100Mil !== undefined ? (gongsireturn?.isAreaOver85 !== undefined ? [chat1, chat2, chat3] : [chat1, chat2, chatarea]) : [chat1, chat2, chatpubLandPrice])
-            : (gongsireturn?.isPubLandPriceOver100Mil !== undefined ? (gongsireturn?.isAreaOver85 !== undefined ? [chat1, chat2, chat4, chat5, chat3] : [chat1, chat2, chat4, chat5, chatarea]) : [chat1, chat2, chat4, chat5, chatpubLandPrice]);
+      let chatList;
+
+      if (isVilla && isAddressEmpty) {
+        chatList = isPubLandPriceOver100Mil
+          ? isAreaOver85
+            ? [chat1, chat2, chat3]
+            : [chat1, chat2, chatarea]
+          : [chat1, chat2, chatpubLandPrice];
+      } else if (isAddressEmpty && isApartmentOrTicket) {
+        chatList = isPubLandPriceOver100Mil
+          ? isAreaOver85
+            ? [chat1, chat2, chat3]
+            : [chat1, chat2, chatarea]
+          : [chat1, chat2, chatpubLandPrice];
+      } else {
+        chatList = isPubLandPriceOver100Mil
+          ? isAreaOver85
+            ? [chat1, chat2, isVilla ? chat4_1 : chat4_2, chat5, chat3]
+            : [chat1, chat2, isVilla ? chat4_1 : chat4_2, chat5, chatarea]
+          : [chat1, chat2, isVilla ? chat4_1 : chat4_2, chat5, chatpubLandPrice];
+      }
       dispatch(setChatDataList([...chatDataList, ...chatList]));
-    } else {
-      const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-      dispatch(setChatDataList(newChatDataList));
     }
-    dispatch(removeLastModalList());
+
   };
 
   useEffect(() => {
@@ -1166,7 +1209,7 @@ const SearchHouseSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+
               setCurrentPageIndex(0);
               setSelectedDong('');
               setSelectedHo('');
@@ -1231,61 +1274,78 @@ const SearchHouseSheet = props => {
                       placeholder="동(읍/면/리)명 또는 도로명주소를 입력해주세요"
                       value={searchText}
                       onChangeText={(text) => { setSearchText(text.replace(/\n/g, '')); }}
-                      onSubmitEditing={() => {
-                        if (searchText === '') {
-                          if (selectedArea !== '전체' && selectedArea !== '') {
-                            if (selectedArea2 !== '전체' && selectedArea2 !== '') {
-                              getAddress(selectedArea, selectedArea2, '');
+                      onSubmitEditing={async () => {
+                        const state = await NetInfo.fetch();
+                        const canProceed = await handleNetInfoChange(state);
+                        if (canProceed) {
+                          if (searchText === '') {
+                            if (selectedArea !== '전체' && selectedArea !== '') {
+                              if (selectedArea2 !== '전체' && selectedArea2 !== '') {
+                                getAddress(selectedArea, selectedArea2, '');
+                              }
+                            } else {
+                              return
                             }
                           } else {
-                            return
-                          }
+                            if (selectedArea === '전체' || selectedArea === '') {
+                              if (selectedArea2 === '전체' || selectedArea2 === '') {
+                                getAddress('', '', searchText);
+                              } else {
+                                getAddress('', selectedArea2, searchText);
+                              }
+
+                            } else {
+                              if (selectedArea2 === '전체' || selectedArea2 === '') {
+                                getAddress(selectedArea, '', searchText);
+                              } else {
+                                getAddress(selectedArea, selectedArea2, searchText);
+                              }
+                            }
+
+                          };
                         } else {
-                          if (selectedArea === '전체' || selectedArea === '') {
-                            if (selectedArea2 === '전체' || selectedArea2 === '') {
-                              getAddress('', '', searchText);
-                            } else {
-                              getAddress('', selectedArea2, searchText);
-                            }
-
-                          } else {
-                            if (selectedArea2 === '전체' || selectedArea2 === '') {
-                              getAddress(selectedArea, '', searchText);
-                            } else {
-                              getAddress(selectedArea, selectedArea2, searchText);
-                            }
-                          }
-
-                        };
-                      }}
+                          const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                          dispatch(setChatDataList(newChatDataList));
+                          actionSheetRef.current?.hide();
+                        }
+                      }
+                      }
                     />
                     <ModalInputButton
-                      onPress={() => {
-                        if (searchText === '') {
-                          if (selectedArea !== '전체' && selectedArea !== '') {
-                            if (selectedArea2 !== '전체' && selectedArea2 !== '') {
-                              getAddress(selectedArea, selectedArea2, '');
+                      onPress={async () => {
+                        const state = await NetInfo.fetch();
+                        const canProceed = await handleNetInfoChange(state);
+                        if (canProceed) {
+                          if (searchText === '') {
+                            if (selectedArea !== '전체' && selectedArea !== '') {
+                              if (selectedArea2 !== '전체' && selectedArea2 !== '') {
+                                getAddress(selectedArea, selectedArea2, '');
+                              }
+                            } else {
+                              return
                             }
                           } else {
-                            return
-                          }
+                            if (selectedArea === '전체' || selectedArea === '') {
+                              if (selectedArea2 === '전체' || selectedArea2 === '') {
+                                getAddress('', '', searchText);
+                              } else {
+                                getAddress('', selectedArea2, searchText);
+                              }
+
+                            } else {
+                              if (selectedArea2 === '전체' || selectedArea2 === '') {
+                                getAddress(selectedArea, '', searchText);
+                              } else {
+                                getAddress(selectedArea, selectedArea2, searchText);
+                              }
+                            }
+
+                          };
                         } else {
-                          if (selectedArea === '전체' || selectedArea === '') {
-                            if (selectedArea2 === '전체' || selectedArea2 === '') {
-                              getAddress('', '', searchText);
-                            } else {
-                              getAddress('', selectedArea2, searchText);
-                            }
-
-                          } else {
-                            if (selectedArea2 === '전체' || selectedArea2 === '') {
-                              getAddress(selectedArea, '', searchText);
-                            } else {
-                              getAddress(selectedArea, selectedArea2, searchText);
-                            }
-                          }
-
-                        };
+                          const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                          dispatch(setChatDataList(newChatDataList));
+                          actionSheetRef.current?.hide();
+                        }
                       }}>
                       <SerchIcon />
                     </ModalInputButton>
@@ -1388,19 +1448,23 @@ const SearchHouseSheet = props => {
               listData.length > 0 &&
               !isLastPage && (
                 <ListFooterButton
-                  onPress={() => {
-                    if (selectedArea === '전체' || selectedArea === '') {
-                      if (selectedArea2 === '전체' || selectedArea2 === '') {
-                        getMoreAddress('', '', searchText);
-                      } else {
-                        getMoreAddress('', selectedArea2, searchText);
-                      }
+                  onPress={async () => {
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      if (selectedArea === '전체' || selectedArea === '') {
+                        if (selectedArea2 === '전체' || selectedArea2 === '') {
+                          getMoreAddress('', '', searchText);
+                        } else {
+                          getMoreAddress('', selectedArea2, searchText);
+                        }
 
-                    } else {
-                      if (selectedArea2 === '전체' || selectedArea2 === '') {
-                        getMoreAddress(selectedArea, '', searchText);
                       } else {
-                        getMoreAddress(selectedArea, selectedArea2, searchText);
+                        if (selectedArea2 === '전체' || selectedArea2 === '') {
+                          getMoreAddress(selectedArea, '', searchText);
+                        } else {
+                          getMoreAddress(selectedArea, selectedArea2, searchText);
+                        }
                       }
                     }
                   }}>
@@ -1434,22 +1498,26 @@ const SearchHouseSheet = props => {
                 </View>
                 <MepSearchResultButton
                   onPress={async () => {
-                    //          console.log('선택 item', item);
-                    setAddress(item?.roadAddr);
-                    if (props.payload?.data === 'villa' || props.payload?.data2 === 'apartment') {
-                      const firstDong = await getDongData(item);
-                      if (firstDong !== 'dongerror') {
-                        await getHoData(item, firstDong);
-                        setSelectedItem(item);
-                        setCurrentPageIndex(1);
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      //          console.log('선택 item', item);
+                      setAddress(item?.roadAddr);
+                      if (props.payload?.data === 'villa' || props.payload?.data2 === 'apartment') {
+                        const firstDong = await getDongData(item);
+                        if (firstDong !== 'dongerror') {
+                          await getHoData(item, firstDong);
+                          setSelectedItem(item);
+                          setCurrentPageIndex(1);
+                        } else {
+                          setSelectedItem(item);
+                          setCurrentPageIndex(1);
+                        }
                       } else {
                         setSelectedItem(item);
-                        setCurrentPageIndex(1);
+                        //                console.log('item', item);
+                        setCurrentPageIndex(2);
                       }
-                    } else {
-                      setSelectedItem(item);
-                      //                console.log('item', item);
-                      setCurrentPageIndex(2);
                     }
                   }}>
                   <MapSearchResultButtonText>선택</MapSearchResultButtonText>

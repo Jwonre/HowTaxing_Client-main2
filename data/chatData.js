@@ -27,7 +27,7 @@ export const acquisitionTax = [
     select: [
       {
         id: 'apartment',
-        name: '아파트',
+        name: '아파트 · 오피스텔',
         icon: <BuildingIcon1 />,
         // 선택시 추가 될 챗 아이템
         select: ['apartment'],

@@ -9,7 +9,9 @@ import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
+import NetInfo from "@react-native-community/netinfo";
+
+
 const SheetContainer = styled.View`
   flex: 1;
   background-color: #fff;
@@ -127,13 +129,16 @@ const ReviewInput = styled.TextInput.attrs(props => ({
 `;
 
 const ReviewSheet = props => {
-  const dispatch = useDispatch();
   const navigation = useNavigation();
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
   const [score, setScore] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [keyboardShow, setKeyboardShow] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -172,6 +177,25 @@ const ReviewSheet = props => {
         console.log(err);
       });
   };
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
 
   return (
     <ActionSheet
@@ -256,12 +280,16 @@ const ReviewSheet = props => {
               width: '49%',
             }}>
             <Button
-              onPress={() => {
-                uploadReview();
-                actionSheetRef.current?.hide();
-                setTimeout(() => {
-                  navigation.navigate('Home');
-                }, 200);
+              onPress={async() => {
+                const state = await NetInfo.fetch();
+                const canProceed = await handleNetInfoChange(state);
+                if (canProceed) {
+                  uploadReview();
+                  actionSheetRef.current?.hide();
+                  setTimeout(() => {
+                    navigation.navigate('Home');
+                  }, 200);
+                }
               }}>
               <ButtonText>제출하기</ButtonText>
             </Button>

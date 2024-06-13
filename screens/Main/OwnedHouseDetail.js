@@ -10,8 +10,8 @@ import {
   BackHandler,
 } from 'react-native';
 import Switch from 'react-native-draggable-switch';
-import React, { useState, useLayoutEffect, useEffect } from 'react';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import React, { useState, useLayoutEffect, useEffect, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import EditGreyIcon from '../../assets/icons/edit_grey.svg';
 import styled from 'styled-components';
@@ -25,7 +25,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { editOwnHouseList } from '../../redux/ownHouseListSlice';
 import dayjs from 'dayjs';
-import { setModalList } from '../../redux/modalListSlice';
+
 import NetInfo from "@react-native-community/netinfo";
 import numberToKorean from '../../utils/numToKorean';
 
@@ -182,7 +182,7 @@ const OwnedHouseDetail = props => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const currentUser = useSelector(state => state.currentUser.value);
-  const modalList = useSelector(state => state.modalList.value);
+
   const [location, setLocation] = useState({
     latitude: 37.5326,
     longitude: 127.024612,
@@ -191,6 +191,9 @@ const OwnedHouseDetail = props => {
   const [data, setData] = useState(null);
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const dispatch = useDispatch();
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
 
 
@@ -323,10 +326,10 @@ const OwnedHouseDetail = props => {
       bdMgtSn: data?.bdMgtSn === undefined ? '' : data?.bdMgtSn,
       admCd: data?.admCd === undefined ? '' : data?.admCd,
       rnMgtSn: data?.rnMgtSn === undefined ? '' : data?.rnMgtSn,
-      area: data?.area === undefined ? '' : data?.area,
+      area: (data?.area === undefined || data?.area === null) ? '' : data?.area,
       isDestruction: data?.destruction === undefined ? '' : data?.destruction,
-      ownerCnt: data?.ownerCnt === undefined ? '' : data?.ownerCnt,
-      userProportion: data?.userProportion === undefined ? '' : data?.userProportion,
+      ownerCnt: (data?.ownerCnt === undefined || data?.ownerCnt === null) ? 1 : data?.ownerCnt,
+      userProportion: (data?.userProportion === undefined || data?.userProportion === null) ? 100 : data?.userProportion,
       isMoveInRight: newMoveInRight === undefined ? '' : newMoveInRight,
     };
 
@@ -338,13 +341,12 @@ const OwnedHouseDetail = props => {
       //  console.log('[OwnedHouseDetail]update response:', response);
       //  console.log('[OwnedHouseDetail]update response.data:', response.data);
       if (response.data.errYn === 'Y') {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
         SheetManager.show('info', {
           payload: {
             type: 'error',
             message: response.data.errMsg,
             description: response.data.errMsgDtl,
+            buttontext: '확인하기',
           },
         });
         return;
@@ -355,14 +357,13 @@ const OwnedHouseDetail = props => {
         setData(p);
       }
     } catch (e) {
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
       // 오류 처리
       SheetManager.show('info', {
         payload: {
           message: '보유주택 수정 중 오류가 발생했습니다.',
           description: e?.message,
           type: 'error',
+          buttontext: '확인하기',
         },
       });
       console.log('에러', e);
@@ -393,13 +394,12 @@ const OwnedHouseDetail = props => {
 
       const response = await axios.get(url, { headers });
       if (response.data.errYn === 'Y') {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
         SheetManager.show('info', {
           payload: {
             type: 'error',
             message: response.data.errMsg,
             description: response.data.errMsgDtl,
+            buttontext: '확인하기',
           },
         });
         return;
@@ -418,13 +418,12 @@ const OwnedHouseDetail = props => {
 
     } catch (error) {
       // console.error('[OwnedHouseDetail] getHouseDetailInfo Error:', error);
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
       SheetManager.show('info', {
         payload: {
           message: '보유주택 상세조회 중 오류가 발생했습니다.',
           description: error?.message,
           type: 'error',
+          buttontext: '확인하기',
         },
       });
     }
@@ -450,118 +449,146 @@ const OwnedHouseDetail = props => {
       });
     } catch (error) {
       console.error(error);
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'info' } }));
       SheetManager.show('info', {
         payload: {
           message: '주소를 찾을 수 없습니다.',
           description: error?.message,
           type: 'error',
+          buttontext: '확인하기',
         },
       });
     }
   };
 
-  const updateHouseName = async () => {
-    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateHouseNameAlert' } }));
-    await SheetManager.show('updateHouseNameAlert', {
-      payload: {
-        navigation,
-        data,
-        prevSheet,
-        handleHouseChange,
-      },
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
     });
+  };
 
+
+  const updateHouseName = async () => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      await SheetManager.show('updateHouseNameAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+    }
   };
 
   const updateHouseType = async () => {
-    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'chooseHouseTypeAlert' } }));
-    await SheetManager.show('chooseHouseTypeAlert', {
-      payload: {
-        navigation,
-        data,
-        prevSheet,
-        handleHouseChange,
-      },
-    });
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      await SheetManager.show('chooseHouseTypeAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+    }
+
   };
 
   const updateAddress = async () => {
-    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateAddressAlert' } }));
-    await SheetManager.show('updateAddressAlert', {
-      payload: {
-        navigation,
-        data,
-        prevSheet,
-        handleHouseChange,
-        getAPTLocation,
-      },
-    });
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      await SheetManager.show('updateAddressAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+          getAPTLocation,
+        },
+      });
 
-    // 네트워크 연결 상태를 확인합니다.
-    const networkState = await NetInfo.fetch();
-
-    // 네트워크가 연결되어 있을 때만 updateHouseDetailName() 함수를 실행합니다.
-    if (networkState.isConnected) {
       await updateHouseDetailName();
     }
   };
+
+
   const updateHouseDetailName = async () => {
-    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateHouseDetailNameAlert' } }));
-    await SheetManager.show('updateHouseDetailNameAlert', {
-      payload: {
-        navigation,
-        data,
-        prevSheet,
-        handleHouseChange,
-      },
-    });
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      await SheetManager.show('updateHouseDetailNameAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+    }
 
   };
 
   const updateContractDate = async () => {
-    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateContractDateAlert' } }));
-    await SheetManager.show('updateContractDateAlert', {
-      payload: {
-        navigation,
-        data,
-        prevSheet,
-        handleHouseChange,
-      },
-    });
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      await SheetManager.show('updateContractDateAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+    }
 
   };
 
   const updateBuyDate = async () => {
-    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateBuyDateAlert' } }));
-    await SheetManager.show('updateBuyDateAlert', {
-      payload: {
-        navigation,
-        data,
-        prevSheet,
-        handleHouseChange,
-      },
-    });
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      await SheetManager.show('updateBuyDateAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+    }
 
   };
   const updateBuyPrice = async () => {
-    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateBuyPriceAlert' } }));
-    await SheetManager.show('updateBuyPriceAlert', {
-      payload: {
-        navigation,
-        data,
-        prevSheet,
-        handleHouseChange,
-      },
-    });
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      await SheetManager.show('updateBuyPriceAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+    }
 
   };
 
@@ -617,6 +644,7 @@ const OwnedHouseDetail = props => {
                 payload: {
                   type: 'info',
                   message: '주택유형을 입력해 주세요.',
+                  buttontext: '확인하기',
                 },
               }); return;
             }
@@ -625,6 +653,7 @@ const OwnedHouseDetail = props => {
                 payload: {
                   type: 'info',
                   message: '주소를 검색해 주세요.',
+                  buttontext: '확인하기',
                 },
               }); return;
             }
@@ -633,6 +662,7 @@ const OwnedHouseDetail = props => {
                 payload: {
                   type: 'info',
                   message: '상세주소를 입력해 주세요.',
+                  buttontext: '확인하기',
                 },
               }); return;
             }
@@ -641,6 +671,7 @@ const OwnedHouseDetail = props => {
                 payload: {
                   type: 'info',
                   message: '지번주소가 없어요.\n주소를 다시 검색해 주세요.',
+                  buttontext: '확인하기',
                 },
               }); return;
             }
@@ -649,6 +680,7 @@ const OwnedHouseDetail = props => {
                 payload: {
                   type: 'info',
                   message: '도로명주소가 없어요.\n주소를 다시 검색해 주세요.',
+                  buttontext: '확인하기',
                 },
               }); return;
             }
@@ -657,6 +689,7 @@ const OwnedHouseDetail = props => {
                 payload: {
                   type: 'info',
                   message: '건물관리번호가 없어요.\n주소를 다시 검색해 주세요.',
+                  buttontext: '확인하기',
                 },
               }); return;
             }
@@ -665,6 +698,7 @@ const OwnedHouseDetail = props => {
                 payload: {
                   type: 'info',
                   message: '계약일자를 입력해 주세요.',
+                  buttontext: '확인하기',
                 },
               }); return;
             }
@@ -673,6 +707,7 @@ const OwnedHouseDetail = props => {
                 payload: {
                   type: 'info',
                   message: '취득일자를 입력해 주세요.',
+                  buttontext: '확인하기',
                 },
               }); return;
             }
@@ -681,6 +716,7 @@ const OwnedHouseDetail = props => {
                 payload: {
                   type: 'info',
                   message: '취득금액을 입력해 주세요.',
+                  buttontext: '확인하기',
                 },
               }); return;
             }
@@ -692,8 +728,6 @@ const OwnedHouseDetail = props => {
             if (!props.route.params?.prevSheet) return;
             //console.log(props.route.params?.prevSheet);
 
-            let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-            dispatch(setModalList({ ...modalList, [Modalindex]: { modal: props.route.params?.prevSheet, index: props.route.params?.index } }));
             SheetManager.show(props.route.params?.prevSheet, {
               payload: {
                 navigation,
@@ -709,8 +743,6 @@ const OwnedHouseDetail = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
-            let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-            dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'delete' } }));
             SheetManager.show('delete', {
               payload: {
                 title: '주택 삭제',
@@ -751,106 +783,115 @@ const OwnedHouseDetail = props => {
     });
   }, [props.route.params?.prevSheet, data]);
 
-  useEffect(() => {
-    // 하드웨어 백 버튼 핸들러 정의
-    const handleBackPress = () => {
-      if ((data?.houseType === '' || data?.houseType === null || data?.houseType === undefined)) {
-        SheetManager.show('info', {
-          payload: {
-            type: 'info',
-            message: '주택유형을 입력해 주세요.',
-          },
-        }); return true;
-      }
-      else if ((data?.roadAddr === '' || data?.roadAddr === null || data?.roadAddr === undefined)) {
-        SheetManager.show('info', {
-          payload: {
-            type: 'info',
-            message: '주소를 검색해 주세요.',
-          },
-        }); return true;
-      }
-      else if ((data?.detailAdr === '' || data?.detailAdr === null || data?.detailAdr === undefined)) {
-        SheetManager.show('info', {
-          payload: {
-            type: 'info',
-            message: '상세주소를 입력해 주세요.',
-          },
-        }); return true;
-      }
-      else if ((data?.jibunAddr === '' || data?.jibunAddr === null || data?.jibunAddr === undefined)) {
-        SheetManager.show('info', {
-          payload: {
-            type: 'info',
-            message: '지번주소가 없어요.\n주소를 다시 검색해 주세요.',
-          },
-        }); return true;
-      }
-      else if ((data?.roadAddr === '' || data?.roadAddr === null || data?.roadAddr === undefined)) {
-        SheetManager.show('info', {
-          payload: {
-            type: 'info',
-            message: '도로명주소가 없어요.\n주소를 다시 검색해 주세요.',
-          },
-        }); return true;
-      }
-      else if ((data?.bdMgtSn === '' || data?.bdMgtSn === null || data?.bdMgtSn === undefined)) {
-        SheetManager.show('info', {
-          payload: {
-            type: 'info',
-            message: '건물관리번호가 없어요.\n주소를 다시 검색해 주세요.',
-          },
-        }); return true;
-      }
-      else if ((props.route.params?.prevSheet == 'own2') && (data?.contractDate === '' || data?.contractDate === null || data?.contractDate === undefined)) {
-        SheetManager.show('info', {
-          payload: {
-            type: 'info',
-            message: '계약일자를 입력해 주세요.',
-          },
-        }); return true;
-      }
-      else if ((props.route.params?.prevSheet == 'own2') && (data?.buyDate === '' || data?.buyDate === null || data?.buyDate === undefined)) {
-        SheetManager.show('info', {
-          payload: {
-            type: 'info',
-            message: '취득일자를 입력해 주세요.',
-          },
-        }); return true;
-      }
-      else if ((props.route.params?.prevSheet == 'own2') && (data?.buyPrice === '' || data?.buyPrice === null || data?.buyPrice === undefined || data?.buyPrice === undefined || data?.buyPrice === 0)) {
-        SheetManager.show('info', {
-          payload: {
-            type: 'info',
-            message: '취득금액을 입력해 주세요.',
-          },
-        }); return true;
-      }
-      if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
-        dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
-      }
-      navigation.goBack();
-      if (!props.route.params?.prevSheet) return true;
-      //console.log(props.route.params?.prevSheet);
-      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      dispatch(setModalList({ ...modalList, [Modalindex]: { modal: props.route.params?.prevSheet, index: props.route.params?.index } }));
-      SheetManager.show(props.route.params?.prevSheet, {
+
+  // 하드웨어 백 버튼 핸들러 정의
+  const handleBackPress = () => {
+    if ((data?.houseType === '' || data?.houseType === null || data?.houseType === undefined)) {
+      SheetManager.show('info', {
         payload: {
-          navigation,
-          index: props.route.params.index
+          type: 'info',
+          message: '주택유형을 입력해 주세요.',
+          buttontext: '확인하기',
         },
-      });
-      return true;
-    };
+      }); return true;
+    }
+    else if ((data?.roadAddr === '' || data?.roadAddr === null || data?.roadAddr === undefined)) {
+      SheetManager.show('info', {
+        payload: {
+          type: 'info',
+          message: '주소를 검색해 주세요.',
+          buttontext: '확인하기',
+        },
+      }); return true;
+    }
+    else if ((data?.detailAdr === '' || data?.detailAdr === null || data?.detailAdr === undefined)) {
+      SheetManager.show('info', {
+        payload: {
+          type: 'info',
+          message: '상세주소를 입력해 주세요.',
+          buttontext: '확인하기',
+        },
+      }); return true;
+    }
+    else if ((data?.jibunAddr === '' || data?.jibunAddr === null || data?.jibunAddr === undefined)) {
+      SheetManager.show('info', {
+        payload: {
+          type: 'info',
+          message: '지번주소가 없어요.\n주소를 다시 검색해 주세요.',
+          buttontext: '확인하기',
+        },
+      }); return true;
+    }
+    else if ((data?.roadAddr === '' || data?.roadAddr === null || data?.roadAddr === undefined)) {
+      SheetManager.show('info', {
+        payload: {
+          type: 'info',
+          message: '도로명주소가 없어요.\n주소를 다시 검색해 주세요.',
+          buttontext: '확인하기',
+        },
+      }); return true;
+    }
+    else if ((data?.bdMgtSn === '' || data?.bdMgtSn === null || data?.bdMgtSn === undefined)) {
+      SheetManager.show('info', {
+        payload: {
+          type: 'info',
+          message: '건물관리번호가 없어요.\n주소를 다시 검색해 주세요.',
+          buttontext: '확인하기',
+        },
+      }); return true;
+    }
+    else if ((props.route.params?.prevSheet == 'own2') && (data?.contractDate === '' || data?.contractDate === null || data?.contractDate === undefined)) {
+      SheetManager.show('info', {
+        payload: {
+          type: 'info',
+          message: '계약일자를 입력해 주세요.',
+          buttontext: '확인하기',
+        },
+      }); return true;
+    }
+    else if ((props.route.params?.prevSheet == 'own2') && (data?.buyDate === '' || data?.buyDate === null || data?.buyDate === undefined)) {
+      SheetManager.show('info', {
+        payload: {
+          type: 'info',
+          message: '취득일자를 입력해 주세요.',
+          buttontext: '확인하기',
+        },
+      }); return true;
+    }
+    else if ((props.route.params?.prevSheet == 'own2') && (data?.buyPrice === '' || data?.buyPrice === null || data?.buyPrice === undefined || data?.buyPrice === undefined || data?.buyPrice === 0)) {
+      SheetManager.show('info', {
+        payload: {
+          type: 'info',
+          message: '취득금액을 입력해 주세요.',
+          buttontext: '확인하기',
+        },
+      }); return true;
+    }
+    if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
+      dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
+    }
+    navigation.goBack();
+    if (!props.route.params?.prevSheet) return true;
+    //console.log(props.route.params?.prevSheet);
+    SheetManager.show(props.route.params?.prevSheet, {
+      payload: {
+        navigation,
+        index: props.route.params.index
+      },
+    });
+    return true;
+  };
 
-    // 이벤트 리스너 추가
-    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+  useFocusEffect(
+    useCallback(() => {
+      // 이벤트 리스너 추가
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress);
 
-    // 컴포넌트 언마운트 시 이벤트 리스너 제거
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
-    };
-  }, [navigation, props.route.params, data]); // 의존성 배열에 navigation과 params 추가
+      // 컴포넌트 언마운트 시 이벤트 리스너 제거
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      };
+    }, [handleBackPress])); // 의존성 배열에 navigation과 params 추가
 
 
 
@@ -1016,8 +1057,6 @@ const OwnedHouseDetail = props => {
               <TouchableOpacity activeOpacity={0.6}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 onPress={() => {
-                  let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                  dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updatePubLandPriceAlert' } }));
                   SheetManager.show('updatePubLandPriceAlert', {
                     payload: {
                       navigation,
@@ -1042,7 +1081,7 @@ const OwnedHouseDetail = props => {
                   {HOUSE_TYPE.find(color => color.id === '8').name}
                 </NecessaryInfoBadgeText>
               </NecessaryInfoBadge>}
-              <InfoContentLabel>계약일자</InfoContentLabel>
+              <InfoContentLabel>취득계약일자</InfoContentLabel>
               <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{data?.contractDate ? dayjs(data?.contractDate).format(
                 'YYYY년 MM월 DD일',
               ) : ''}</InfoContentText>
@@ -1067,8 +1106,6 @@ const OwnedHouseDetail = props => {
               <TouchableOpacity activeOpacity={0.6}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 onPress={() => {
-                  let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                  dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateAreaMeterAlert' } }));
                   SheetManager.show('updateAreaMeterAlert', {
                     payload: {
                       navigation,
@@ -1146,8 +1183,7 @@ const OwnedHouseDetail = props => {
                 <TouchableOpacity activeOpacity={0.6}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   onPress={() => {
-                    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                    dispatch(setModalList({ ...modalList, [Modalindex]: { modal: 'updateUserProportionAlert' } }));
+
                     SheetManager.show('updateUserProportionAlert', {
                       payload: {
                         navigation,
@@ -1177,7 +1213,7 @@ const OwnedHouseDetail = props => {
                       공동명의{'  '}
                     </Text>
                   )}
-                  {data?.userProportion}%
+                  {data?.userProportion === null ? 100 : data?.userProportion}%
                 </InfoContentText>
               </InfoContentItem>
               {Number(data?.ownerCnt) > 1 &&

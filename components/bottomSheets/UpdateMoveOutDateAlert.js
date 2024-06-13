@@ -15,7 +15,7 @@ import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { useDispatch, useSelector } from 'react-redux';
 import Calendar from '../Calendar';
-import { removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
 
 
 const SheetContainer = styled.View`
@@ -114,17 +114,19 @@ const ButtonText = styled.Text`
 
 
 const UpdateMoveOutDateAlert = props => {
-
-  const { handleHouseChange, data, navigation, prevSheet } = props.payload;
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+  const { handleHouseChange, data, navigation} = props.payload;
 
   const dispatch = useDispatch();
   const actionSheetRef = useRef(null);
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const _scrollViewRef = useRef(null);
   const [selectedDate, setSelectedDate] = useState(new Date(),
   );
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   // 공시가격
 
 
@@ -149,14 +151,36 @@ const UpdateMoveOutDateAlert = props => {
     };
   }, []);
 
-  const nextHandler = async () => {
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
-    var p = data;
-    p.moveOutDate = selectedDate;
-   // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
-    await handleHouseChange(p, p?.isMoveInRight);
-    dispatch(removeLastModalList());
-    actionSheetRef.current?.hide();
+
+  const nextHandler = async () => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      var p = data;
+      p.moveOutDate = selectedDate;
+      // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
+      await handleHouseChange(p, p?.isMoveInRight);
+       
+      actionSheetRef.current?.hide();
+    }
   };
 
   return (
@@ -168,7 +192,7 @@ const UpdateMoveOutDateAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />

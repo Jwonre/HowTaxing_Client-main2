@@ -15,7 +15,8 @@ import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { useDispatch, useSelector } from 'react-redux';
 import Calendar from '../Calendar';
-import { removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
+  
 
 
 
@@ -34,82 +35,12 @@ const ModalTitle = styled.Text`
   text-align: center;
 `;
 
-const ModalLabel = styled.Text`
-  font-size: 15px;
-  font-family: Pretendard-SemiBold;
-  color: #000;
-  line-height: 18px;
-  margin-right: 6px;
-`;
-
-const ModalSubtitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
-  font-family: Pretendard-Medium;
-  color: #1b1c1f;
-  line-height: 20px;
-  text-align: center;
-  margin: 20px 0;
-`;
-
-const ModalInput = styled.TextInput.attrs(props => ({
-  placeholderTextColor: '#C1C3C5',
-}))`
-  width: 100%;
-  height: 50px;
-  border-radius: 10px;
-  background-color: #f0f3f8;
-  padding: 0 15px;
-  margin-top: 10px;
-  font-size: 15px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 20px;
-  text-align: right;
-`;
-
-const ModalSelectButton = styled.TouchableOpacity.attrs(props => ({
-  activeOpacity: 0.6,
-}))`
-  width: 24%;
-  height: 48px;
-  border-radius: 10px;
-  background-color: #fff;
-  align-items: center;
-  justify-content: center;
-  margin-top: 10px;
-  border: 1px solid #e8eaed;
-`;
-
-const ModalSelectButtonText = styled.Text`
-  font-size: 15px;
-  font-family: Pretendard-SemiBold;
-  color: #1b1c1f;
-  line-height: 20px;
-`;
-
 const ModalInputSection = styled.View`
   width: 100%;
   height: auto;
   background-color: #fff;
 `;
 
-const ModalButton = styled.TouchableOpacity.attrs(props => ({
-  activeOpacity: 0.8,
-}))`
-  width: 48%;
-  height: 50px;
-  border-radius: 25px;
-  background-color: #2f87ff;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
-  font-family: Pretendard-SemiBold;
-  color: #fff;
-  line-height: 20px;
-`;
 
 const ModalHeader = styled.View`
   width: 100%;
@@ -170,7 +101,9 @@ const ButtonText = styled.Text`
 const UpdateBalanceDateAlert = props => {
 
   const { handleHouseChange, data, navigation, prevSheet } = props.payload;
-
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const dispatch = useDispatch();
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
@@ -178,7 +111,6 @@ const UpdateBalanceDateAlert = props => {
   const _scrollViewRef = useRef(null);
   const [selectedDate, setSelectedDate] = useState(new Date(),
   );
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   // 공시가격
   const [pubLandPrice, setPubLandPrice] = useState(
@@ -186,8 +118,23 @@ const UpdateBalanceDateAlert = props => {
   );
 
   // 공시가격 선택 리스트
-  const AC_PUBLANDPRICE_LIST = [500000000, 100000000, 10000000, 1000000];
-
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
   // 키보드 이벤트
   useEffect(() => {
@@ -211,15 +158,18 @@ const UpdateBalanceDateAlert = props => {
   }, []);
 
   const nextHandler = async () => {
-
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
     var p = data;
     p.balanceDate = selectedDate;
    // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
     await handleHouseChange(p, p?.isMoveInRight);
-    dispatch(removeLastModalList());
+     
     actionSheetRef.current?.hide();
+    }
   };
-  console.log('data?.contractDate',data?.contractDate)
+
   return (
     <ActionSheet
       ref={actionSheetRef}
@@ -229,7 +179,7 @@ const UpdateBalanceDateAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />

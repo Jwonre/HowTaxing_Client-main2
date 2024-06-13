@@ -9,6 +9,7 @@ import getFontSize from '../utils/getFontSize';
 import * as Animatable from 'react-native-animatable';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import dayjs from 'dayjs';
 import { setHouseInfo } from '../redux/houseInfoSlice';
 import { HOUSE_TYPE } from '../constants/colors';
 import { SheetManager } from 'react-native-actions-sheet';
@@ -114,15 +115,16 @@ const TaxCard2 = props => {
   const getTaxCard2Info = async () => {
     const data = {
       houseId : houseInfo.houseId  === undefined ? '' : houseInfo.houseId ,
-      sellContractDate : houseInfo.contractDate === undefined ? '' : houseInfo.contractDate,
-      sellDate : houseInfo.sellDate === undefined ? '' : houseInfo.sellDate,
+      sellContractDate : dayjs(houseInfo.contractDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
+      sellDate : dayjs(houseInfo.sellDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.sellDate).format('YYYY-MM-DD'),
       sellPrice : houseInfo.saleAmount === undefined ? '' : houseInfo.saleAmount,
       necExpensePrice : houseInfo.necessaryExpense === undefined ? '' : houseInfo.necessaryExpense,
       isWWLandLord :  houseInfo.isLandlord === undefined ? '' : houseInfo.isLandlord,
       stayPeriodYear : houseInfo.livePeriodYear === undefined ? '' : houseInfo.livePeriodYear,
       stayPeriodMonth : houseInfo.livePeriodMonth === undefined ? '' : houseInfo.livePeriodMonth,
-      planAnswer : null,
-      //houseInfo.planAnswer === undefined ? '' : houseInfo.planAnswer
+      //additionalAnswer : null,
+      planAnswer : null
+      //planAnswer : houseInfo.planAnswer === undefined ? '' : houseInfo.planAnswer
     };
     const headers = {
       'Content-Type': 'application/json',
@@ -131,9 +133,10 @@ const TaxCard2 = props => {
     axios
       .post('http://13.125.194.154:8080/calculation/sellResult', data, { headers: headers })
       .then(response => {
-       // console.log('양도소득세 계산 중:', response.data);
+        //console.log('양도소득세 파라미터', data);
+        //console.log('양도소득세 계산 중:', response.data);
         // 성공적인 응답 처리
-       // console.log('양도소득세 파라미터', data);
+
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
@@ -142,6 +145,7 @@ const TaxCard2 = props => {
               description: response.data.errMsgDtl,
               closeSheet: true,
               navigation: props?.navigation,
+              buttontext: '확인하기',
             },
           });
         //  console.log('양도소득세 결과', response.data);
@@ -164,6 +168,7 @@ const TaxCard2 = props => {
             id: 'calculation',
             closeSheet: true,
             navigation: props?.navigation,
+            buttontext: '확인하기',
           },
         });
         console.error(error);

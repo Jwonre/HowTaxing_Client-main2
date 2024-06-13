@@ -1,10 +1,11 @@
 // 결과에서 주택 정보 섹션 
 
-import {View, Text} from 'react-native';
+import { View, Text } from 'react-native';
 import React from 'react';
 import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';
-import {HOUSE_TYPE} from '../constants/colors';
+import { HOUSE_TYPE } from '../constants/colors';
+import NetInfo from "@react-native-community/netinfo";
 
 const HoustInfoSection = styled.View`
   width: 100%;
@@ -77,6 +78,28 @@ const HoustInfoButtonText = styled.Text`
 `;
 
 const HouseInfo = props => {
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
   //console.log(props);
   return (
     <HoustInfoSection>
@@ -98,12 +121,17 @@ const HouseInfo = props => {
         <HoustInfoText>{props.item?.houseDetailName}</HoustInfoText>
       </View>
       <HoustInfoButton
-        onPress={() => {
-          props.navigation.push('HouseDetail', {
-            item: props.item,
-          });
-         // console.log('houseinfo.js houseinfo', props.item);
-        }}>
+        onPress={async () => {
+          const state = await NetInfo.fetch();
+          const canProceed = await handleNetInfoChange(state);
+          if (canProceed) {
+            props.navigation.push('HouseDetail', {
+              item: props.item,
+            });
+            // console.log('houseinfo.js houseinfo', props.item);
+          }
+        }
+        }>
         <HoustInfoButtonText>자세히 보기</HoustInfoButtonText>
       </HoustInfoButton>
     </HoustInfoSection>

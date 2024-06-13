@@ -1,41 +1,44 @@
 
 import { useWindowDimensions, BackHandler } from 'react-native';
-import React, { useLayoutEffect, useEffect } from 'react';
+import React, { useLayoutEffect, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import DropShadow from 'react-native-drop-shadow';
 import getFontSize from '../../utils/getFontSize';
 import NetInfo from '@react-native-community/netinfo';
-
+import NetworkError from '../../assets/icons/network_error.svg';
 
 const Container = styled.View`
   flex: 1;
   background-color: #fff;
 `;
 
+const Wrapper = styled.View`
+  flex: 1;
+  padding: 25px;
+  alignItems: 'center';
+  justifyContent: 'center';
+  margin-top: 80px;
+`;
+
+
 const IntroSection = styled.View`
-  flex: 0.6;
   width: 100%;
   padding: 25px;
-  justify-content: flex-end;
+  justify-content: center;
+  alignItems: 'center';
+  margin-top: 130px;
+  
 `;
 
-const Tag = styled.View`
-  width: 68px;
-  height: 26px;
+const IconView = styled.View`
+  width: 100px;
+  height: 100px;
   background-color: #fff;
-  border-radius: ${getFontSize(16)}px;
   align-items: center;
   justify-content: center;
-  border: 1px solid #FF7401;
-`;
-
-const TagText = styled.Text`
-  font-size: ${getFontSize(13)}px;
-  font-family: Pretendard-Medium;
-  color: #FF7401;
-  line-height: 16px;
-  letter-spacing: -0.5px;
+  margin-left: auto;
+  margin-right: auto;
 `;
 
 const Title = styled.Text`
@@ -52,29 +55,21 @@ const SubTitle = styled.Text`
   font-size: ${getFontSize(13)}px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
-  line-height: 20px;
+  line-height: 15px;
   margin-top: 6px;
 `;
 
-const IconView = styled.View`
-  width: 100px;
-  height: 100px;
-  border-radius: 50px;
-  background-color: #fff;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  right: 25px;
-  border: 1px solid #e8eaed;
-`;
+
 const ButtonSection = styled.View`
   width: 100%;
   height: auto;
   background-color: #fff;
   align-items: center;
   flex-direction: row;
-  justify-content: center;
   padding: 20px;
+  flex: 1;
+  justify-content: space-between;
+  margin-top: 140px;
 `;
 
 const Button = styled.TouchableOpacity.attrs(props => ({
@@ -102,13 +97,11 @@ const ButtonText = styled.Text`
 const NetworkAlert = props => {
   const navigation = props.navigation;
   const { width } = useWindowDimensions();
-
+  const [isConnected, setIsConnected] = useState(true);
   const handleBackPress = () => {
-    NetInfo.addEventListener(state => {
-      if (state.isConnected) {
-        navigation.goBack();
-      }
-    })
+    if (isConnected) {
+      navigation.goBack();
+    } 
     return true;
   };
 
@@ -118,15 +111,26 @@ const NetworkAlert = props => {
       BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
     };
   }, [handleBackPress]);
+
   useLayoutEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
 
   return (
     <Container>
-      <IntroSection>
-        <Title>현재 인터넷이 연결되어 있지 않아요. 연결될 때까지 기다려 주세요.</Title>
+      <Wrapper>
+        <IntroSection>
+          <IconView><NetworkError /></IconView>
+          <Title>지금 네트워크가 불안정해요.</Title>
+          <SubTitle>인터넷 연결상태에 어떤 문제가 있는 것 같아요.{'\n'}통신 상태를 확인하신 후, 다시 시도해주세요.</SubTitle>
+        </IntroSection>
         <ButtonSection>
           <DropShadow
             style={{
@@ -142,18 +146,15 @@ const NetworkAlert = props => {
             }}>
             <Button
               onPress={() => {
-                NetInfo.addEventListener(state => {
-                  if (state.isConnected) {
-                    navigation.goBack();
-                  }
-                })
-                //navigation.goBack();
+                if (isConnected) {
+                  navigation.goBack();
+                } 
               }}>
-              <ButtonText>연결하기</ButtonText>
+              <ButtonText>다시 시도하기</ButtonText>
             </Button>
           </DropShadow>
         </ButtonSection>
-      </IntroSection>
+      </Wrapper>
     </Container>
   );
 };

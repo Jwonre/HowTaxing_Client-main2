@@ -22,6 +22,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { setCert } from '../../redux/certSlice';
 import { AREA_LIST } from '../../data/areaData';
 import { LogBox } from 'react-native';
+import NetInfo from "@react-native-community/netinfo"
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -292,13 +293,32 @@ const CertSheet = props => {
   const { certType, agreeCert, agreePrivacy, agreeCopyright, agreeGov24 } = useSelector(
     state => state.cert.value,
   );
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
 
-
-  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if(props?.payload?.isGainsTax === true){
+    if (props?.payload?.isGainsTax === true) {
       setIsGainsTax('02');
     } else {
       setIsGainsTax('01');
@@ -351,6 +371,7 @@ const CertSheet = props => {
             type: 'error',
             message: response.data.errMsg,
             description: response.data.errMsgDtl,
+            buttontext: '확인하기',
           },
         });
         return;
@@ -359,6 +380,7 @@ const CertSheet = props => {
           payload: {
             type: 'error',
             message: '주택정보를 조회하는데 문제가 발생했습니다.',
+            buttontext: '확인하기',
           },
         });
         return;
@@ -391,7 +413,7 @@ const CertSheet = props => {
 
     try {
       //console.log('[CertSheet]headers:', headers);
-     // console.log('[CertSheet]data:', data);
+      // console.log('[CertSheet]data:', data);
       await hypenHouseAPI(url, data, headers);
     } catch (error) {
       SheetManager.show('info', {
@@ -399,6 +421,7 @@ const CertSheet = props => {
           message: '주택정보를 조회하는데 문제가 발생했습니다.',
           description: error.message,
           type: 'error',
+          buttontext: '확인하기',
         },
       });
       console.log('에러', error);
@@ -406,47 +429,51 @@ const CertSheet = props => {
   };
 
   const nextHandler = async () => {
-    if (chatDataList.find(el => el.id === 'under12')) {
-      // 실거주기간 가져와야함
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      if (chatDataList.find(el => el.id === 'under12')) {
+        // 실거주기간 가져와야함
 
-      actionSheetRef.current?.hide();
+        actionSheetRef.current?.hide();
 
-      const chat1 = gainTax.find(el => el.id === 'real');
-      const chat2 = {
-        id: 'year',
-        type: 'my',
-        progress: 5,
-        message: '2년 10개월',
-      };
+        const chat1 = gainTax.find(el => el.id === 'real');
+        const chat2 = {
+          id: 'year',
+          type: 'my',
+          progress: 5,
+          message: '2년 10개월',
+        };
 
-      const chat3 = gainTax.find(el => el.id === 'ExpenseInquiry');
-      const chat4 = gainTax.find(el => el.id === 'ExpenseAnswer');
+        const chat3 = gainTax.find(el => el.id === 'ExpenseInquiry');
+        const chat4 = gainTax.find(el => el.id === 'ExpenseAnswer');
 
-      dispatch(
-        setHouseInfo({
-          ...houseInfo,
-          livePeriodYear: 2,
-          livePeriodMonth: 10
-        }),
-      );
+        dispatch(
+          setHouseInfo({
+            ...houseInfo,
+            livePeriodYear: 2,
+            livePeriodMonth: 10
+          }),
+        );
 
-      dispatch(setChatDataList([...chatDataList, chat1, chat2, chat3, chat4])) // 1초 후에 실행);
-      //console.log(chat4);
+        dispatch(setChatDataList([...chatDataList, chat1, chat2, chat3, chat4])) // 1초 후에 실행);
+        //console.log(chat4);
 
-      // 인증 데이터 초기화
-      dispatch(
-        setCert({
-          certType: null,
-          agreeCert: false,
-          agreePrivacy: false,
-          agreeCopyright: false,
-          agreeGov24: false,
-        }),
-      );
+        // 인증 데이터 초기화
+        dispatch(
+          setCert({
+            certType: null,
+            agreeCert: false,
+            agreePrivacy: false,
+            agreeCopyright: false,
+            agreeGov24: false,
+          }),
+        );
 
-      return;
+        return;
 
 
+      }
     }
   };
 
@@ -640,7 +667,7 @@ const CertSheet = props => {
                 <ListItemButton
                   onPress={() => {
                     actionSheetRef.current?.hide();
-                 //   console.log('certType', certType);
+                    //   console.log('certType', certType);
                     navigation.navigate('Gov24', {
                       cert: certType,
                       isGainsTax: props.payload.isGainsTax,
@@ -815,9 +842,9 @@ const CertSheet = props => {
                       data={
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
-                     /* onSelect={(selectedItem, index) => {
-                        console.log(selectedItem, index);
-                      }}*/
+                      /* onSelect={(selectedItem, index) => {
+                         console.log(selectedItem, index);
+                       }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
                           <View
@@ -1063,19 +1090,19 @@ const CertSheet = props => {
                 </Button>
               </ButtonShadow>
               <ButtonShadow>
-                <Button onPress={nextHandler}style={{
-                    backgroundColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                    borderColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                  }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
-                    <ButtonText style={{
-                      color: name && phone.length === 11 && residentNumber.length === 13
-                        ? '#fff'
-                        : '#717274',
-                    }}> 다음으로</ButtonText>
+                <Button onPress={nextHandler} style={{
+                  backgroundColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                  borderColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
+                  <ButtonText style={{
+                    color: name && phone.length === 11 && residentNumber.length === 13
+                      ? '#fff'
+                      : '#717274',
+                  }}> 다음으로</ButtonText>
                 </Button>
               </ButtonShadow>
             </ButtonSection>
@@ -1178,9 +1205,9 @@ const CertSheet = props => {
                       data={
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
-                     /* onSelect={(selectedItem, index) => {
-                        console.log(selectedItem, index);
-                      }}*/
+                      /* onSelect={(selectedItem, index) => {
+                         console.log(selectedItem, index);
+                       }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
                           <View
@@ -1206,7 +1233,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                             // console.log(item);
+                              // console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1243,18 +1270,18 @@ const CertSheet = props => {
               </ButtonShadow>
               <ButtonShadow>
                 <Button onPress={nextHandler} style={{
-                    backgroundColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                    borderColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                  }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
-                    <ButtonText style={{
-                      color: name && phone.length === 11 && residentNumber.length === 13
-                        ? '#fff'
-                        : '#717274',
-                    }}>다음으로</ButtonText>
+                  backgroundColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                  borderColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
+                  <ButtonText style={{
+                    color: name && phone.length === 11 && residentNumber.length === 13
+                      ? '#fff'
+                      : '#717274',
+                  }}>다음으로</ButtonText>
                 </Button>
               </ButtonShadow>
             </ButtonSection>
@@ -1365,9 +1392,9 @@ const CertSheet = props => {
                       data={
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
-                    /*  onSelect={(selectedItem, index) => {
-                        console.log(selectedItem, index);
-                      }}*/
+                      /*  onSelect={(selectedItem, index) => {
+                          console.log(selectedItem, index);
+                        }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
                           <View
@@ -1393,7 +1420,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                            //  console.log(item);
+                              //  console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1429,19 +1456,19 @@ const CertSheet = props => {
                 </Button>
               </ButtonShadow>
               <ButtonShadow>
-                <Button onPress={nextHandler}style={{
-                    backgroundColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                    borderColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                  }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
-                    <ButtonText style={{
-                      color: name && phone.length === 11 && residentNumber.length === 13
-                        ? '#fff'
-                        : '#717274',
-                    }}>다음으로</ButtonText>
+                <Button onPress={nextHandler} style={{
+                  backgroundColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                  borderColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
+                  <ButtonText style={{
+                    color: name && phone.length === 11 && residentNumber.length === 13
+                      ? '#fff'
+                      : '#717274',
+                  }}>다음으로</ButtonText>
                 </Button>
               </ButtonShadow>
             </ButtonSection>
@@ -1616,19 +1643,19 @@ const CertSheet = props => {
                 </Button>
               </ButtonShadow>
               <ButtonShadow>
-                <Button onPress={nextHandler}style={{
-                    backgroundColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                    borderColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                  }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
-                    <ButtonText style={{
-                      color: name && phone.length === 11 && residentNumber.length === 13
-                        ? '#fff'
-                        : '#717274',
-                    }}>다음으로</ButtonText>
+                <Button onPress={nextHandler} style={{
+                  backgroundColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                  borderColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
+                  <ButtonText style={{
+                    color: name && phone.length === 11 && residentNumber.length === 13
+                      ? '#fff'
+                      : '#717274',
+                  }}>다음으로</ButtonText>
                 </Button>
               </ButtonShadow>
             </ButtonSection>
@@ -1803,19 +1830,19 @@ const CertSheet = props => {
                 </Button>
               </ButtonShadow>
               <ButtonShadow>
-                <Button onPress={nextHandler}style={{
-                    backgroundColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                    borderColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                  }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
-                    <ButtonText style={{
-                      color: name && phone.length === 11 && residentNumber.length === 13
-                        ? '#fff'
-                        : '#717274',
-                    }}>다음으로</ButtonText>
+                <Button onPress={nextHandler} style={{
+                  backgroundColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                  borderColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
+                  <ButtonText style={{
+                    color: name && phone.length === 11 && residentNumber.length === 13
+                      ? '#fff'
+                      : '#717274',
+                  }}>다음으로</ButtonText>
                 </Button>
               </ButtonShadow>
             </ButtonSection>
@@ -1926,9 +1953,9 @@ const CertSheet = props => {
                       data={
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
-                    /*  onSelect={(selectedItem, index) => {
-                        console.log(selectedItem, index);
-                      }}*/
+                      /*  onSelect={(selectedItem, index) => {
+                          console.log(selectedItem, index);
+                        }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
                           <View
@@ -1954,7 +1981,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                             // console.log(item);
+                              // console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1990,19 +2017,19 @@ const CertSheet = props => {
                 </Button>
               </ButtonShadow>
               <ButtonShadow>
-                <Button onPress={nextHandler}style={{
-                    backgroundColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                    borderColor: name && phone.length === 11 && residentNumber.length === 13
-                      ? '#2F87FF'
-                      : '#E8EAED',
-                  }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
-                    <ButtonText style={{
-                      color: name && phone.length === 11 && residentNumber.length === 13
-                        ? '#fff'
-                        : '#717274',
-                    }}>다음으로</ButtonText>
+                <Button onPress={nextHandler} style={{
+                  backgroundColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                  borderColor: name && phone.length === 11 && residentNumber.length === 13
+                    ? '#2F87FF'
+                    : '#E8EAED',
+                }} disabled={!(name && phone.length === 11 && residentNumber.length === 13)}>
+                  <ButtonText style={{
+                    color: name && phone.length === 11 && residentNumber.length === 13
+                      ? '#fff'
+                      : '#717274',
+                  }}>다음으로</ButtonText>
                 </Button>
               </ButtonShadow>
             </ButtonSection>

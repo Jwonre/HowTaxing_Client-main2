@@ -24,7 +24,8 @@ import ChevronDownIcon from '../../assets/icons/chevron_down.svg';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { AREA_LIST } from '../../data/areaData';
-import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
+
 const SheetContainer = styled.View`
   flex: 1;
   background-color: #fff;
@@ -228,7 +229,7 @@ const ListFooterButtonText = styled.Text`
 `;
 
 const UpdateAddressAlert = props => {
-  const { handleHouseChange, data, getAPTLocation} = props.payload;
+  const { handleHouseChange, data, getAPTLocation } = props.payload;
   const actionSheetRef = useRef(null);
   const scrollViewRef = useRef(null);
   const selectRef2 = useRef(null);
@@ -245,7 +246,7 @@ const UpdateAddressAlert = props => {
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedArea2, setSelectedArea2] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
-  const modalList = useSelector(state => state.modalList.value);
+
   const currentUser = useSelector(state => state.currentUser.value);
 
   useEffect(() => {
@@ -267,6 +268,26 @@ const UpdateAddressAlert = props => {
       keyboardDidShowListener.remove();
     };
   }, []);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
+
 
   // 주소 검색
   const getAddress = async (Area, Area2, searchtext) => {
@@ -348,8 +369,6 @@ const UpdateAddressAlert = props => {
       .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
-          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
           SheetManager.show('info', {
             payload: {
               type: 'error',
@@ -357,20 +376,20 @@ const UpdateAddressAlert = props => {
               description: response.data.errMsgDtl,
               closemodal: true,
               actionSheetRef: actionSheetRef,
+              buttontext: '확인하기',
             },
           });
           return;
         } else {
           // 성공적인 응답 처리 
           const list = response.data.data.jusoList;
-             // console.log('response', response.data.data)
+          // console.log('response', response.data.data)
           if (list.length === 0) {
-            let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-            dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
             SheetManager.show('info', {
               payload: {
                 type: 'error',
                 message: '검색 결과가 없어요.',
+                buttontext: '확인하기',
               },
             });
           } else {
@@ -382,14 +401,13 @@ const UpdateAddressAlert = props => {
       })
       .catch(error => {
         // 오류 처리
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
         SheetManager.show('info', {
           type: 'error',
           message: error?.errMsg,
           errorMessage: error?.errCode,
           closemodal: true,
           actionSheetRef: actionSheetRef,
+          buttontext: '확인하기',
         });
         console.error(error);
       });
@@ -479,8 +497,6 @@ const UpdateAddressAlert = props => {
       .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
-          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
           SheetManager.show('info', {
             payload: {
               type: 'error',
@@ -488,6 +504,7 @@ const UpdateAddressAlert = props => {
               description: response.data.errMsgDtl,
               closemodal: true,
               actionSheetRef: actionSheetRef,
+              buttontext: '확인하기',
             },
           });
           return;
@@ -496,12 +513,11 @@ const UpdateAddressAlert = props => {
           const list = response.data.data.jusoList;
           //console.log('response', response.data.data)
           if (list.length === 0) {
-            let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-            dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
             SheetManager.show('info', {
               payload: {
                 type: 'error',
                 message: '검색 결과가 없어요.',
+                buttontext: '확인하기',
               },
             });
           } else if (list.length < 5) {
@@ -514,14 +530,13 @@ const UpdateAddressAlert = props => {
 
       })
       .catch(function (error) {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
         SheetManager.show('info', {
           type: 'error',
           message: error?.errMsg,
           errorMessage: error?.errCode,
           closemodal: true,
           actionSheetRef: actionSheetRef,
+          buttontext: '확인하기',
         });
         console.log(error);
       });
@@ -679,7 +694,7 @@ const UpdateAddressAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -726,60 +741,70 @@ const UpdateAddressAlert = props => {
                     placeholder="동(읍/면/리)명 또는 도로명주소를 입력해주세요"
                     value={searchText}
                     onChangeText={setSearchText}
-                    onSubmitEditing={() => {
-                      if (searchText === '') {
-                        if (selectedArea !== '전체' && selectedArea !== '') {
-                          if (selectedArea2 !== '전체' && selectedArea2 !== '') {
-                            getAddress(selectedArea, selectedArea2, '');
+                    onSubmitEditing={async () => {
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        if (searchText === '') {
+                          if (selectedArea !== '전체' && selectedArea !== '') {
+                            if (selectedArea2 !== '전체' && selectedArea2 !== '') {
+                              getAddress(selectedArea, selectedArea2, '');
+                            }
+                          } else {
+                            return
                           }
                         } else {
-                          return
-                        }
-                      } else {
-                        if (selectedArea === '전체' || selectedArea === '') {
-                          if (selectedArea2 === '전체' || selectedArea2 === '') {
-                            getAddress('', '', searchText);
+                          if (selectedArea === '전체' || selectedArea === '') {
+                            if (selectedArea2 === '전체' || selectedArea2 === '') {
+                              getAddress('', '', searchText);
+                            } else {
+                              getAddress('', selectedArea2, searchText);
+                            }
+
                           } else {
-                            getAddress('', selectedArea2, searchText);
+                            if (selectedArea2 === '전체' || selectedArea2 === '') {
+                              getAddress(selectedArea, '', searchText);
+                            } else {
+                              getAddress(selectedArea, selectedArea2, searchText);
+                            }
                           }
 
-                        } else {
-                          if (selectedArea2 === '전체' || selectedArea2 === '') {
-                            getAddress(selectedArea, '', searchText);
-                          } else {
-                            getAddress(selectedArea, selectedArea2, searchText);
-                          }
                         }
                       }
                     }}
                   />
                   <ModalInputButton
-                    onPress={() => {
-                      if (searchText === '') {
-                        if (selectedArea !== '전체' && selectedArea !== '') {
-                          if (selectedArea2 !== '전체' && selectedArea2 !== '') {
-                            getAddress(selectedArea, selectedArea2, '');
+                    onPress={async () => {
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        if (searchText === '') {
+                          if (selectedArea !== '전체' && selectedArea !== '') {
+                            if (selectedArea2 !== '전체' && selectedArea2 !== '') {
+                              getAddress(selectedArea, selectedArea2, '');
+                            }
+                          } else {
+                            return
                           }
                         } else {
-                          return
-                        }
-                      } else {
-                        if (selectedArea === '전체' || selectedArea === '') {
-                          if (selectedArea2 === '전체' || selectedArea2 === '') {
-                            getAddress('', '', searchText);
-                          } else {
-                            getAddress('', selectedArea2, searchText);
-                          }
+                          if (selectedArea === '전체' || selectedArea === '') {
+                            if (selectedArea2 === '전체' || selectedArea2 === '') {
+                              getAddress('', '', searchText);
+                            } else {
+                              getAddress('', selectedArea2, searchText);
+                            }
 
-                        } else {
-                          if (selectedArea2 === '전체' || selectedArea2 === '') {
-                            getAddress(selectedArea, '', searchText);
                           } else {
-                            getAddress(selectedArea, selectedArea2, searchText);
+                            if (selectedArea2 === '전체' || selectedArea2 === '') {
+                              getAddress(selectedArea, '', searchText);
+                            } else {
+                              getAddress(selectedArea, selectedArea2, searchText);
+                            }
                           }
                         }
                       }
-                    }}>
+                    }
+                    }>
                     <SerchIcon />
                   </ModalInputButton>
                 </ModalAddressInputContainer>
@@ -864,7 +889,7 @@ const UpdateAddressAlert = props => {
                       return (
                         <SelectItem
                           onPress={() => {
-                           // console.log('item',item);
+                            // console.log('item',item);
                             setSelectedArea2(item);
                             selectRef2.current?.closeDropdown();
                           }}>
@@ -881,28 +906,32 @@ const UpdateAddressAlert = props => {
             listData.length > 0 &&
             !isLastPage && (
               <ListFooterButton
-                onPress={() => {
-                  if (searchText === '') {
-                    if (selectedArea !== '전체' && selectedArea !== '') {
-                      if (selectedArea2 !== '전체' && selectedArea2 !== '') {
-                        getAddress(selectedArea, selectedArea2, '');
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    if (searchText === '') {
+                      if (selectedArea !== '전체' && selectedArea !== '') {
+                        if (selectedArea2 !== '전체' && selectedArea2 !== '') {
+                          getAddress(selectedArea, selectedArea2, '');
+                        }
+                      } else {
+                        return
                       }
                     } else {
-                      return
-                    }
-                  } else {
-                    if (selectedArea === '전체' || selectedArea === '') {
-                      if (selectedArea2 === '전체' || selectedArea2 === '') {
-                        getMoreAddress('', '', searchText);
-                      } else {
-                        getMoreAddress('', selectedArea2, searchText);
-                      }
+                      if (selectedArea === '전체' || selectedArea === '') {
+                        if (selectedArea2 === '전체' || selectedArea2 === '') {
+                          getMoreAddress('', '', searchText);
+                        } else {
+                          getMoreAddress('', selectedArea2, searchText);
+                        }
 
-                    } else {
-                      if (selectedArea2 === '전체' || selectedArea2 === '') {
-                        getMoreAddress(selectedArea, '', searchText);
                       } else {
-                        getMoreAddress(selectedArea, selectedArea2, searchText);
+                        if (selectedArea2 === '전체' || selectedArea2 === '') {
+                          getMoreAddress(selectedArea, '', searchText);
+                        } else {
+                          getMoreAddress(selectedArea, selectedArea2, searchText);
+                        }
                       }
                     }
                   }
@@ -936,32 +965,35 @@ const UpdateAddressAlert = props => {
                 </View>
               </View>
               <MepSearchResultButton
-                onPress={() => {
-                  //console.log('[UpdateAddressAlert]onPress item:', item);
-                  setAddress(item?.roadAddr);
-                  /*         if (item?.detBdNmList !== '') {
-                             const list = item?.detBdNmList?.split(', ').map(dong => {
-                               return dong.replace('동', '');
-                             });
-                             setDongList(list);
-                             getHoData(item, list[0] + '동');
-                           } else {
-                             getHoData(item);
-                           }*/
-                  setSelectedItem(item);
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    //console.log('[UpdateAddressAlert]onPress item:', item);
+                    setAddress(item?.roadAddr);
+                    /*         if (item?.detBdNmList !== '') {
+                               const list = item?.detBdNmList?.split(', ').map(dong => {
+                                 return dong.replace('동', '');
+                               });
+                               setDongList(list);
+                               getHoData(item, list[0] + '동');
+                             } else {
+                               getHoData(item);
+                             }*/
+                    setSelectedItem(item);
 
-                  var p = data;
-                  p.houseName = item.bdNm;
-                  p.jibunAddr = item.jibunAddr;
-                  p.bdMgtSn = item.bdMgtSn;
-                  p.roadAddr = item.roadAddrPart1;
-                  p.roadAddrRef = item.roadAddrPart2;
-                  //console.log('[UpdateAddressAlert]onPress p:', p);
-                  handleHouseChange(p, p?.isMoveInRight);
-                  getAPTLocation(item?.roadAddr);
-                  dispatch(removeLastModalList());
-                  actionSheetRef.current?.hide();
+                    var p = data;
+                    p.houseName = item.bdNm;
+                    p.jibunAddr = item.jibunAddr;
+                    p.bdMgtSn = item.bdMgtSn;
+                    p.roadAddr = item.roadAddrPart1;
+                    p.roadAddrRef = item.roadAddrPart2;
+                    //console.log('[UpdateAddressAlert]onPress p:', p);
+                    handleHouseChange(p, p?.isMoveInRight);
+                    getAPTLocation(item?.roadAddr);
 
+                    actionSheetRef.current?.hide();
+                  }
                 }}>
                 <MapSearchResultButtonText>선택</MapSearchResultButtonText>
               </MepSearchResultButton>

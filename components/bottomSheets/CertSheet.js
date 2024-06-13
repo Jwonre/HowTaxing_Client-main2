@@ -1,4 +1,3 @@
-// 본인인증 시트
 
 import { View, useWindowDimensions, Pressable, Keyboard } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
@@ -18,7 +17,9 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { setCert } from '../../redux/certSlice';
 import { LogBox } from 'react-native';
-import { removeLastModalList } from '../../redux/modalListSlice';
+
+import { setResend } from '../../redux/resendSlice';
+import NetInfo from '@react-native-community/netinfo';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -233,17 +234,37 @@ const CertSheet = props => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const houseInfo = useSelector(state => state.houseInfo.value);
   const currentUser = useSelector(state => state.currentUser.value);
   const [isGainsTax, setIsGainsTax] = useState('');
   //const [certresult, setCertresult] = useState(false);
-
-
-  const { certType, agreeCert, agreePrivacy, agreeThird } = useSelector(
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const { certType, agreeCert, agreePrivacy } = useSelector(
     state => state.cert.value,
   );
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-  const [isEditing, setIsEditing] = useState(false);
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
+
+  //  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     //   console.log('props?.payload?.isGainsTax', props?.payload?.isGainsTax)
@@ -270,14 +291,30 @@ const CertSheet = props => {
     }
   }, [cert]);
 
+  useEffect(() => {
+    // 키보드가 보여질 때 높이를 설정
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      (e) => setKeyboardHeight(e.endCoordinates.height)
+    );
 
+    // 키보드가 사라질 때 높이를 초기화
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [residentNumber, setResidentNumber] = useState('');
-  const [maskedResidentNumber, setMaskedResidentNumber] = useState('');
   const chatDataList = useSelector(state => state.chatDataList.value);
   const dispatch = useDispatch();
   const input1 = useRef(null);
@@ -306,58 +343,81 @@ const CertSheet = props => {
 
   const hypenHouseAPI = async (url, data, headers) => {
     try {
-
       const response = await axios.post(url, data, { headers });
-      //console.log('response.data', response.data);
       if (response.data.errYn === 'Y') {
-        SheetManager.hide("info");
-        setTimeout(async () => {
+        if (response.data.errCode === 'HOUSE-005') {
           await SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtasdfl,
+              message: '청약홈 인증 중\n오류가 발생했어요.\n입력하신 정보를 다시 확인해주세요.',
+              description: response.data?.errMsgDtasdfl ? response.data?.errMsgDtasdfl : '',
+              buttontext: '다시 확인하기',
             },
           });
-
-          SheetManager.show('cert', {
-            payload: {
-              cert: cert,
-              index: props.payload?.index,
-              currentPageIndex,
-              name,
-              phone,
-              id,
-              password,
-              residentNumber,
-              failreturn: true,
-            },
-          });
-
+          dispatch(setResend(false));
+          SheetManager.hide('infoCertification');
+          setTimeout(async () => {
+            const networkState = await NetInfo.fetch();
+            // 네트워크가 연결되어 있을 때만 updateHouseDetailName() 함수를 실행합니다.
+            if (networkState.isConnected) {
+              SheetManager.show('cert', {
+                payload: {
+                  cert: cert,
+                  index: props.payload?.index,
+                  currentPageIndex,
+                  name,
+                  phone,
+                  id,
+                  password,
+                  residentNumber,
+                  failreturn: true,
+                },
+              });
+            }
+          }, 900);
           const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
           dispatch(setChatDataList(newChatDataList));
-          return false;
-        }, 500);
 
-
+        } else {
+          SheetManager.hide("infoCertification");
+          setTimeout(async () => {
+            await SheetManager.show('info', {
+              payload: {
+                type: 'error',
+                message: response.data.errMsg ? response.data.errMsg : '청약홈에서 정보를 불러오는 중\n오류가 발생했어요.\n인증을 다시 진행해주세요.',
+                description: response.data?.errMsgDtasdfl ? response.data?.errMsgDtasdfl : null,
+                buttontext: '확인하기',
+              },
+            });
+          }, 400);
+          dispatch(setResend(true));
+        }
+        return false;
       } else {
         const list = response.data.data.list;
-        //console.log('[hypenHouseAPI]response:', response);
-        //console.log('[hypenHouseAPI]list:', list);
         dispatch(setOwnHouseList(list));
         return true;
       }
-
     } catch (error) {
-      // 에러 처리
-      console.error('[hypenHouseAPI] An error occurred:', error);
-      throw error; // 에러를 호출하는 함수로 전파
-
+      SheetManager.hide("infoCertification");
+      setTimeout(async () => {
+        console.error('[hypenHouseAPI] An error occurred:', error ? error : '');
+        SheetManager.show('info', {
+          payload: {
+            message: '청약홈에서 정보를 불러오는 중\n오류가 발생했어요.\n인증을 다시 진행해주세요.',
+            description: error?.message,
+            type: 'error',
+            buttontext: '인증하기',
+          }
+        });
+      }, 400);
+      dispatch(setResend(true));
+      // 에러를 호출하는 함수로 전파하지 않고, 적절히 처리합니다.
+      return false;
     }
   };
 
   const postOwnHouse = async () => {
-    //const url = 'http://13.125.194.154:8080/house/search'; real api
     const url = 'http://13.125.194.154:8080/house/search';
     const headers = {
       'Content-Type': 'application/json',
@@ -379,47 +439,36 @@ const CertSheet = props => {
       // console.log('[CertSheet]headers:', headers);
       // console.log('[CertSheet]data:', data);
       const response = await hypenHouseAPI(url, data, headers);
+
       if (response) {
         return true;
       } else {
         return false;
       }
     } catch (error) {
-      SheetManager.hide("info");
+      SheetManager.hide("infoCertification");
       setTimeout(async () => {
         await SheetManager.show('info', {
           payload: {
-            message: '주택정보를 조회하는데 문제가 발생했습니다.',
+            message: '청약홈에서 정보를 불러오는 중\n오류가 발생했어요.\n인증을 다시 진행해주세요.',
             description: error?.message,
             type: 'error',
+            buttontext: '인증하기',
           }
         });
+        console.log('에러', error);
+        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+        dispatch(setChatDataList(newChatDataList));
 
-        SheetManager.show('cert', {
-          payload: {
-            cert: cert,
-            index: props.payload?.index,
-            currentPageIndex,
-            name,
-            phone,
-            id,
-            password,
-            residentNumber,
-            failreturn: true,
-          },
-        });
-      }, 500);
+        dispatch(setResend(true));
+      }, 400);
 
-      console.log('에러', error);
-      const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-      dispatch(setChatDataList(newChatDataList));
-      dispatch(removeLastModalList());
       return false;
-
     }
   };
 
   const nextHandler = async () => {
+
     /*  if (currentPageIndex === 1 || currentPageIndex === 3) {
         if (name.trim() === '' || phone.trim() === '' || residentNumber.trim() === '') {
           SheetManager.show('info', {
@@ -443,12 +492,12 @@ const CertSheet = props => {
           return;
         }
       }
-
+ 
     if (chatDataList.find(el => el.id === 'over12')) {
       // 실거주기간 가져와야함
-
+ 
       actionSheetRef.current?.hide();
-
+ 
       const chat1 = gainTax.find(el => el.id === 'real');
       const chat2 = {
         id: 'year',
@@ -456,20 +505,20 @@ const CertSheet = props => {
         progress: 5,
         message: '2년 10개월',
       };
-
+ 
       const chat3 = gainTax.find(el => el.id === 'ExpenseInquiry');
       const chat4 = gainTax.find(el => el.id === 'ExpenseAnswer');
-
+ 
       dispatch(
         setHouseInfo({
           ...houseInfo,
           livePeriod: '34',
         }),
       );
-
+ 
       dispatch(setChatDataList([...chatDataList, chat1, chat2, chat3, chat4])) // 1초 후에 실행);
       console.log(chat4);
-
+ 
       // 인증 데이터 초기화
       dispatch({
         setCert: {
@@ -479,34 +528,48 @@ const CertSheet = props => {
        //  agreeThird: false,
         },
       });
-
+ 
       return;
-
-
+ 
+ 
     }
       */
-    actionSheetRef.current?.hide(); // 본인인증 창 닫기
-    setTimeout(async () => {
-      SheetManager.show('info', {
-        payload: {
-          message: '인증을 진행하고 있어요.\n조금만 기다려 주세요.',
-          id: 'WaitingCert',
-        },
-      });
-    }, 500);
-    const certresult = await postOwnHouse();
-    //console.log('certresult', certresult)
-    if (certresult) {
-      SheetManager.hide("info");
-      const { isGainsTax } = props.payload;
-      const chatItem = isGainsTax
-        ? gainTax.find(el => el.id === 'allHouse')
-        : acquisitionTax.find(el => el.id === 'moment');
-      //console.log(chatItem);
-      dispatch(setChatDataList([...chatDataList, chatItem]));
-      dispatch(removeLastModalList());
-    }
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      actionSheetRef.current?.hide(); // 본인인증 창 닫기
 
+      setTimeout(() => {
+        SheetManager.show('infoCertification', {
+          payload: {
+            message: '인증 알림을 보냈어요.\n인증이 완료되면 다음화면으로 넘어가요.',
+            certType: certType,
+            index: props.payload?.index,
+            isGainsTax: props.payload,
+            name: name,
+            phone: phone,
+            residentNumber: residentNumber,
+            id: id,
+            password: password,
+            calcType: isGainsTax
+          },
+        });
+      }, 500);
+
+      const certresult = await postOwnHouse();
+
+      //console.log('certresult', certresult)
+      if (certresult) {
+        SheetManager.hide("infoCertification");
+        const { isGainsTax } = props.payload;
+        const chatItem = isGainsTax
+          ? gainTax.find(el => el.id === 'allHouse')
+          : acquisitionTax.find(el => el.id === 'moment');
+        //console.log(chatItem);
+        dispatch(setChatDataList([...chatDataList, chatItem]));
+
+      }
+    }
   };
 
 
@@ -524,7 +587,7 @@ const CertSheet = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-              dispatch(removeLastModalList());
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -739,7 +802,7 @@ const CertSheet = props => {
       {currentPageIndex === 1 && (
         <KeyboardAwareScrollView
           style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
-          extraScrollHeight={100}
+          extraScrollHeight={keyboardHeight}
         >
           <SheetContainer width={width}>
             <ModalInputSection>
@@ -848,7 +911,7 @@ const CertSheet = props => {
       {currentPageIndex === 2 && (
         <KeyboardAwareScrollView
           style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
-          extraScrollHeight={100}
+          extraScrollHeight={keyboardHeight}
         >
           <SheetContainer width={width}>
             <ModalInputSection>
@@ -959,7 +1022,7 @@ const CertSheet = props => {
         currentPageIndex === 3 && (
           <KeyboardAwareScrollView
             style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
-            extraScrollHeight={100}
+            extraScrollHeight={keyboardHeight}
           >
             <SheetContainer width={width}>
               <ModalInputSection>

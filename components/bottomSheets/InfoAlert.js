@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import InfoCircleIcon from '../../assets/icons/info_circle.svg';
 import { setCurrentUser } from '../../redux/currentUserSlice';
 import { View } from 'react-native-animatable';
-import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
+  
 
 
 const SheetContainer = styled.View`
@@ -131,7 +131,7 @@ const InfoAlert = props => {
   const { width, height } = useWindowDimensions();
   const [errorMessage, setErrorMessage] = useState('');
   const [buttonText, setButtonText] = useState('자세히');
-  const modalList = useSelector(state => state.modalList.value);
+   
   //console.log('[InfoAlert] props', props);
 
   const toggleText = () => {
@@ -150,7 +150,7 @@ const InfoAlert = props => {
       headerAlwaysVisible
       CustomHeaderComponent={
         <ModalHeader>
-          {(props?.payload?.id !== 'WaitingCert') && <Pressable
+          <Pressable
             hitSlop={20}
             onPress={() => {
               actionSheetRef.current?.hide();
@@ -164,45 +164,32 @@ const InfoAlert = props => {
                   navigation.navigate('Login')
                 }
               }
-              dispatch(removeLastModalList());
+               
             }}>
             <CloseIcon width={16} height={16} />
-          </Pressable>}
+          </Pressable>
         </ModalHeader>
       }
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
-      closeOnPressBack={props?.payload?.id === 'WaitingCert' ? false : true}
+      closeOnPressBack={true}
       closeOnTouchBackdrop={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: errorMessage ? (props?.payload?.id === 'calculation' ? 450 : 410) : props?.payload?.id === 'WaitingCert' ? 250 : props?.payload?.type === 'error' ? (props?.payload?.id === 'calculation' ? 350 : 300) : 300,
+        height: errorMessage ? (props?.payload?.id === 'calculation' ? 450 : 410) : props?.payload?.type === 'error' ? (props?.payload?.id === 'calculation' ? 350 : 330) : 300,
         width: width - 40
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
-          {(props?.payload?.id !== 'WaitingCert') && <InfoCircleIcon
+          <InfoCircleIcon
             style={{
               color: props?.payload?.type === 'error' ? '#FF7401' : '#2F87FF',
             }}
-          />}
-
-          {(props?.payload?.id === 'WaitingCert') && <View
-            style={{
-              //height: height + 100,
-              alignItems: 'center',
-            }}>
-            <ActivityIndicator
-              size={60}
-              color="#A2C62B"
-              animating
-              style={{ marginTop: -5 }}
-            />
-          </View>}
+          />
           <ModalTitle>{props?.payload?.message}</ModalTitle>
           {errorMessage && <ScrollView style={{ marginHorizontal: 20, maxHeight: 120 }}
             showsVerticalScrollIndicator={false}><ModalDescription>{errorMessage}</ModalDescription></ScrollView>}
@@ -274,7 +261,7 @@ const InfoAlert = props => {
                         navigation.navigate('Login')
                       }
                     }
-                    dispatch(removeLastModalList());
+                     
                   }}>
                   <ButtonText>확인하기</ButtonText>
                 </Button>
@@ -317,9 +304,9 @@ const InfoAlert = props => {
                 }}>
                 <Button
                   onPress={() => {
-                    console.log(modalList);
+                   // console.log(modalList);
                     actionSheetRef.current?.hide();
-                    dispatch(removeLastModalList());
+                     
                   }}
                   style={{ backgroundColor: '#fff', borderColor: '#E8EAED' }}>
                   <ButtonText style={{ color: '#717274' }}>아니오</ButtonText>
@@ -342,7 +329,6 @@ const InfoAlert = props => {
                 }}>
                 <Button
                   onPress={() => {
-                    dispatch(setModalList([]));
                     actionSheetRef.current?.hide();
                     props?.payload?.navigation.goBack();
                   }}>

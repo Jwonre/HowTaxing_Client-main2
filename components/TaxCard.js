@@ -152,6 +152,7 @@ const TaxCard = props => {
             description: response.data.errMsgDtl,
             closeSheet: true,
             navigation: props?.navigation,
+            buttontext: '확인하기',
           },
         });
       } else {
@@ -167,6 +168,7 @@ const TaxCard = props => {
           id: 'calculation', 
           closeSheet: true,
           navigation: props?.navigation,
+          buttontext: '확인하기',
         }, 
       });
       //console.error(error.stack);

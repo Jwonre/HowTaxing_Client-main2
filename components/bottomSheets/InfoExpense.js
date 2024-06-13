@@ -1,6 +1,6 @@
 // 정보 또는 경고 알림창 컴포넌트
 
-import { useWindowDimensions, Pressable } from 'react-native';
+import { useWindowDimensions, Pressable, View} from 'react-native';
 import React, { useRef, useState } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
@@ -8,7 +8,7 @@ import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { useDispatch } from 'react-redux';
-import { removeLastModalList } from '../../redux/modalListSlice';
+  
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -36,7 +36,7 @@ const BoldText = styled.Text`
 const ModalDescription = styled.Text`
   font-size: ${getFontSize(14)}px;
   font-family: Bold;
-  width: 78%;
+  width:100%;
   color: #1b1c1f;
   line-height: 22px;
   margin-top: 10px;
@@ -44,14 +44,13 @@ const ModalDescription = styled.Text`
 `;
 
 const Modaldetail = styled.Text`
-  width: 110%;
-  font-size: ${getFontSize(11)}px;
+  width: 100%;
+  font-size: ${getFontSize(12)}px;
   font-family: Bold;
   color: #1b1c1f;
   line-height: 20px;
   margin-top: 15px;
   text-align: left;
-  padding: 0px 48px;
   margin-bottom: 10px;
 `;
 
@@ -60,7 +59,7 @@ const ModalContentSection = styled.View`
   height: auto;
   margin-top: 10px;
   background-color: #fff;
-  align-items: center;
+  align-items: center; 
   justify-content: center;
 `;
 
@@ -118,7 +117,7 @@ const InfoExpense = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -139,9 +138,12 @@ const InfoExpense = props => {
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
+          
           <ModalTitle><BoldText>{props.payload?.Title}</BoldText>란?</ModalTitle>
+          <View styled={{width: '80%'}}>
           <ModalDescription>{props.payload?.Description}</ModalDescription>
           {props.payload?.Title === '상생임대인제도' && <Modaldetail>{props.payload?.Detail}</Modaldetail>}
+          </View>
         </ModalContentSection>
 
         <ButtonSection>
@@ -155,11 +157,11 @@ const InfoExpense = props => {
               shadowOpacity: 0.15,
               shadowRadius: 2,
               alignSelf: 'center',
-              width: 285,
+              width: width - 120,
             }}>
             <Button
               onPress={() => {
-                dispatch(removeLastModalList());
+                 
                 actionSheetRef.current?.hide();
               }}>
               <ButtonText>돌아가기</ButtonText>

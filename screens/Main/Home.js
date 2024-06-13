@@ -1,7 +1,7 @@
 // 홈 페이지
 
 import { useWindowDimensions, StatusBar, StyleSheet, BackHandler } from 'react-native';
-import React, { useLayoutEffect, useEffect, useState } from 'react';
+import React, { useLayoutEffect, useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import DropShadow from 'react-native-drop-shadow';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -11,6 +11,7 @@ import ConSultingIcon from '../../assets/images/home_consulting.svg';
 import getFontSize from '../../utils/getFontSize';
 import { SheetManager } from 'react-native-actions-sheet';
 import ChanelTalkIcon from '../../assets/icons/chaneltalk.svg';
+import AppInformationIcon from '../../assets/icons/appinformaion_circle.svg'
 import LogOutIcon from '../../assets/icons/logout_circle.svg';
 import { ChannelIO } from 'react-native-channel-plugin';
 import NetInfo from '@react-native-community/netinfo';
@@ -20,7 +21,8 @@ import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
 import { setCert } from '../../redux/certSlice';
 import { setCurrentUser } from '../../redux/currentUserSlice';
-import { setModalList } from '../../redux/modalListSlice';
+  
+import { setResend } from '../../redux/resendSlice';
 import axios from 'axios';
 
 
@@ -135,6 +137,13 @@ const LogOutIconFloatContainer = styled.View`
 
 `;
 
+const AppInformationIconFloatContainer = styled.View`
+  position: absolute;
+  bottom: 25px;
+  right: 195px;
+
+`;
+
 const ChanelTalkIconFloatButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
@@ -153,6 +162,14 @@ const LogOutIconFloatButton = styled.TouchableOpacity.attrs(props => ({
   border-radius: 30px;
 `;
 
+const AppInformationIconFloatButton = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.8,
+}))`
+  width: 55px;
+  height: 55px;
+  border-radius: 30px;
+`;
+
 const ShadowContainer = styled(DropShadow)`
   shadow-color: #ececef;
   shadow-offset: 0px 9px;
@@ -164,6 +181,9 @@ const style = StyleSheet.create({
   LogOutIcon: {
     marginRight: 85,
   },
+  AppInformationIcon: {
+    marginRight: 55,
+  },
 
 });
 
@@ -173,10 +193,9 @@ const style = StyleSheet.create({
 
 const Home = () => {
   const currentUser = useSelector(state => state.currentUser.value);
-  const modalList = useSelector(state => state.modalList.value);
-  const chatDataList = useSelector(state => state.chatDataList.value);
   const [isConnected, setIsConnected] = useState(true);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const handleBackPress = () => {
     console.log('LogOut!');
     goLogin();
@@ -238,6 +257,7 @@ const Home = () => {
               type: 'error',
               message: response.data.errMsg,
               description: response.data.errMsgDtl,
+              buttontext: '확인하기',
             },
           });
           return;
@@ -246,6 +266,7 @@ const Home = () => {
             payload: {
               type: 'info',
               message: '회원탈퇴에 성공했습니다.',
+              buttontext: '확인하기',
             },
           });
           // 성공적인 응답 처리
@@ -260,6 +281,7 @@ const Home = () => {
             message: '회원탈퇴에 실패했습니다.',
             description: error?.message,
             type: 'error',
+            buttontext: '확인하기',
           }
         });
         console.error(error);
@@ -267,10 +289,10 @@ const Home = () => {
   };
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(setModalList({}));
       dispatch(setChatDataList([]));
       dispatch(setHouseInfo(null));
       dispatch(setOwnHouseList([]));
+      dispatch(setResend(false));
       dispatch(
         setCert({
           agreeCert: false,
@@ -287,43 +309,23 @@ const Home = () => {
       return () => { };
     }, [])
   );
-
-  useEffect(() => {
-   // console.log('homemodalList', modalList)
-    const unsubscribe = NetInfo.addEventListener(state => {
-      // const newSheetId = 'info';
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
-        setHasNavigatedBack(false); // 인터넷 연결이 끊어지면 hasNavigatedBack을 false로 설정
-        const keys = Object.keys(modalList);
-        if (keys.length > 0) {
-          for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            const actionSheet = modalList[key];
-            if(actionSheet.index !== undefined) {
-              const newChatDataList = chatDataList.slice(0, actionSheet.index + 1);
-              dispatch(setChatDataList(newChatDataList));
-            }
-            SheetManager.hide(actionSheet.modal);
-          }
-          dispatch(setModalList({}));
-        }
-        setTimeout(() => {
-          navigation.push('NetworkAlert', navigation);
-        }, 300);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
       } else if (state.isConnected && !isConnected) {
         setIsConnected(true);
-        if (!hasNavigatedBack) { // hasNavigatedBack이 false일 때만 navigation.goBack() 호출
-          navigation.goBack();
-          setHasNavigatedBack(true); // navigation.goBack() 호출 후 hasNavigatedBack을 true로 설정
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
         }
+        resolve(true);
+      } else {
+        resolve(true);
       }
     });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [NetInfo, dispatch, modalList, isConnected, hasNavigatedBack]); // dispatch와 modalList를 의존성 배열에 추가합니다.
+  };
 
   const AC_HASHTAG_LIST = [
     '취득세 계산',
@@ -352,17 +354,21 @@ const Home = () => {
   ];
 
   const goAcquisigion = () => {
+    const state = NetInfo.fetch();
+    handleNetInfoChange(state);
     navigation.push('Acquisition');
   };
 
   const goGainsTax = () => {
+    const state = NetInfo.fetch();
+    handleNetInfoChange(state);
     navigation.push('GainsTax');
   };
 
   const goConSulting = () => {
-    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'Consulting'} }));
-    SheetManager.show('Consulting');
+    const state = NetInfo.fetch();
+    handleNetInfoChange(state);
+   SheetManager.show('Consulting');
   };
 
   const goLogin = () => {
@@ -374,6 +380,11 @@ const Home = () => {
       },
     });
 
+    return;
+  };
+
+  const goAppInformation = () => {
+    SheetManager.show('InfoAppinformation');
     return;
   };
 
@@ -489,6 +500,28 @@ const Home = () => {
           </LogOutIconFloatButton>
         </DropShadow>
       </LogOutIconFloatContainer>
+
+      <AppInformationIconFloatContainer>
+        <DropShadow
+          style={{
+            shadowColor: '#A3A3A3',
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.80,
+            shadowRadius: 10,
+          }}>
+
+          <AppInformationIconFloatButton
+            onPress={() => {
+              console.log('AppInformation');
+              goAppInformation();
+            }}>
+            <AppInformationIcon style={style.AppInformationIcon} />
+          </AppInformationIconFloatButton>
+        </DropShadow>
+      </AppInformationIconFloatContainer>
     </Container>
   );
 };

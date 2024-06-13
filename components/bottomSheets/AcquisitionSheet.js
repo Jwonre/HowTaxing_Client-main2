@@ -23,7 +23,8 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import dayjs from 'dayjs';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
 import { LogBox } from 'react-native';
-import { removeLastModalList } from '../../redux/modalListSlice';
+
+
 
 
 const SheetContainer = styled.View`
@@ -218,10 +219,6 @@ const AcquisitionSheet = props => {
   // 취득금액 선택 리스트
   const AC_AMOUNT_LIST = [500000000, 100000000, 10000000, 1000000];
 
-
-
-
-
   // 수정하기로 들어온 페이지 이동
   useEffect(() => {
     //console.log('acAmount:', acAmount);
@@ -304,7 +301,7 @@ const AcquisitionSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -516,7 +513,7 @@ const AcquisitionSheet = props => {
         <SheetContainer width={width}>
           <ModalInputSection>
             <ModalTitle>취득금액을 입력해주세요.</ModalTitle>
-            <ModalSubtitle>{numberToKorean(acAmount)}원</ModalSubtitle>
+            <ModalSubtitle>{numberToKorean(acAmount)}{(acAmount !== null && acAmount !== 0) ? '원' : ' '}</ModalSubtitle>
             <View
               style={{
                 paddingHorizontal: 20,
@@ -620,7 +617,7 @@ const AcquisitionSheet = props => {
                   };
                   const chat3 = acquisitionTax.find(el => el.id === 'joint');
                   dispatch(setChatDataList([...chatDataList, chat2, chat3]));
-                  dispatch(removeLastModalList());
+                   
                   //  setTimeout(() => { console.log('aquiAmountDate', houseInfo) }, 500);
                 }} style={{
                   backgroundColor: acAmount ? '#2f87ff' : '#E8EAED',

@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { gainTax } from '../../data/chatData';
-import { removeLastModalList } from '../../redux/modalListSlice';
+  
 
 
 
@@ -136,9 +136,9 @@ const directlivePeriod = props => {
       id: 'livePeriodMy',
       type: 'my',
       message:
-        (selectedDate.year ? selectedDate.year : YearList[0])
+        (selectedDate.year ? selectedDate.year === '0년' ? '' : selectedDate.year : '0년')
         +
-        (selectedDate.month ? selectedDate.month : MonthList[0])
+        (selectedDate.month ? selectedDate.month === '0개월' ? selectedDate.year === '0년' ? '거주기간 없음' : '' : selectedDate.month : '0개월')
       ,
       questionId: 'livePeriod',
     };
@@ -154,7 +154,7 @@ const directlivePeriod = props => {
         },
       )
     );
-    dispatch(removeLastModalList());
+     
     // console.log('selectedYear :', Math.floor(selectedYear.replace('년', '')));
     // console.log('selectedMonth :', selectedMonth.replace('개월', ''));
 
@@ -193,7 +193,7 @@ const directlivePeriod = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />

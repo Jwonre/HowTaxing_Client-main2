@@ -12,14 +12,14 @@ import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
-
+import NetInfo from "@react-native-community/netinfo";
 import DropShadow from 'react-native-drop-shadow';
 import MinusIcon from '../../assets/icons/minus.svg';
 import PlusIcon from '../../assets/icons/plus.svg';
 import { useDispatch, useSelector } from 'react-redux';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { setChatDataList } from '../../redux/chatDataListSlice';
-import { removeLastModalList } from '../../redux/modalListSlice';
+
 import { acquisitionTax } from '../../data/chatData';
 
 const SheetContainer = styled.View`
@@ -88,6 +88,28 @@ const JointSheet = props => {
   const [personCount, setPersonCount] = useState(2);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
 
   return (
     <ActionSheet
@@ -100,7 +122,6 @@ const JointSheet = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-              dispatch(removeLastModalList());
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -117,7 +138,7 @@ const JointSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 280,
+        height: 300,
         width: width - 40,
       }}>
       <SheetContainer width={width}>
@@ -205,33 +226,36 @@ const JointSheet = props => {
               alignSelf: 'center',
             }}>
             <ModalButton
-              onPress={() => {
-                dispatch(
-                  setHouseInfo({ ...houseInfo, ownerCnt: personCount, userProportion: personCount===1 ? 100 : 50 })
-                );
-                actionSheetRef.current?.hide();
-                const chat = {
-                  id: 'jointSystem',
-                  type: 'system',
-                  message: '총 공동 소유자가 몇 명 인가요?',
-                  questionId: 'apartment',
-                  progress: 5,
-                };
-                const chat1 = {
-                  id: 'joint',
-                  type: 'my',
-                  message: `${personCount}명`,
-                  questionId: 'apartment',
-                };
-                const chat2 = acquisitionTax.find(el => el.id === 'moreHouse');
-                dispatch(
-                  setChatDataList([...chatDataList, chat, chat1, chat2]),
+              onPress={async () => {
+                const state = await NetInfo.fetch();
+                const canProceed = await handleNetInfoChange(state);
+                if (canProceed) {
+                  dispatch(
+                    setHouseInfo({ ...houseInfo, ownerCnt: personCount, userProportion: personCount === 1 ? 100 : 50 })
+                  );
+                  actionSheetRef.current?.hide();
+                  const chat = {
+                    id: 'jointSystem',
+                    type: 'system',
+                    message: '총 공동 소유자가 몇 명 인가요?',
+                    questionId: 'apartment',
+                    progress: 5,
+                  };
+                  const chat1 = {
+                    id: 'joint',
+                    type: 'my',
+                    message: `${personCount}명`,
+                    questionId: 'apartment',
+                  };
+                  const chat2 = acquisitionTax.find(el => el.id === 'moreHouse');
+                  dispatch(
+                    setChatDataList([...chatDataList, chat, chat1, chat2]),
 
-                );
-                dispatch(removeLastModalList());
+                  );
+                }
               }}
               style={{
-                width: width - 80,
+                width: width - 120,
                 alignSelf: 'center',
                 marginTop: 20,
                 marginBottom: 50,

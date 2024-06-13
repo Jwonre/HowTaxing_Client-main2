@@ -203,6 +203,7 @@ const Login = () => {
               type: 'error',
               message: '로그인에 실패했습니다.',
               description: response.data.errMsg,
+              buttontext: '확인하기',
             },
           });
           return;

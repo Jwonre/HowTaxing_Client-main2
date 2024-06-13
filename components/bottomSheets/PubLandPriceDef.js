@@ -89,7 +89,7 @@ const PubLandPriceDef = props => {
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
   const [errorMessage, setErrorMessage] = useState('');
-  console.log('props', props);
+  //console.log('props', props);
 
   return (
     <ActionSheet

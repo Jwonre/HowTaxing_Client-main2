@@ -15,7 +15,7 @@ import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { useDispatch, useSelector } from 'react-redux';
 import Calendar from '../Calendar';
-import { removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -95,8 +95,10 @@ const ButtonText = styled.Text`
 
 
 const UpdateContractDateAlert = props => {
-
-  const { handleHouseChange, data, navigation, prevSheet } = props.payload;
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+  const { handleHouseChange, data } = props.payload;
 
   const dispatch = useDispatch();
   const actionSheetRef = useRef(null);
@@ -106,6 +108,24 @@ const UpdateContractDateAlert = props => {
   const [selectedDate, setSelectedDate] = useState(new Date(),
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
 
   // 키보드 이벤트
@@ -130,13 +150,16 @@ const UpdateContractDateAlert = props => {
   }, []);
 
   const nextHandler = async () => {
-
-    var p = data;
-    p.contractDate = selectedDate;
-   // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
-    await handleHouseChange(p, p?.isMoveInRight);
-    dispatch(removeLastModalList());
-    actionSheetRef.current?.hide();
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      var p = data;
+      p.contractDate = selectedDate;
+      // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
+      await handleHouseChange(p, p?.isMoveInRight);
+       
+      actionSheetRef.current?.hide();
+    }
   };
 
   return (
@@ -148,7 +171,7 @@ const UpdateContractDateAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -178,7 +201,7 @@ const UpdateContractDateAlert = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>계약일자를 선택해주세요.</ModalTitle>
+            <ModalTitle>취득 당시 계약일자를 선택해주세요.</ModalTitle>
             <View
               style={{
                 width: '100%',

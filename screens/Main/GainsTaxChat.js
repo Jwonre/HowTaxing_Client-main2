@@ -11,8 +11,8 @@ import {
   Animated,
   BackHandler,
 } from 'react-native';
-import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState, useLayoutEffect, useRef, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import styled from 'styled-components';
 import FastImage from 'react-native-fast-image';
 import * as Animatable from 'react-native-animatable';
@@ -27,12 +27,12 @@ import CTACard from '../../components/CTACard';
 import InfoIcon from '../../assets/icons/info_tooltip_ico.svg';
 import axios from 'axios';
 import numberToKorean from '../../utils/numToKorean';
+import NetInfo from "@react-native-community/netinfo";
+import HouseInfo from '../../components/HouseInfo';
 
 // Icons
 import PencilIcon from '../../assets/icons/pencil.svg';
 import CloseIcon from '../../assets/icons/close_button.svg';
-
-import HouseInfo from '../../components/HouseInfo';
 import EditIcon from '../../assets/icons/edit.svg';
 
 // Redux
@@ -42,7 +42,7 @@ import TaxCard2 from '../../components/TaxCard2';
 import TaxInfoCard2 from '../../components/TaxInfoCard2';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
-import { setModalList } from '../../redux/modalListSlice';
+
 
 const Container = styled.View`
   flex: 1;
@@ -344,7 +344,30 @@ const GainsTaxChat = () => {
   const houseInfo = useSelector(state => state.houseInfo.value);
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useSelector(state => state.currentUser.value);
-  const modalList = useSelector(state => state.modalList.value);
+
+  const [reviewShown, setReviewShown] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
 
   const getOwnlist = async () => {
     const url = `http://13.125.194.154:8080/house/list?calcType=02`
@@ -375,8 +398,6 @@ const GainsTaxChat = () => {
   };
 
   const handleBackPress = () => {
-    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
     SheetManager.show('info', {
       payload: {
         type: 'backHome',
@@ -387,13 +408,14 @@ const GainsTaxChat = () => {
     return true;
   }
 
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', handleBackPress)
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
-    }
-
-  }, [handleBackPress,]);
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      }
+    }, [handleBackPress])
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -460,9 +482,6 @@ const GainsTaxChat = () => {
 
   const renderMyChatItem = ({ item, index }) => {
     if (item?.openSheet) {
-      //  console.log('openSheet');
-      //let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-      // dispatch(setModalList({ ...modalList, [Modalindex]: item.openSheet }));
       SheetManager.show(item.openSheet, {
         payload: {
           navigation: navigation,
@@ -509,22 +528,26 @@ const GainsTaxChat = () => {
             <ModalButton
               disabled={index < chatDataList.length - 1}
               onPress={async () => {
-                const chat1 = {
-                  id: 'calulating',
-                  type: 'system',
-                  message:
-                    '계산하는 중이에요.\n서비스를 종료하지 마시고, 조금만 기다려주세요.',
-                  progress: 10,
-                };
-                dispatch(setChatDataList([chat1]));
-                setTimeout(() => {
-                  const chatItem = {
-                    id: 'cta2',
+                const state = await NetInfo.fetch();
+                const canProceed = await handleNetInfoChange(state);
+                if (canProceed) {
+                  const chat1 = {
+                    id: 'calulating',
                     type: 'system',
+                    message:
+                      '계산하는 중이에요.\n서비스를 종료하지 마시고, 조금만 기다려주세요.',
                     progress: 10,
                   };
-                  dispatch(setChatDataList([chatItem]));
-                }, 3000);
+                  dispatch(setChatDataList([chat1]));
+                  setTimeout(() => {
+                    const chatItem = {
+                      id: 'cta2',
+                      type: 'system',
+                      progress: 10,
+                    };
+                    dispatch(setChatDataList([chatItem]));
+                  }, 3000);
+                }
               }}
               style={{
                 width: width - 40,
@@ -634,15 +657,19 @@ const GainsTaxChat = () => {
               </Text>
             </View>
             <TouchableOpacity
-              onPress={() => {
-                //  console.log('gain houseinfo', houseInfo);
-                navigation.push(
-                  'HouseDetail',
-                  {
-                    item: houseInfo,
-                  },
-                  'HouseDetail',
-                );
+              onPress={async () => {
+                const state = await NetInfo.fetch();
+                const canProceed = await handleNetInfoChange(state);
+                if (canProceed) {
+                  //  console.log('gain houseinfo', houseInfo);
+                  navigation.push(
+                    'HouseDetail',
+                    {
+                      item: houseInfo,
+                    },
+                    'HouseDetail',
+                  );
+                }
               }}
               activeOpacity={0.8}
               style={{
@@ -686,21 +713,21 @@ const GainsTaxChat = () => {
     );
   };
 
-  const renderSystemChatItem = ({ item, index }) => {if (item?.id === 'goodbye') {
-    // modalList에 'review'가 없는 경우에만 추가합니다.
-    if (!Object.values(modalList).some(modal => modal.modal === 'review')) {
-      setTimeout(() => {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'review'} }));
-        SheetManager.show('review', {
-          payload: {
-            questionId: 'goodbye',
-            navigation: navigation,
-          },
-        });
-      }, 1000);
+  const renderSystemChatItem = ({ item, index }) => {
+    if (item?.id === 'goodbye' && !reviewShown) {
+      // modalList에 'review'가 없는 경우에만 추가합니다.
+      if (!Object.values(modalList).some(modal => modal.modal === 'review')) {
+        setTimeout(() => {
+          SheetManager.show('review', {
+            payload: {
+              questionId: 'goodbye',
+              navigation: navigation,
+            },
+          });
+          setReviewShown(true); // 리뷰가 표시되었음을 표시합니다.
+        }, 1000);
+      }
     }
-  }
 
     if (item?.id === 'cta2') {
       return (
@@ -725,9 +752,13 @@ const GainsTaxChat = () => {
             }}>
             <ModalButton
               disabled={index < chatDataList.length - 1}
-              onPress={() => {
-                const googByeItem = gainTax.find(el => el.id === 'goodbye');
-                dispatch(setChatDataList([googByeItem]));
+              onPress={async () => {
+                const state = await NetInfo.fetch();
+                const canProceed = await handleNetInfoChange(state);
+                if (canProceed) {
+                  const googByeItem = gainTax.find(el => el.id === 'goodbye');
+                  dispatch(setChatDataList([googByeItem]));
+                }
               }}
               style={{
                 width: width - 40,
@@ -763,13 +794,11 @@ const GainsTaxChat = () => {
                   hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                   <InfoIcon
                     onPress={() => {
-                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'infoExpense'} }));
                       SheetManager.show('infoExpense', {
                         payload: {
                           Title: "상생임대인제도",
                           Description: "임대차 가격 인상 자제 유도 및 양도세 실거주\n의무 충족을 위한 자가 이주 과정에서의 연\n쇄적 임차인 퇴거 방지를 위해 임대료를 일정\n기준 이하로 올리는 임대인에게 혜택을 제공\n하는 제도, 그 제도에 따른 임대인을 의미해요.\n\n아래 조건들에 해당할 때 해당 제도를 활용할\n수 있어요.",
-                          Detail: "① 신규(갱신) 임대차계약의 임대보증금 또는 임대료 증가\n율이 직전 임대차계약 대비 5% 이하일 것 \n② 신규(갱신) 임대차계약이 2021.12.20~2024.12.31\n사이에 체결되었을 것\n③ 직전 임대차계약에 따른 임대기간이 1년 6개월 이상일\n것\n④ 신규(갱신) 임대차계약에 따른 임대기간이 2년 이상일\n것",
+                          Detail: "① 신규(갱신) 임대차계약의 임대보증금 또는 임대료\n 증가율이 직전 임대차계약 대비 5% 이하일 것\n② 신규(갱신) 임대차계약이\n2021.12.20~2024.12.31사이에 체결되었을 것\n③ 직전 임대차계약에 따른 임대기간이 1년 6개월\n이상일 것\n④ 신규(갱신) 임대차계약에 따른 임대기간이 2년\n이상일 것",
                           height: 570,
                         },
                       });
@@ -786,113 +815,115 @@ const GainsTaxChat = () => {
                       disabled={index < chatDataList.length - 1}
                       key={index2}
                       onPress={async () => {
-                        const myChatItem = {
-                          id: item?.id + item2.id,
-                          type: 'my',
-                          message: item2.name,
-                        };
-
-                        const chatList = [];
-                        if (item2?.select) {
-                          await item2?.select.forEach((item3, index3) => {
-                            gainTax.find(el => {
-                              if (el.id === item3) {
-                                chatList.push(el);
-                              }
-                            });
-                          });
-                        }
-
-                        if (item.id === 'cert' && item2.id === 'no') {
-                          const saleAmountSystemIndex = chatDataList.findIndex(
-                            el => el.id === 'saleAmountSystem',
-                          );
-                          if (saleAmountSystemIndex > -1) {
-                            const newChatDataList = chatDataList.slice(
-                              0,
-                              saleAmountSystemIndex + 1,
-                            );
-
-                            dispatch(setChatDataList(newChatDataList));
-                          } else {
-                            navigation.replace('GainsTax');
-                          }
-                        }
-
-
-                        if (
-                          item.id === 'contractDateSystem' ||
-                          item.id === 'saleDateSystem' ||
-                          item.id === 'saleAmountSystem'
-                        ) {
-                          //     console.log('contractDateSystem');
-                        } else if (item.id === 'ExpenseAnswer') {
-                          //     console.log('ExpenseAnswer');
-                        } else if (item.id === 'residenceperiod' && item2.id === 'directlivePeriod') {
-                          //    console.log('directlivePeriod');
-                        } else if (item.id === 'sellDateSystem') {
-                          //    console.log('sellDateSystem');
-                        } else {
-                          dispatch(
-                            setChatDataList([
-                              ...chatDataList,
-                              myChatItem,
-                              ...chatList,
-                            ]),
-                          );
-                        }
-                        //  console.log('item2.id : ', item2.id);
-                        //  console.log('index2 : ', index2);
-                        if (item2.id == 'landlordY') {
-                          dispatch(
-                            setHouseInfo({
-                              ...houseInfo,
-                              isLandlord: true,
-                            }),
-                          );
-                        } else if (item2.id == 'landlordN') {
-                          dispatch(
-                            setHouseInfo({
-                              ...houseInfo,
-                              isLandlord: false,
-                            }),
-                          );
-                        }
-                        //         console.log('landlordhouseInfo',houseInfo)
-                        if (item2.id == 'AcquiredhouseY') {
-                          dispatch(
-                            setHouseInfo({
-                              ...houseInfo,
-                              isAcquiredhouse: true,
-                            }),
-                          );
-                        } else if (item2.id == 'AcquiredhouseN') {
-                          dispatch(
-                            setHouseInfo({
-                              ...houseInfo,
-                              isAcquiredhouse: false,
-                            }),
-                          );
-                        }
-
-                        if (item.id === 'certType' && item.type === 'system') {
-                          if (item2.id === 'Nosubscriptionaccount') {
-                            getOwnlist();
+                        const state = await NetInfo.fetch();
+                        const canProceed = await handleNetInfoChange(state);
+                        if (canProceed) {
+                          const myChatItem = {
+                            id: item?.id + item2.id,
+                            type: 'my',
+                            message: item2.name,
                           };
-                        }
-                        //  console.log('item2?.openSheet : ', item2?.openSheet)
-                        if (item2?.openSheet) {
-                          let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                          dispatch(setModalList({ ...modalList, [Modalindex]: {modal : item2.openSheet, index: index} }));
-                          SheetManager.show(item2.openSheet, {
-                            payload: {
-                              navigation: navigation,
-                              data: item2.id,
-                              isGainsTax: true,
-                              currentPageIndex: item2?.currentPageIndex,
-                              index,
-                            },
-                          });
+
+                          const chatList = [];
+                          if (item2?.select) {
+                            await item2?.select.forEach((item3, index3) => {
+                              gainTax.find(el => {
+                                if (el.id === item3) {
+                                  chatList.push(el);
+                                }
+                              });
+                            });
+                          }
+
+                          if (item.id === 'cert' && item2.id === 'no') {
+                            const saleAmountSystemIndex = chatDataList.findIndex(
+                              el => el.id === 'saleAmountSystem',
+                            );
+                            if (saleAmountSystemIndex > -1) {
+                              const newChatDataList = chatDataList.slice(
+                                0,
+                                saleAmountSystemIndex + 1,
+                              );
+
+                              dispatch(setChatDataList(newChatDataList));
+                            } else {
+                              navigation.replace('GainsTax');
+                            }
+                          }
+
+
+                          if (
+                            item.id === 'contractDateSystem' ||
+                            item.id === 'saleDateSystem' ||
+                            item.id === 'saleAmountSystem'
+                          ) {
+                            //     console.log('contractDateSystem');
+                          } else if (item.id === 'ExpenseAnswer') {
+                            //     console.log('ExpenseAnswer');
+                          } else if (item.id === 'residenceperiod' && item2.id === 'directlivePeriod') {
+                            //    console.log('directlivePeriod');
+                          } else if (item.id === 'sellDateSystem') {
+                            //    console.log('sellDateSystem');
+                          } else {
+                            dispatch(
+                              setChatDataList([
+                                ...chatDataList,
+                                myChatItem,
+                                ...chatList,
+                              ]),
+                            );
+                          }
+                          //  console.log('item2.id : ', item2.id);
+                          //  console.log('index2 : ', index2);
+                          if (item2.id == 'landlordY') {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                isLandlord: true,
+                              }),
+                            );
+                          } else if (item2.id == 'landlordN') {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                isLandlord: false,
+                              }),
+                            );
+                          }
+                          //         console.log('landlordhouseInfo',houseInfo)
+                          if (item2.id == 'AcquiredhouseY') {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                isAcquiredhouse: true,
+                              }),
+                            );
+                          } else if (item2.id == 'AcquiredhouseN') {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                isAcquiredhouse: false,
+                              }),
+                            );
+                          }
+
+                          if (item.id === 'certType' && item.type === 'system') {
+                            if (item2.id === 'Nosubscriptionaccount') {
+                              getOwnlist();
+                            };
+                          }
+                          //  console.log('item2?.openSheet : ', item2?.openSheet)
+                          if (item2?.openSheet) {
+                            SheetManager.show(item2.openSheet, {
+                              payload: {
+                                navigation: navigation,
+                                data: item2.id,
+                                isGainsTax: true,
+                                currentPageIndex: item2?.currentPageIndex,
+                                index,
+                              },
+                            });
+                          }
                         }
                       }}>
                       {item2?.icon ? item2.icon : null}
@@ -904,16 +935,18 @@ const GainsTaxChat = () => {
               {item?.id === 'getInfoConfirm' && (
                 <SelectButton
                   disabled={index < chatDataList.length - 1}
-                  onPress={() => {
-                    let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'confirm2', index: index} }));
-                    SheetManager.show('confirm2', {
-                      payload: {
-                        questionId: item?.id,
-                        navigation: navigation,
-                        index,
-                      },
-                    });
+                  onPress={async () => {
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      SheetManager.show('confirm2', {
+                        payload: {
+                          questionId: item?.id,
+                          navigation: navigation,
+                          index,
+                        },
+                      });
+                    }
                   }}
                   style={{
                     marginTop: 20,
@@ -942,7 +975,11 @@ const GainsTaxChat = () => {
                 <ProfileName>윤국녕 세무사</ProfileName>
                 <ProfileEmail>ilbitax86@naver.com</ProfileEmail>
                 <KakaoButton
-                  onPress={() => Linking.openURL('http://pf.kakao.com/_jfxgFG')}>
+                  onPress={async () => {
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) { Linking.openURL('http://pf.kakao.com/_jfxgFG') }
+                  }}>
                   <SocialButtonIcon
                     source={require('../../assets/images/socialIcon/kakao_ico.png')}
                   />
@@ -1060,17 +1097,19 @@ const GainsTaxChat = () => {
                   }}>
                   <ModalButton
                     disabled={index < chatDataList.length - 1}
-                    onPress={() => {
+                    onPress={async() => {
                       // console.log('next');
-                      let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                      dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'gain', index: index} }));
-                      SheetManager.show('gain', {
-                        payload: {
-                          questionId: item?.id,
-                          navigation,
-                          index,
-                        },
-                      });
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        SheetManager.show('gain', {
+                          payload: {
+                            questionId: item?.id,
+                            navigation,
+                            index,
+                          },
+                        });
+                      }
                     }}
                     style={{
                       width: width - 80,

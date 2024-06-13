@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { HOUSE_TYPE } from '../../constants/colors';
-import { removeLastModalList } from '../../redux/modalListSlice';
+  
 import numberToKorean from '../../utils/numToKorean';
 
 const SheetContainer = styled.View`
@@ -113,6 +113,11 @@ const ModalInputSection = styled.View`
   background-color: #fff;
 `;
 
+const ModalButtonSection = styled.View`
+  bottom: 5px;
+  width: 100%;
+`;
+
 const ModalButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
@@ -191,31 +196,31 @@ const ConfirmSheet = props => {
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
 
 
- /* const calculateTax = () => {
-    const data = {
-      houseId: houseInfo.houseId || '1',
-      houseName: houseInfo.houseName,
-      houseDetailName: houseInfo.houseDetailName || '',
-      contractDate: dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
-      buyDate: dayjs(houseInfo.acquisitionData).format('YYYY-MM-DD'),
-      buyPrice: houseInfo.acAmount,
-      legalDstCode: houseInfo.legalDstCode || '11110',
-    };
-
-    axios
-      .post('http://13.125.194.154:8080/calculate/buyTax', data)
-      .then(response => {
-        // 성공적인 응답 처리
-        const data2 = response.data.data;
-
-        dispatch(setHouseInfo({ ...houseInfo, ...data2 }));
-      })
-      .catch(error => {
-        // 오류 처리
-        console.error(error);
-      });
-  };
-*/
+  /* const calculateTax = () => {
+     const data = {
+       houseId: houseInfo.houseId || '1',
+       houseName: houseInfo.houseName,
+       houseDetailName: houseInfo.houseDetailName || '',
+       contractDate: dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
+       buyDate: dayjs(houseInfo.acquisitionData).format('YYYY-MM-DD'),
+       buyPrice: houseInfo.acAmount,
+       legalDstCode: houseInfo.legalDstCode || '11110',
+     };
+ 
+     axios
+       .post('http://13.125.194.154:8080/calculate/buyTax', data)
+       .then(response => {
+         // 성공적인 응답 처리
+         const data2 = response.data.data;
+ 
+         dispatch(setHouseInfo({ ...houseInfo, ...data2 }));
+       })
+       .catch(error => {
+         // 오류 처리
+         console.error(error);
+       });
+   };
+ */
   return (
     <ActionSheet
       ref={actionSheetRef}
@@ -227,7 +232,7 @@ const ConfirmSheet = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -288,7 +293,7 @@ const ConfirmSheet = props => {
             <HoustInfoButton
               onPress={() => {
                 actionSheetRef.current?.hide();
-             //   console.log('detail houseInfo', houseInfo);
+                //   console.log('detail houseInfo', houseInfo);
                 props.payload.navigation.navigate('HouseDetail', {
                   item: houseInfo,
                   prevSheet: 'confirm',
@@ -330,6 +335,8 @@ const ConfirmSheet = props => {
             <InfoContentLabel style={{ width: '110%' }}>기존 주택 보유 수</InfoContentLabel>
             <InfoContentText>{houseInfo?.ownHouseCnt ? houseInfo?.ownHouseCnt : 0}채</InfoContentText>
           </InfoContentItem>
+        </InfoContentSection>
+        <ModalButtonSection>
           <DropShadow
             style={{
               shadowColor: 'rgba(0,0,0,0.25)',
@@ -352,7 +359,7 @@ const ConfirmSheet = props => {
                 };
 
                 dispatch(setChatDataList([...chatDataList, chat1]));
-                dispatch(removeLastModalList());
+                 
               }}
               style={{
                 width: width - 80,
@@ -363,7 +370,8 @@ const ConfirmSheet = props => {
               <ModalButtonText>확인하기</ModalButtonText>
             </ModalButton>
           </DropShadow>
-        </InfoContentSection>
+        </ModalButtonSection>
+
       </SheetContainer>
     </ActionSheet>
   );

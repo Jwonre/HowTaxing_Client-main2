@@ -51,6 +51,7 @@ const LoginWebview = (props) => {
                             type: 'error',
                             message: response.data.errMsg,
                             description: response.data.errMsgDtl,
+                            buttontext: '확인하기',
                         },
                     });
                 } else {
@@ -58,6 +59,7 @@ const LoginWebview = (props) => {
                         payload: {
                             type: 'error',
                             message: '로그인에 실패했습니다.',
+                            buttontext: '확인하기',
                         },
                     });
                 }

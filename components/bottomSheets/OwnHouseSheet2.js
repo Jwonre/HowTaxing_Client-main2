@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { HOUSE_TYPE } from '../../constants/colors';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
-import { setModalList, removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
 import axios from 'axios';
 
 const SheetContainer = styled.ScrollView.attrs({
@@ -241,14 +241,34 @@ const OwnHouseSheet2 = props => {
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
   const { width, height } = useWindowDimensions();
-
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedList, setSelectedList] = useState([]);
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const currentUser = useSelector(state => state.currentUser.value);
-  const modalList = useSelector(state => state.modalList.value);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
 
   const getHouseDetailInfo = async (item) => {
     try {
@@ -262,13 +282,12 @@ const OwnHouseSheet2 = props => {
       const response = await axios.get(url, { headers });
       const detaildata = response.data.data;
       if (response.data.errYn == 'Y') {
-        let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-        dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
         SheetManager.show('info', {
           payload: {
             type: 'error',
             message: response.data.errMsg,
             description: response.data.errMsgDtl,
+            buttontext: '확인하기',
           },
         });
         return {
@@ -306,7 +325,7 @@ const OwnHouseSheet2 = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-              dispatch(removeLastModalList());
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -398,23 +417,24 @@ const OwnHouseSheet2 = props => {
                           ).color,
                         }}>
                         <TagText>
-                          {
-                            HOUSE_TYPE.find(color => color.id === item.houseType)
-                              .name
-                          }
+                          {HOUSE_TYPE.find(color => color.id === item.houseType).name}
                         </TagText>
                       </Tag>
                       <CardTitle>{item.houseName}</CardTitle>
                       <CardSubTitle>{item.detailAdr}</CardSubTitle>
                       <CardButton
-                        onPress={() => {
-                          actionSheetRef.current?.hide();
-                          dispatch(removeLastModalList());
-                          props.payload.navigation.push(
-                            'OwnedHouseDetail',
-                            { item: item, prevSheet: 'own2', index: props.payload.index, },
-                            'OwnedHouseDetail',
-                          );
+                        onPress={async() => {
+                          const state = await NetInfo.fetch();
+                          const canProceed = await handleNetInfoChange(state);
+                          if (canProceed) {
+                            actionSheetRef.current?.hide();
+
+                            props.payload.navigation.push(
+                              'OwnedHouseDetail',
+                              { item: item, prevSheet: 'own2', index: props.payload.index, },
+                              'OwnedHouseDetail',
+                            );
+                          }
                         }}>
                         <CardButtonText>자세히 보기</CardButtonText>
                       </CardButton>
@@ -460,14 +480,18 @@ const OwnHouseSheet2 = props => {
                 flexDirection: 'row',
               }}>
               <AddButton
-                onPress={() => {
-                  actionSheetRef.current?.hide();
-                  dispatch(removeLastModalList());
-                  props.payload.navigation.push('DirectRegister', {
-                    prevChat: 'GainsTaxChat',
-                    prevSheet: 'own2',
-                    index: props.payload?.index,
-                  });
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    actionSheetRef.current?.hide();
+
+                    props.payload.navigation.push('DirectRegister', {
+                      prevChat: 'GainsTaxChat',
+                      prevSheet: 'own2',
+                      index: props.payload?.index,
+                    });
+                  }
                 }}>
                 <AddCircleIcon />
                 <AddButtonText>직접 등록하기</AddButtonText>
@@ -505,14 +529,18 @@ const OwnHouseSheet2 = props => {
                 }}>
                 <EmptyCard>
                   <AddHouseCircleIcon
-                    onPress={() => {
-                      actionSheetRef.current?.hide();
-                      dispatch(removeLastModalList());
-                      props.payload.navigation.push('DirectRegister', {
-                        prevChat: 'GainsTaxChat',
-                        prevSheet: 'own2',
-                        index: props.payload?.index,
-                      });
+                    onPress={async () => {
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        actionSheetRef.current?.hide();
+
+                        props.payload.navigation.push('DirectRegister', {
+                          prevChat: 'GainsTaxChat',
+                          prevSheet: 'own2',
+                          index: props.payload?.index,
+                        });
+                      }
                     }} style={{ margin: 20 }}></AddHouseCircleIcon>
                   <EmptyTitle>
                     {'보유하신 주택이 없거나 불러오지 못했어요.'}
@@ -532,14 +560,18 @@ const OwnHouseSheet2 = props => {
                 flexDirection: 'row',
               }}>
               <AddButton
-                onPress={() => {
-                  actionSheetRef.current?.hide();
-                  dispatch(removeLastModalList());
-                  props.payload.navigation.push('DirectRegister', {
-                    prevChat: 'GainsTaxChat',
-                    prevSheet: 'own2',
-                    index: props.payload?.index,
-                  });
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    actionSheetRef.current?.hide();
+
+                    props.payload.navigation.push('DirectRegister', {
+                      prevChat: 'GainsTaxChat',
+                      prevSheet: 'own2',
+                      index: props.payload?.index,
+                    });
+                  }
                 }}>
                 <AddCircleIcon />
                 <AddButtonText>직접 등록하기</AddButtonText>
@@ -573,65 +605,63 @@ const OwnHouseSheet2 = props => {
             width={width}
             active={selectedList.length > 0}
             onPress={async () => {
-              /* console.log('[OwnHouseSheet2] selectedList:',
-                 ownHouseList?.find(
-                   item => item.houseId === selectedList[0].houseId,
-                 ),
-               );*/
-              if (ownHouseList?.some(item => item.isRequiredDataMissing === true)) {
-                let Modalindex = Object.keys(modalList).length; // modalList의 현재 길이를 가져옵니다.
-                dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'info'} }));
-                SheetManager.show('info', {
-                  payload: {
-                    type: 'info',
-                    message: '자세히 보기를 눌러 보유하신\n모든 주택의 필수정보를 채워주세요.',
-                  },
-                });
-                return;
-              } else {
-                const response = await getHouseDetailInfo(ownHouseList?.find(
-                  item => item.houseId === selectedList[0].houseId,
-                ))
-                actionSheetRef.current?.hide();
-
-                if (response?.returndata) {
-                  const chatItem = {
-                    id: 'ownConfirmOK',
-                    type: 'my',
-                    message: '확인 완료',
-                  };
-                  // console.log('houseInfo last:', houseInfo);
-                  dispatch(removeLastModalList());
-                  dispatch(
-                    setChatDataList([
-                      ...chatDataList.slice(0, chatDataList.length - 1),
-                      chatItem,
-                    ]),
-                  );
-                  dispatch(
-                    setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseList?.length, isOwnHouseCntRegist: true, ...response?.detaildata }),
-                  );
-                  setTimeout(() => {
-                    let Modalindex = Object.keys(modalList).length - 1; // modalList의 현재 길이를 가져옵니다.
-                    console.log('Modalindex:', Modalindex);
-                    console.log('modalList:', modalList);
-                    dispatch(setModalList({ ...modalList, [Modalindex]: {modal : 'gain', index: props.payload?.index} }));
-                    SheetManager.show('gain', {
-                      payload: {
-                        navigation: props?.payload?.navigation,
-                        index: props?.payload?.index,
-                      },
-                    });
-
-                  }, 200);
+              const state = await NetInfo.fetch();
+              const canProceed = await handleNetInfoChange(state);
+              if (canProceed) {
+                /* console.log('[OwnHouseSheet2] selectedList:',
+                   ownHouseList?.find(
+                     item => item.houseId === selectedList[0].houseId,
+                   ),
+                 );*/
+                if (ownHouseList?.some(item => item.isRequiredDataMissing === true)) {
+                  SheetManager.show('info', {
+                    payload: {
+                      type: 'info',
+                      message: '자세히 보기를 눌러 보유하신\n모든 주택의 필수정보를 채워주세요.',
+                      buttontext: '확인하기',
+                    },
+                  });
+                  return;
                 } else {
-                  const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-                  dispatch(setChatDataList(newChatDataList));
-                  dispatch(removeLastModalList());
+                  const response = await getHouseDetailInfo(ownHouseList?.find(
+                    item => item.houseId === selectedList[0].houseId,
+                  ))
+                  actionSheetRef.current?.hide();
+
+                  if (response?.returndata) {
+                    const chatItem = {
+                      id: 'ownConfirmOK',
+                      type: 'my',
+                      message: '확인 완료',
+                    };
+                    // console.log('houseInfo last:', houseInfo);
+
+                    dispatch(
+                      setChatDataList([
+                        ...chatDataList.slice(0, chatDataList.length - 1),
+                        chatItem,
+                      ]),
+                    );
+                    dispatch(
+                      setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseList?.length, isOwnHouseCntRegist: true, ...response?.detaildata }),
+                    );
+                    setTimeout(() => {
+                      SheetManager.show('gain', {
+                        payload: {
+                          navigation: props?.payload?.navigation,
+                          index: props?.payload?.index,
+                        },
+                      });
+
+                    }, 200);
+                  } else {
+                    const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                    dispatch(setChatDataList(newChatDataList));
+
+                  }
+
                 }
-
               }
-
             }}>
             <ButtonText active={selectedList.length > 0}>선택하기</ButtonText>
           </Button>

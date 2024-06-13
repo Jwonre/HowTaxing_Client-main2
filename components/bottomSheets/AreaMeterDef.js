@@ -292,6 +292,7 @@ const AreaMeterDef = props => {
         type: 'error',
         message: error?.errMsg,
         errorMessage: error?.errCode,
+        buttontext: '확인하기',
       });
       console.log(error);
     }

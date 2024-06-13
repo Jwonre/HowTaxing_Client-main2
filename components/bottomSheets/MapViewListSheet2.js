@@ -428,6 +428,7 @@ const MapViewListSheet2 = props => {
               message: '주소 검색 중 오류가 발생했어요.',
               description: parsedData.results.common.errorMessage,
               type: 'error',
+              buttontext: '확인하기',
             },
           });
           return;
@@ -440,6 +441,7 @@ const MapViewListSheet2 = props => {
             payload: {
               message: '주소에 대한 정보가 없어요.',
               type: 'error',
+              buttontext: '확인하기',
             },
           });
           return;
@@ -559,6 +561,7 @@ const MapViewListSheet2 = props => {
           payload: {
             message: '주소를 찾을 수 없어요.',
             type: 'error',
+            buttontext: '확인하기',
           },
         });
       });
@@ -917,7 +920,7 @@ const MapViewListSheet2 = props => {
                     itemHeight={40}
                     options={dongList}
                     onChange={index => {
-                      console.log(index);
+                     // console.log(index);
                       setSelectedDong(dongList[index]);
                       setSelectedHo(hoList[0]);
                     }}
@@ -962,7 +965,7 @@ const MapViewListSheet2 = props => {
               }}>
               <Button
                 onPress={() => {
-                  console.log(myPosition);
+                 // console.log(myPosition);
                   setMyPosition({
                     latitude: Number(myPosition?.latitude),
                     longitude: Number(myPosition?.longitude),
@@ -985,7 +988,7 @@ const MapViewListSheet2 = props => {
               <Button
                 onPress={() => {
                   actionSheetRef.current?.hide();
-                  console.log(selectedDong, selectedHo);
+                  //console.log(selectedDong, selectedHo);
                   dispatch(
                     setDirectRegister({
                       houseName: selectedItem?.COMPLEX_NM1

@@ -1,4 +1,3 @@
-import { View, Text, Platform } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -37,6 +36,8 @@ import ExpenseSheet from '../components/bottomSheets/ExpenseSheet';
 import ConsultingSheet from '../components/bottomSheets/ConsultingSheet';
 import DeleteHouseAlert from '../components/bottomSheets/DeleteHouseAlert';
 import InfoAlert from '../components/bottomSheets/InfoAlert';
+import InfoCertification from '../components/bottomSheets/InfoCertification';
+import InfoAppinformation from '../components/bottomSheets/InfoAppinformation';
 import InfoExpense from '../components/bottomSheets/InfoExpense';
 import LogOutSheet from '../components/bottomSheets/LogOutSheet';
 import MapViewListSheet from '../components/bottomSheets/MapViewListSheet';
@@ -111,6 +112,8 @@ const AppNavigator = () => {
     registerSheet('cert2', CertSheet2);
     registerSheet('infoExpense', InfoExpense);
     registerSheet('info', InfoAlert);
+    registerSheet('infoCertification', InfoCertification);
+    registerSheet('InfoAppinformation', InfoAppinformation);
     registerSheet('joint', JointSheet);
     registerSheet('ownHouseCount', OwnHouseCountSheet);
     registerSheet('confirm', ConfirmSheet);
@@ -219,6 +222,10 @@ const AppNavigator = () => {
                 <Stack.Screen name="Privacy2" component={Privacy2} />
                 <Stack.Screen name="Location2" component={Location2} />
               </Stack.Group>
+              <Stack.Screen
+                name="NetworkAlert"
+                component={NetworkAlert}
+              />
               <Stack.Screen name="LoginWebview" component={LoginWebview}
                 options={{ headerShown: false }} />
             </Stack.Group>

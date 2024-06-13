@@ -1,7 +1,7 @@
 export const HOUSE_TYPE = [
   {
     id: '1',
-    name: '아파트',
+    name: '아파트 · 오피스텔',
     color: '#1FC9A8',
   },
   {

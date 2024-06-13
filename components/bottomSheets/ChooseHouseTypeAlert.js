@@ -13,7 +13,8 @@ import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo"
+
 // Icons
 import BuildingIcon1 from '../../assets/icons/house/building_type1_ico.svg';
 import HouseIcon from '../../assets/icons/house/house.svg';
@@ -139,13 +140,34 @@ const ChooseHouseTypeAlert = props => {
   const { width, height } = useWindowDimensions();
 
   const [selectedHouseType, setSelectedHouseType] = useState(data?.houseType === null ? null : data?.houseType);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
 
 
   const HOUSE_TYPE = [
     {
       id: '1',
-      name: '아파트',
+      name: '아파트 · 오피스텔',
       icon: <BuildingIcon1 />,
     },
     {
@@ -173,7 +195,7 @@ const ChooseHouseTypeAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -214,8 +236,12 @@ const ChooseHouseTypeAlert = props => {
                   <SelectButton
                     key={it.id}
                     active={selectedHouseType === it.id}
-                    onPress={() => {
-                      setSelectedHouseType(it.id);
+                    onPress={async () => {
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        setSelectedHouseType(it.id);
+                      }
                     }}>
                     {it.icon}
                     <SelectButtonText>{it.name}</SelectButtonText>
@@ -235,7 +261,7 @@ const ChooseHouseTypeAlert = props => {
             }}>
             <Button
               onPress={() => {
-           //     console.log('ChooseHouseType 이전으로 버튼');
+                //     console.log('ChooseHouseType 이전으로 버튼');
                 actionSheetRef.current?.hide();
               }}
               style={{
@@ -252,14 +278,18 @@ const ChooseHouseTypeAlert = props => {
           </ButtonShadow>
           <ButtonShadow>
             <Button
-              onPress={() => {
-                var p = data;
-                p.houseType = selectedHouseType;
-            //    console.log('[ChooseHouseTypeAlert] p:', p);
-                handleHouseChange(p, p?.isMoveInRight);
-                // ownHouseList가 배열이라면, map 함수를 사용하여 해당 houseId를 가진 객체만 업데이트합니다.
-                dispatch(removeLastModalList());
-                actionSheetRef.current?.hide();
+              onPress={async () => {
+                const state = await NetInfo.fetch();
+                const canProceed = await handleNetInfoChange(state);
+                if (canProceed) {
+                  var p = data;
+                  p.houseType = selectedHouseType;
+                  //    console.log('[ChooseHouseTypeAlert] p:', p);
+                  handleHouseChange(p, p?.isMoveInRight);
+                  // ownHouseList가 배열이라면, map 함수를 사용하여 해당 houseId를 가진 객체만 업데이트합니다.
+
+                  actionSheetRef.current?.hide();
+                }
               }}>
               <ButtonText>다음으로</ButtonText>
             </Button>

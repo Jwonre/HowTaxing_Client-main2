@@ -1,15 +1,15 @@
 // 취득세 홈페이지
 
 import { TouchableOpacity, useWindowDimensions, BackHandler } from 'react-native';
-import React, { useLayoutEffect, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useRef, useLayoutEffect, useState, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import HomeIcon from '../../assets/images/home_home_lg.svg';
 import FastImage from 'react-native-fast-image';
 import DropShadow from 'react-native-drop-shadow';
 import getFontSize from '../../utils/getFontSize';
-
+import NetInfo from "@react-native-community/netinfo";
 
 const Container = styled.View`
   flex: 1;
@@ -172,19 +172,43 @@ const Acquisition = () => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const AC_HASHTAG_LIST = ['취득세 계산', '조정 지역', '주택 매수'];
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+  
   const handleBackPress = () => {
     navigation.goBack();
     return true;
   }
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
-  
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', handleBackPress)
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
-    }
 
-  }, [handleBackPress]);
+
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      }
+
+    }, [handleBackPress]));
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -250,8 +274,12 @@ const Acquisition = () => {
         <ShadowContainer>
           <Button
             width={width}
-            onPress={() => {
-              navigation.replace('AcquisitionChat');
+            onPress={async () => {
+              const state = await NetInfo.fetch();
+              const canProceed = await handleNetInfoChange(state);
+              if (canProceed) {
+                navigation.replace('AcquisitionChat');
+              }
             }}>
             <ButtonText>시작하기</ButtonText>
           </Button>

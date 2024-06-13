@@ -16,7 +16,8 @@ import DropShadow from 'react-native-drop-shadow';
 import { useDispatch, useSelector } from 'react-redux';
 import numberToKorean from '../../utils/numToKorean';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
-import { removeLastModalList } from '../../redux/modalListSlice';
+import NetInfo from "@react-native-community/netinfo";
+
 import { LogBox } from 'react-native';
 
 const SheetContainer = styled.View`
@@ -155,13 +156,15 @@ const ButtonText = styled.Text`
 
 
 const UpdatePubLandPriceAlert = props => {
-
-  const { handleHouseChange, data, navigation, prevSheet } = props.payload;
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+  const { handleHouseChange, data} = props.payload;
   LogBox.ignoreLogs(['to contain units']);
   const dispatch = useDispatch();
   const actionSheetRef = useRef(null);
-  const { width, height } = useWindowDimensions();
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const { width } = useWindowDimensions();
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   // 공시가격
   const [pubLandPrice, setPubLandPrice] = useState(
     data?.pubLandPrice ? data?.pubLandPrice : 0,
@@ -192,14 +195,36 @@ const UpdatePubLandPriceAlert = props => {
     };
   }, []);
 
-  const nextHandler = async () => {
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
 
-    var p = data;
-    p.pubLandPrice = pubLandPrice;
-    // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
-    await handleHouseChange(p, p?.isMoveInRight);
-    dispatch(removeLastModalList());
-    actionSheetRef.current?.hide();
+  
+  const nextHandler = async () => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      var p = data;
+      p.pubLandPrice = pubLandPrice;
+      // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
+      await handleHouseChange(p, p?.isMoveInRight);
+       
+      actionSheetRef.current?.hide();
+    }
   };
 
   return (
@@ -211,7 +236,7 @@ const UpdatePubLandPriceAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -233,7 +258,7 @@ const UpdatePubLandPriceAlert = props => {
       <SheetContainer width={width}>
         <ModalInputSection>
           <ModalTitle>공시가격를 입력해주세요.</ModalTitle>
-          <ModalSubtitle>{numberToKorean(pubLandPrice)}원</ModalSubtitle>
+          <ModalSubtitle>{numberToKorean(pubLandPrice)}{(pubLandPrice !== null && pubLandPrice !== 0) ? '원' : ' '}</ModalSubtitle>
           <View
             style={{
               paddingHorizontal: 20,

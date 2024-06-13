@@ -1,13 +1,14 @@
 // 양도소득세 홈페이지
 
 import { TouchableOpacity, useWindowDimensions, BackHandler } from 'react-native';
-import React, { useLayoutEffect, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useRef, useLayoutEffect, useState, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import HomeIcon from '../../assets/images/home_home_lg.svg';
 import FastImage from 'react-native-fast-image';
 import DropShadow from 'react-native-drop-shadow';
+import NetInfo from "@react-native-community/netinfo";
 
 const Container = styled.View`
   flex: 1;
@@ -160,27 +161,48 @@ const ButtonText = styled.Text`
 const GainsTax = () => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
   const handleBackPress = () => {
     navigation.goBack();
     return true;
   }
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      }
 
+    }, [handleBackPress]));
 
-
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', handleBackPress)
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
-    }
-
-  }, [handleBackPress]);
   const GAIN_HASHTAG_LIST = [
     '양도소득세 계산',
     '다주택자 세금 컨설팅',
     '일시적 2 주택',
   ];
 
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
+  
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -256,8 +278,12 @@ const GainsTax = () => {
         }}>
         <Button
           width={width}
-          onPress={() => {
-            navigation.replace('GainsTaxChat');
+          onPress={async () => {
+            const state = await NetInfo.fetch();
+            const canProceed = await handleNetInfoChange(state);
+            if (canProceed) {
+              navigation.replace('GainsTaxChat');
+            }
           }}>
           <ButtonText>시작하기</ButtonText>
         </Button>

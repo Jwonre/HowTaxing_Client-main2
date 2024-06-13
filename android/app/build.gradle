@@ -136,6 +136,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://devrepo.kakao.com/nexus/content/groups/public/'}
         maven { url 'https://jitpack.io' }
         // 네이버 지도 저장소
         maven {

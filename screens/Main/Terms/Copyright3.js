@@ -151,7 +151,6 @@ const Copyright3 = props => {
             setActiveButton(false);
           }
         }}>
-        // 스크롤이 하단에 도달했을 때
 
         <Title>(필수) 정부24 저작권보호정책</Title>
         <SubTitle>[필수] 정부24 저작권보호정책</SubTitle>

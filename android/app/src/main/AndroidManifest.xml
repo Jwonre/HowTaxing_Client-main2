@@ -1,52 +1,70 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.xmonster.howtaxing">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.xmonster.howtaxing">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-  <uses-permission android:name="android.permission.VIBRATE"/>
+  <uses-permission android:name="android.permission.VIBRATE" />
 
-    <application
-      android:name=".MainApplication"
+  <application
+    android:name=".MainApplication"
+    android:label="@string/app_name"
+    android:icon="@mipmap/ic_launcher"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:allowBackup="true"
+    android:usesCleartextTraffic="true"
+    android:theme="@style/AppTheme">
+
+    <activity
+      android:name=".MainActivity"
       android:label="@string/app_name"
-      android:icon="@mipmap/ic_launcher"
-      android:roundIcon="@mipmap/ic_launcher_round"
-      android:allowBackup="true"
-      android:usesCleartextTraffic="true"
-      android:theme="@style/AppTheme">
-      <activity
-        android:name=".MainActivity"
-        android:label="@string/app_name"
-        android:configChanges="keyboardHidden|orientation|screenSize"
-        android:launchMode="singleTask"
-        android:windowSoftInputMode="adjustPan"
-        android:exported="true">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-        <intent-filter>
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.DEFAULT" />
-            <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="howtaxing" android:host="main" />
-            <data
-            android:scheme="howtaxing"  
-            android:host="naverlogin" 
-            />
-             <data android:host="oauth"
+      android:configChanges="keyboardHidden|orientation|screenSize"
+      android:launchMode="singleTask"
+      android:windowSoftInputMode="adjustPan"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="howtaxing" android:host="main" />
+        <data
+          android:scheme="howtaxing"
+          android:host="naverlogin"
+        />
+        <data android:host="oauth"
           android:scheme="kakao9b9f977d588a05bbf9d5d2f77a327e8c" />
-        </intent-filter>
-      </activity>
-      
-      <meta-data
-            android:name="com.naver.maps.map.CLIENT_ID"
-            android:value="0wc83sxbri" />
-    </application>
-      <queries>
-  <package android:name="com.kakao.talk" /> <!-- 카카오톡 -->
-  <package android:name="com.nhn.android.search" /> <!-- 네이버 -->
+      </intent-filter>
+    </activity>
 
-</queries>
+    <activity
+      android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+
+        <!-- Redirect URI: "kakao${NATIVE_APP_KEY}://oauth" -->
+        <data android:host="oauth"
+          android:scheme="kakao9b9f977d588a05bbf9d5d2f77a327e8c" />
+      </intent-filter>
+    </activity>
+
+    <meta-data android:name="com.kakao.sdk.AppKey" android:value="9b9f977d588a05bbf9d5d2f77a327e8c" />
+    
+    <meta-data
+      android:name="com.naver.maps.map.CLIENT_ID"
+      android:value="0wc83sxbri" />
+  </application>
+  <queries>
+    <package android:name="com.kakao.talk" /> <!-- 카카오톡 -->
+    <package android:name="com.nhn.android.search" /> <!-- 네이버 -->
+
+  </queries>
 </manifest>

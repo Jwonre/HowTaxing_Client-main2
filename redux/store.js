@@ -5,7 +5,7 @@ import chatDataListSlice from './chatDataListSlice';
 import ownHouseListSlice from './ownHouseListSlice';
 import certSlice from './certSlice';
 import directRegisterSlice from './directRegisterSlice';
-import modalListSlice from './modalListSlice';
+import resendSlice from './resendSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,7 +15,7 @@ export const store = configureStore({
     ownHouseList: ownHouseListSlice,
     cert: certSlice,
     directRegister: directRegisterSlice,
-    modalList: modalListSlice,
+    resend: resendSlice,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

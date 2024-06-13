@@ -12,14 +12,14 @@ import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
-
+import NetInfo from "@react-native-community/netinfo";
 import DropShadow from 'react-native-drop-shadow';
 import MinusIcon from '../../assets/icons/minus.svg';
 import PlusIcon from '../../assets/icons/plus.svg';
 import { useDispatch, useSelector } from 'react-redux';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { setChatDataList } from '../../redux/chatDataListSlice';
-import { removeLastModalList } from '../../redux/modalListSlice';
+
 const SheetContainer = styled.View`
   flex: 1;
   background-color: #fff;
@@ -86,6 +86,29 @@ const OwnHouseCountSheet = props => {
   const [HouseCount, setHouseCount] = useState(1);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+
+   const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
+
 
   return (
     <ActionSheet
@@ -98,7 +121,7 @@ const OwnHouseCountSheet = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-              dispatch(removeLastModalList());
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -196,51 +219,54 @@ const OwnHouseCountSheet = props => {
               alignSelf: 'center',
             }}>
             <ModalButton
-              onPress={() => {
-                dispatch(
-                  setHouseInfo({ ...houseInfo, ownHouseCnt: HouseCount, isOwnHouseCntRegist: true })
-                );
-                actionSheetRef.current?.hide();
-                const chat = {
-                  id: 'OwnHouseCountSystem',
-                  type: 'system',
-                  message: '보유한 주택은 몇 채인가요?',
-                  questionId: 'HouseCount',
-                  progress: 5,
-                };
-                const chat1 = {
-                  id: 'ownConfirmOK2',
-                  type: 'my',
-                  message: `${HouseCount}채`,
-                  questionId: 'HouseCount',
-                };
-                const chat2 = {
-                  id: 'palnSale',
-                  type: 'system',
-                  progress: 6,
-                  message:
-                    '종전주택 매도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 매도 계획이 있나요?',
-                  select: [
-                    {
-                      id: 'planSaleYes',
-                      name: '3년 이내 매도 계획',
-                      select: ['getInfoDone', 'getInfoConfirm'],
-                    },
-                    {
-                      id: 'planSaleNo',
-                      name: '매도 계획 없음',
-                      select: ['getInfoDone', 'getInfoConfirm'],
-                    },
-                  ],
-                };
-                dispatch(
-                  setChatDataList([...chatDataList, chat, chat1, chat2]),
+              onPress={async () => {
+                const state = await NetInfo.fetch();
+                const canProceed = await handleNetInfoChange(state);
+                if (canProceed) {
+                  dispatch(
+                    setHouseInfo({ ...houseInfo, ownHouseCnt: HouseCount, isOwnHouseCntRegist: true })
+                  );
+                  actionSheetRef.current?.hide();
+                  const chat = {
+                    id: 'OwnHouseCountSystem',
+                    type: 'system',
+                    message: '보유한 주택은 몇 채인가요?',
+                    questionId: 'HouseCount',
+                    progress: 5,
+                  };
+                  const chat1 = {
+                    id: 'ownConfirmOK2',
+                    type: 'my',
+                    message: `${HouseCount}채`,
+                    questionId: 'HouseCount',
+                  };
+                  const chat2 = {
+                    id: 'palnSale',
+                    type: 'system',
+                    progress: 6,
+                    message:
+                      '종전주택 매도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 매도 계획이 있나요?',
+                    select: [
+                      {
+                        id: 'planSaleYes',
+                        name: '3년 이내 매도 계획',
+                        select: ['getInfoDone', 'getInfoConfirm'],
+                      },
+                      {
+                        id: 'planSaleNo',
+                        name: '매도 계획 없음',
+                        select: ['getInfoDone', 'getInfoConfirm'],
+                      },
+                    ],
+                  };
+                  dispatch(
+                    setChatDataList([...chatDataList, chat, chat1, chat2]),
 
-                );
-                dispatch(removeLastModalList());
+                  );
+                }
               }}
               style={{
-                width: width - 80,
+                width: width - 120,
                 alignSelf: 'center',
                 marginTop: 20,
                 marginBottom: 50,

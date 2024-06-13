@@ -23,7 +23,7 @@ import dayjs from 'dayjs';
 import { gainTax } from '../../data/chatData';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
 import { LogBox } from 'react-native';
-import { removeLastModalList } from '../../redux/modalListSlice';
+
 
 dayjs.locale('ko');
 
@@ -212,7 +212,8 @@ const GainSheet = props => {
 
   // 양도금액 선택 리스트
   const AC_AMOUNT_LIST = [500000000, 100000000, 10000000, 1000000];
-  // 페이지 이동
+
+    // 페이지 이동
   useEffect(() => {
     _scrollViewRef.current?.scrollTo({
       x: (width - 40) * currentPageIndex,
@@ -285,7 +286,7 @@ const GainSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
 
             }}>
@@ -495,7 +496,7 @@ const GainSheet = props => {
         <SheetContainer width={width}>
           <ModalInputSection>
             <ModalTitle>양도금액을 입력해주세요.</ModalTitle>
-            <ModalSubtitle>{numberToKorean(saleAmount)}원</ModalSubtitle>
+            <ModalSubtitle>{numberToKorean(saleAmount)}{(saleAmount !== null && saleAmount !== 0) ? '원' : ' '}</ModalSubtitle>
             <View
               style={{
                 paddingHorizontal: 20,
@@ -574,6 +575,7 @@ const GainSheet = props => {
             <ButtonShadow>
               <Button
                 onPress={async () => {
+
                   // console.log('selectedDate', selectedDate, selectedDate2);
 
                   // 실거주 기간 계산
@@ -636,7 +638,7 @@ const GainSheet = props => {
                     );
                   }
 
-                  dispatch(removeLastModalList());
+                   
                 }} style={{
                   backgroundColor: saleAmount ? '#2f87ff' : '#E8EAED',
                   borderColor: saleAmount ? '#2f87ff' : '#E8EAED',

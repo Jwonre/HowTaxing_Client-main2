@@ -11,7 +11,8 @@ import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { HOUSE_TYPE } from '../../constants/colors';
-import { removeLastModalList } from '../../redux/modalListSlice';
+
+
 import numberToKorean from '../../utils/numToKorean';
 
 const SheetContainer = styled.View`
@@ -113,6 +114,11 @@ const ModalInputSection = styled.View`
   background-color: #fff;
 `;
 
+const ModalButtonSection = styled.View`
+  bottom: 5px;
+  width: 100%;
+`;
+
 const ModalButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
@@ -182,34 +188,34 @@ const ConfirmSheet2 = props => {
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
   const { width, height } = useWindowDimensions();
-  const ownHouseList = useSelector(state => state.ownHouseList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
 
- /* 
-  // 양도세 계산
-  const calculateTax = () => {
-    const data = {
-      houseId: houseInfo.houseId || '1',
-      contractDate: dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
-      sellDate: dayjs(houseInfo.saleDate).format('YYYY-MM-DD'),
-      sellPrice: houseInfo.saleAmount || '100000000',
-    };
 
-    axios
-      .post('http://13.125.194.154:8080/calculate/sellTax', data)
-      .then(response => {
-        // 성공적인 응답 처리
-        const data2 = response.data.data;
-
-        dispatch(setHouseInfo({ ...houseInfo, ...data2 }));
-      })
-      .catch(error => {
-        // 오류 처리
-        console.error(error);
-      });
-  };
-*/
+  /* 
+   // 양도세 계산
+   const calculateTax = () => {
+     const data = {
+       houseId: houseInfo.houseId || '1',
+       contractDate: dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
+       sellDate: dayjs(houseInfo.saleDate).format('YYYY-MM-DD'),
+       sellPrice: houseInfo.saleAmount || '100000000',
+     };
+ 
+     axios
+       .post('http://13.125.194.154:8080/calculate/sellTax', data)
+       .then(response => {
+         // 성공적인 응답 처리
+         const data2 = response.data.data;
+ 
+         dispatch(setHouseInfo({ ...houseInfo, ...data2 }));
+       })
+       .catch(error => {
+         // 오류 처리
+         console.error(error);
+       });
+   };
+ */
   return (
     <ActionSheet
       ref={actionSheetRef}
@@ -219,9 +225,9 @@ const ConfirmSheet2 = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              const newChatDataList = chatDataList.slice(0, props.payload?.index+1);
+              const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-              dispatch(removeLastModalList());
+               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -287,7 +293,7 @@ const ConfirmSheet2 = props => {
                   prevSheet: 'confirm2',
                   index: props.payload?.index,
                 });
-                
+
               }}>
               <HoustInfoButtonText>자세히 보기</HoustInfoButtonText>
             </HoustInfoButton>
@@ -297,13 +303,25 @@ const ConfirmSheet2 = props => {
           <InfoContentItem>
             <InfoContentLabel>필요경비</InfoContentLabel>
             <InfoContentText>
-              {numberToKorean(Number(houseInfo?.necessaryExpense).toString())} 원
+              {houseInfo?.necessaryExpense ? numberToKorean(Number(houseInfo?.necessaryExpense)?.toString()) + '원' : ''}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
             <InfoContentLabel>계약일자</InfoContentLabel>
             <InfoContentText>
               {dayjs(houseInfo?.contractDate).format('YYYY년 MM월 DD일')}
+            </InfoContentText>
+          </InfoContentItem>
+          <InfoContentItem>
+            <InfoContentLabel>취득계약일자</InfoContentLabel>
+            <InfoContentText>
+              {dayjs(houseInfo?.buyDate).format('YYYY년 MM월 DD일')}
+            </InfoContentText>
+          </InfoContentItem>
+          <InfoContentItem>
+            <InfoContentLabel>취득금액</InfoContentLabel>
+            <InfoContentText>
+              {houseInfo?.buyPrice ? numberToKorean(Number(houseInfo?.buyPrice)?.toString()) + '원' : ''}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
@@ -315,19 +333,21 @@ const ConfirmSheet2 = props => {
           <InfoContentItem>
             <InfoContentLabel>양도금액</InfoContentLabel>
             <InfoContentText>
-              {numberToKorean(Number(houseInfo?.saleAmount).toString())} 원
+              {houseInfo?.saleAmount ? numberToKorean(Number(houseInfo?.saleAmount)?.toString()) + '원' : ''}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
             <InfoContentLabel>실거주기간</InfoContentLabel>
             <InfoContentText>
-             {((houseInfo?.livePeriodYear === undefined & houseInfo?.livePeriodMonth === undefined)||(houseInfo?.livePeriodYear === 0 & houseInfo?.livePeriodMonth === 0)) ? '거주기간 없음' :houseInfo?.livePeriodYear+'년 '+houseInfo?.livePeriodMonth+'개월'}
+              {((houseInfo?.livePeriodYear === undefined & houseInfo?.livePeriodMonth === undefined) || (houseInfo?.livePeriodYear === 0 & houseInfo?.livePeriodMonth === 0)) ? '거주기간 없음' : houseInfo?.livePeriodMonth !== 0 ? houseInfo?.livePeriodYear !== 0 ? houseInfo?.livePeriodYear + '년 ' + houseInfo?.livePeriodMonth + '개월' : houseInfo?.livePeriodMonth + '개월' : houseInfo?.livePeriodYear + '년'}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
             <InfoContentLabel style={{ width: '110%' }}>기존 주택 보유 수(양도주택포함)</InfoContentLabel>
             <InfoContentText>{houseInfo?.ownHouseCnt ? houseInfo?.ownHouseCnt : 0}채</InfoContentText>
           </InfoContentItem>
+        </InfoContentSection>
+        <ModalButtonSection>
           <DropShadow
             style={{
               shadowColor: 'rgba(0,0,0,0.25)',
@@ -349,7 +369,7 @@ const ConfirmSheet2 = props => {
                   type: 'my',
                   message: '확인 완료',
                 };
-                dispatch(removeLastModalList());
+                 
                 dispatch(setChatDataList([...chatDataList, chat1]));
               }}
               style={{
@@ -361,7 +381,7 @@ const ConfirmSheet2 = props => {
               <ModalButtonText>확인하기</ModalButtonText>
             </ModalButton>
           </DropShadow>
-        </InfoContentSection>
+        </ModalButtonSection>
       </SheetContainer>
     </ActionSheet >
   );
