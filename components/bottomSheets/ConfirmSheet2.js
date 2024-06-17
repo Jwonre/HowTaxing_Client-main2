@@ -307,13 +307,7 @@ const ConfirmSheet2 = props => {
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
-            <InfoContentLabel>계약일자</InfoContentLabel>
-            <InfoContentText>
-              {dayjs(houseInfo?.contractDate).format('YYYY년 MM월 DD일')}
-            </InfoContentText>
-          </InfoContentItem>
-          <InfoContentItem>
-            <InfoContentLabel>취득계약일자</InfoContentLabel>
+            <InfoContentLabel>취득일자</InfoContentLabel>
             <InfoContentText>
               {dayjs(houseInfo?.buyDate).format('YYYY년 MM월 DD일')}
             </InfoContentText>
@@ -322,6 +316,12 @@ const ConfirmSheet2 = props => {
             <InfoContentLabel>취득금액</InfoContentLabel>
             <InfoContentText>
               {houseInfo?.buyPrice ? numberToKorean(Number(houseInfo?.buyPrice)?.toString()) + '원' : ''}
+            </InfoContentText>
+          </InfoContentItem>
+          <InfoContentItem>
+            <InfoContentLabel>양도계약일자</InfoContentLabel>
+            <InfoContentText>
+              {dayjs(houseInfo?.contractDate).format('YYYY년 MM월 DD일')}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>

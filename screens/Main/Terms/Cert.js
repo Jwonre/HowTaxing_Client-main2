@@ -77,7 +77,8 @@ const ContentText = styled.Text`
 `;
 
 const Cert = props => {
-  const navigation = useNavigation();
+  const navigation = props.navigation;
+  console.log('navigation2', navigation);
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
   const [activeButton, setActiveButton] = useState(false);
@@ -91,6 +92,7 @@ const Cert = props => {
       SheetManager.show('cert', {
         payload: {
           index: props.route.params.index,
+          navigation: navigation,
         },
       });
     }, 300);
@@ -116,6 +118,7 @@ const Cert = props => {
               SheetManager.show('cert', {
                 payload: {
                   index: props.route.params.index,
+                  navigation: navigation,
                 },
               });
             }, 300);
@@ -395,6 +398,7 @@ const Cert = props => {
                 SheetManager.show('cert', {
                   payload: {
                     index: props.route.params.index,
+                    navigation: navigation,
                   },
                 });
               }, 300);

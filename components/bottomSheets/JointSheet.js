@@ -88,11 +88,13 @@ const JointSheet = props => {
   const [personCount, setPersonCount] = useState(2);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-
-   const handleNetInfoChange = (state) => {
+  const navigation = props.payload?.navigation;
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -252,6 +254,10 @@ const JointSheet = props => {
                     setChatDataList([...chatDataList, chat, chat1, chat2]),
 
                   );
+                } else {
+                  const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                  dispatch(setChatDataList(newChatDataList));
+                  actionSheetRef.current?.hide();
                 }
               }}
               style={{

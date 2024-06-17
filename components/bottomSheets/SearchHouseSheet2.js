@@ -25,9 +25,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { AREA_LIST } from '../../data/areaData';
 import { setDirectRegister } from '../../redux/directRegisterSlice';
-import { setChatDataList } from '../../redux/chatDataListSlice';
 import NetInfo from "@react-native-community/netinfo";
-import { useNavigation } from '@react-navigation/native';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -330,11 +328,10 @@ const SearchHouseSheet2 = props => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [apartmentInfoGroupHeight, setApartmentInfoGroupHeight] = useState(0);
   const currentUser = useSelector(state => state.currentUser.value);
-  const chatDataList = useSelector(state => state.chatDataList.value);
-  const [isConnected, setIsConnected] = useState(true);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-  const navigation = useNavigation();
+  const navigation = props.payload.navigation;
+  const selectedHouseType = props.payload.selectedHouseType;
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -356,7 +353,11 @@ const SearchHouseSheet2 = props => {
     };
   }, []);
 
-   const handleNetInfoChange = (state) => {
+
+
+  const [isConnected, setIsConnected] = useState(true);
+
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -462,8 +463,6 @@ const SearchHouseSheet2 = props => {
               buttontext: '확인하기',
             },
           });
-          const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-          dispatch(setChatDataList(newChatDataList));
           return;
         } else {
           const list = response.data.data.jusoList;
@@ -487,15 +486,13 @@ const SearchHouseSheet2 = props => {
         // 오류 처리
         SheetManager.show('info', {
           type: 'error',
-          message: error?.errMsg,
-          errorMessage: error?.errCode,
+          message: error?.errMsg ? error?.errMsg : '주소를 불러오지 못했어요.',
+          errorMessage: error?.errCode ? error?.errCode : 'error',
           closemodal: true,
           actionSheetRef: actionSheetRef,
           buttontext: '확인하기',
         });
-        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-        dispatch(setChatDataList(newChatDataList));
-        console.error(error);
+        console.error(error ? error : 'error');
         return;
       });
   };
@@ -591,8 +588,6 @@ const SearchHouseSheet2 = props => {
               buttontext: '확인하기',
             },
           });
-          const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-          dispatch(setChatDataList(newChatDataList));
           return;
         } else {
           const list = response.data.data.jusoList;
@@ -616,20 +611,18 @@ const SearchHouseSheet2 = props => {
       .catch(function (error) {
         SheetManager.show('info', {
           type: 'error',
-          message: error?.errMsg,
-          errorMessage: error?.errCode,
+          message: error?.errMsg ? error?.errMsg : '주소를 불러오지 못했어요.',
+          errorMessage: error?.errCode ? error?.errCode : 'error',
           closemodal: true,
           actionSheetRef: actionSheetRef,
           buttontext: '확인하기',
         });
-        console.log(error);
-        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-        dispatch(setChatDataList(newChatDataList));
+        console.log(error ? error : 'error');
         return;
       });
   };
   // 주택 호 정보 가져오기
-  const getHoData = async (address, dongNm) => {
+  const getHoData = async (address, dongNm, type) => {
     const url = 'http://13.125.194.154:8080/house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
@@ -647,8 +640,8 @@ const SearchHouseSheet2 = props => {
     };
 
     try {
-
       const response = await axios.post(url, data, { headers: headers });
+      console.log('Holist response :', response.data.data.dongHoList);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -660,31 +653,37 @@ const SearchHouseSheet2 = props => {
             buttontext: '확인하기',
           },
         });
-        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-        dispatch(setChatDataList(newChatDataList));
-        return;
-
+        if (type === 'init') {
+          return 0;
+        } else {
+          return;
+        }
       } else {
-        //console.log('Holist response :',response.data.data.dongHoList);
         const holist = response.data.data.dongHoList;
         setHoList(holist);
         setSelectedHo(holist[0]);
+        if (type === 'init') {
+          return holist.length;
+        } else {
+          return;
+        }
       }
-
 
     } catch (error) {
       SheetManager.show('info', {
         type: 'error',
-        message: error?.errMsg,
-        errorMessage: error?.errCode,
+        message: error?.errMsg ? error?.errMsg : '주택의 호수를 불러오는데 문제가 발생했습니다.',
+        errorMessage: error?.errCode ? error?.errCode : 'error',
         closemodal: true,
         actionSheetRef: actionSheetRef,
         buttontext: '확인하기',
       });
-      const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-      dispatch(setChatDataList(newChatDataList));
-      console.log(error);
-      return;
+      console.log(error ? error : 'error');
+      if (type === 'init') {
+        return 0;
+      } else {
+        return;
+      }
     }
   };
 
@@ -706,6 +705,7 @@ const SearchHouseSheet2 = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
+      console.log('Donglist response :', response.data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -717,29 +717,25 @@ const SearchHouseSheet2 = props => {
             buttontext: '확인하기',
           },
         });
-        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-        dispatch(setChatDataList(newChatDataList));
         return 'dongerror';
 
       } else {
+        // console.log('donglist response :', response.data.data.dongHoList);
         const donglist = response.data.data.dongHoList;
         setDongList(donglist);
         return donglist[0];
-      }
-      //console.log('donglist response :',response.data.data.dongHoList);
 
+      }
     } catch (error) {
       SheetManager.show('info', {
         type: 'error',
-        message: error?.errMsg,
-        errorMessage: error?.errCode,
+        message: error?.errMsg ? error?.errMsg : '주택의 동 목록을 불러오는데 문제가 발생했습니다.',
+        errorMessage: error?.errCode ? error?.errCode : 'dongerror',
         closemodal: true,
         actionSheetRef: actionSheetRef,
         buttontext: '확인하기',
       });
-      console.log(error);
-      const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-      dispatch(setChatDataList(newChatDataList));
+      console.log(error ? error : 'error');
       return 'dongerror';
     }
   };
@@ -776,6 +772,9 @@ const SearchHouseSheet2 = props => {
           // rnMgtSn | String | 도로명코드
         }),
       );
+    } else {
+
+      actionSheetRef.current?.hide();
     }
   };
 
@@ -877,6 +876,9 @@ const SearchHouseSheet2 = props => {
                               }
                             }
                           }
+                        } else {
+
+                          actionSheetRef.current?.hide();
                         }
                       }}
                     />
@@ -909,6 +911,9 @@ const SearchHouseSheet2 = props => {
                               }
                             }
                           }
+                        } else {
+
+                          actionSheetRef.current?.hide();
                         }
                       }}>
                       <SerchIcon />
@@ -1040,6 +1045,8 @@ const SearchHouseSheet2 = props => {
                           }
                         }
                       }
+                    } else {
+                      actionSheetRef.current?.hide();
                     }
                   }}>
                   <ListFooterButtonText>더 보기</ListFooterButtonText>
@@ -1076,22 +1083,31 @@ const SearchHouseSheet2 = props => {
                     const canProceed = await handleNetInfoChange(state);
                     if (canProceed) {
                       //       console.log('선택 item', item);
+                      //          console.log('선택 item', item);
                       setAddress(item?.roadAddr);
-                      if (props.payload?.data === 'villa' || props.payload?.data === 'apartment') {
+                      if (selectedHouseType === '1' || selectedHouseType === '2') {
                         const firstDong = await getDongData(item);
+                        console.log('firstDong', firstDong);
                         if (firstDong !== 'dongerror') {
-                          await getHoData(item, firstDong);
+                          const Hodata = await getHoData(item, firstDong, 'init');
                           setSelectedItem(item);
-                          setCurrentPageIndex(1);
+                          console.log('Hodata', Hodata);
+                          if (Hodata > 0) {
+                            setCurrentPageIndex(1);
+                          } else {
+                            setCurrentPageIndex(2);
+                          }
+                        } else {
+                          setSelectedItem(item);
+                          setCurrentPageIndex(2);
                         }
-                        //         console.log('dongList[0]', firstDong);
-                        setSelectedItem(item);
-                        setCurrentPageIndex(1);
                       } else {
                         setSelectedItem(item);
-                        //        console.log('item', item);
+                        //console.log('item', item);
                         setCurrentPageIndex(2);
                       }
+                    } else {
+                      actionSheetRef.current?.hide();
                     }
                   }}>
                   <MapSearchResultButtonText>선택</MapSearchResultButtonText>
@@ -1143,7 +1159,7 @@ const SearchHouseSheet2 = props => {
                     onChange={index => {
                       setSelectedDong(dongList[index]);
                       setHoList([]);
-                      getHoData(selectedItem, dongList[index]);
+                      getHoData(selectedItem, dongList[index], 'change');
                     }}
                   />
                 )}
@@ -1264,7 +1280,18 @@ const SearchHouseSheet2 = props => {
               }}>
               <Button
                 onPress={() => {
-                  setCurrentPageIndex(0);
+                  {
+                    if (selectedHouseType === '1' || selectedHouseType === '2') {
+                      if (!(dongList.length === 0 && hoList.length === 0)) {
+                        setCurrentPageIndex(1);
+                      } else {
+                        setCurrentPageIndex(0);
+                      }
+                    } else {
+                      setCurrentPageIndex(0);
+                    }
+
+                  }
                 }}
                 style={{
                   backgroundColor: '#fff',
@@ -1279,8 +1306,16 @@ const SearchHouseSheet2 = props => {
               </Button>
             </DropShadow>
             <DropShadow style={styles.dropshadow}>
-              <Button onPress={nextHandler}>
-                <ButtonText>다음으로</ButtonText>
+              <Button active={detailAddress}
+                disabled={!(detailAddress)}
+                onPress={
+                  nextHandler
+                } style={{
+                  backgroundColor: detailAddress ? '#2f87ff' : '#E8EAED',
+                  borderColor: detailAddress ? '#2f87ff' : '#E8EAED',
+                }}>
+                <ButtonText active={detailAddress} style={{ color: detailAddress ? '#fff' : '#717274' }}
+                >다음으로</ButtonText>
               </Button>
             </DropShadow>
           </ButtonSection>

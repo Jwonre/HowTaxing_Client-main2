@@ -308,7 +308,7 @@ const ConfirmSheet = props => {
         </DropShadow>
         <InfoContentSection>
           <InfoContentItem>
-            <InfoContentLabel>계약일자</InfoContentLabel>
+            <InfoContentLabel>취득계약일자</InfoContentLabel>
             <InfoContentText>
               {dayjs(houseInfo?.contractDate).format('YYYY년 MM월 DD일')}
             </InfoContentText>

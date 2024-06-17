@@ -95,7 +95,7 @@ const ButtonText = styled.Text`
 
 
 const UpdateMoveInDateAlert = props => {
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data, navigation, prevSheet } = props.payload;
@@ -108,7 +108,9 @@ const UpdateMoveInDateAlert = props => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   // 공시가격
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

@@ -294,7 +294,7 @@ const CheckTerms = props => {
         <ListItemButton
           onPress={() => {
             //    console.log('agreeCert', agreeCert)
-            navigation.navigate('Cert2', { agreeCert: agreeCert });
+            navigation.navigate('Cert2', { agreeCert: agreeCert, navigation: navigation },);
           }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
@@ -320,7 +320,7 @@ const CheckTerms = props => {
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
-            navigation.navigate('Privacy2', { agreePrivacy: agreePrivacy });
+            navigation.navigate('Privacy2', { agreePrivacy: agreePrivacy, navigation: navigation });
           }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
@@ -346,7 +346,7 @@ const CheckTerms = props => {
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
-            navigation.navigate('Location2', { agreeLocation: agreeLocation });
+            navigation.navigate('Location2', { agreeLocation: agreeLocation, navigation: navigation });
 
           }}>
           <ListItemButtonText>보기</ListItemButtonText>
@@ -382,7 +382,7 @@ const CheckTerms = props => {
             width={width}
             disabled={!(agreeCert && agreeAge && agreePrivacy && agreeLocation)}
             onPress={() => {
-              navigation.navigate('Login', { param: agreeMarketing });
+              navigation.navigate('Login', { param: agreeMarketing, navigation: navigation });
             }}
             style={{
               width: width - 80,

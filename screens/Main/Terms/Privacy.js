@@ -77,7 +77,7 @@ const ContentText = styled.Text`
 `;
 
 const Cert = props => {
-  const navigation = useNavigation();
+  const navigation = props.navigation;
   const dispatch = useDispatch();
   const {width} = useWindowDimensions();
   const [activeButton, setActiveButton] = useState(false);
@@ -86,14 +86,16 @@ const Cert = props => {
   );
 
   const handleBackPress = () => {
-    navigation.goBack();
+
     setTimeout(() => {
       SheetManager.show('cert', {
         payload: {
-          index : props.route.params.index
+          index : props.route.params.index,
+          navigation: navigation,
         },
       });
     }, 300);
+    navigation.goBack();
     return true;
   };
 
@@ -111,14 +113,16 @@ const Cert = props => {
           activeOpacity={0.6}
           hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
           onPress={() => {
-            navigation.goBack();
+ 
             setTimeout(() => {
               SheetManager.show('cert', {
                 payload: {
-                  index : props.route.params.index
+                  index : props.route.params.index,
+                  navigation: navigation,
                 },
               });
             }, 300);
+            navigation.goBack();
           }}>
           <CloseIcon />
         </TouchableOpacity>
@@ -362,7 +366,8 @@ const Cert = props => {
               setTimeout(() => {
                 SheetManager.show('cert', {
                   payload: {
-                    index : props.route.params.index
+                    index : props.route.params.index,
+                    navigation: navigation,
                   },
                 });
               }, 300);

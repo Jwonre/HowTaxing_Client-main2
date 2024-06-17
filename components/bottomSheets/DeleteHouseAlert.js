@@ -1,7 +1,7 @@
 // 보유 주택 목록에서 주택 삭제 시 뜨는 시트
 
 import { useWindowDimensions, Pressable } from 'react-native';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
@@ -79,11 +79,13 @@ const DeleteHouseAlert = props => {
   const { width, height } = useWindowDimensions();
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const currentUser = useSelector(state => state.currentUser.value);
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -166,6 +168,8 @@ const DeleteHouseAlert = props => {
         });
         console.error(error);
       }
+    } else {
+      actionSheetRef.current?.hide();
     }
   };
 

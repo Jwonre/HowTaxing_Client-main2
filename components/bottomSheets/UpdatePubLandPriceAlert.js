@@ -156,7 +156,7 @@ const ButtonText = styled.Text`
 
 
 const UpdatePubLandPriceAlert = props => {
-  const [isConnected, setIsConnected] = useState(true);
+  const { navigation } = props.payload?.navigation;
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data} = props.payload;
@@ -195,7 +195,9 @@ const UpdatePubLandPriceAlert = props => {
     };
   }, []);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -280,7 +282,12 @@ const UpdatePubLandPriceAlert = props => {
                   keyboardType="number-pad"
                   value={pubLandPrice ? pubLandPrice?.toLocaleString() : null}
                   onChangeText={text => {
-                    setPubLandPrice(Number(text.replace(/[^0-9]/g, '')));
+                    const numericValue = Number(text.replace(/[^0-9]/g, ''));
+                    if (numericValue <= 1000000000000000) {
+                      setPubLandPrice(numericValue);
+                    } else {
+                      setPubLandPrice(1000000000000000)
+                    }
                   }}
                 />
                 {(pubLandPrice !== null && pubLandPrice !== 0) && (

@@ -135,7 +135,7 @@ const ReviewSheet = props => {
   const [score, setScore] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [keyboardShow, setKeyboardShow] = useState(false);
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
@@ -178,7 +178,9 @@ const ReviewSheet = props => {
       });
   };
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -289,7 +291,9 @@ const ReviewSheet = props => {
                   setTimeout(() => {
                     navigation.navigate('Home');
                   }, 200);
-                }
+                } else {
+                  actionSheetRef.current?.hide();
+                } 
               }}>
               <ButtonText>제출하기</ButtonText>
             </Button>

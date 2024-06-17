@@ -143,11 +143,12 @@ const ChooseHouseDongHoAlert = props => {
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const currentUser = useSelector(state => state.currentUser.value);
-  const [isConnected, setIsConnected] = useState(true);
+  const navigation = props.payload?.navigation;
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-
-   const handleNetInfoChange = (state) => {
+  const questionId = props.payload?.currentPageIndex.questionId;
+  const [isConnected, setIsConnected] = useState(true);
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -171,8 +172,8 @@ const ChooseHouseDongHoAlert = props => {
     // console.log('props.payload?.dongList', props.payload.currentPageIndex.dongList);
     //  console.log('props.payload?.hoList', props.payload.currentPageIndex.hoList);
     // console.log('props.payload?.currentPageIndex', props.payload);
-    setDongList(props.payload.currentPageIndex.dongList);
-    setHoList(props.payload.currentPageIndex.hoList);
+    setDongList(props.payload?.currentPageIndex.dongList);
+    setHoList(props.payload?.currentPageIndex.hoList);
 
   }, []);
 
@@ -610,6 +611,10 @@ const ChooseHouseDongHoAlert = props => {
       } else {
 
       }
+    } else {
+      const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+      dispatch(setChatDataList(newChatDataList));
+      actionSheetRef.current?.hide();
     }
 
   };
@@ -655,7 +660,7 @@ const ChooseHouseDongHoAlert = props => {
           style={{
             marginBottom: 20,
           }}>
-          취득하실 주택 동과 호를 선택해주세요.
+          {questionId === 'villa' ? '취득하실 주택 동과 호를 선택해주세요.' : '취득하실 아파트 동과 호를 선택해주세요.'}
         </ModalTitle>
         <ApartmentInfoGroup>
           <ApartmentInfoTitle>

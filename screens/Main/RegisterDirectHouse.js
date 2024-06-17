@@ -198,14 +198,16 @@ const RegisterDirectHouse = props => {
   const currentUser = useSelector(state => state.currentUser.value);
   const [prevChat, setPrevChat] = useState(null);
   const [prevSheet, setPrevSheet] = useState(null);
-  const [isConnected, setIsConnected] = useState(true);
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const directRegister = useSelector(
     state => state.directRegister.value,
   );
 
-   const handleNetInfoChange = (state) => {
+  const [isConnected, setIsConnected] = useState(true);
+
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -541,28 +543,23 @@ const RegisterDirectHouse = props => {
                   onSubmitEditing={() => {
                     addressDetailInputRef.current.focus();
                   }}
-                  onFocus={() => {
-                    //  console.log('focus', selectedHouseType);
-                    if (selectedHouseType === '1') {
-                      SheetManager.show('searchHouse2', {
-                        payload: {
-                          prevScreen: 'RegisterDirectHouse',
-                          prevChat: props.route.params?.prevChat,
-                          prevSheet: props.route.params?.prevSheet,
-                          navigation: navigation,
-                          index: props.route.params?.index,
-                        },
-                      });
-                    } else {
-                      SheetManager.show('searchHouse2', {
-                        payload: {
-                          prevScreen: 'RegisterDirectHouse',
-                          prevChat: props.route.params?.prevChat,
-                          prevSheet: props.route.params?.prevSheet,
-                          navigation: navigation,
-                          index: props.route.params?.index,
-                        },
-                      });
+                  onFocus={async() => {
+                    {
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        //  console.log('focus', selectedHouseType);
+                        SheetManager.show('searchHouse2', {
+                          payload: {
+                            prevScreen: 'RegisterDirectHouse',
+                            prevChat: props.route.params?.prevChat,
+                            prevSheet: props.route.params?.prevSheet,
+                            navigation: navigation,
+                            index: props.route.params?.index,
+                            selectedHouseType: selectedHouseType,
+                          },
+                        });
+                      }
                     }
                   }}
                 />
@@ -589,6 +586,7 @@ const RegisterDirectHouse = props => {
                       const state = await NetInfo.fetch();
                       const canProceed = await handleNetInfoChange(state);
                       if (canProceed) {
+                        //  console.log('focus', selectedHouseType);
                         SheetManager.show('searchHouse2', {
                           payload: {
                             prevScreen: 'RegisterDirectHouse',
@@ -596,6 +594,7 @@ const RegisterDirectHouse = props => {
                             prevSheet: props.route.params?.prevSheet,
                             navigation: navigation,
                             index: props.route.params?.index,
+                            selectedHouseType: selectedHouseType,
                           },
                         });
                       }

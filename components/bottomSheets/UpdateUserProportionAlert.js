@@ -99,7 +99,7 @@ const ButtonText = styled.Text`
 
 
 const UpdateUserProportionAlert = props => {
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data } = props.payload;
@@ -115,7 +115,7 @@ const UpdateUserProportionAlert = props => {
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const chatDataList = useSelector(state => state.chatDataList.value);
-
+  const { navigation } = props.payload?.navigation;
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -137,7 +137,9 @@ const UpdateUserProportionAlert = props => {
   }, []);
 
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

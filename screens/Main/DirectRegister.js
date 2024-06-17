@@ -1,7 +1,7 @@
 // 직접 등록 안내 페이지
 
 import { TouchableOpacity, useWindowDimensions, BackHandler } from 'react-native';
-import React, { useLayoutEffect, useCallback } from 'react';
+import React, { useLayoutEffect, useCallback, useState, useRef } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
@@ -76,11 +76,13 @@ const ButtonText = styled.Text`
 const DirectRegister = props => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

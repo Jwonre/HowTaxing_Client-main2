@@ -76,7 +76,7 @@ const ContentText = styled.Text`
 `;
 
 const Third = props => {
-  const navigation = useNavigation();
+  const navigation = props.navigation;
   const dispatch = useDispatch();
   const {type} = props.route.params;
   const {width} = useWindowDimensions();
@@ -90,7 +90,8 @@ const Third = props => {
       SheetManager.show('cert', {
         payload: {
           cert: props.route.params.cert,
-          index : props.route.params.index
+          index : props.route.params.index,
+          navigation: navigation,
         },
       });
     }, 300);
@@ -117,7 +118,8 @@ const Third = props => {
               SheetManager.show('cert', {
                 payload: {
                   cert: props.route.params.cert,
-                  index : props.route.params.index
+                  index : props.route.params.index,
+                  navigation: navigation
                 },
               });
             }, 300);
@@ -310,6 +312,7 @@ const Third = props => {
                 SheetManager.show('cert', {
                   payload: {
                     cert: props.route.params.cert,
+                    navigation: navigation,
                   },
                 });
               }, 300);

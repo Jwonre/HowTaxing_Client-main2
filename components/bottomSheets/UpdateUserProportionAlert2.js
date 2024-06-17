@@ -145,7 +145,7 @@ const ButtonText = styled.Text`
 
 
 const UpdateUserProportionAlert = props => {
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data } = props.payload;
@@ -160,7 +160,7 @@ const UpdateUserProportionAlert = props => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   // 지분율 선택 리스트
   const AC_PROPORTION_LIST = [80, 60, 40, 20];
-
+  const { navigation }  = props.payload?.navigation;
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -181,7 +181,9 @@ const UpdateUserProportionAlert = props => {
     };
   }, []);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

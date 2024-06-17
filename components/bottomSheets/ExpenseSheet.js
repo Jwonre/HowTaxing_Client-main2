@@ -316,7 +316,12 @@ const ExpenseSheet = props => {
                   keyboardType="number-pad"
                   value={ExpenseAmount ? ExpenseAmount.toLocaleString() : null}
                   onChangeText={text => {
-                    setExpenseAmount(Number(text.replace(/[^0-9]/g, '')));
+                    const numericValue = Number(text.replace(/[^0-9]/g, ''));
+                    if (numericValue <= 1000000000000000) {
+                      setExpenseAmount(numericValue);
+                    } else {
+                      setExpenseAmount(1000000000000000)
+                    }
                   }}
                 />
                 {(ExpenseAmount !== null && ExpenseAmount !== 0) && (

@@ -16,7 +16,7 @@ import DropShadow from 'react-native-drop-shadow';
 import { useDispatch, useSelector } from 'react-redux';
 import Calendar from '../Calendar';
 import NetInfo from "@react-native-community/netinfo";
-  
+import { useNavigation } from '@react-navigation/native';
 
 
 
@@ -101,7 +101,7 @@ const ButtonText = styled.Text`
 const UpdateBalanceDateAlert = props => {
 
   const { handleHouseChange, data, navigation, prevSheet } = props.payload;
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const dispatch = useDispatch();
@@ -118,7 +118,9 @@ const UpdateBalanceDateAlert = props => {
   );
 
   // 공시가격 선택 리스트
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

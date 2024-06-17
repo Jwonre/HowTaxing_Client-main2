@@ -140,11 +140,13 @@ const ChooseHouseTypeAlert = props => {
   const { width, height } = useWindowDimensions();
 
   const [selectedHouseType, setSelectedHouseType] = useState(data?.houseType === null ? null : data?.houseType);
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -241,6 +243,10 @@ const ChooseHouseTypeAlert = props => {
                       const canProceed = await handleNetInfoChange(state);
                       if (canProceed) {
                         setSelectedHouseType(it.id);
+                      } else {
+                        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                        dispatch(setChatDataList(newChatDataList));
+                        actionSheetRef.current?.hide();
                       }
                     }}>
                     {it.icon}
@@ -288,6 +294,8 @@ const ChooseHouseTypeAlert = props => {
                   handleHouseChange(p, p?.isMoveInRight);
                   // ownHouseList가 배열이라면, map 함수를 사용하여 해당 houseId를 가진 객체만 업데이트합니다.
 
+                  actionSheetRef.current?.hide();
+                }else {
                   actionSheetRef.current?.hide();
                 }
               }}>

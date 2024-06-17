@@ -1,7 +1,7 @@
 // 취득세 결과애에서 CTA 섹션
 
 import { Linking } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';
 import * as Animatable from 'react-native-animatable';
@@ -91,21 +91,16 @@ const SocialButtonIcon = styled.Image.attrs(props => ({
   margin-right: 16px;
 `;
 
-const openKakaoLink = async () => {
-  const state = await NetInfo.fetch();
-  const canProceed = await handleNetInfoChange(state);
-  if (canProceed) {
 
-    Linking.openURL('http://pf.kakao.com/_jfxgFG');
-  }
-};
 
 const CTACard = () => {
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -123,6 +118,14 @@ const CTACard = () => {
     });
   };
 
+  const openKakaoLink = async () => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+  
+      Linking.openURL('http://pf.kakao.com/_jfxgFG');
+    }
+  };
 
   return (
     <Card>

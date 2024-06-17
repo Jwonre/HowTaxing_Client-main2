@@ -22,7 +22,6 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import NetInfo from "@react-native-community/netinfo";
 
-
 const SheetContainer = styled.ScrollView.attrs({
   contentContainerStyle: {
     flexGrow: 1,
@@ -244,7 +243,7 @@ const OwnHouseSheet = props => {
   const [selectedList, setSelectedList] = useState([]);
   const ownHouseList = useSelector(state => state.ownHouseList?.value);
   const chatDataList = useSelector(state => state.chatDataList?.value);
-  const [isConnected, setIsConnected] = useState(true);
+  const navigation = props.payload?.navigation;
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const CARD_WIDTH = 180 + 22;
@@ -252,12 +251,12 @@ const OwnHouseSheet = props => {
 
    const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
-      if (!state.isConnected && isConnected) {
-        setIsConnected(false);
+      if (!state.isConnected) {
+
         navigation.push('NetworkAlert', navigation);
         resolve(false);
-      } else if (state.isConnected && !isConnected) {
-        setIsConnected(true);
+      } else if (state.isConnected) {
+          
         if (!hasNavigatedBackRef.current) {
           setHasNavigatedBack(true);
         }
@@ -395,6 +394,10 @@ const OwnHouseSheet = props => {
                             { item: item, prevSheet: 'own', index: props.payload.index, },
                           );
                           //console.log('detail item', item);
+                        } else {
+                          const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                          dispatch(setChatDataList(newChatDataList));
+                          actionSheetRef.current?.hide();
                         }
                       }}>
                       <CardButtonText>자세히 보기</CardButtonText>
@@ -454,6 +457,10 @@ const OwnHouseSheet = props => {
                       chatDataList: chatDataList,
                       actionSheetRef: actionSheetRef,
                     });
+                  } else {
+                    const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                    dispatch(setChatDataList(newChatDataList));
+                    actionSheetRef.current?.hide();
                   }
                 }}>
                 <AddCircleIcon />
@@ -504,6 +511,10 @@ const OwnHouseSheet = props => {
                           prevSheet: 'own',
                           index: props.payload?.index,
                         });
+                      } else {
+                        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                        dispatch(setChatDataList(newChatDataList));
+                        actionSheetRef.current?.hide();
                       }
                     }} style={{ margin: 20 }}></AddHouseCircleIcon>
                   <EmptyTitle>
@@ -535,6 +546,10 @@ const OwnHouseSheet = props => {
                       prevSheet: 'own',
                       index: props.payload?.index,
                     });
+                  } else {
+                    const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                    dispatch(setChatDataList(newChatDataList));
+                    actionSheetRef.current?.hide();
                   }
                 }}>
                 <AddCircleIcon />
@@ -603,6 +618,10 @@ const OwnHouseSheet = props => {
                 dispatch(
                   setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true })
                 );
+              } else {
+                const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                dispatch(setChatDataList(newChatDataList));
+                actionSheetRef.current?.hide();
               }
             }}>
             <ButtonText active={selectedList.length > 0}>확인하기</ButtonText>

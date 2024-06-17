@@ -97,7 +97,7 @@ const ButtonText = styled.Text`
 
 const UpdateBuyDateAlert = props => {
 
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data, navigation, prevSheet } = props.payload;
@@ -109,7 +109,9 @@ const UpdateBuyDateAlert = props => {
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

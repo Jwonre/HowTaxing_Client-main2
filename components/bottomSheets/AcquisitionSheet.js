@@ -534,7 +534,12 @@ const AcquisitionSheet = props => {
                     keyboardType="number-pad"
                     value={acAmount ? acAmount.toLocaleString() : null}
                     onChangeText={text => {
-                      setAcAmount(Number(text.replace(/[^0-9]/g, '')));
+                      const numericValue = Number(text.replace(/[^0-9]/g, ''));
+                      if (numericValue <= 1000000000000000) {
+                        setAcAmount(numericValue);
+                      } else {
+                        setAcAmount(1000000000000000)
+                      }
                     }}
                   />
                   {(acAmount !== null && acAmount !== 0) && (

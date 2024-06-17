@@ -161,7 +161,7 @@ const ButtonText = styled.Text`
 const GainsTax = () => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
@@ -184,7 +184,9 @@ const GainsTax = () => {
     '일시적 2 주택',
   ];
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

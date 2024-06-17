@@ -25,7 +25,6 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { AREA_LIST } from '../../data/areaData';
 import NetInfo from "@react-native-community/netinfo";
-
 const SheetContainer = styled.View`
   flex: 1;
   background-color: #fff;
@@ -246,7 +245,7 @@ const UpdateAddressAlert = props => {
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedArea2, setSelectedArea2] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
-
+  const navigation = props.payload?.navigation;
   const currentUser = useSelector(state => state.currentUser.value);
 
   useEffect(() => {
@@ -269,7 +268,9 @@ const UpdateAddressAlert = props => {
     };
   }, []);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

@@ -172,15 +172,13 @@ const Acquisition = () => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const AC_HASHTAG_LIST = ['취득세 계산', '조정 지역', '주택 매수'];
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   
-  const handleBackPress = () => {
-    navigation.goBack();
-    return true;
-  }
-   const handleNetInfoChange = (state) => {
+  const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -197,9 +195,11 @@ const Acquisition = () => {
       }
     });
   };
-
-
-
+  
+  const handleBackPress = () => {
+    navigation.goBack();
+    return true;
+  }
   useFocusEffect(
     useCallback(() => {
       BackHandler.addEventListener('hardwareBackPress', handleBackPress)

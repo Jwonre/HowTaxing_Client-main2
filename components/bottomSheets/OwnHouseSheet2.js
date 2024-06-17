@@ -7,7 +7,7 @@ import {
   Pressable,
   ScrollView,
 } from 'react-native';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
@@ -22,7 +22,6 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import NetInfo from "@react-native-community/netinfo";
 import axios from 'axios';
-
 const SheetContainer = styled.ScrollView.attrs({
   contentContainerStyle: {
     flexGrow: 1,
@@ -241,7 +240,7 @@ const OwnHouseSheet2 = props => {
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
   const { width, height } = useWindowDimensions();
-  const [isConnected, setIsConnected] = useState(true);
+  const navigation = props.payload?.navigation;
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -251,7 +250,9 @@ const OwnHouseSheet2 = props => {
   const houseInfo = useSelector(state => state.houseInfo.value);
   const currentUser = useSelector(state => state.currentUser.value);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -434,6 +435,10 @@ const OwnHouseSheet2 = props => {
                               { item: item, prevSheet: 'own2', index: props.payload.index, },
                               'OwnedHouseDetail',
                             );
+                          } else {
+                            const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                            dispatch(setChatDataList(newChatDataList));
+                            actionSheetRef.current?.hide();
                           }
                         }}>
                         <CardButtonText>자세히 보기</CardButtonText>
@@ -491,6 +496,10 @@ const OwnHouseSheet2 = props => {
                       prevSheet: 'own2',
                       index: props.payload?.index,
                     });
+                  } else {
+                    const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                    dispatch(setChatDataList(newChatDataList));
+                    actionSheetRef.current?.hide();
                   }
                 }}>
                 <AddCircleIcon />
@@ -540,6 +549,10 @@ const OwnHouseSheet2 = props => {
                           prevSheet: 'own2',
                           index: props.payload?.index,
                         });
+                      } else {
+                        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                        dispatch(setChatDataList(newChatDataList));
+                        actionSheetRef.current?.hide();
                       }
                     }} style={{ margin: 20 }}></AddHouseCircleIcon>
                   <EmptyTitle>
@@ -571,6 +584,10 @@ const OwnHouseSheet2 = props => {
                       prevSheet: 'own2',
                       index: props.payload?.index,
                     });
+                  } else {
+                    const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                    dispatch(setChatDataList(newChatDataList));
+                    actionSheetRef.current?.hide();
                   }
                 }}>
                 <AddCircleIcon />
@@ -661,6 +678,10 @@ const OwnHouseSheet2 = props => {
                   }
 
                 }
+              } else {
+                const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                dispatch(setChatDataList(newChatDataList));
+                actionSheetRef.current?.hide();
               }
             }}>
             <ButtonText active={selectedList.length > 0}>선택하기</ButtonText>

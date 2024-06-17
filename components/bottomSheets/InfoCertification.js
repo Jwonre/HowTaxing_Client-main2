@@ -115,11 +115,13 @@ const InfoCertification = props => {
   const chatDataList = useSelector(state => state.chatDataList.value);
   const currentUser = useSelector(state => state.currentUser.value);
   const { name, phone, residentNumber, id, password, calcType } = props?.payload;
-  const [isConnected, setIsConnected] = useState(true);
+  const navigation = props?.payload?.navigation;
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -377,6 +379,10 @@ const InfoCertification = props => {
                     dispatch(setChatDataList([...chatDataList, chatItem]));
 
                   }
+                } else {
+                  const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                  dispatch(setChatDataList(newChatDataList));
+                  actionSheetRef.current?.hide();
                 }
               }}
               style={{

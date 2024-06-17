@@ -341,11 +341,10 @@ const AcquisitionChat = () => {
   const houseInfo = useSelector(state => state.houseInfo.value);
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useSelector(state => state.currentUser.value);
-  const [isConnected, setIsConnected] = useState(true);
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-  const [reviewShown, setReviewShown] = useState(false);
   const onQuestionMarkPress = (type) => {
     //.log('ques');
     SheetManager.show('questionMarkDefinition', {
@@ -393,16 +392,18 @@ const AcquisitionChat = () => {
         SheetManager.show('info', {
           payload: {
             message: '보유주택을 불러오는데 문제가 발생했습니다.',
-            description: error?.message,
+            description: error?.message ? error?.message : '오류가 발생했습니다.',
             type: 'error',
             buttontext: '확인하기',
           }
         });
-        console.log(error);
+        console.log(error ? error : 'error');
       });
   };
 
-   const handleNetInfoChange = (state) => {
+  const [isConnected, setIsConnected] = useState(true);
+
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -761,19 +762,17 @@ const AcquisitionChat = () => {
   // 시스템 챗 버블 렌더링
   const renderSystemChatItem = ({ item, index }) => {
     // console.log('renderSystemChatItem item', item.id);
-    if (item?.id === 'goodbye' && !reviewShown) {
+    if (item?.id === 'goodbye') {
       // modalList에 'review'가 없는 경우에만 추가합니다.
-      if (!Object.values(modalList).some(modal => modal.modal === 'review')) {
-        setTimeout(() => {
-          SheetManager.show('review', {
-            payload: {
-              questionId: 'goodbye',
-              navigation: navigation,
-            },
-          });
-          setReviewShown(true); // 리뷰가 표시되었음을 표시합니다.
-        }, 1000);
-      }
+      setTimeout(() => {
+        SheetManager.show('review', {
+          payload: {
+            questionId: 'goodbye',
+            navigation: navigation,
+          },
+        });
+      }, 1000);
+
     }
 
     // CTA
@@ -893,7 +892,7 @@ const AcquisitionChat = () => {
                           */
                           if (item.id === 'type') {
                             //console.log('item2?.name', item2?.name);
-                            if ((item2?.name === '아파트 · 오피스텔')) {
+                            if ((item2?.name === '아파트')) {
                               dispatch(
                                 setHouseInfo({
                                   ...houseInfo,
@@ -1279,7 +1278,7 @@ const AcquisitionChat = () => {
                         SheetManager.show('acquisition', {
                           payload: {
                             questionId: item?.id,
-                            navigation,
+                            navigation: navigation,
                             index,
                           },
                         });

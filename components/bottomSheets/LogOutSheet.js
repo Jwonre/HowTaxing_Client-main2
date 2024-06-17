@@ -61,6 +61,7 @@ const ButtonSection = styled.View`
   align-items: center;
   flex-direction: row;
   justify-content: center;
+  margin-top: 10px;
   padding: 20px;
 `;
 
@@ -115,7 +116,7 @@ const LogOutSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: errorMessage ? 310 : 270,
+        height: errorMessage ? 320 : 290,
         width: width - 40,
       }}>
       <SheetContainer width={width}>

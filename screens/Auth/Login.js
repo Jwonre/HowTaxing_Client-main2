@@ -100,13 +100,15 @@ const Login = () => {
   const route = useRoute();
   const dispatch = useDispatch();
   //const [isConnected, setIsConnected] = useState(true);
-  const agreeMarketing = route.params;
+  const agreeMarketing = route.params? route.params.agreeMarketing : false;
   const accessToken = null;
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

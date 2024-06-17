@@ -279,7 +279,7 @@ const CertSheet = props => {
   LogBox.ignoreLogs(['to contain units']);
   const actionSheetRef = useRef(null);
   const data = props.payload.data;
-  const navigation = useNavigation();
+  const navigation = props.payload?.navigation;
   const { width, height } = useWindowDimensions();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const houseInfo = useSelector(state => state.houseInfo.value);
@@ -293,11 +293,13 @@ const CertSheet = props => {
   const { certType, agreeCert, agreePrivacy, agreeCopyright, agreeGov24 } = useSelector(
     state => state.cert.value,
   );
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -474,6 +476,8 @@ const CertSheet = props => {
 
 
       }
+    } else {
+      actionSheetRef.current?.hide();
     }
   };
 
@@ -582,7 +586,8 @@ const CertSheet = props => {
                     navigation.navigate('Cert3', {
                       cert: certType,
                       isGainsTax: props.payload.isGainsTax,
-                      index: props.payload.index
+                      index: props.payload.index,
+                      navigation: props.payload?.navigation
                     });
                   }}>
                   <ListItemButtonText>보기</ListItemButtonText>
@@ -610,7 +615,8 @@ const CertSheet = props => {
                     navigation.navigate('Privacy3', {
                       cert: certType,
                       isGainsTax: props.payload.isGainsTax,
-                      index: props.payload.index
+                      index: props.payload.index,
+                      navigation: props.payload?.navigation
                     });
                   }}>
                   <ListItemButtonText>보기</ListItemButtonText>
@@ -640,7 +646,8 @@ const CertSheet = props => {
                     navigation.navigate('Copyright3', {
                       cert: certType,
                       isGainsTax: props.payload.isGainsTax,
-                      index: props.payload.index
+                      index: props.payload.index,
+                      navigation: props.payload?.navigation
                     });
                   }}>
                   <ListItemButtonText>보기</ListItemButtonText>

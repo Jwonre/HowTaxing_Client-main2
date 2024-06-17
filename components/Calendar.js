@@ -40,7 +40,7 @@ const SelectGroup = styled.View`
 
 
 const SelectLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: ${getFontSize(14)}px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -64,13 +64,48 @@ const Calendar = props => {
   const [selectedDate, setSelectedDate] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate) : null);
   const [selectedYear, setSelectedYear] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate).getFullYear() : null);
   const [selectedMonth, setSelectedMonth] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate).getMonth() : null);
+  //const minYear = props.minDate ? props.minDate.getFullYear() : currentDate.getFullYear();
+  // const minDate = props.minDate ? props.minDate.getDay() : getDaysInMonth(currentDate.getMonth(), currentDate.getFullYear());
+
   const currentyear = currentDate.getFullYear();
+  const currentmonth = currentDate.getMonth();
   const years = [];
+  /*  const [months, setMonths] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    if (props.minDate) {
+      for (let i = minYear; i <= minYear + 50; i++) {
+        years.push(i);
+      }
+    } else {
+      for (let i = currentyear - 50; i <= currentyear + 50; i++) {
+        years.push(i);
+      }
+    }
+  */
+  const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   for (let i = currentyear - 50; i <= currentyear + 50; i++) {
     years.push(i);
   }
-  const currentmonth = currentDate.getMonth();
-  const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  /*
+    useEffect(() => {
+      let minMonth = 0;
+      if (props.minDate) {
+        const lastDayOfMonth = new Date(props.minDate.getFullYear(), props.minDate.getMonth() + 1, 0);
+        if (props.minDate.getDate() === lastDayOfMonth.getDate()) {
+          minMonth = props.minDate.getMonth() + 1;
+        } else {
+          minMonth = props.minDate.getMonth();
+        }
+      } else {
+        minMonth = 0;
+      }
+      if (minMonth !== 0) {
+        setMonths(Array.from({ length: 12 - minMonth }, (_, i) => i + minMonth + 1));
+      } else {
+        setMonths(Array.from({ length: 12 }, (_, i) => i + 1));
+      }
+    }, [props.minDate]);*/
+
+
   const getDaysInMonth = (month, year) => {
     let date = new Date(year, month, 1);
     let days = [];
@@ -80,7 +115,7 @@ const Calendar = props => {
     }
     return days;
   };
-  const [daysInMonth, setDaysInMonth] =  useState(selectedMonth ? getDaysInMonth(selectedMonth, selectedYear ? selectedYear : currentyear) : getDaysInMonth(currentmonth, selectedYear ? selectedYear : currentyear));
+  const [daysInMonth, setDaysInMonth] = useState(selectedMonth ? getDaysInMonth(selectedMonth, selectedYear ? selectedYear : currentyear) : getDaysInMonth(currentmonth, selectedYear ? selectedYear : currentyear));
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   //const [viewMode, setViewMode] = useState('day');
@@ -286,11 +321,11 @@ const Calendar = props => {
         }}>
         <SelectGroup>
           <View style={{ width: '40%', marginRight: 10 }}>
-            <SelectLabel>연도 선택</SelectLabel>
+            <SelectLabel>연도</SelectLabel>
             <PickerContainer>
               <WheelPicker
                 selectedIndex={
-                  selectedDate !== null ? years.indexOf(selectedDate.getFullYear()) : years.indexOf(currentDate.getFullYear())
+                  selectedDate !== null ? years.indexOf(selectedDate.getFullYear()) >= 0 ? years.indexOf(selectedDate.getFullYear()) : 0 : years.indexOf(currentDate.getFullYear()) >= 0 ? years.indexOf(currentDate.getFullYear()) : 0
                 }
                 containerStyle={{
                   width: 120,
@@ -309,7 +344,28 @@ const Calendar = props => {
                 options={years}
                 onChange={index => {
                   setSelectedYear(years[index]);
-                  setSelectedDate(new Date(years[index] , selectedMonth !== null ? selectedMonth : currentmonth, selectedDate !== null ? selectedDate.getDate() : currentDate.getDate()) );
+                  setSelectedDate(new Date(years[index], selectedMonth !== null ? selectedMonth : currentmonth, selectedDate !== null ? selectedDate.getDate() : currentDate.getDate()));
+                  /* Promise.resolve().then(() => {
+ 
+                     let minMonth = 0;
+                     console.log('minDate', props.minDate);
+                     console.log('years[index]', years[index]);
+                     console.log('minDate.getFullYear()', props.minDate.getFullYear());
+                     if ((props.minDate) && (props.minDate.getFullYear() === years[index])) {
+                       minMonth = props.minDate.getMonth();
+                     } else {
+                       minMonth = 0;
+                     }
+                     console.log('minMonth', minMonth);
+                     if (minMonth !== 0) {
+                       setMonths(Array.from({ length: 12 - minMonth }, (_, i) => i + minMonth + 1));
+                       console.log('after months1', months);
+                     } else {
+                       setMonths(Array.from({ length: 12 }, (_, i) => i + 1));
+                       console.log('after months2', months);
+                     }
+                     
+                   });*/
                 }}
                 visibleRest={5}
               />
@@ -317,11 +373,11 @@ const Calendar = props => {
             </PickerContainer>
           </View>
           <View style={{ width: '27%', marginRight: 10 }}>
-            <SelectLabel>월 선택</SelectLabel>
+            <SelectLabel>월</SelectLabel>
             <PickerContainer>
               <WheelPicker
                 selectedIndex={
-                  selectedDate !== null ? months.indexOf(selectedDate.getMonth()+1) : months.indexOf(currentDate.getMonth()+1)
+                  selectedDate !== null ? months.indexOf(selectedDate.getMonth() + 1) >= 0 ? months.indexOf(selectedDate.getMonth() + 1) : 0 : months.indexOf(currentDate.getMonth() + 1) >= 0 ? months.indexOf(currentDate.getMonth() + 1) : 0
                 }
                 containerStyle={{
                   width: 120,
@@ -339,10 +395,10 @@ const Calendar = props => {
                 itemHeight={40}
                 options={months}
                 onChange={index => {
-                  const monthIndex = months[index]-1;
+                  const monthIndex = months[index] - 1;
                   setSelectedMonth(monthIndex);
                   setDaysInMonth(getDaysInMonth(monthIndex, selectedYear ? selectedYear : currentyear));
-                  setSelectedDate( new Date(selectedYear !== null ? selectedYear : currentyear , monthIndex, selectedDate !== null ? selectedDate.getDate() : currentDate.getDate()) );
+                  setSelectedDate(new Date(selectedYear !== null ? selectedYear : currentyear, monthIndex, selectedDate !== null ? selectedDate.getDate() : currentDate.getDate()));
                 }}
                 visibleRest={5}
               />
@@ -350,12 +406,12 @@ const Calendar = props => {
             </PickerContainer>
           </View>
           <View style={{ width: '27%', marginRight: 10 }}>
-            <SelectLabel>일 선택</SelectLabel>
+            <SelectLabel>일</SelectLabel>
             <PickerContainer>
               <WheelPicker
                 key={daysInMonth}
                 selectedIndex={
-                  selectedDate !== null ? daysInMonth.indexOf(selectedDate.getDate()) : daysInMonth.indexOf(currentDate.getDate())
+                  selectedDate !== null ? daysInMonth.indexOf(selectedDate.getDate()) >= 0 ? daysInMonth.indexOf(selectedDate.getDate()) : 0 : daysInMonth.indexOf(currentDate.getDate()) >= 0 ? daysInMonth.indexOf(currentDate.getDate()) : 0
                 }
                 containerStyle={{
                   width: 120,
@@ -373,7 +429,7 @@ const Calendar = props => {
                 itemHeight={40}
                 options={daysInMonth}
                 onChange={index => {
-                  setSelectedDate( new Date(selectedYear !== null ? selectedYear : currentyear , selectedMonth !== null ? selectedMonth : currentmonth, daysInMonth[index]) );
+                  setSelectedDate(new Date(selectedYear !== null ? selectedYear : currentyear, selectedMonth !== null ? selectedMonth : currentmonth, daysInMonth[index]));
                 }}
                 visibleRest={5}
               />

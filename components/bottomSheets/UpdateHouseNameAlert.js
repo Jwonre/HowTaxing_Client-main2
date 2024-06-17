@@ -115,7 +115,7 @@ const ButtonText = styled.Text`
 `;
 
 const UpdateHouseNameAlert = props => {
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data } = props.payload;
@@ -124,8 +124,10 @@ const UpdateHouseNameAlert = props => {
   const { width } = useWindowDimensions();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [houseName, setHouseName] = useState(data.houseName);
-
-   const handleNetInfoChange = (state) => {
+  const { navigation } = props;
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);

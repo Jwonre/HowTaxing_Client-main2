@@ -158,7 +158,7 @@ const ButtonText = styled.Text`
 const UpdateBuyPriceAlert = props => {
   LogBox.ignoreLogs(['to contain units']);
   const { handleHouseChange, data, navigation, prevSheet } = props.payload;
-  const [isConnected, setIsConnected] = useState(true);
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const dispatch = useDispatch();
@@ -172,8 +172,9 @@ const UpdateBuyPriceAlert = props => {
 
   // 공시가격 선택 리스트
   const AC_BUYPRICE_LIST = [500000000, 100000000, 10000000, 1000000];
+  const [isConnected, setIsConnected] = useState(true);
 
-   const handleNetInfoChange = (state) => {
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -190,7 +191,6 @@ const UpdateBuyPriceAlert = props => {
       }
     });
   };
-
 
 
   // 키보드 이벤트
@@ -279,7 +279,12 @@ const UpdateBuyPriceAlert = props => {
                   keyboardType="number-pad"
                   value={buyPrice ? buyPrice?.toLocaleString() : null}
                   onChangeText={text => {
-                    setBuyPrice(Number(text.replace(/[^0-9]/g, '')));
+                    const numericValue = Number(text.replace(/[^0-9]/g, ''));
+                    if (numericValue <= 1000000000000000) {
+                      setBuyPrice(numericValue);
+                    } else {
+                      setBuyPrice(1000000000000000)
+                    }
                   }}
                 />
                 {(buyPrice !== null && buyPrice !== 0) && (

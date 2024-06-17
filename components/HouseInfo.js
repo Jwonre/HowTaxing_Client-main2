@@ -1,11 +1,12 @@
 // 결과에서 주택 정보 섹션 
 
 import { View, Text } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';
 import { HOUSE_TYPE } from '../constants/colors';
 import NetInfo from "@react-native-community/netinfo";
+import { useNavigation } from '@react-navigation/native';
 
 const HoustInfoSection = styled.View`
   width: 100%;
@@ -78,11 +79,13 @@ const HoustInfoButtonText = styled.Text`
 `;
 
 const HouseInfo = props => {
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-
-   const handleNetInfoChange = (state) => {
+  const navigation = useNavigation();
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -127,6 +130,7 @@ const HouseInfo = props => {
           if (canProceed) {
             props.navigation.push('HouseDetail', {
               item: props.item,
+
             });
             // console.log('houseinfo.js houseinfo', props.item);
           }

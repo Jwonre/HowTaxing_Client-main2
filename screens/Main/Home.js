@@ -21,7 +21,7 @@ import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
 import { setCert } from '../../redux/certSlice';
 import { setCurrentUser } from '../../redux/currentUserSlice';
-  
+
 import { setResend } from '../../redux/resendSlice';
 import axios from 'axios';
 
@@ -193,7 +193,7 @@ const style = StyleSheet.create({
 
 const Home = () => {
   const currentUser = useSelector(state => state.currentUser.value);
-  const [isConnected, setIsConnected] = useState(true);
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const handleBackPress = () => {
@@ -309,14 +309,14 @@ const Home = () => {
       return () => { };
     }, [])
   );
-   const handleNetInfoChange = (state) => {
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
-      if (!state.isConnected && isConnected) {
-        setIsConnected(false);
+      if (!state.isConnected) {
+         
         navigation.push('NetworkAlert', navigation);
         resolve(false);
-      } else if (state.isConnected && !isConnected) {
-        setIsConnected(true);
+      } else if (state.isConnected) {
+          
         if (!hasNavigatedBackRef.current) {
           setHasNavigatedBack(true);
         }
@@ -353,22 +353,28 @@ const Home = () => {
     '기타 주택세금',
   ];
 
-  const goAcquisigion = () => {
-    const state = NetInfo.fetch();
-    handleNetInfoChange(state);
-    navigation.push('Acquisition');
+  const goAcquisigion = async () => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      navigation.push('Acquisition');
+    }
   };
 
-  const goGainsTax = () => {
-    const state = NetInfo.fetch();
-    handleNetInfoChange(state);
-    navigation.push('GainsTax');
+  const goGainsTax = async () => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      navigation.push('GainsTax');
+    }
   };
 
-  const goConSulting = () => {
-    const state = NetInfo.fetch();
-    handleNetInfoChange(state);
-   SheetManager.show('Consulting');
+  const goConSulting = async () => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      SheetManager.show('Consulting', {payload: {navigation}});
+    }
   };
 
   const goLogin = () => {
@@ -471,9 +477,9 @@ const Home = () => {
           }}>
           <ChanelTalkIconFloatButton
             onPress={() => {
-              //console.log('currentUser',currentUser.accessToken);
-              handleWithDraw(currentUser.accessToken);
-              dispatch(setCurrentUser(null));
+              console.log('currentUser',currentUser.accessToken);
+              //handleWithDraw(currentUser.accessToken);
+              //dispatch(setCurrentUser(null));
             }}>
             <ChanelTalkIcon />
           </ChanelTalkIconFloatButton>

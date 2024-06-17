@@ -154,7 +154,7 @@ const ButtonText = styled.Text`
 const UpdateAreaMeterAlert = props => {
 
   const { handleHouseChange, data, navigation, prevSheet } = props.payload;
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const dispatch = useDispatch();
@@ -191,7 +191,9 @@ const UpdateAreaMeterAlert = props => {
     };
   }, []);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -274,7 +276,12 @@ const UpdateAreaMeterAlert = props => {
                   keyboardType="number-pad"
                   value={areaMeter ? areaMeter?.toLocaleString() : null}
                   onChangeText={text => {
-                    setAreaMeter(Number(text.replace(/[^0-9]/g, '')));
+                    const numericValue = Number(text.replace(/[^0-9]/g, ''));
+                    if (numericValue <= 1000000000000000) {
+                      setAreaMeter(numericValue);
+                    } else {
+                      setAreaMeter(1000000000000000)
+                    }
                   }}
                 />
                 {(areaMeter !== null && areaMeter !== 0) && (

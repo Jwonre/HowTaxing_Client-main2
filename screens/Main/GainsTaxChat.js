@@ -345,12 +345,12 @@ const GainsTaxChat = () => {
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useSelector(state => state.currentUser.value);
 
-  const [reviewShown, setReviewShown] = useState(false);
-  const [isConnected, setIsConnected] = useState(true);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-   const handleNetInfoChange = (state) => {
+  const [isConnected, setIsConnected] = useState(true);
+
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -714,19 +714,16 @@ const GainsTaxChat = () => {
   };
 
   const renderSystemChatItem = ({ item, index }) => {
-    if (item?.id === 'goodbye' && !reviewShown) {
-      // modalList에 'review'가 없는 경우에만 추가합니다.
-      if (!Object.values(modalList).some(modal => modal.modal === 'review')) {
-        setTimeout(() => {
-          SheetManager.show('review', {
-            payload: {
-              questionId: 'goodbye',
-              navigation: navigation,
-            },
-          });
-          setReviewShown(true); // 리뷰가 표시되었음을 표시합니다.
-        }, 1000);
-      }
+    if (item?.id === 'goodbye') {
+      setTimeout(() => {
+        SheetManager.show('review', {
+          payload: {
+            questionId: 'goodbye',
+            navigation: navigation,
+          },
+        });
+      }, 1000);
+
     }
 
     if (item?.id === 'cta2') {
@@ -1097,7 +1094,7 @@ const GainsTaxChat = () => {
                   }}>
                   <ModalButton
                     disabled={index < chatDataList.length - 1}
-                    onPress={async() => {
+                    onPress={async () => {
                       // console.log('next');
                       const state = await NetInfo.fetch();
                       const canProceed = await handleNetInfoChange(state);

@@ -261,11 +261,11 @@ const GainSheet = props => {
     const chat1 = {
       id: 'contractDateSystem',
       type: 'system',
-      message: '계약일자를 선택해주세요.',
+      message: '양도계약일자를 선택해주세요.',
       select: [
         {
           id: 'contractDate',
-          name: '계약일자 선택하기',
+          name: '양도계약일자 선택하기',
           openSheet: 'gain',
           currentPageIndex: 0,
         },
@@ -318,7 +318,7 @@ const GainSheet = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>계약일자를 선택해주세요.</ModalTitle>
+            <ModalTitle>양도계약일자를 선택해주세요.</ModalTitle>
             <InfoMessage>
                 양도하실 주택의 매매 계약일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
             </InfoMessage>
@@ -516,7 +516,12 @@ const GainSheet = props => {
                   keyboardType="number-pad"
                   value={saleAmount ? saleAmount.toLocaleString() : null}
                   onChangeText={text => {
-                    setAcAmount(Number(text.replace(/[^0-9]/g, '')));
+                    const numericValue = Number(text.replace(/[^0-9]/g, ''));
+                    if (numericValue <= 1000000000000000) {
+                      setAcAmount(numericValue);
+                    } else {
+                      setAcAmount(1000000000000000)
+                    }
                   }}
                 />
                 {(saleAmount !== null && saleAmount !== 0) && (

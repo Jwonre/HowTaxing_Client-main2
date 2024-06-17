@@ -70,7 +70,7 @@ const ContentText = styled.Text`
 `;
 
 const Gov24 = props => {
-  const navigation = useNavigation();
+  const navigation = props.navigation;
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
   const [activeButton, setActiveButton] = useState(false);
@@ -84,6 +84,7 @@ const Gov24 = props => {
       SheetManager.show('cert2', {
         payload: {
           index: props.route.params.index,
+          navigation: navigation,
         },
       });
     }, 300);
@@ -109,6 +110,7 @@ const Gov24 = props => {
               SheetManager.show('cert2', {
                 payload: {
                   index: props.route.params.index,
+                  navigation: navigation,
                 },
               });
             }, 300);
@@ -394,6 +396,7 @@ const Gov24 = props => {
                 SheetManager.show('cert2', {
                   payload: {
                     index: props.route.params.index,
+                    navigation: navigation,
                   },
                 });
               }, 300);

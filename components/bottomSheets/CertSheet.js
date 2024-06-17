@@ -20,6 +20,7 @@ import { LogBox } from 'react-native';
 
 import { setResend } from '../../redux/resendSlice';
 import NetInfo from '@react-native-community/netinfo';
+import ChooseHouseDongHoAlert from './ChooseHouseDongHoAlert';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -231,7 +232,8 @@ const CertSheet = props => {
   LogBox.ignoreLogs(['to contain units']);
   const actionSheetRef = useRef(null);
   const cert = props.payload.data;
-  const navigation = useNavigation();
+  const navigation = props.payload?.navigation;
+  console.log('navigation', navigation);
   const { width, height } = useWindowDimensions();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const currentUser = useSelector(state => state.currentUser.value);
@@ -241,11 +243,13 @@ const CertSheet = props => {
   const { certType, agreeCert, agreePrivacy } = useSelector(
     state => state.cert.value,
   );
-  const [isConnected, setIsConnected] = useState(true);
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-   const handleNetInfoChange = (state) => {
+  const [isConnected, setIsConnected] = useState(true);
+
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
@@ -379,7 +383,7 @@ const CertSheet = props => {
           dispatch(setChatDataList(newChatDataList));
 
         } else {
-          SheetManager.hide("infoCertification");
+
           setTimeout(async () => {
             await SheetManager.show('info', {
               payload: {
@@ -399,13 +403,13 @@ const CertSheet = props => {
         return true;
       }
     } catch (error) {
-      SheetManager.hide("infoCertification");
+
       setTimeout(async () => {
         console.error('[hypenHouseAPI] An error occurred:', error ? error : '');
         SheetManager.show('info', {
           payload: {
             message: '청약홈에서 정보를 불러오는 중\n오류가 발생했어요.\n인증을 다시 진행해주세요.',
-            description: error?.message,
+            description: error?.message ? error?.message : null,
             type: 'error',
             buttontext: '인증하기',
           }
@@ -446,17 +450,17 @@ const CertSheet = props => {
         return false;
       }
     } catch (error) {
-      SheetManager.hide("infoCertification");
+
       setTimeout(async () => {
         await SheetManager.show('info', {
           payload: {
             message: '청약홈에서 정보를 불러오는 중\n오류가 발생했어요.\n인증을 다시 진행해주세요.',
-            description: error?.message,
+            description: error?.message ? error?.message : '',
             type: 'error',
             buttontext: '인증하기',
           }
         });
-        console.log('에러', error);
+        console.log('에러', error ? error : '');
         const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
         dispatch(setChatDataList(newChatDataList));
 
@@ -569,6 +573,8 @@ const CertSheet = props => {
         dispatch(setChatDataList([...chatDataList, chatItem]));
 
       }
+    } else {
+      actionSheetRef.current?.hide();
     }
   };
 
@@ -676,11 +682,13 @@ const CertSheet = props => {
               <ListItemButton
                 onPress={() => {
                   actionSheetRef.current?.hide();
-                  navigation.navigate('Cert', {
-                    cert: certType,
-                    isGainsTax: props.payload.isGainsTax,
-                    index: props.payload.index
-                  });
+                    navigation.navigate('Cert', {
+                      cert: certType,
+                      isGainsTax: props.payload.isGainsTax,
+                      index: props.payload.index,
+                      navigation: navigation
+                    });
+                
                 }}>
                 <ListItemButtonText>보기</ListItemButtonText>
               </ListItemButton>
@@ -703,11 +711,14 @@ const CertSheet = props => {
               <ListItemButton
                 onPress={() => {
                   actionSheetRef.current?.hide();
-                  navigation.navigate('Privacy', {
-                    cert: certType,
-                    isGainsTax: props.payload.isGainsTax,
-                    index: props.payload.index
-                  });
+                    navigation.navigate('Privacy', {
+                      cert: certType,
+                      isGainsTax: props.payload.isGainsTax,
+                      index: props.payload.index,
+                      navigation: navigation
+
+                    });
+                
                 }}>
                 <ListItemButtonText>보기</ListItemButtonText>
               </ListItemButton>

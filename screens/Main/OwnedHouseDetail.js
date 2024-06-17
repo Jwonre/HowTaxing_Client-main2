@@ -10,7 +10,7 @@ import {
   BackHandler,
 } from 'react-native';
 import Switch from 'react-native-draggable-switch';
-import React, { useState, useLayoutEffect, useEffect, useCallback } from 'react';
+import React, { useState, useLayoutEffect, useEffect, useCallback, useRef } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import EditGreyIcon from '../../assets/icons/edit_grey.svg';
@@ -191,7 +191,7 @@ const OwnedHouseDetail = props => {
   const [data, setData] = useState(null);
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const dispatch = useDispatch();
-  const [isConnected, setIsConnected] = useState(true);
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
@@ -460,14 +460,14 @@ const OwnedHouseDetail = props => {
     }
   };
 
-   const handleNetInfoChange = (state) => {
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
-      if (!state.isConnected && isConnected) {
-        setIsConnected(false);
+      if (!state.isConnected) {
+
         navigation.push('NetworkAlert', navigation);
         resolve(false);
-      } else if (state.isConnected && !isConnected) {
-        setIsConnected(true);
+      } else if (state.isConnected) {
+
         if (!hasNavigatedBackRef.current) {
           setHasNavigatedBack(true);
         }
@@ -697,7 +697,7 @@ const OwnedHouseDetail = props => {
               SheetManager.show('info', {
                 payload: {
                   type: 'info',
-                  message: '계약일자를 입력해 주세요.',
+                  message: '취득계약일자를 입력해 주세요.',
                   buttontext: '확인하기',
                 },
               }); return;
@@ -844,7 +844,7 @@ const OwnedHouseDetail = props => {
       SheetManager.show('info', {
         payload: {
           type: 'info',
-          message: '계약일자를 입력해 주세요.',
+          message: '취득계약일자를 입력해 주세요.',
           buttontext: '확인하기',
         },
       }); return true;
@@ -1105,15 +1105,19 @@ const OwnedHouseDetail = props => {
               </View>
               <TouchableOpacity activeOpacity={0.6}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                onPress={() => {
-                  SheetManager.show('updateAreaMeterAlert', {
-                    payload: {
-                      navigation,
-                      data,
-                      prevSheet,
-                      handleHouseChange,
-                    },
-                  });
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    SheetManager.show('updateAreaMeterAlert', {
+                      payload: {
+                        navigation,
+                        data,
+                        prevSheet,
+                        handleHouseChange,
+                      },
+                    });
+                  }
                 }}>
                 <EditGreyIcon></EditGreyIcon>
               </TouchableOpacity>
@@ -1182,16 +1186,19 @@ const OwnedHouseDetail = props => {
                 </Label>
                 <TouchableOpacity activeOpacity={0.6}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  onPress={() => {
-
-                    SheetManager.show('updateUserProportionAlert', {
-                      payload: {
-                        navigation,
-                        data,
-                        prevSheet,
-                        handleHouseChange,
-                      },
-                    });
+                  onPress={async () => {
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      SheetManager.show('updateUserProportionAlert', {
+                        payload: {
+                          navigation,
+                          data,
+                          prevSheet,
+                          handleHouseChange,
+                        },
+                      });
+                    }
                   }}>
                   <EditGreyIcon></EditGreyIcon>
                 </TouchableOpacity>
@@ -1266,11 +1273,19 @@ const OwnedHouseDetail = props => {
                   backgroundColor: '#fff',
                 }}
 
-                onValueChange={(Yn) => {
+                onValueChange={async (Yn) => {
                   if (Yn === undefined) {
-                    handleHouseChange(data, data?.isMoveInRight);
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      handleHouseChange(data, data?.isMoveInRight);
+                    }
                   } else {
-                    handleHouseChange(data, Yn);
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      handleHouseChange(data, Yn);
+                    }
                   }
                 }}
 

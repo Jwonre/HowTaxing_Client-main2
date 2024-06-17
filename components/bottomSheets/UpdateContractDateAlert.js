@@ -95,11 +95,11 @@ const ButtonText = styled.Text`
 
 
 const UpdateContractDateAlert = props => {
-  const [isConnected, setIsConnected] = useState(true);
+  
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data } = props.payload;
-
+  const { navigation } = props.payload?.navigation;
   const dispatch = useDispatch();
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
@@ -109,7 +109,9 @@ const UpdateContractDateAlert = props => {
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
-   const handleNetInfoChange = (state) => {
+    const [isConnected, setIsConnected] = useState(true);
+  
+  const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
         setIsConnected(false);
