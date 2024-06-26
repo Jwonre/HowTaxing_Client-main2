@@ -133,7 +133,20 @@ const Login = () => {
     if (event.nativeEvent.data.role === 'GUEST') {
       //약관확인 화면으로 이동 후 약관 동의 완료시 handleSignUp 진행
       await navigation.push('CheckTerms');
-      handleSignUp(event.nativeEvent.data.accessToken);
+      const Sighupresult = handleSignUp(event.nativeEvent.data.accessToken);
+      if(Sighupresult){
+        const tokenObject = { 'accessToken': tokens[0], 'refreshToken': tokens[1] };
+        //   console.log('Login tokenObject:', tokenObject);
+        dispatch(setCurrentUser(tokenObject));
+      } else {
+        SheetManager.show('info', {
+          payload: {
+            message: '로그인에 실패했습니다.',
+            type: 'error',
+            buttontext: '확인하기',
+          }
+        });
+      }
     } else {
       //   console.log('Login token:', tokens[0]);
       const tokenObject = { 'accessToken': tokens[0], 'refreshToken': tokens[1] };
@@ -162,18 +175,18 @@ const Login = () => {
     };
 
     axios
-      .post('http://13.125.194.154:8080/user/signUp', data, { headers: headers })
+      .post('http://devapp.how-taxing.com/user/signUp', data, { headers: headers })
       .then(response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '회원가입 도중에 문제가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
               buttontext: '확인하기',
             },
           });
-          return;
+          return false;
         } else {
          /* SheetManager.show('info', {
             payload: {
@@ -184,6 +197,7 @@ const Login = () => {
           // 성공적인 응답 처리
           // const { id } = response.data;
           //    console.log("1111111", response);
+          return true;
         }
       })
       .catch(error => {
@@ -197,6 +211,7 @@ const Login = () => {
           }
         });
         console.error(error);
+        return false;
       });
   };
 
@@ -363,14 +378,14 @@ const Login = () => {
     };
 
     axios
-      .post('http://13.125.194.154:8080/user/socialLogin', data)
+      .post('http://devapp.how-taxing.com/user/socialLogin', data)
       .then(response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '소셜 로그인에 실패했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               buttontext: '확인하기',
             },
           });
@@ -399,7 +414,7 @@ const Login = () => {
   // 유저 정보 가져오기
   const getUserData = async id => {
     await axios
-      .get(`http://13.125.194.154:8080/user/${id}`)
+      .get(`http://devapp.how-taxing.com/user/${id}`)
       .then(response => {
         // 성공적인 응답 처리
         // console.log(response.data);

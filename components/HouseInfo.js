@@ -130,8 +130,11 @@ const HouseInfo = props => {
           if (canProceed) {
             props.navigation.push('HouseDetail', {
               item: props.item,
+              navigation: props.navigation,
+              prevSheet: props.ChatType,
 
             });
+            console.log('navigation', navigation);
             // console.log('houseinfo.js houseinfo', props.item);
           }
         }

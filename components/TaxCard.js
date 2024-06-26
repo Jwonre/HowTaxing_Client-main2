@@ -131,7 +131,7 @@ const TaxCard = props => {
       ownerCnt: houseInfo.ownerCnt === undefined ? 0 : houseInfo.ownerCnt,
       userProportion: houseInfo.userProportion === undefined ? 0 : houseInfo.userProportion,
       isMoveInRight: houseInfo.isMoveInRight === undefined ? '' : houseInfo.isMoveInRight,
-      hasSellPlan: houseInfo.hasSellPlan === undefined ? '' : houseInfo.hasSellPlan,
+   //   hasSellPlan: houseInfo.hasSellPlan === undefined ? '' : houseInfo.hasSellPlan,
       isOwnHouseCntRegist: houseInfo.isOwnHouseCntRegist === undefined ? '' : houseInfo.isOwnHouseCntRegist,
       ownHouseCnt: houseInfo.ownHouseCnt  === undefined ? 0 : houseInfo.ownHouseCnt,
     };
@@ -141,15 +141,15 @@ const TaxCard = props => {
     };
     
     try { 
-      const response = await axios.post('http://13.125.194.154:8080/calculation/buyResult', params, { headers });
+      const response = await axios.post('http://devapp.how-taxing.com/calculation/buyResult', params, { headers });
     //  console.log('taxCard params', params)
     //  console.log('response.data', response.data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '취득세 계산 중 오류가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             closeSheet: true,
             navigation: props?.navigation,
             buttontext: '확인하기',

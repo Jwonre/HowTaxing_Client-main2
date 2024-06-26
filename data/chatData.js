@@ -536,13 +536,13 @@ export const gainTax = [
       {
         id: 'AcquiredhouseY',
         name: '네',
-        select: ['over12', 'residenceperiod'],
+        select: ['over12', 'residenceperiod2'],
 
       },
       {
         id: 'AcquiredhouseN',
         name: '아니오',
-        select: ['over12', 'residenceperiod'],
+        select: ['over12', 'residenceperiod2'],
       },
     ],
   },
@@ -556,13 +556,13 @@ export const gainTax = [
       {
         id: 'AcquiredhouseY',
         name: '네',
-        select: ['under12', 'residenceperiod'],
+        select: ['under12', 'residenceperiod2'],
 
       },
       {
         id: 'AcquiredhouseN',
         name: '아니오',
-        select: ['under12', 'residenceperiod'],
+        select: ['under12', 'residenceperiod2'],
       },
     ],
   },
@@ -570,25 +570,49 @@ export const gainTax = [
     id: 'residenceperiod',
     type: 'system',
     progress: 5,
-    message:
-      '실거주 기간을 어떻게 가져올까요?',
+    message: '',
     select: [
       {
         id: 'directlivePeriod',
         name: '직접 입력하기',
         openSheet: 'directlivePeriod',
+        answer: '01'
 
       },
       {
         id: 'cert2',
         name: '본인 인증하기',
         select: ['certType2'],
+        answer: '02'
       },
     ],
+
+  },
+  {
+    id: 'residenceperiod2',
+    type: 'system',
+    progress: 5,
+    message: '실거주 기간을 어떻게 가져올까요?',
+    select: [
+      {
+        id: 'directlivePeriod',
+        name: '직접 입력하기',
+        openSheet: 'directlivePeriod',
+        answer: '01'
+
+      },
+      {
+        id: 'cert2',
+        name: '본인 인증하기',
+        select: ['certType2'],
+        answer: '02'
+      },
+    ],
+
   },
   {
     id: 'landlord1',
-    user: 'system',
+    type: 'system',
     message: '상생임대인에 해당하시나요?',
     progress: 3,
     select: [
@@ -608,7 +632,7 @@ export const gainTax = [
   },
   {
     id: 'landlord2',
-    user: 'system',
+    type: 'system',
     message: '상생임대인에 해당하시나요?',
     progress: 3,
     select: [
@@ -623,6 +647,39 @@ export const gainTax = [
         select: ['ExpenseInquiry', 'ExpenseAnswer'],
       },
     ],
-  }
+  },
+  {
+    id: 'additionalQuestion',
+    type: 'system',
+    message: '',
+    progress: 3,
+    select: [
+      {
+        id: 'additionalQuestionY',
+        name: '',
+        select: ['ExpenseAnswer'],
+        answer: '',
+      },
+      {
+        id: 'additionalQuestionN',
+        name: '',
+        select: ['ExpenseAnswer'],
+        answer: '',
+      },
+    ],
+    questionId: '',
+    
+  },
+
+  {
+    id: 'additionalQuestion2',
+    type: 'system',
+    message: '',
+    progress: 3,
+    questionId: '',
+    answer: '',
+  },
+
+
 ];
 

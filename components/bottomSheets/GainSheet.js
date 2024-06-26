@@ -23,6 +23,8 @@ import dayjs from 'dayjs';
 import { gainTax } from '../../data/chatData';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
 import { LogBox } from 'react-native';
+import axios from 'axios';
+import { current } from '@reduxjs/toolkit';
 
 
 dayjs.locale('ko');
@@ -194,7 +196,7 @@ const GainSheet = props => {
   // 계약일자
   const [selectedDate, setSelectedDate] = useState(new Date(),
   );
-
+  const currentUser = useSelector(state => state.currentUser.value);
   // 양도일자
   const [selectedDate2, setSelectedDate2] = useState(new Date(new Date(selectedDate).setDate(new Date(selectedDate).getDate() + 1)),
   );
@@ -202,8 +204,8 @@ const GainSheet = props => {
   const [currentDate, setCurrentDate] = useState();
 
   // 양도금액
-  const [saleAmount, setAcAmount] = useState(
-    houseInfo?.saleAmount ? houseInfo?.saleAmount : 0,
+  const [sellAmount, setAcAmount] = useState(
+    houseInfo?.sellAmount ? houseInfo?.sellAmount : 0,
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const houseInfo = useSelector(state => state.houseInfo.value);
@@ -213,7 +215,67 @@ const GainSheet = props => {
   // 양도금액 선택 리스트
   const AC_AMOUNT_LIST = [500000000, 100000000, 10000000, 1000000];
 
-    // 페이지 이동
+  // 추가 질의 함수
+  const getadditionalQuestion = async (questionId, answerValue, houseId, sellDate, sellPrice) => {
+    /*
+    [필수] calcType | String | 계산유형(01:취득세, 02:양도소득세)
+    [선택] questionId | String | 질의ID
+    [선택] answerValue | String | 응답값
+    [선택] sellHouseId | Long | 양도주택ID (  양도소득세 계산 시 세팅)
+    [선택] sellDate | LocalDate | 양도일자 (양도소득세 계산 시 세팅)
+    [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
+*/
+    try {
+      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.accessToken}`
+      };
+
+      const param = {
+        calcType: '02',
+        questionId: questionId,
+        answerValue: answerValue ? answerValue : '',
+        sellHouseId: houseId ? houseId : '',
+        sellDate: sellDate ? dayjs(sellDate).format('YYYY-MM-DD') : null,
+        sellPrice: sellPrice ? sellPrice : 0
+      };
+   //   console.log('[additionalQuestion] additionalQuestion param:', param);
+      //console.log('[HouseDetail] Fetching house details for item:', item);
+      const response = await axios.post(url, param, { headers });
+      const detaildata = response.data.data;
+      if (response.data.errYn == 'Y') {
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: response.data.errMsg ? response.data.errMsg : '추가질의를 가져오지 못했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+            buttontext: '확인하기',
+          },
+        });
+        return {
+          returndata: false
+        };
+      } else {
+      //  console.log('[additionalQuestion] additionalQuestion retrieved:', detaildata);
+        // console.log('[additionalQuestion] detaildata?.houseType:', detaildata?.houseType);
+     //  console.log('[additionalQuestion] additionalQuestion houseInfo:', houseInfo);
+        return {
+          detaildata: detaildata,
+          returndata: true
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        returndata: false
+      };
+    }
+  };
+
+
+
+  // 페이지 이동
   useEffect(() => {
     _scrollViewRef.current?.scrollTo({
       x: (width - 40) * currentPageIndex,
@@ -255,6 +317,7 @@ const GainSheet = props => {
 
   // 초기 세팅
   useEffect(() => {
+    console
     if (chatDataList.find(el => el.id === 'contractDateSystem')) {
       return;
     }
@@ -286,7 +349,7 @@ const GainSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
 
             }}>
@@ -320,7 +383,7 @@ const GainSheet = props => {
           <ModalInputSection>
             <ModalTitle>양도계약일자를 선택해주세요.</ModalTitle>
             <InfoMessage>
-                양도하실 주택의 매매 계약일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
+              양도하실 주택의 매매 계약일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
             </InfoMessage>
             <View
               style={{
@@ -329,7 +392,8 @@ const GainSheet = props => {
               }}>
               <Calendar
                 setSelectedDate={setSelectedDate}
-                currentDate={new Date()}
+                minDate={new Date(houseInfo?.buyDate ? houseInfo?.buyDate : '')}
+                currentDate={new Date(houseInfo?.buyDate ? houseInfo?.buyDate : currentDate)}
               />
             </View>
           </ModalInputSection>
@@ -403,15 +467,16 @@ const GainSheet = props => {
           <ModalInputSection>
             <ModalTitle>양도일자를 선택해주세요.</ModalTitle>
             <InfoMessage>
-                양도하실 주택의 양도예정일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
+              양도하실 주택의 양도예정일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
             </InfoMessage>
             <View
               style={{
                 width: '100%',
                 height: 420,
               }}>
+
               {currentPageIndex === 1 && (<Calendar
-                minDate={new Date(selectedDate ? selectedDate : houseInfo?.contractDate)}
+                minDate={new Date(houseInfo?.contractDate)}
                 currentDate={new Date(currentDate ? currentDate : houseInfo?.contractDate)}
                 setSelectedDate={setSelectedDate2}
               />)}
@@ -465,12 +530,12 @@ const GainSheet = props => {
                   };
 
                   const chat5 = {
-                    id: 'saleAmountSystem',
+                    id: 'sellAmountSystem',
                     type: 'system',
                     message: '양도금액을 입력해주세요.',
                     select: [
                       {
-                        id: 'saleAmount',
+                        id: 'sellAmount',
                         name: '양도금액 입력하기',
                         openSheet: 'gain',
                         currentPageIndex: 2,
@@ -496,7 +561,7 @@ const GainSheet = props => {
         <SheetContainer width={width}>
           <ModalInputSection>
             <ModalTitle>양도금액을 입력해주세요.</ModalTitle>
-            <ModalSubtitle>{numberToKorean(saleAmount)}{(saleAmount !== null && saleAmount !== 0) ? '원' : ' '}</ModalSubtitle>
+            <ModalSubtitle>{numberToKorean(sellAmount)}{(sellAmount !== null && sellAmount !== 0) ? '원' : ' '}</ModalSubtitle>
             <View
               style={{
                 paddingHorizontal: 20,
@@ -514,7 +579,7 @@ const GainSheet = props => {
                 <StyledInput
                   placeholder="양도금액을 입력해주세요."
                   keyboardType="number-pad"
-                  value={saleAmount ? saleAmount.toLocaleString() : null}
+                  value={sellAmount ? sellAmount.toLocaleString() : null}
                   onChangeText={text => {
                     const numericValue = Number(text.replace(/[^0-9]/g, ''));
                     if (numericValue <= 1000000000000000) {
@@ -524,7 +589,7 @@ const GainSheet = props => {
                     }
                   }}
                 />
-                {(saleAmount !== null && saleAmount !== 0) && (
+                {(sellAmount !== null && sellAmount !== 0) && (
                   <TouchableOpacity onPress={() => setAcAmount(null)}>
                     <CancelCircle style={{ marginRight: 10 }} width={20} height={20} />
                   </TouchableOpacity>
@@ -561,7 +626,7 @@ const GainSheet = props => {
               }}>
               <Button
                 onPress={() => {
-                  const newChatDataList = chatDataList.filter(item => item.id !== 'saleAmountSystem').filter(item => item.id !== 'sellDateMy');
+                  const newChatDataList = chatDataList.filter(item => item.id !== 'sellAmountSystem').filter(item => item.id !== 'sellDateMy');
                   dispatch(setChatDataList(newChatDataList));
                   setCurrentPageIndex(1);
                 }}
@@ -592,7 +657,7 @@ const GainSheet = props => {
                   dispatch(
                     setHouseInfo({
                       ...houseInfo,
-                      saleAmount: saleAmount ? saleAmount : 550000000,
+                      sellAmount: sellAmount ? sellAmount : 550000000,
                       livePeriod,
                     }),
                   );
@@ -601,62 +666,133 @@ const GainSheet = props => {
                   //console.log('houseInfo', houseInfo);
 
                   const chat6 = {
-                    id: 'saleAmount',
+                    id: 'sellAmount',
                     type: 'my',
-                    message: `${saleAmount?.toLocaleString()}원`,
+                    message: `${sellAmount?.toLocaleString()}원`,
                     data: {
-                      saleAmount,
+                      sellAmount,
                       contractDate: selectedDate,
                       sellDate: selectedDate2,
                     },
                   };
+                  const additionalQuestion = await getadditionalQuestion('', '', houseInfo?.houseId, houseInfo?.sellDate, sellAmount);
+                  let chat7;
+                  let chat11;
+                  const chat8 = gainTax.find(el => el.id === 'landlord2');
+                  const chat9 = gainTax.find(el => el.id === 'ExpenseInquiry');
+                  const chat10 = gainTax.find(el => el.id === 'ExpenseAnswer');
+                  if (additionalQuestion.returndata && additionalQuestion.detaildata?.hasNextQuestion === true) {
+                    if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0001') {
+                      let chatIndex = gainTax.findIndex(el => el.id === 'additionalQuestion');
+                      if (chatIndex !== -1) {
+                        chat7 = {
+                          ...gainTax[chatIndex],
+                          message: additionalQuestion.detaildata?.nextQuestionContent,
+                          questionId: additionalQuestion.detaildata?.nextQuestionId,
+                          select: gainTax[chatIndex].select.map(item => ({
+                            ...item,
+                            name: item.id === 'additionalQuestionY' ? '1년 이상 거주 계획' : '1년 이내 거주 계획',
+                            answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                          }))
+                        };
+                      }
+                      dispatch(
+                        setChatDataList([
+                          ...chatDataList,
+                          chat6,
+                          chat7
+                        ])
+                      );
+                    } else if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0004') {
+                      let chatIndex = gainTax.findIndex(el => el.id === 'additionalQuestion2');
+                      if (chatIndex !== -1) {
+                        chat7 = {
+                          ...gainTax[chatIndex],
+                          message: additionalQuestion.detaildata?.nextQuestionContent,
+                          questionId: additionalQuestion.detaildata?.nextQuestionId,
+                          answer: additionalQuestion.detaildata?.selectSelectList ? additionalQuestion.detaildata?.selectSelectList.answerValue : null,
+                        };
+                      }
+                      const additionalQuestion2 = await getadditionalQuestion(additionalQuestion.detaildata?.nextQuestionId, '' ? additionalQuestion.detaildata?.selectSelectList.answerValue : null, houseInfo?.houseId, houseInfo?.sellDate, sellAmount);
+                      if (additionalQuestion2.returndata) {
+                        if (additionalQuestion2.detaildata?.hasNextQuestion === true) {
+                          if (additionalQuestion2.detaildata?.nextQuestionId === 'Q_0005') {
+                            let chatIndex = gainTax.findIndex(el => el.id === 'residenceperiod');
+                            if (chatIndex !== -1) {
+                              chat11 = {
+                                ...gainTax[chatIndex],
+                                message: additionalQuestion2.detaildata?.nextQuestionContent,
+                              };
+                            }
+                          }
+                        }
+                      } else {
+                        let chatIndex = gainTax.findIndex(el => el.id === 'residenceperiod2');
+                        chat11 = {
+                          ...gainTax[chatIndex],
+                        }
 
-                  const chat7 = gainTax.find(el => el.id === 'landlord1');
+                      }
+                      dispatch(
+                        setChatDataList([
+                          ...chatDataList,
+                          chat6,
+                          chat7,
+                          chat11
+                        ])
+                      );
+                    }
+                  } else {
+                    if (houseInfo.ownHouseCnt === 1) {
+                      dispatch(
+                        setChatDataList([
+                          ...chatDataList,
+                          chat6,
+                          chat8
+                        ])
+                      );
+                    } else {
+                      dispatch(
+                        setChatDataList([
+                          ...chatDataList,
+                          chat6,
+                          chat9,
+                          chat10
+                        ])
+                      );
+                    }
+                  }
+                  //questionId, answerValue, houseId, sellDate, sellPrice
+                  //const chat7 = gainTax.find(el => el.id === 'landlord1');
                   //const chat8 = gainTax.find(el => el.id === 'landlord2');
                   // const chat9 = gainTax.find(el => el.id === 'Acquiredhouse');
-                  const chat10 = gainTax.find(el => el.id === 'Acquiredhouse2');
+                  //const chat10 = gainTax.find(el => el.id === 'Acquiredhouse2');
                   //const chat11 = gainTax.find(el => el.id === 'ExpenseInquiry');
                   //const chat12 = gainTax.find(el => el.id === 'ExpenseAnswer');
 
                   /* const chatList =
                      chatDataList[chatDataList.length - 1].id ===
-                       'saleAmountSystem'
+                       'sellAmountSystem'
                        ? [chat6]
                        : [chat6];*/
 
+               //   console.log('houseInfo.additionalAnswerList', houseInfo.additionalAnswerList);
 
-                  if (houseInfo.ownHouseCnt === 1) {
-                    dispatch(
-                      setChatDataList([
-                        ...chatDataList,
-                        chat6,
-                        chat7
-                      ])
-                    );
-                  } else if (houseInfo.ownHouseCnt > 1) {
-                    dispatch(
-                      setChatDataList([
-                        ...chatDataList,
-                        chat6,
-                        chat10
-                      ])
-                    );
-                  }
 
-                   
-                }} style={{
-                  backgroundColor: saleAmount ? '#2f87ff' : '#E8EAED',
-                  borderColor: saleAmount ? '#2f87ff' : '#E8EAED',
+                }
+                } style={{
+                  backgroundColor: sellAmount ? '#2f87ff' : '#E8EAED',
+                  borderColor: sellAmount ? '#2f87ff' : '#E8EAED',
                 }}
-                active={saleAmount}
-                disabled={!(saleAmount)}>
-                <ButtonText active={saleAmount} style={{ color: saleAmount ? '#fff' : '#717274' }}>다음으로</ButtonText>
+                active={sellAmount}
+                disabled={!(sellAmount)}>
+                <ButtonText active={sellAmount} style={{ color: sellAmount ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>
         </SheetContainer>
       </ScrollView>
-    </ActionSheet>
+    </ActionSheet >
   );
 };
 

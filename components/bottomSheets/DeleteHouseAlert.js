@@ -108,7 +108,7 @@ const DeleteHouseAlert = props => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-      const url = `http://13.125.194.154:8080/house/delete`;
+      const url = `http://devapp.how-taxing.com/house/delete`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -124,8 +124,8 @@ const DeleteHouseAlert = props => {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '보유주택을 삭제하는데 문제가 발생했어요.', 
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               closemodal: true,
               actionSheetRef: actionSheetRef,
               buttontext: '확인하기',

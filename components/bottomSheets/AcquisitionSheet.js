@@ -427,7 +427,7 @@ const AcquisitionSheet = props => {
                 height: 420,
               }}>
               {currentPageIndex === 1 && (<Calendar
-                minDate={new Date(selectedDate ? selectedDate : houseInfo?.contractDate)}
+                minDate={new Date(houseInfo?.contractDate)}
                 setSelectedDate={setSelectedDate2}
                 currentDate={new Date(currentDate ? currentDate : houseInfo?.contractDate)}
               />)}

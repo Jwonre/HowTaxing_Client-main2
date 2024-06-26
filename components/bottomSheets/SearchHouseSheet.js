@@ -450,14 +450,14 @@ const SearchHouseSheet = props => {
 
     };
     axios
-      .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
+      .post('http://devapp.how-taxing.com/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ?  response.data.errMsg : '주소 검색 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               closemodal: true,
               actionSheetRef: actionSheetRef,
               buttontext: '확인하기',
@@ -580,14 +580,14 @@ const SearchHouseSheet = props => {
 
     };
     axios
-      .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
+      .post('http://devapp.how-taxing.com/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '주소 검색 중 오류가 발생했어요.', 
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               closemodal: true,
               actionSheetRef: actionSheetRef,
               buttontext: '확인하기',
@@ -635,7 +635,7 @@ const SearchHouseSheet = props => {
 
   // 주택 호 정보 가져오기
   const getHoData = async (address, dongNm, type) => {
-    const url = 'http://13.125.194.154:8080/house/roadAddrDetail';
+    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -658,8 +658,8 @@ const SearchHouseSheet = props => {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '주택의 호수를 불러오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             closemodal: true,
             actionSheetRef: actionSheetRef,
             buttontext: '확인하기',
@@ -697,7 +697,7 @@ const SearchHouseSheet = props => {
   };
 
   const getDongData = async (address) => {
-    const url = 'http://13.125.194.154:8080/house/roadAddrDetail';
+    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -719,8 +719,8 @@ const SearchHouseSheet = props => {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '주택의 동 목록을 불러오는데 문제가 발생했어요.', 
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             closemodal: true,
             actionSheetRef: actionSheetRef,
             buttontext: '확인하기',
@@ -790,7 +790,7 @@ const SearchHouseSheet = props => {
             numOfRows: 5,
             pageNo: 1,
           })*/
-      const response = await axios.post('http://13.125.194.154:8080/house/pubLandPriceAndArea', param, { headers: headers });
+      const response = await axios.post('http://devapp.how-taxing.com/house/pubLandPriceAndArea', param, { headers: headers });
       const data = response.data.data;
       //console.log('param', param);
       //console.log('gongsiData', data);
@@ -799,8 +799,8 @@ const SearchHouseSheet = props => {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '공시가격과 전용면적을 불러오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
             buttontext: '확인하기',
           },
         });
@@ -834,7 +834,7 @@ const SearchHouseSheet = props => {
         payload: {
           type: 'error',
           message: '공시가격과 전용면적을 불러오는데 실패했어요. ',
-          description: response.data.errMsg + ' ' + response.data.errMsgDtasdfl,
+          description: response.data.errMsg + ' ' + response.data.errMsgDtl,
           buttontext: '확인하기',
         },
       });

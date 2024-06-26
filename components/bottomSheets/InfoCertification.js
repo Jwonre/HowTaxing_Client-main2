@@ -158,8 +158,8 @@ const InfoCertification = props => {
           await SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: '청약홈 인증 중\n오류가 발생했어요.\n입력하신 정보를 다시 확인해주세요.',
-              description: response.data.errMsgDtasdfl,
+              message: response.data.errMsg ? response.data.errMsg : '공공기관에서 보유주택 정보를 가져오는 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               buttontext: '다시 확인하기',
             },
           });
@@ -192,8 +192,8 @@ const InfoCertification = props => {
           await SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtasdfl,
+              message: response.data.errMsg ? response.data.errMsg : '청약홈에서 정보를 불러오는 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               buttontext: '확인하기',
             },
           });
@@ -224,7 +224,7 @@ const InfoCertification = props => {
   };
 
   const postOwnHouse = async () => {
-    const url = 'http://13.125.194.154:8080/house/search';
+    const url = 'http://devapp.how-taxing.com/house/search';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`

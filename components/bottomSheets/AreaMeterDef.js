@@ -271,7 +271,7 @@ const AreaMeterDef = props => {
   ];
 
   const postOwnHouse = async () => {
-    const url = 'http://13.125.194.154:8080/house/list';
+    const url = 'http://devapp.how-taxing.com/house/list';
 
     const data = {
       certAuthor: certType === 'KB' ? '1' : certType === 'naver' ? '2' : '3',

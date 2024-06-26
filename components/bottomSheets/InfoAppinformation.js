@@ -122,7 +122,7 @@ const InfoAppinformation = () => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 320,
+        height: 300,
         width: width - 40
       }}>
       <SheetContainer width={width}>

@@ -21,7 +21,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SheetManager } from 'react-native-actions-sheet';
 import { HOUSE_TYPE } from '../../constants/colors';
 import axios from 'axios';
-  
+import dayjs from 'dayjs';
+
 import numberToKorean from '../../utils/numToKorean';
 
 const Container = styled.View`
@@ -155,7 +156,7 @@ const HouseDetail = props => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const dispatch = useDispatch();
-   
+
   // const [isMoveInRight, setIsMoveInRight] = useState(false);
 
   // console.log(item);
@@ -239,7 +240,7 @@ const HouseDetail = props => {
               return;
             } else {
 
-               SheetManager.show(props.route.params?.prevSheet, {
+              SheetManager.show(props.route.params?.prevSheet, {
                 payload: {
                   navigation,
                   index: props.route.params?.index,
@@ -336,6 +337,12 @@ const HouseDetail = props => {
           </HouseSection>
           <InfoContentSection>
             <InfoContentItem>
+              <InfoContentLabel>주택명</InfoContentLabel>
+              <InfoContentText>
+                {item?.houseName ? item?.houseName : ''}
+              </InfoContentText>
+            </InfoContentItem>
+            <InfoContentItem>
               <InfoContentLabel>주택유형</InfoContentLabel>
               <InfoContentText>
                 {HOUSE_TYPE.find(color => color.id === item?.houseType).name}
@@ -360,6 +367,12 @@ const HouseDetail = props => {
               </InfoContentText>
             </InfoContentItem>
             <InfoContentItem>
+              <InfoContentLabel>{(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? '양도계약일자' : '취득계약일자'}</InfoContentLabel>
+              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{item?.contractDate ? dayjs(item?.contractDate).format(
+                'YYYY년 MM월 DD일',
+              ) : ''}</InfoContentText>
+            </InfoContentItem>
+            <InfoContentItem>
               <InfoContentLabel>계약면적</InfoContentLabel>
               <View
                 style={{
@@ -374,6 +387,16 @@ const HouseDetail = props => {
                   {item?.area + 'm2'}
                 </InfoContentText>}
               </View>
+            </InfoContentItem>
+            <InfoContentItem>
+              <InfoContentLabel>{(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? '양도일자' : '취득일자'}</InfoContentLabel>
+              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? (item?.sellDate ? dayjs(item?.sellDate).format('YYYY년 MM월 DD일') : '') : (item?.buyDate ? dayjs(item?.buyDate).format('YYYY년 MM월 DD일') : '')}</InfoContentText>
+            </InfoContentItem>
+            <InfoContentItem>
+                <InfoContentLabel>{(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? '양도금액' : '취득금액'}</InfoContentLabel>
+              <InfoContentText>
+                {(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? (item?.sellAmount ? numberToKorean(Number(item?.sellAmount)?.toString()) + '원' : '') : (item?.buyPrice ? numberToKorean(Number(item?.buyPrice)?.toString()) + '원' : '')}
+              </InfoContentText>
             </InfoContentItem>
           </InfoContentSection>
           <InputSection>
@@ -451,10 +474,9 @@ const HouseDetail = props => {
                   backgroundColor: '#fff',
                 }}
                 onValueChange={value => {
-                  //setIsMoveInRight(value);
 
                 }}
-                activeColor="#2F87FF"
+                activeColor="#2F87FF"          
                 disabledColor="#E8EAED"
               />
             </InfoContentItem>

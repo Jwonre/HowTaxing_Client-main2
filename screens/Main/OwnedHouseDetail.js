@@ -301,7 +301,7 @@ const OwnedHouseDetail = props => {
     // userProportion | Integer | 본인지분비율
     // moveInRight | boolean | 입주권여부
 
-    const url = 'http://13.125.194.154:8080/house/modify';
+    const url = 'http://devapp.how-taxing.com/house/modify';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -344,8 +344,8 @@ const OwnedHouseDetail = props => {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '보유주택 수정 중 오류가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             buttontext: '확인하기',
           },
         });
@@ -384,7 +384,7 @@ const OwnedHouseDetail = props => {
 
   const getHouseDetailInfo = async () => {
     try {
-      const url = `http://13.125.194.154:8080/house/detail?houseId=${pData?.houseId}`;
+      const url = `http://devapp.how-taxing.com/house/detail?houseId=${pData?.houseId}`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`,
@@ -397,8 +397,8 @@ const OwnedHouseDetail = props => {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '보유주택 상세조회 중 오류가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             buttontext: '확인하기',
           },
         });

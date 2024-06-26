@@ -211,7 +211,7 @@ const UpdateContractDateAlert = props => {
               }}>
               <Calendar
                 currentDate={data?.contractDate ? new Date(data?.contractDate) : new Date()}
-                value={data?.contractDate}
+                maxDate={data?.buyDate ? new Date(data?.buyDate) : ''}
                 setSelectedDate={setSelectedDate}
               />
             </View>

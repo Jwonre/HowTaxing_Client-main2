@@ -227,12 +227,13 @@ const RegisterDirectHouse = props => {
 
   const getOwnlist = async () => {
     var prevSheetNum = '';
-    if (prevSheet === 'gainsTax') {
+    if (prevSheet === 'own2') {
       prevSheetNum = '02';
     } else {
       prevSheetNum = '01';
     }
-    const url = `http://13.125.194.154:8080/house/list?calcType=${prevSheetNum}`
+    console.log('prevSheet', prevSheet);
+    const url = `http://devapp.how-taxing.com/house/list?calcType=${prevSheetNum}`
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -426,14 +427,14 @@ const RegisterDirectHouse = props => {
       //successRegister();
 
       axios
-        .post('http://13.125.194.154:8080/house/regist', data, { headers: headers })
+        .post('http://devapp.how-taxing.com/house/regist', data, { headers: headers })
         .then(async response => {
           if (response.data.errYn === 'Y') {
             SheetManager.show('info', {
               payload: {
                 type: 'error',
-                message: response.data.errMsg,
-                description: response.data.errMsgDtl,
+                message: response.data.errMsg ? response.data.errMsg : '주택 등록 중 오류가 발생했습니다.',
+                description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
                 buttontext: '확인하기',
               },
             });
@@ -477,8 +478,7 @@ const RegisterDirectHouse = props => {
               직접 등록해주세요
             </Title>
             <SubTitle>
-              요청받은 가족의 휴대폰에 주세박이 설치되어있지 않다면{'\n'}
-              카카오톡으로 설치 안내 메시지가 동시에 전달됩니다
+              등록하실 주택이 아파트인지, 그 외 주택 형태인지 선택해주세요.
             </SubTitle>
             <Paper>
               <Label>주택 형태</Label>

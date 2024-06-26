@@ -341,7 +341,7 @@ const AcquisitionChat = () => {
   const houseInfo = useSelector(state => state.houseInfo.value);
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useSelector(state => state.currentUser.value);
-
+  const [hasShownGoodbye, setHasShownGoodbye] = useState(false);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
@@ -356,7 +356,8 @@ const AcquisitionChat = () => {
     return;
   };
   const getOwnlist = async () => {
-    const url = `http://13.125.194.154:8080/house/list?calcType=01`
+    var acquisition = '01';
+    const url = `http://devapp.how-taxing.com/house/list?calcType=${acquisition}`
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -370,8 +371,8 @@ const AcquisitionChat = () => {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '보유주택을 불러오는데 문제가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               buttontext: '확인하기',
             },
           });
@@ -697,21 +698,8 @@ const AcquisitionChat = () => {
                   navigation.push(
                     'HouseDetail',
                     {
-                      item: {
-                        prevSheet: 'AcquisitionChat',
-                        houseType: houseInfo.houseType,
-                        detailAdr: houseInfo.detailAdr,
-                        houseName: houseInfo.houseName,
-                        roadAddr: houseInfo.roadAddr,
-                        houseDetailName: houseInfo.houseDetailName,
-                        pubLandPrice: houseInfo.pubLandPrice,
-                        isPubLandPriceOver100Mil: houseInfo.isPubLandPriceOver100Mil,
-                        area: houseInfo.area,
-                        isAreaOver85: houseInfo.isAreaOver85,
-                        ownerCnt: houseInfo.ownerCnt,
-                        userProportion: houseInfo.userProportion,
-                        isMoveInRight: houseInfo.isMoveInRight,
-                      },
+                      prevSheet: 'AcquisitionChat',
+                      item: houseInfo,
                     },
                     'HouseDetail',
                   );
@@ -762,7 +750,8 @@ const AcquisitionChat = () => {
   // 시스템 챗 버블 렌더링
   const renderSystemChatItem = ({ item, index }) => {
     // console.log('renderSystemChatItem item', item.id);
-    if (item?.id === 'goodbye') {
+    if (item?.id === 'goodbye' && !hasShownGoodbye) {
+      setHasShownGoodbye(true);
       // modalList에 'review'가 없는 경우에만 추가합니다.
       setTimeout(() => {
         SheetManager.show('review', {
@@ -771,7 +760,7 @@ const AcquisitionChat = () => {
             navigation: navigation,
           },
         });
-      }, 1000);
+      }, 600);
 
     }
 
@@ -783,7 +772,7 @@ const AcquisitionChat = () => {
             padding: 20,
           }}>
           <CTACard />
-          <HouseInfo item={houseInfo} navigation={navigation} />
+          <HouseInfo item={houseInfo} navigation={navigation} ChatType='AcquisitionChat'/>
           <TaxCard navigation={navigation} />
           <TaxInfoCard />
           <DropShadow
@@ -851,13 +840,12 @@ const AcquisitionChat = () => {
 
                           const chatList = [];
                           if (item2?.select) {
-                            await item2?.select.forEach((item3, index3) => {
-                              acquisitionTax.find(el => {
-                                if (el.id === item3) {
-                                  chatList.push(el);
-                                }
-                              });
-                            });
+                            for (const item3 of item2.select) {
+                              const foundItem = acquisitionTax.find(el => el.id === item3);
+                              if (foundItem) {
+                                chatList.push(foundItem);
+                              }
+                            }
                           }
 
                           if (
@@ -995,24 +983,10 @@ const AcquisitionChat = () => {
                               dispatch(
                                 setHouseInfo({
                                   ...houseInfo,
-                                  hasSellPlan:
-                                    item2.id === 'planSaleYes'
-                                      ? true
-                                      : false,
                                   isDestruction: false,
                                   isMoveInRight: false,
                                 }),
 
-                              );
-                            } else {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  hasSellPlan:
-                                    item2.id === 'planSaleYes'
-                                      ? true
-                                      : false,
-                                }),
                               );
                             }
                           }
@@ -1033,7 +1007,7 @@ const AcquisitionChat = () => {
                               dispatch(
                                 setHouseInfo({
                                   ...houseInfo,
-                                  hasSellPlan: false,
+                                  //   hasSellPlan: false,
                                   isDestruction: false,
                                   isMoveInRight: false,
                                   isOwnHouseCntRegist: true,
@@ -1044,7 +1018,7 @@ const AcquisitionChat = () => {
                               dispatch(
                                 setHouseInfo({
                                   ...houseInfo,
-                                  hasSellPlan: false,
+                                  //   hasSellPlan: false,
                                   isOwnHouseCntRegist: true,
                                   ownHouseCnt: 0,
                                 }),
@@ -1280,6 +1254,7 @@ const AcquisitionChat = () => {
                             questionId: item?.id,
                             navigation: navigation,
                             index,
+                            currentPageIndex: 0,
                           },
                         });
                       }

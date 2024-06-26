@@ -190,7 +190,7 @@ const ConfirmSheet2 = props => {
   const { width, height } = useWindowDimensions();
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-
+ // console.log('[ConfirmSheet2] houseInfo', houseInfo);
 
   /* 
    // 양도세 계산
@@ -199,11 +199,11 @@ const ConfirmSheet2 = props => {
        houseId: houseInfo.houseId || '1',
        contractDate: dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
        sellDate: dayjs(houseInfo.saleDate).format('YYYY-MM-DD'),
-       sellPrice: houseInfo.saleAmount || '100000000',
+       sellPrice: houseInfo.sellAmount || '100000000',
      };
  
      axios
-       .post('http://13.125.194.154:8080/calculate/sellTax', data)
+       .post('http://devapp.how-taxing.com/calculate/sellTax', data)
        .then(response => {
          // 성공적인 응답 처리
          const data2 = response.data.data;
@@ -333,7 +333,7 @@ const ConfirmSheet2 = props => {
           <InfoContentItem>
             <InfoContentLabel>양도금액</InfoContentLabel>
             <InfoContentText>
-              {houseInfo?.saleAmount ? numberToKorean(Number(houseInfo?.saleAmount)?.toString()) + '원' : ''}
+              {houseInfo?.sellAmount ? numberToKorean(Number(houseInfo?.sellAmount)?.toString()) + '원' : ''}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>

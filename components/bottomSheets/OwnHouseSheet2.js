@@ -250,8 +250,8 @@ const OwnHouseSheet2 = props => {
   const houseInfo = useSelector(state => state.houseInfo.value);
   const currentUser = useSelector(state => state.currentUser.value);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -273,7 +273,7 @@ const OwnHouseSheet2 = props => {
 
   const getHouseDetailInfo = async (item) => {
     try {
-      const url = `http://13.125.194.154:8080/house/detail?houseId=${item?.houseId}`;
+      const url = `http://devapp.how-taxing.com/house/detail?houseId=${item?.houseId}`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -286,8 +286,8 @@ const OwnHouseSheet2 = props => {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '보유주택의 상세정보를 가져오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
             buttontext: '확인하기',
           },
         });
@@ -310,6 +310,9 @@ const OwnHouseSheet2 = props => {
       };
     }
   };
+
+ 
+
 
   const CARD_WIDTH = 180 + 22;
   /* ownHouseList?.map((item, index) => (
@@ -424,7 +427,7 @@ const OwnHouseSheet2 = props => {
                       <CardTitle>{item.houseName}</CardTitle>
                       <CardSubTitle>{item.detailAdr}</CardSubTitle>
                       <CardButton
-                        onPress={async() => {
+                        onPress={async () => {
                           const state = await NetInfo.fetch();
                           const canProceed = await handleNetInfoChange(state);
                           if (canProceed) {
@@ -662,15 +665,16 @@ const OwnHouseSheet2 = props => {
                     dispatch(
                       setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseList?.length, isOwnHouseCntRegist: true, ...response?.detaildata }),
                     );
-                    setTimeout(() => {
-                      SheetManager.show('gain', {
-                        payload: {
-                          navigation: props?.payload?.navigation,
-                          index: props?.payload?.index,
-                        },
-                      });
-
-                    }, 200);
+                          setTimeout(() => {
+                             SheetManager.show('gain', {
+                               payload: {
+                                 navigation: props?.payload?.navigation,
+                                 index: props?.payload?.index,
+                                 currentPageIndex: 0,
+                               },
+                             });
+       
+                           }, 200);
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
                     dispatch(setChatDataList(newChatDataList));

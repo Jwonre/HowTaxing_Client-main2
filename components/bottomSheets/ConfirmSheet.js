@@ -208,7 +208,7 @@ const ConfirmSheet = props => {
      };
  
      axios
-       .post('http://13.125.194.154:8080/calculate/buyTax', data)
+       .post('http://devapp.how-taxing.com/calculate/buyTax', data)
        .then(response => {
          // 성공적인 응답 처리
          const data2 = response.data.data;
@@ -325,12 +325,7 @@ const ConfirmSheet = props => {
               {numberToKorean(Number(houseInfo?.acAmount).toString())} 원
             </InfoContentText>
           </InfoContentItem>
-          <InfoContentItem>
-            <InfoContentLabel style={{ width: '110%' }}>종전주택 매도계획</InfoContentLabel>
-            <InfoContentText>
-              {houseInfo?.hasSellPlan === true ? '3년 이내 매도 예정' : houseInfo?.ownHouseCnt !== 0 ? '매도 계획 없음' : '기존 보유 주택 없음'}
-            </InfoContentText>
-          </InfoContentItem>
+
           <InfoContentItem>
             <InfoContentLabel style={{ width: '110%' }}>기존 주택 보유 수</InfoContentLabel>
             <InfoContentText>{houseInfo?.ownHouseCnt ? houseInfo?.ownHouseCnt : 0}채</InfoContentText>

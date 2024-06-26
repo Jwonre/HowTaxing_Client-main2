@@ -209,9 +209,8 @@ const UpdateBuyDateAlert = props => {
                 height: 420,
               }}>
               <Calendar
-                minDate={data?.contractDate ? data?.contractDate : ''}
-                currentDate={data?.buyDate ? data?.buyDate : new Date()}
-                value={data?.buyDate}
+                minDate={data?.contractDate ? new Date(data?.contractDate) : ''}
+                currentDate={data?.buyDate ? new Date(data?.buyDate) : new Date()}
                 setSelectedDate={setSelectedDate}
               />
             </View>

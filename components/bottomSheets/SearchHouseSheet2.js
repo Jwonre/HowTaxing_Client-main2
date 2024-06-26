@@ -450,14 +450,14 @@ const SearchHouseSheet2 = props => {
     };
 
     axios
-      .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
+      .post('http://devapp.how-taxing.com/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '주소 검색 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               closemodal: true,
               actionSheetRef: actionSheetRef,
               buttontext: '확인하기',
@@ -574,15 +574,14 @@ const SearchHouseSheet2 = props => {
 
     };
     axios
-      .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
+      .post('http://devapp.how-taxing.com/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '주소 검색 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '', 
               closemodal: true,
               actionSheetRef: actionSheetRef,
               buttontext: '확인하기',
@@ -623,7 +622,7 @@ const SearchHouseSheet2 = props => {
   };
   // 주택 호 정보 가져오기
   const getHoData = async (address, dongNm, type) => {
-    const url = 'http://13.125.194.154:8080/house/roadAddrDetail';
+    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -641,13 +640,13 @@ const SearchHouseSheet2 = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      console.log('Holist response :', response.data.data.dongHoList);
+      //console.log('Holist response :', response.data.data.dongHoList);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '주택의 호수를 불러오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             closemodal: true,
             actionSheetRef: actionSheetRef,
             buttontext: '확인하기',
@@ -688,7 +687,7 @@ const SearchHouseSheet2 = props => {
   };
 
   const getDongData = async (address) => {
-    const url = 'http://13.125.194.154:8080/house/roadAddrDetail';
+    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -705,13 +704,13 @@ const SearchHouseSheet2 = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      console.log('Donglist response :', response.data);
+      //console.log('Donglist response :', response.data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '주택의 동 목록을 불러오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             closemodal: true,
             actionSheetRef: actionSheetRef,
             buttontext: '확인하기',
@@ -1087,7 +1086,7 @@ const SearchHouseSheet2 = props => {
                       setAddress(item?.roadAddr);
                       if (selectedHouseType === '1' || selectedHouseType === '2') {
                         const firstDong = await getDongData(item);
-                        console.log('firstDong', firstDong);
+                        //console.log('firstDong', firstDong);
                         if (firstDong !== 'dongerror') {
                           const Hodata = await getHoData(item, firstDong, 'init');
                           setSelectedItem(item);

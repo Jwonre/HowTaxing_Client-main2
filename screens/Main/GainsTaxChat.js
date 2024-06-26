@@ -40,9 +40,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import TaxCard2 from '../../components/TaxCard2';
 import TaxInfoCard2 from '../../components/TaxInfoCard2';
-import { setHouseInfo } from '../../redux/houseInfoSlice';
-import { setOwnHouseList } from '../../redux/ownHouseListSlice';
-
+import { setHouseInfo, clearHouseInfo } from '../../redux/houseInfoSlice';
+import ownHouseListSlice, { setOwnHouseList } from '../../redux/ownHouseListSlice';
+import dayjs from 'dayjs';
 
 const Container = styled.View`
   flex: 1;
@@ -344,11 +344,68 @@ const GainsTaxChat = () => {
   const houseInfo = useSelector(state => state.houseInfo.value);
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useSelector(state => state.currentUser.value);
-
+  const [hasShownGoodbye, setHasShownGoodbye] = useState(false);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
   const [isConnected, setIsConnected] = useState(true);
+
+  const getadditionalQuestion = async (questionId, answerValue, houseId, sellDate, sellPrice) => {
+    /*
+    [필수] calcType | String | 계산유형(01:취득세, 02:양도소득세)
+    [선택] questionId | String | 질의ID
+    [선택] answerValue | String | 응답값
+    [선택] sellHouseId | Long | 양도주택ID (  양도소득세 계산 시 세팅)
+    [선택] sellDate | LocalDate | 양도일자 (양도소득세 계산 시 세팅)
+    [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
+*/
+    try {
+      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.accessToken}`
+      };
+
+      const param = {
+        calcType: '02',
+        questionId: questionId,
+        answerValue: answerValue,
+        sellHouseId: houseId ? houseId : '',
+        sellDate: sellDate ? dayjs(sellDate).format('YYYY-MM-DD') : null,
+        sellPrice: sellPrice ? sellPrice : 0
+      };
+    //  console.log('[additionalQuestion] param:', param);
+      //console.log('[HouseDetail] Fetching house details for item:', item);
+      const response = await axios.post(url, param, { headers });
+      const detaildata = response.data.data;
+      if (response.data.errYn == 'Y') {
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: response.data.errMsg ? response.data.errMsg : '추가질의를 가져오지 못했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+            buttontext: '확인하기',
+          },
+        });
+        return {
+          returndata: false
+        };
+      } else {
+      //  console.log('[additionalQuestion] additionalQuestion retrieved:', detaildata);
+        // console.log('[additionalQuestion] detaildata?.houseType:', detaildata?.houseType);
+      //  console.log('[additionalQuestion] additionalQuestion houseInfo:', houseInfo);
+        return {
+          detaildata: detaildata,
+          returndata: true
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        returndata: false
+      };
+    }
+  };
 
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
@@ -370,7 +427,8 @@ const GainsTaxChat = () => {
 
 
   const getOwnlist = async () => {
-    const url = `http://13.125.194.154:8080/house/list?calcType=02`
+    var gain = '02';
+    const url = `http://devapp.how-taxing.com/house/list?calcType=${gain}`
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -425,6 +483,7 @@ const GainsTaxChat = () => {
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
+            dispatch(clearHouseInfo());
           }}>
           <CloseIcon />
         </TouchableOpacity>
@@ -665,6 +724,7 @@ const GainsTaxChat = () => {
                   navigation.push(
                     'HouseDetail',
                     {
+                      prevSheet: 'GainsTaxChat',
                       item: houseInfo,
                     },
                     'HouseDetail',
@@ -714,7 +774,9 @@ const GainsTaxChat = () => {
   };
 
   const renderSystemChatItem = ({ item, index }) => {
-    if (item?.id === 'goodbye') {
+    // console.log('renderSystemChatItem item', item.id);
+    if (item?.id === 'goodbye' && !hasShownGoodbye) {
+      setHasShownGoodbye(true);
       setTimeout(() => {
         SheetManager.show('review', {
           payload: {
@@ -733,7 +795,7 @@ const GainsTaxChat = () => {
             padding: 20,
           }}>
           <CTACard />
-          <HouseInfo item={houseInfo} navigation={navigation} />
+          <HouseInfo item={houseInfo} navigation={navigation} ChatType='GainsTaxChatlast'/>
           <TaxCard2 navigation={navigation} />
           <TaxInfoCard2 />
           <DropShadow
@@ -755,6 +817,7 @@ const GainsTaxChat = () => {
                 if (canProceed) {
                   const googByeItem = gainTax.find(el => el.id === 'goodbye');
                   dispatch(setChatDataList([googByeItem]));
+                  dispatch(clearHouseInfo());
                 }
               }}
               style={{
@@ -815,6 +878,7 @@ const GainsTaxChat = () => {
                         const state = await NetInfo.fetch();
                         const canProceed = await handleNetInfoChange(state);
                         if (canProceed) {
+
                           const myChatItem = {
                             id: item?.id + item2.id,
                             type: 'my',
@@ -822,24 +886,96 @@ const GainsTaxChat = () => {
                           };
 
                           const chatList = [];
+                       //   console.log('item', item);
+                       //   console.log('item2', item2);
+                       //   console.log('item2.select', item2.select);
+
+
                           if (item2?.select) {
-                            await item2?.select.forEach((item3, index3) => {
-                              gainTax.find(el => {
-                                if (el.id === item3) {
-                                  chatList.push(el);
+                            for (const item3 of item2.select) {
+                              if (item?.questionId === 'Q_0001') {
+                                if (item2?.answer) {
+                                  dispatch(
+                                    setHouseInfo({
+                                      ...houseInfo,
+                                      additionalAnswerList: [
+                                        { "Q_0001": item2.answer }
+                                      ]
+                                    })
+                                  );
                                 }
-                              });
-                            });
+                              } else if (item2?.questionId === 'Q_0005') {
+                                dispatch(
+                                  setHouseInfo({
+                                    ...houseInfo,
+                                    additionalAnswerList: [
+                                      { "Q_0005": item2.select.answer }
+                                    ]
+                                  })
+                                );
+                              }
+                              if (item?.name === 'residenceperiod2') {
+                                dispatch(
+                                  setHouseInfo({
+                                    ...houseInfo,
+                                    additionalAnswerList: [
+                                      { "Q_0005": item.select.answer }
+                                    ]
+                                  })
+                                );
+                              }
+                              /*     if (item3 === 'additionalQuestion2' || item3 === 'additionalQuestion') {
+                               const QuestionData = await getadditionalQuestion(item2.questionId, item3 === 'additionalQuestion2' ? item2.answer : item2.select.answer, houseInfo.houseId, houseInfo.sellDate, houseInfo.sellAmount);
+                                  console.log('QuestionData.returndata', QuestionData.returndata);
+                                  console.log('.questionId', QuestionData.detaildata?.nextQuestionId);
+                                  console.log('QuestionData.answer', QuestionData.detaildata?.selectSelectList ? QuestionData.detaildata?.selectSelectList.answerValue : 'null');
+                                  if (QuestionData.returndata) {
+                                    if (QuestionData.detaildata?.hasNextQuestion === true) {
+                                      if (QuestionData.detaildata?.nextQuestionId === 'Q_0005') {
+                                        let chatIndex = gainTax.findIndex(el => el.id === 'residenceperiod');
+                                        let chat;
+                                        if (chatIndex !== -1) {
+                                          chat = {
+                                            ...gainTax[chatIndex],
+                                            message: QuestionData.detaildata?.nextQuestionContent,
+                                          };
+                                        }
+                                      }
+                                      chatList.push({ ...chat });
+                                    } else if (QuestionData.detaildata?.nextQuestionId === 'Q_0003') {
+                                      dispatch(
+                                        setHouseInfo({
+                                          ...houseInfo,
+                                          additionalAnswerList: [
+                                            { "Q_0003": item2.select.answer }
+                                          ]
+                                        })
+                                      );
+                                      let chat = gainTax.find(el => el.id === 'ExpenseAnswer');
+                                      chatList.push({ ...chat });
+                                    }
+                                  }
+                                  else {
+                                    let el = gainTax.find(el => el.id === 'residenceperiod2');
+                                    if (el) chatList.push(el);
+                                  }
+                                } else {*/
+                              let el = gainTax.find(el => el.id === item3);
+                              if (el) chatList.push(el);
+                              //    }
+                              //   }
+                            }
                           }
 
+
                           if (item.id === 'cert' && item2.id === 'no') {
-                            const saleAmountSystemIndex = chatDataList.findIndex(
-                              el => el.id === 'saleAmountSystem',
+                            const sellAmountSystemIndex = chatDataList.findIndex(
+                              el => el.id === 'sellAmountSystem',
                             );
-                            if (saleAmountSystemIndex > -1) {
+                            if (sellAmountSystemIndex > -1) {
                               const newChatDataList = chatDataList.slice(
                                 0,
-                                saleAmountSystemIndex + 1,
+                                sellAmountSystemIndex + 1,
                               );
 
                               dispatch(setChatDataList(newChatDataList));
@@ -851,17 +987,16 @@ const GainsTaxChat = () => {
 
                           if (
                             item.id === 'contractDateSystem' ||
-                            item.id === 'saleDateSystem' ||
-                            item.id === 'saleAmountSystem'
+                            item.id === 'sellDateSystem' ||
+                            item.id === 'sellAmountSystem'
                           ) {
                             //     console.log('contractDateSystem');
                           } else if (item.id === 'ExpenseAnswer') {
                             //     console.log('ExpenseAnswer');
-                          } else if (item.id === 'residenceperiod' && item2.id === 'directlivePeriod') {
+                          } else if ((item.id === 'residenceperiod' || item.id === 'residenceperiod2') && item2.id === 'directlivePeriod') {
                             //    console.log('directlivePeriod');
-                          } else if (item.id === 'sellDateSystem') {
-                            //    console.log('sellDateSystem');
                           } else {
+                        //    console.log('chatList', chatList);
                             dispatch(
                               setChatDataList([
                                 ...chatDataList,
@@ -922,7 +1057,8 @@ const GainsTaxChat = () => {
                             });
                           }
                         }
-                      }}>
+                      }
+                      }>
                       {item2?.icon ? item2.icon : null}
                       <SelectButtonText>{item2?.name}</SelectButtonText>
                     </SelectButton>
@@ -952,7 +1088,7 @@ const GainsTaxChat = () => {
                 </SelectButton>
               )}
             </ChatBubble>
-          </ChatItem>
+          </ChatItem >
           {item?.id === 'cta' && (
             <>
               <Card
@@ -1005,25 +1141,28 @@ const GainsTaxChat = () => {
                 </Button>
               </DropShadow>
             </>
-          )}
-          {item?.id === 'calulating' && (
-            <View
-              style={{
-                height: height - 320,
-
-                alignItems: 'center',
-              }}>
-              <ActivityIndicator
-                size={80}
-                color="#A2C62B"
-                animating
+          )
+          }
+          {
+            item?.id === 'calulating' && (
+              <View
                 style={{
-                  marginTop: '30%',
-                }}
-              />
-            </View>
-          )}
-          {item?.id === 'apartmentAddressInfoSystem' && (
+                  height: height - 320,
+
+                  alignItems: 'center',
+                }}>
+                <ActivityIndicator
+                  size={80}
+                  color="#A2C62B"
+                  animating
+                  style={{
+                    marginTop: '30%',
+                  }}
+                />
+              </View>
+            )
+          }
+          {/*item?.id === 'apartmentAddressInfoSystem' && (
             <DropShadow
               style={{
                 shadowColor: 'rgba(0,0,0,0.25)',
@@ -1118,7 +1257,7 @@ const GainsTaxChat = () => {
                 </DropShadow>
               </HouseInfoCard>
             </DropShadow>
-          )}
+          )*/}
         </>
       );
     }

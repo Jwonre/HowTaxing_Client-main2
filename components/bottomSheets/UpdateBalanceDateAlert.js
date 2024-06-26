@@ -220,7 +220,6 @@ const UpdateBalanceDateAlert = props => {
               <Calendar
                 currentDate={data?.contractDate ? new Date(data?.contractDate) : new Date()}
                 minDate={data?.contractDate ? new Date(data?.contractDate) : new Date()}
-                value={data?.balanceDate}
                 setSelectedDate={setSelectedDate}
 
               />

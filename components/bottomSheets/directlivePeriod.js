@@ -136,9 +136,9 @@ const directlivePeriod = props => {
       id: 'livePeriodMy',
       type: 'my',
       message:
-        (selectedDate.year ? selectedDate.year === '0년' ? '' : selectedDate.year : '0년')
+        (selectedDate.year ? (selectedDate.year === '0년' ? '' : selectedDate.year) : '0년')
         +
-        (selectedDate.month ? selectedDate.month === '0개월' ? selectedDate.year === '0년' ? '거주기간 없음' : '' : selectedDate.month : '0개월')
+        (selectedDate.month ? (selectedDate.month === '0개월' ? (selectedDate.year === '0년' ? '거주기간 없음' : '') : (selectedDate.year ? ' ' + selectedDate.month : selectedDate.month)) : '0개월')
       ,
       questionId: 'livePeriod',
     };
@@ -146,13 +146,13 @@ const directlivePeriod = props => {
     const chat3 = gainTax.find(el => el.id === 'ExpenseAnswer');
     dispatch(setChatDataList([...chatDataList, chat1, chat2, chat3]));
     dispatch(
-      setHouseInfo(
-        {
-          ...houseInfo,
-          livePeriodYear: Math.floor(selectedDate.year ? selectedDate.year.replace('년', '') : 0),
-          livePeriodMonth: Math.floor(selectedDate.month ? selectedDate.month.replace('개월', '') : 0)
-        },
-      )
+      setHouseInfo({
+        ...houseInfo,
+        additionalAnswerList: [
+          {"Q_0005":"01",
+          "PERIOD_DIAL" : selectedDate.year + ' ' + selectedDate.month}
+        ]
+      })
     );
      
     // console.log('selectedYear :', Math.floor(selectedYear.replace('년', '')));

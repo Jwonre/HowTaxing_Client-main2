@@ -367,14 +367,14 @@ const UpdateAddressAlert = props => {
 
     };
     axios
-      .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
+      .post('http://devapp.how-taxing.com/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '주소 검색 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               closemodal: true,
               actionSheetRef: actionSheetRef,
               buttontext: '확인하기',
@@ -495,14 +495,14 @@ const UpdateAddressAlert = props => {
 
     };
     axios
-      .post('http://13.125.194.154:8080/house/roadAddr', data, { headers: headers })
+      .post('http://devapp.how-taxing.com/house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '주소 검색 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               closemodal: true,
               actionSheetRef: actionSheetRef,
               buttontext: '확인하기',
@@ -589,7 +589,7 @@ const UpdateAddressAlert = props => {
       .catch(function (error) {
         console.log(error);
       });
-    const url = 'http://13.125.194.154:8080/house/roadAddrDetail';
+    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -636,7 +636,7 @@ const UpdateAddressAlert = props => {
   };*/
 
   /*const getDongData = async (address) => {
-    const url = 'http://13.125.194.154:8080/house/roadAddrDetail';
+    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`

@@ -166,7 +166,7 @@ const ReviewSheet = props => {
       score,
       reviewText,
     };
-    const url = 'http://13.125.194.154:8080/review/registReview';
+    const url = 'http://devapp.how-taxing.com/review/registReview';
 
     await axios
       .post(url, data)

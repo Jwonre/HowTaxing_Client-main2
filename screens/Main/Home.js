@@ -87,7 +87,7 @@ const TagText = styled.Text`
 `;
 
 const CardTitle = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: ${getFontSize(15)}px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -102,7 +102,7 @@ const HashTagGroup = styled.View`
 `;
 
 const HashTagText = styled.Text`
-  font-size: ${getFontSize(11)}px;
+  font-size: ${getFontSize(12)}px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -249,14 +249,14 @@ const Home = () => {
     // 요청 바디
 
     axios
-      .post('http://13.125.194.154:8080/user/withdraw', { headers: headers })
+      .post('http://devapp.how-taxing.com/user/withdraw', { headers: headers })
       .then(response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '회원탈퇴에 문제가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
               buttontext: '확인하기',
             },
           });
@@ -451,7 +451,7 @@ const Home = () => {
           <CardTitle>세금 상담받기</CardTitle>
           <HashTagGroup
             style={{
-              width: '70%',
+              width: '80%',
             }}>
             {CONSULTING_HASHTAG_LIST.map((item, index) => (
               <HashTagText key={index}>#{item}</HashTagText>

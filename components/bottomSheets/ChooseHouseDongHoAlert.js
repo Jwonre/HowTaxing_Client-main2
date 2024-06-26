@@ -242,7 +242,7 @@ const ChooseHouseDongHoAlert = props => {
       .catch(function (error) {
         console.log(error);
       });*/
-    const url = 'http://13.125.194.154:8080/house/roadAddrDetail';
+    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -265,8 +265,8 @@ const ChooseHouseDongHoAlert = props => {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '상세주소를 가져오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             closemodal: true,
             actionSheetRef: actionSheetRef,
             buttontext: '확인하기',
@@ -332,15 +332,15 @@ const ChooseHouseDongHoAlert = props => {
             numOfRows: 5,
             pageNo: 1,
           })*/
-      const response = await axios.post('http://13.125.194.154:8080/house/pubLandPriceAndArea', param, { headers: headers });
+      const response = await axios.post('http://devapp.how-taxing.com/house/pubLandPriceAndArea', param, { headers: headers });
       const data = response.data.data;
       //    console.log('gongsiData return', data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '공시가격과 전용면적을 가져오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             buttontext: '확인하기',
           },
         });

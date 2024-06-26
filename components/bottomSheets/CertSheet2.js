@@ -293,12 +293,12 @@ const CertSheet = props => {
   const { certType, agreeCert, agreePrivacy, agreeCopyright, agreeGov24 } = useSelector(
     state => state.cert.value,
   );
-  
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -367,37 +367,65 @@ const CertSheet = props => {
   const hypenHouseAPI = async (url, data, headers) => {
     const response = await axios.post(url, data, { headers: headers });
     if (response.data.errYn === 'Y') {
-      if (response.data.status !== undefined || null) {
-        SheetManager.show('info', {
+      if (response.data.errCode === 'HOUSE-005') {
+        console.log('response.data', response.data);
+        await SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
-            buttontext: '확인하기',
+            message: response.data.errMsg ? response.data.errMsg : '공공기관에서 보유주택 정보를 가져오는 중 오류가 발생했습니다.',
+            description: response.data?.errMsgDtl ? response.data?.errMsgDtl : '',
+            buttontext: '다시 확인하기',
           },
         });
-        return;
-      } else {
-        SheetManager.show('info', {
-          payload: {
-            type: 'error',
-            message: '주택정보를 조회하는데 문제가 발생했습니다.',
-            buttontext: '확인하기',
-          },
-        });
-        return;
-      }
+        dispatch(setResend(false));
+        SheetManager.hide('infoCertification');
+        setTimeout(async () => {
+          const networkState = await NetInfo.fetch();
+          // 네트워크가 연결되어 있을 때만 updateHouseDetailName() 함수를 실행합니다.
+          if (networkState.isConnected) {
+            SheetManager.show('cert', {
+              payload: {
+                cert: cert,
+                index: props.payload?.index,
+                currentPageIndex,
+                name,
+                phone,
+                id,
+                password,
+                residentNumber,
+                failreturn: true,
+              },
+            });
+          }
+        }, 900);
+        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+        dispatch(setChatDataList(newChatDataList));
 
+      } else {
+
+        setTimeout(async () => {
+          await SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg ? response.data.errMsg : '청약홈에서 정보를 불러오는 중\n오류가 발생했어요.\n인증을 다시 진행해주세요.',
+              description: response.data?.errMsgDtl ? response.data?.errMsgDtl : null,
+              buttontext: '확인하기',
+            },
+          });
+        }, 400);
+        dispatch(setResend(true));
+      }
+      return false;
     }
-    const list = response.data.data.list === undefined ? null : response.data.data.list;
+    const list = response.data.data.list ? response.data.data.list : null;
     //console.log('[hypenHouseAPI]list:', list);
     //인증서 확인요청 팝업 화면 출력
     dispatch(setOwnHouseList(list));
   };
 
   const postOwnHouse = async () => {
-    //const url = 'http://13.125.194.154:8080/house/search'; real api
-    const url = 'http://13.125.194.154:8080/house/search';
+    //const url = 'http://devapp.how-taxing.com/house/search'; real api
+    const url = 'http://devapp.how-taxing.com/house/search';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -453,9 +481,11 @@ const CertSheet = props => {
         dispatch(
           setHouseInfo({
             ...houseInfo,
-            livePeriodYear: 2,
-            livePeriodMonth: 10
-          }),
+            additionalAnswerList: [
+              {"Q_0005" : "02",
+              "PERIOD_CERT" : "2년 10개월"}
+            ]
+          })
         );
 
         dispatch(setChatDataList([...chatDataList, chat1, chat2, chat3, chat4])) // 1초 후에 실행);

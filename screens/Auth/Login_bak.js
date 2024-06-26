@@ -195,7 +195,7 @@ const Login = () => {
     };
 
     axios
-      .post('http://13.125.194.154:8080/user/socialLogin', data)
+      .post('http://devapp.how-taxing.com/user/socialLogin', data)
       .then(response => {
         if (response.data.isError) {
           SheetManager.show('info', {
@@ -221,7 +221,7 @@ const Login = () => {
   // 유저 정보 가져오기
   const getUserData = async id => {
     await axios
-      .get(`http://13.125.194.154:8080/user/${id}`)
+      .get(`http://devapp.how-taxing.com/user/${id}`)
       .then(response => {
         // 성공적인 응답 처리
       //  console.log(response.data);

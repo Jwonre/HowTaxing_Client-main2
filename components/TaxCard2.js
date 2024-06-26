@@ -117,23 +117,24 @@ const TaxCard2 = props => {
       houseId : houseInfo.houseId  === undefined ? '' : houseInfo.houseId ,
       sellContractDate : dayjs(houseInfo.contractDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
       sellDate : dayjs(houseInfo.sellDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.sellDate).format('YYYY-MM-DD'),
-      sellPrice : houseInfo.saleAmount === undefined ? '' : houseInfo.saleAmount,
+      sellPrice : houseInfo.sellAmount === undefined ? '' : houseInfo.sellAmount,
       necExpensePrice : houseInfo.necessaryExpense === undefined ? '' : houseInfo.necessaryExpense,
       isWWLandLord :  houseInfo.isLandlord === undefined ? '' : houseInfo.isLandlord,
-      stayPeriodYear : houseInfo.livePeriodYear === undefined ? '' : houseInfo.livePeriodYear,
-      stayPeriodMonth : houseInfo.livePeriodMonth === undefined ? '' : houseInfo.livePeriodMonth,
+      //stayPeriodYear : houseInfo.livePeriodYear === undefined ? '' : houseInfo.livePeriodYear,
+      //stayPeriodMonth : houseInfo.livePeriodMonth === undefined ? '' : houseInfo.livePeriodMonth,
       //additionalAnswer : null,
-      planAnswer : null
+      additionalAnswerList : houseInfo.additionalAnswerList === undefined ? []: houseInfo.additionalAnswerList
       //planAnswer : houseInfo.planAnswer === undefined ? '' : houseInfo.planAnswer
     };
+    console.log('양도소득세 파라미터', data);
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
     };
     axios
-      .post('http://13.125.194.154:8080/calculation/sellResult', data, { headers: headers })
+      .post('http://devapp.how-taxing.com/calculation/sellResult', data, { headers: headers })
       .then(response => {
-        //console.log('양도소득세 파라미터', data);
+
         //console.log('양도소득세 계산 중:', response.data);
         // 성공적인 응답 처리
 
@@ -141,8 +142,8 @@ const TaxCard2 = props => {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
+              message: response.data.errMsg ? response.data.errMsg : '양도소득세 계산 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
               closeSheet: true,
               navigation: props?.navigation,
               buttontext: '확인하기',

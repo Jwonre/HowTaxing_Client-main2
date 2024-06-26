@@ -58,84 +58,79 @@ const PickerContainer = styled.View`
 const Calendar = props => {
   // console.log('props.currentDate', props.currentDate);
   //console.log('props.currentDate', props.currentDate);
-  //console.log('props.selectedDate', props.selectedDate);
-  const [currentDate, setCurrentDate] = useState(props.currentDate !== undefined ? new Date(props.currentDate) : new Date());
-  const [calendarData, setCalendarData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate) : null);
-  const [selectedYear, setSelectedYear] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate).getFullYear() : null);
-  const [selectedMonth, setSelectedMonth] = useState(props.selectedDate !== undefined ? new Date(props.selectedDate).getMonth() : null);
-  //const minYear = props.minDate ? props.minDate.getFullYear() : currentDate.getFullYear();
-  // const minDate = props.minDate ? props.minDate.getDay() : getDaysInMonth(currentDate.getMonth(), currentDate.getFullYear());
 
+  const [currentDate, setCurrentDate] = useState(props.currentDate ? new Date(props.currentDate) : new Date());
+  const [calendarData, setCalendarData] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(props.minDate ? new Date(props.minDate) : null);
+  const currentday = currentDate.getDate();
   const currentyear = currentDate.getFullYear();
   const currentmonth = currentDate.getMonth();
-  const years = [];
-  /*  const [months, setMonths] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  const minYear = props.minDate ? new Date(props.minDate).getFullYear() : currentyear;
+  //console.log('firstselectedDate', selectedDate);
+  const getDaysInMonth = (day, month, year, selectedDate, currentyear, currentmonth) => {
+    let date = day && (year === selectedDate?.getFullYear()) && (month === selectedDate?.getMonth()) ? new Date(year, month, props.minDate ? day : 1) : new Date(selectedDate ? selectedDate?.getFullYear() : currentyear, selectedDate ? selectedDate?.getMonth() : currentmonth, 1);
+    let days = [];
     if (props.minDate) {
-      for (let i = minYear; i <= minYear + 50; i++) {
-        years.push(i);
+      while (date.getMonth() === selectedDate?.getMonth()) {
+        days.push(date.getDate());
+        date.setDate(date.getDate() + 1);
       }
     } else {
-      for (let i = currentyear - 50; i <= currentyear + 50; i++) {
-        years.push(i);
+      while (date.getMonth() === month) {
+        days.push(date.getDate());
+        date.setDate(date.getDate() + 1);
       }
     }
-  */
-  const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  for (let i = currentyear - 50; i <= currentyear + 50; i++) {
-    years.push(i);
-  }
-  /*
-    useEffect(() => {
-      let minMonth = 0;
-      if (props.minDate) {
-        const lastDayOfMonth = new Date(props.minDate.getFullYear(), props.minDate.getMonth() + 1, 0);
-        if (props.minDate.getDate() === lastDayOfMonth.getDate()) {
-          minMonth = props.minDate.getMonth() + 1;
-        } else {
-          minMonth = props.minDate.getMonth();
-        }
-      } else {
-        minMonth = 0;
-      }
-      if (minMonth !== 0) {
-        setMonths(Array.from({ length: 12 - minMonth }, (_, i) => i + minMonth + 1));
-      } else {
-        setMonths(Array.from({ length: 12 }, (_, i) => i + 1));
-      }
-    }, [props.minDate]);*/
-
-
-  const getDaysInMonth = (month, year) => {
-    let date = new Date(year, month, 1);
-    let days = [];
-    while (date.getMonth() === month) {
-      days.push(date.getDate());
-      date.setDate(date.getDate() + 1);
-    }
-    return days;
+    return days || [];
   };
-  const [daysInMonth, setDaysInMonth] = useState(selectedMonth ? getDaysInMonth(selectedMonth, selectedYear ? selectedYear : currentyear) : getDaysInMonth(currentmonth, selectedYear ? selectedYear : currentyear));
+
+  const [daysInMonth, setDaysInMonth] = useState(getDaysInMonth(props.minDate ? new Date(props.minDate).getDate() : currentday, props.minDate ? new Date(props.minDate).getMonth() : currentmonth, props.minDate ? new Date(props.minDate).getFullYear() : currentyear, selectedDate, currentyear, currentmonth));
+
+  const years = [];
+  if (props.minDate) {
+    for (let i = minYear; i <= minYear + 50; i++) {
+      years.push(i);
+    }
+  } else {
+    for (let i = currentyear - 50; i <= currentyear + 50; i++) {
+      years.push(i);
+    }
+  }
+
+  const [months, setMonths] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  useEffect(() => {
+    let minMonth = props?.minDate ? new Date(props.minDate).getMonth() : 0;
+    let newMonths = [];
+    if (minMonth !== 0 && (new Date(props?.minDate).getFullYear() === selectedDate?.getFullYear())) {
+      for (let i = minMonth + 1; i <= 12; i++) {
+        newMonths.push(i);
+      }
+    } else {
+      for (let i = 1; i <= 12; i++) {
+        newMonths.push(i);
+      }
+    }
+    setMonths(newMonths);
+  }, [selectedDate?.getFullYear()]);
+
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  //const [viewMode, setViewMode] = useState('day');
-  //console.log('currentDate', currentDate);
-  //console.log('currentyear', currentyear);
-  //console.log('currentmonth', currentmonth);
-  //console.log('SelectedYear', selectedYear);
-  //console.log('SelectedMonth', selectedMonth);
-  //console.log('daysInMonths', daysInMonth);
   useEffect(() => {
-    //console.log('currentDate', currentDate);
     setCurrentPageIndex(0);
     generateDatesInRange();
   }, [currentDate]);
 
   useEffect(() => {
-    props.setSelectedDate(selectedDate);
-    //console.log('viewMode', viewMode);
-    // console.log('    currentDate.getMonth()', currentDate.getMonth());
 
+    if (props.minDate) {
+      setDaysInMonth(getDaysInMonth(new Date(props.minDate).getDate(), new Date(props.minDate).getMonth(), new Date(props.minDate).getFullYear(), selectedDate, currentyear, currentmonth));
+    } else {
+      setDaysInMonth(getDaysInMonth(selectedDate ? selectedDate?.getDate() : currentday, selectedDate ? selectedDate?.getMonth() : currentmonth, selectedDate ? selectedDate?.getFullYear() : currentyear, selectedDate, currentyear, currentmonth));
+    }
+  }, [selectedDate?.getFullYear(), selectedDate?.getMonth()]);
+
+  useEffect(() => {
+    props.setSelectedDate(selectedDate);
   }, [selectedDate]);
 
   const CalendarHeader = () => {
@@ -186,13 +181,15 @@ const Calendar = props => {
   );
 
   const renderDay = ({ item }) => {
+    //console.log('props.minDate', props.minDate);
     const isPast = item < props.minDate;
+    const islimit = item > props.maxDate;
     const isSunday = item.getDay() === 0;
     const isSaturday = item.getDay() === 6;
     const isSelected = item.toDateString() === selectedDate?.toDateString();
     return (
       <Pressable
-        disabled={props.minDate ? isPast : false}
+        disabled={(props.minDate ? isPast : false) || (props.maxDate ? islimit : false)}
         onPress={() => {
           setSelectedDate(item);
           // console.log('item', item);
@@ -221,7 +218,7 @@ const Calendar = props => {
                 color: isSelected ? '#fff' : '#CFD1D5',
                 textAlign: 'center',
               },
-              !isPast
+              !(isPast||islimit)
                 ? {
                   color: isSelected
                     ? '#fff'
@@ -246,8 +243,8 @@ const Calendar = props => {
         flex: 1,
         backgroundColor: '#fff',
       }}>
-      <ModalSubtitle>
-        {dayjs(selectedDate !== null ? selectedDate : new Date()).format('YYYY년 MM월 DD일')}
+      <ModalSubtitle onPress={() => { if (currentPageIndex === 0) { setCurrentPageIndex(1) } else { setCurrentPageIndex(0); setCurrentDate(selectedDate ? selectedDate : new Date()) } }}>
+        {dayjs(selectedDate ? selectedDate : new Date()).format('YYYY년 MM월 DD일')}
       </ModalSubtitle>
       {currentPageIndex === 0 && (<><View
         style={{
@@ -277,7 +274,7 @@ const Calendar = props => {
             }}>
             <ArrowIcon />
           </TouchableOpacity>
-          <ModalSubtitle onPress={() => { setCurrentPageIndex(1) }}>{dayjs(currentDate).format('YYYY.MM')}</ModalSubtitle>
+          <ModalSubtitle>{dayjs(currentDate).format('YYYY.MM')}</ModalSubtitle>
           <TouchableOpacity
             activeOpacity={0.8}
             hitSlop={{
@@ -325,7 +322,7 @@ const Calendar = props => {
             <PickerContainer>
               <WheelPicker
                 selectedIndex={
-                  selectedDate !== null ? years.indexOf(selectedDate.getFullYear()) >= 0 ? years.indexOf(selectedDate.getFullYear()) : 0 : years.indexOf(currentDate.getFullYear()) >= 0 ? years.indexOf(currentDate.getFullYear()) : 0
+                  selectedDate ? years.indexOf(selectedDate.getFullYear()) >= 0 ? years.indexOf(selectedDate.getFullYear()) : 0 : years.indexOf(currentDate.getFullYear())
                 }
                 containerStyle={{
                   width: 120,
@@ -343,30 +340,29 @@ const Calendar = props => {
                 itemHeight={40}
                 options={years}
                 onChange={index => {
-                  setSelectedYear(years[index]);
-                  setSelectedDate(new Date(years[index], selectedMonth !== null ? selectedMonth : currentmonth, selectedDate !== null ? selectedDate.getDate() : currentDate.getDate()));
-                  /* Promise.resolve().then(() => {
- 
-                     let minMonth = 0;
-                     console.log('minDate', props.minDate);
-                     console.log('years[index]', years[index]);
-                     console.log('minDate.getFullYear()', props.minDate.getFullYear());
-                     if ((props.minDate) && (props.minDate.getFullYear() === years[index])) {
-                       minMonth = props.minDate.getMonth();
-                     } else {
-                       minMonth = 0;
-                     }
-                     console.log('minMonth', minMonth);
-                     if (minMonth !== 0) {
-                       setMonths(Array.from({ length: 12 - minMonth }, (_, i) => i + minMonth + 1));
-                       console.log('after months1', months);
-                     } else {
-                       setMonths(Array.from({ length: 12 }, (_, i) => i + 1));
-                       console.log('after months2', months);
-                     }
-                     
-                   });*/
-                }}
+                  if (props.minDate) {
+                    if (years[index] === new Date(props.minDate).getFullYear()) {
+                      if (selectedDate.getMonth() < new Date(props.minDate).getMonth()) {
+                        if (selectedDate.getDate() < new Date(props.minDate).getDate()) {
+                          setSelectedDate(new Date(years[index], new Date(props.minDate).getMonth(), new Date(props.minDate).getDate()));
+                        } else {
+                          setSelectedDate(new Date(years[index], new Date(props.minDate).getMonth(), selectedDate ? selectedDate?.getDate() : currentday));
+                        }
+                      } else {
+                        if (selectedDate.getDate() < new Date(props.minDate).getDate()) {
+                          setSelectedDate(new Date(years[index], selectedDate ? selectedDate?.getMonth() : currentmonth, new Date(props.minDate).getDate()));
+                        } else {
+                          setSelectedDate(new Date(years[index], selectedDate ? selectedDate?.getMonth() : currentmonth, selectedDate ? selectedDate?.getDate() : currentday));
+                        }
+                      }
+                    } else {
+                      setSelectedDate(new Date(years[index], selectedDate ? selectedDate?.getMonth() : currentmonth, selectedDate ? selectedDate?.getDate() : currentday));
+                    }
+                  } else {
+                    setSelectedDate(new Date(years[index], selectedDate ? selectedDate?.getMonth() : currentmonth, selectedDate ? selectedDate?.getDate() : currentday));
+                  }
+                }
+                }
                 visibleRest={5}
               />
 
@@ -376,8 +372,9 @@ const Calendar = props => {
             <SelectLabel>월</SelectLabel>
             <PickerContainer>
               <WheelPicker
+                key={months}
                 selectedIndex={
-                  selectedDate !== null ? months.indexOf(selectedDate.getMonth() + 1) >= 0 ? months.indexOf(selectedDate.getMonth() + 1) : 0 : months.indexOf(currentDate.getMonth() + 1) >= 0 ? months.indexOf(currentDate.getMonth() + 1) : 0
+                  selectedDate ? months.indexOf(selectedDate.getMonth() + 1) >= 0 ? months.indexOf(selectedDate.getMonth() + 1) : 0 : months.indexOf(currentDate.getMonth() + 1) >= 0 ? months.indexOf(currentDate.getMonth() + 1) : 0
                 }
                 containerStyle={{
                   width: 120,
@@ -395,10 +392,10 @@ const Calendar = props => {
                 itemHeight={40}
                 options={months}
                 onChange={index => {
-                  const monthIndex = months[index] - 1;
-                  setSelectedMonth(monthIndex);
-                  setDaysInMonth(getDaysInMonth(monthIndex, selectedYear ? selectedYear : currentyear));
-                  setSelectedDate(new Date(selectedYear !== null ? selectedYear : currentyear, monthIndex, selectedDate !== null ? selectedDate.getDate() : currentDate.getDate()));
+                  setSelectedDate(new Date(selectedDate ? selectedDate.getFullYear() : currentyear, months[index] - 1, selectedDate ? selectedDate?.getDate() : currentday));
+
+                  //setDaysInMonth(getDaysInMonth(monthIndex, selectedYear ? selectedYear : currentyear));
+                  //setSelectedDate(new Date(selectedYear !== null ? selectedYear : currentyear, monthIndex, selectedDate !== null ? selectedDate.getDate() : currentDate.getDate()));
                 }}
                 visibleRest={5}
               />
@@ -411,7 +408,7 @@ const Calendar = props => {
               <WheelPicker
                 key={daysInMonth}
                 selectedIndex={
-                  selectedDate !== null ? daysInMonth.indexOf(selectedDate.getDate()) >= 0 ? daysInMonth.indexOf(selectedDate.getDate()) : 0 : daysInMonth.indexOf(currentDate.getDate()) >= 0 ? daysInMonth.indexOf(currentDate.getDate()) : 0
+                  selectedDate ? daysInMonth.indexOf(selectedDate.getDate()) >= 0 ? daysInMonth.indexOf(selectedDate.getDate()) : 0 : daysInMonth.indexOf(currentDate.getDate()) >= 0 ? daysInMonth.indexOf(currentDate.getDate()) : 0
                 }
                 containerStyle={{
                   width: 120,
@@ -429,11 +426,10 @@ const Calendar = props => {
                 itemHeight={40}
                 options={daysInMonth}
                 onChange={index => {
-                  setSelectedDate(new Date(selectedYear !== null ? selectedYear : currentyear, selectedMonth !== null ? selectedMonth : currentmonth, daysInMonth[index]));
+                  setSelectedDate(new Date(selectedDate ? selectedDate.getFullYear() : currentyear, selectedDate ? selectedDate?.getMonth() : currentmonth, daysInMonth[index]));
                 }}
                 visibleRest={5}
               />
-
             </PickerContainer>
           </View>
         </SelectGroup>

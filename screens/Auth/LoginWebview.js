@@ -12,7 +12,7 @@ const LoginWebview = (props) => {
     const { width, height } = Dimensions.get('window');
     const [webViewStyle, setWebViewStyle] = useState({ width: width, height: height });
     const onWebViewMessage = route.params?.onWebViewMessage;
-    const uri = { uri: `http://13.125.194.154:8080/oauth2/authorization/${socialType}` };
+    const uri = { uri: `http://devapp.how-taxing.com/oauth2/authorization/${socialType}` };
     const sendWebMessage = () => {
         webViewRef.current.injectJavaScript(`
         const url =document?.URL===null ? null:document?.URL ;
@@ -49,8 +49,8 @@ const LoginWebview = (props) => {
                     SheetManager.show('info', {
                         payload: {
                             type: 'error',
-                            message: response.data.errMsg,
-                            description: response.data.errMsgDtl,
+                            message: response.data.errMsg ? response.data.errMsg : '로그인 중 parsedError가 발생했어요.',
+                            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
                             buttontext: '확인하기',
                         },
                     });

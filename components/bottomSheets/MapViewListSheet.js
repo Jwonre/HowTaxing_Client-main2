@@ -604,7 +604,7 @@ const MapViewListSheet = props => {
   };
   // 아파트 단지 선택 시 상세 정보 가져오기
  /* const getHouseDetailInfo = async () => {
-    const url = 'http://13.125.194.154:8080/house/detail';
+    const url = 'http://devapp.how-taxing.com/house/detail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`

@@ -263,7 +263,7 @@ const InfoAlert = props => {
                     }
                      
                   }}>
-                  <ButtonText>확인하기</ButtonText>
+                  <ButtonText>{props?.payload?.buttontext ? props?.payload?.buttontext : '확인하기'}</ButtonText>
                 </Button>
               </DropShadow>
 
