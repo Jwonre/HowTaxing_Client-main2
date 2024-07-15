@@ -7,7 +7,9 @@ import {
   StyleSheet,
 } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
-import ActionSheet from 'react-native-actions-sheet';
+import ActionSheet, {
+  SheetManager,
+} from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
@@ -17,8 +19,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { gainTax } from '../../data/chatData';
-  
-
+import dayjs from 'dayjs';
+import axios from 'axios';
 
 
 const SheetContainer = styled.View`
@@ -126,9 +128,78 @@ const directlivePeriod = props => {
   const { width, height } = useWindowDimensions();
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
+  const currentUser = useSelector(state => state.currentUser.value);
   const YearList = Array.from({ length: 101 }, (_, i) => `${i}년`);
   const MonthList = Array.from({ length: 12 }, (_, i) => `${i}개월`);
+  const getadditionalQuestion = async (questionId, answerValue, houseId, sellDate, sellPrice) => {
+    /*
+    [필수] calcType | String | 계산유형(01:취득세, 02:양도소득세)
+    [선택] questionId | String | 질의ID
+    [선택] answerValue | String | 응답값
+    [선택] sellHouseId | Long | 양도주택ID (  양도소득세 계산 시 세팅)
+    [선택] sellDate | LocalDate | 양도일자 (양도소득세 계산 시 세팅)
+    [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
+*/
+    try {
+      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.accessToken}`
+      };
 
+      const param = {
+        calcType: '02',
+        questionId: questionId,
+        answerValue: answerValue ? answerValue : '',
+        sellHouseId: houseId ? houseId : '',
+        sellDate: sellDate ? dayjs(sellDate).format('YYYY-MM-DD') : null,
+        sellPrice: sellPrice ? sellPrice : 0,
+        ownHouseCnt: houseInfo?.ownHouseCnt ? houseInfo?.ownHouseCnt : 0
+      };
+      ////console.log('[additionalQuestion] additionalQuestion param:', param);
+      //////console.log('[HouseDetail] Fetching house details for item:', item);
+      const response = await axios.post(url, param, { headers });
+      const detaildata = response.data.data;
+      ////console.log('response.data', response.data);
+      if (response.data.errYn == 'Y') {
+        setTimeout(() => {
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg ? response.data.errMsg : '추가질의를 가져오지 못했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+              buttontext: '확인하기',
+            },
+          });
+        }, 500)
+        return {
+          returndata: false
+        };
+      } else {
+        //  ////console.log('[additionalQuestion] additionalQuestion retrieved:', detaildata);
+        // ////console.log('[additionalQuestion] detaildata?.houseType:', detaildata?.houseType);
+        //  ////console.log('[additionalQuestion] additionalQuestion houseInfo:', houseInfo);
+        return {
+          detaildata: detaildata,
+          returndata: true
+        }
+      }
+    } catch (error) {
+      setTimeout(() => {
+        ////console.log(error ? error : 'error');
+        SheetManager.show('info', {
+          payload: {
+            message: '추가질의를 가져오는데\n알수없는 오류가 발생했습니다.',
+            type: 'error',
+            buttontext: '확인하기',
+          },
+        });
+      }, 500)
+      return {
+        returndata: false
+      };
+    }
+  };
   // 다음으로 버튼 핸들러
   const nextHandler = async () => {
     actionSheetRef.current?.hide();
@@ -136,27 +207,147 @@ const directlivePeriod = props => {
       id: 'livePeriodMy',
       type: 'my',
       message:
-        (selectedDate.year ? (selectedDate.year === '0년' ? '' : selectedDate.year) : '0년')
+        (selectedDate.year ? (selectedDate.year === '0년' ? '' : selectedDate.year) : '')
         +
         (selectedDate.month ? (selectedDate.month === '0개월' ? (selectedDate.year === '0년' ? '거주기간 없음' : '') : (selectedDate.year ? ' ' + selectedDate.month : selectedDate.month)) : '0개월')
       ,
       questionId: 'livePeriod',
     };
-    const chat2 = gainTax.find(el => el.id === 'ExpenseInquiry');
-    const chat3 = gainTax.find(el => el.id === 'ExpenseAnswer');
-    dispatch(setChatDataList([...chatDataList, chat1, chat2, chat3]));
-    dispatch(
-      setHouseInfo({
+    let tempadditionalAnswerList = houseInfo?.additionalAnswerList || [];
+    let Index1 = tempadditionalAnswerList.findIndex(item => 'Q_0005' in item);
+    let Index2 = tempadditionalAnswerList.findIndex(item => 'PERIOD_DIAL' in item);
+
+    let newIndex1 = "01";
+    let newIndex2 = (selectedDate.year ? (selectedDate.year === '0년' ? '' : selectedDate.year) : '') + (selectedDate.month ? (selectedDate.month === '0개월' ? (selectedDate.year === '0년' ? '0개월' : '') : (selectedDate.year !== '0년' ? ' ' + selectedDate.month : selectedDate.month)) : '');
+
+    if (Index1 !== -1 && Index2 !== -1) {
+      if (tempadditionalAnswerList[Index1]['Q_0005'] !== newIndex1 || tempadditionalAnswerList[Index2]['PERIOD_DIAL'] !== newIndex2) {
+        tempadditionalAnswerList = [
+          ...tempadditionalAnswerList.slice(0, Index1),
+          { ...tempadditionalAnswerList[Index1], 'Q_0005': newIndex1 },
+          ...tempadditionalAnswerList.slice(Index1 + 1)
+        ];
+        tempadditionalAnswerList = [
+          ...tempadditionalAnswerList.slice(0, Index2),
+          { ...tempadditionalAnswerList[Index2], 'PERIOD_DIAL': newIndex2 },
+          ...tempadditionalAnswerList.slice(Index2 + 1)
+        ];
+      }
+    } else if (Index1 !== -1 && Index2 === -1) {
+      tempadditionalAnswerList = [
+        ...tempadditionalAnswerList.slice(0, Index1),
+        { ...tempadditionalAnswerList[Index1], 'Q_0005': newIndex1 },
+        ...tempadditionalAnswerList.slice(Index1 + 1),
+        { "PERIOD_DIAL": newIndex2 }
+      ];
+    } else {
+      tempadditionalAnswerList = [
+        ...tempadditionalAnswerList,
+        { "Q_0005": newIndex1 },
+        { "PERIOD_DIAL": newIndex2 }
+      ];
+    }
+    setTimeout(() => {
+      dispatch(setHouseInfo({
         ...houseInfo,
-        additionalAnswerList: [
-          {"Q_0005":"01",
-          "PERIOD_DIAL" : selectedDate.year + ' ' + selectedDate.month}
-        ]
-      })
-    );
-     
-    // console.log('selectedYear :', Math.floor(selectedYear.replace('년', '')));
-    // console.log('selectedMonth :', selectedMonth.replace('개월', ''));
+        livePeriodYear: (selectedDate.year ? selectedDate.year.replace('년', '') : ''),
+        livePeriodMonth: (selectedDate.month ? selectedDate.month.replace('개월', '') : ''),
+        additionalAnswerList: tempadditionalAnswerList
+      }))
+    }, 300);
+
+    const livePeriod = (selectedDate.year ? (selectedDate.year === '0년' ? '' : selectedDate.year) : '') + (selectedDate.month ? (selectedDate.month === '0개월' ? (selectedDate.year === '0년' ? '0개월' : '') : (selectedDate.year !== '0년' ? ' ' + selectedDate.month : selectedDate.month)) : '');
+    ////console.log('livePeriod', livePeriod);
+    ////console.log('livePeriodYear', (selectedDate.year ? selectedDate.year.replace('년', '') : ''));
+    ////console.log('livePeriodMonth', (selectedDate.month ? selectedDate.year.replace('개월', '') : ''));
+    const chat9 = gainTax.find(el => el.id === 'ExpenseInquiry');
+    const chat10 = gainTax.find(el => el.id === 'ExpenseAnswer');
+    const additionalQuestion = await getadditionalQuestion('PERIOD_DIAL', livePeriod, houseInfo?.houseId, houseInfo?.sellDate, houseInfo?.sellAmount);
+    //console.log('PERIOD_DIAL additionalQuestion', additionalQuestion);
+    let chat7;
+    if (additionalQuestion.returndata) {
+      if (additionalQuestion.detaildata?.hasNextQuestion === true) {
+        if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0006') {
+          let chatIndex = gainTax.findIndex(el => el.id === 'additionalQuestion');
+          if (chatIndex !== -1) {
+            chat7 = {
+              ...gainTax[chatIndex],
+              message: additionalQuestion.detaildata?.nextQuestionContent,
+              questionId: additionalQuestion.detaildata?.nextQuestionId,
+              select: gainTax[chatIndex].select.map(item => ({
+                ...item,
+                name: item.id === 'additionalQuestionY' ? '예' : '아니요',
+                answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                select: ['ExpenseInquiry', 'ExpenseAnswer'],
+              }))
+            };
+          }
+        } else {
+          let chatIndex = gainTax.findIndex(el => el.id === 'landlord2');
+          chat7 = {
+            ...gainTax[chatIndex],
+          };
+        }
+
+        dispatch(
+          setChatDataList([
+            ...chatDataList,
+            chat1,
+            chat7
+          ])
+        );
+      } else {
+        if (additionalQuestion.detaildata?.answerSelectList === null && additionalQuestion.detaildata?.nextQuestionContent === null) {
+
+
+          let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
+          if (tempadditionalAnswerList) {
+            let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0006' in item);
+            if (foundIndex !== -1) {
+              // 불변성을 유지하면서 Q_0005 값을 삭제
+              tempadditionalAnswerList = tempadditionalAnswerList.filter((_, index) => index !== foundIndex);
+              //console.log('tempadditionalAnswerList', tempadditionalAnswerList);
+              setTimeout(() => {
+                dispatch(setHouseInfo({
+                  ...houseInfo, additionalAnswerList: tempadditionalAnswerList
+                }));
+              }, 300);
+            }
+          }
+        }
+        dispatch(
+          setChatDataList([
+            ...chatDataList,
+            chat1,
+            chat9,
+            chat10
+          ])
+        );
+      }
+
+    } else {
+
+
+      let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
+      if (tempadditionalAnswerList) {
+        let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0006' in item);
+        if (foundIndex !== -1) {
+          // 불변성을 유지하면서 Q_0005 값을 삭제
+          tempadditionalAnswerList = tempadditionalAnswerList.filter((_, index) => index !== foundIndex);
+          setTimeout(() => {
+            dispatch(setHouseInfo({
+              ...houseInfo, additionalAnswerList: tempadditionalAnswerList
+            }));
+          }, 300);
+        }
+      }
+
+      const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+      dispatch(setChatDataList(newChatDataList));
+    }
+
+    // ////console.log('selectedYear :', Math.floor(selectedYear.replace('년', '')));
+    // ////console.log('selectedMonth :', selectedMonth.replace('개월', ''));
 
 
   };
@@ -193,7 +384,7 @@ const directlivePeriod = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />

@@ -220,7 +220,7 @@ const UpdateBuyPriceAlert = props => {
     if (canProceed) {
       var p = data;
       p.buyPrice = buyPrice;
-      //console.log('[UpdatebuyPriceAlert]nextHandler p:', p);
+      //////console.log('[UpdatebuyPriceAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
        
       actionSheetRef.current?.hide();

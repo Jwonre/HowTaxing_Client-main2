@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Pressable,
 } from 'react-native';
-import React, { useRef, useState } from 'react';
-import ActionSheet from 'react-native-actions-sheet';
+import React, { useRef, useState, useEffect } from 'react';
+import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
@@ -19,7 +19,11 @@ import PlusIcon from '../../assets/icons/plus.svg';
 import { useDispatch, useSelector } from 'react-redux';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { setChatDataList } from '../../redux/chatDataListSlice';
-
+import { acquisitionTax } from '../../data/chatData';
+import axios from 'axios';
+import dayjs from 'dayjs';
+import { legacy_createStore } from '@reduxjs/toolkit';
+dayjs.locale('ko');
 const SheetContainer = styled.View`
   flex: 1;
   background-color: #fff;
@@ -89,9 +93,79 @@ const OwnHouseCountSheet = props => {
   const navigation = props.payload?.navigation;
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
+  const [isConnected, setIsConnected] = useState(true);
+  const currentUser = useSelector(state => state.currentUser.value);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const getadditionalQuestion = async (questionId, answerValue, houseId, buyDate, buyPrice) => {
+    /*
+    [필수] calcType | String | 계산유형(01:취득세, 02:양도소득세)
+    [선택] questionId | String | 질의ID
+    [선택] answerValue | String | 응답값
+    [선택] sellHouseId | Long | 양도주택ID (  양도소득세 계산 시 세팅)
+    [선택] sellDate | LocalDate | 양도일자 (양도소득세 계산 시 세팅)
+    [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
+*/
+
+    try {
+      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.accessToken}`
+      };
+
+      const param = {
+        calcType: '01',
+        questionId: questionId,
+        answerValue: answerValue ? answerValue : '',
+        sellHouseId: houseId ? houseId : '',
+        buyDate: buyDate ? dayjs(buyDate).format('YYYY-MM-DD') : null,
+        buyPrice: buyPrice ? buyPrice : 0,
+        ownHouseCnt: HouseCount ? HouseCount : 0
+      };
+      // console.log('[additionalQuestion] additionalQuestion param:', param);
+      const response = await axios.post(url, param, { headers });
+      const detaildata = response.data.data;
+      //console.log('response.data', response.data);
+      if (response.data.errYn == 'Y') {
+        setTimeout(() => {
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg ? response.data.errMsg : '추가질의를 가져오지 못했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+              buttontext: '확인하기',
+            },
+          });
+        }, 500)
+        return {
+          returndata: false
+        };
+      } else {
+        //  console.log('[additionalQuestion] additionalQuestion retrieved:', detaildata);
+        //    console.log('[additionalQuestion] detaildata?.houseType:', detaildata?.houseType);
+        //   console.log('[additionalQuestion] additionalQuestion houseInfo:', houseInfo);
+        return {
+          detaildata: detaildata,
+          returndata: true
+        }
+      }
+    } catch (error) {
+      setTimeout(() => {
+        ////console.log(error ? error : 'error');
+        SheetManager.show('info', {
+          payload: {
+            message: '추가질의를 가져오는데\n알수없는 오류가 발생했습니다.',
+            type: 'error',
+            buttontext: '확인하기',
+          },
+        });
+      }, 500)
+      return {
+        returndata: false
+      };
+    }
+  };
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -110,7 +184,9 @@ const OwnHouseCountSheet = props => {
     });
   };
 
-
+  useEffect(() => {
+    dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: [] }));
+  }, []);
 
   return (
     <ActionSheet
@@ -224,10 +300,10 @@ const OwnHouseCountSheet = props => {
               onPress={async () => {
                 const state = await NetInfo.fetch();
                 const canProceed = await handleNetInfoChange(state);
+                const ownHouseCnt = HouseCount;
                 if (canProceed) {
-                  dispatch(
-                    setHouseInfo({ ...houseInfo, ownHouseCnt: HouseCount, isOwnHouseCntRegist: true })
-                  );
+
+
                   actionSheetRef.current?.hide();
                   const chat = {
                     id: 'OwnHouseCountSystem',
@@ -246,6 +322,7 @@ const OwnHouseCountSheet = props => {
                     id: 'palnSale',
                     type: 'system',
                     progress: 6,
+                    questionId: 'Q_0007',
                     message:
                       '종전주택 매도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 매도 계획이 있나요?',
                     select: [
@@ -253,18 +330,130 @@ const OwnHouseCountSheet = props => {
                         id: 'planSaleYes',
                         name: '3년 이내 매도 계획',
                         select: ['getInfoDone', 'getInfoConfirm'],
+                        answer: '01'
                       },
                       {
                         id: 'planSaleNo',
                         name: '매도 계획 없음',
                         select: ['getInfoDone', 'getInfoConfirm'],
+                        answer: '02'
                       },
                     ],
                   };
-                  dispatch(
-                    setChatDataList([...chatDataList, chat, chat1, chat2]),
 
-                  );
+                  const chat4 = acquisitionTax.find(el => el.id === 'getInfoDone');
+                  const chat5 = acquisitionTax.find(el => el.id === 'getInfoConfirm');
+                  const additionalQuestion = await getadditionalQuestion('', '', houseInfo?.houseId, houseInfo?.buyDate, houseInfo?.acAmount);
+                  // console.log('additionalQuestion', additionalQuestion);
+                  let chat3;
+                  if (additionalQuestion.returndata) {
+                    if (additionalQuestion.detaildata?.hasNextQuestion === true) {
+                      if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0007') {
+                        let chatIndex = acquisitionTax.findIndex(el => el.id === 'additionalQuestion');
+                        if (chatIndex !== -1) {
+                          chat3 = {
+                            ...acquisitionTax[chatIndex],
+                            message: additionalQuestion.detaildata?.nextQuestionContent,
+                            questionId: additionalQuestion.detaildata?.nextQuestionId,
+                            select: acquisitionTax[chatIndex].select.map(item => ({
+                              ...item,
+                              name: item.id === 'additionalQuestionY' ? '3년 이내 매도 계획' : '매도 계획 없음',
+                              answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                              select: ['getInfoDone', 'getInfoConfirm'],
+                            }))
+                          };
+                          setTimeout(() => {
+                            dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
+                          }, 300);
+                        }
+                        dispatch(
+                          setChatDataList([
+                            ...chatDataList,
+                            chat,
+                            chat1,
+                            chat3
+                          ])
+                        );
+                      }
+
+                    } else {
+                      if (additionalQuestion.detaildata?.answerSelectList === null && additionalQuestion.detaildata?.nextQuestionContent === null) {
+
+                        let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
+                        if (tempadditionalAnswerList) {
+                          let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0007' in item);
+                          if (foundIndex !== -1) {
+                            // 불변성을 유지하면서 Q_0007 값을 삭제
+                            const { 'Q_0007': _, ...rest } = tempadditionalAnswerList[foundIndex];
+                            tempadditionalAnswerList = [
+                              ...tempadditionalAnswerList.slice(0, foundIndex),
+                              rest,
+                              ...tempadditionalAnswerList.slice(foundIndex + 1)
+                            ];
+                            // console.log('ownHouseCnt', ownHouseCnt);
+                            setTimeout(() => {
+                              dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
+                            }, 300);
+
+                          } else {
+                            setTimeout(() => {
+                              dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
+                            }, 300);
+                          }
+                        } else {
+                           console.log('ownHouseCnt', ownHouseCnt);
+                          setTimeout(() => {
+                            dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
+                          }, 300);
+                        }
+                      }
+                      dispatch(
+                        setChatDataList([
+                          ...chatDataList,
+                          chat,
+                          chat1,
+                          chat4,
+                          chat5
+                        ])
+                      );
+
+                    }
+
+                  } else {
+                    let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
+                    if (tempadditionalAnswerList) {
+                      let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0007' in item);
+                      if (foundIndex !== -1) {
+                        // 불변성을 유지하면서 Q_0007 값을 삭제
+                        const { 'Q_0007': _, ...rest } = tempadditionalAnswerList[foundIndex];
+                        tempadditionalAnswerList = [
+                          ...tempadditionalAnswerList.slice(0, foundIndex),
+                          rest,
+                          ...tempadditionalAnswerList.slice(foundIndex + 1)
+                        ];
+                        setTimeout(() => {
+                          // console.log('ownHouseCnt', ownHouseCnt);
+                          dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
+                        }, 300);
+
+                      } else {
+                        setTimeout(() => {
+                          dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
+                        }, 300);
+                      }
+                    } else {
+                      setTimeout(() => {
+                        // console.log('ownHouseCnt', ownHouseCnt);
+                        dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
+                      }, 300);
+                    }
+                    const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                    dispatch(setChatDataList(newChatDataList));
+                  }
+
+
+
+
                 } else {
                   const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
                   dispatch(setChatDataList(newChatDataList));

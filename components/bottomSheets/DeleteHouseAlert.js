@@ -135,8 +135,8 @@ const DeleteHouseAlert = props => {
 
         } else {
           const result = response.data;
-          //  console.log('deleteHouse', response);
-          //  console.log('item?.houseId', item?.houseId);
+          //  ////console.log('deleteHouse', response);
+          //  ////console.log('item?.houseId', item?.houseId);
 
           const filteredList = ownHouseList.filter(el => el.houseId !== item?.houseId);
           dispatch(setOwnHouseList(filteredList));

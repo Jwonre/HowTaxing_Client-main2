@@ -115,7 +115,7 @@ const TaxCard2 = props => {
   const getTaxCard2Info = async () => {
     const data = {
       houseId : houseInfo.houseId  === undefined ? '' : houseInfo.houseId ,
-      sellContractDate : dayjs(houseInfo.contractDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
+      sellContractDate : dayjs(houseInfo.sellContractDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.sellContractDate).format('YYYY-MM-DD'),
       sellDate : dayjs(houseInfo.sellDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.sellDate).format('YYYY-MM-DD'),
       sellPrice : houseInfo.sellAmount === undefined ? '' : houseInfo.sellAmount,
       necExpensePrice : houseInfo.necessaryExpense === undefined ? '' : houseInfo.necessaryExpense,
@@ -126,7 +126,7 @@ const TaxCard2 = props => {
       additionalAnswerList : houseInfo.additionalAnswerList === undefined ? []: houseInfo.additionalAnswerList
       //planAnswer : houseInfo.planAnswer === undefined ? '' : houseInfo.planAnswer
     };
-    console.log('양도소득세 파라미터', data);
+    //console.log('양도소득세 파라미터', data);
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -149,10 +149,10 @@ const TaxCard2 = props => {
               buttontext: '확인하기',
             },
           });
-        //  console.log('양도소득세 결과', response.data);
+        //  ////console.log('양도소득세 결과', response.data);
         } else {
           const data = response.data.data;
-        //  console.log('양도소득세 결과', data);
+        //  ////console.log('양도소득세 결과', data);
           setPData(data.list);
           dispatch(setHouseInfo({ ...houseInfo, ...data.list[0] }));
         }

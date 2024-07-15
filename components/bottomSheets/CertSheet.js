@@ -233,7 +233,7 @@ const CertSheet = props => {
   const actionSheetRef = useRef(null);
   const cert = props.payload.data;
   const navigation = props.payload?.navigation;
-  console.log('navigation', navigation);
+  ////console.log('navigation', navigation);
   const { width, height } = useWindowDimensions();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const currentUser = useSelector(state => state.currentUser.value);
@@ -271,7 +271,7 @@ const CertSheet = props => {
   //  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    //   console.log('props?.payload?.isGainsTax', props?.payload?.isGainsTax)
+    //   ////console.log('props?.payload?.isGainsTax', props?.payload?.isGainsTax)
     if (props?.payload?.isGainsTax === true) {
       setIsGainsTax('02');
     } else {
@@ -350,7 +350,7 @@ const CertSheet = props => {
       const response = await axios.post(url, data, { headers });
       if (response.data.errYn === 'Y') {
         if (response.data.errCode === 'HOUSE-005') {
-          console.log('response.data', response.data);
+          ////console.log('response.data', response.data);
           await SheetManager.show('info', {
             payload: {
               type: 'error',
@@ -428,7 +428,7 @@ const CertSheet = props => {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
     };
-    //console.log('@@@@@@@@@headers:', headers);
+    //////console.log('@@@@@@@@@headers:', headers);
 
     const data = {
       certOrg: certType === 'KB' ? 'kb' : certType === 'naver' ? 'naver' : 'toss',
@@ -439,10 +439,10 @@ const CertSheet = props => {
       userPw: password,
       calcType: isGainsTax,
     };
-    //console.log('certdata : ', data);
+    //////console.log('certdata : ', data);
     try {
-      // console.log('[CertSheet]headers:', headers);
-      // console.log('[CertSheet]data:', data);
+      // ////console.log('[CertSheet]headers:', headers);
+      // ////console.log('[CertSheet]data:', data);
       const response = await hypenHouseAPI(url, data, headers);
 
       if (response) {
@@ -461,7 +461,7 @@ const CertSheet = props => {
             buttontext: '인증하기',
           }
         });
-        console.log('에러', error ? error : '');
+        ////console.log('에러', error ? error : '');
         const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
         dispatch(setChatDataList(newChatDataList));
 
@@ -522,7 +522,7 @@ const CertSheet = props => {
       );
  
       dispatch(setChatDataList([...chatDataList, chat1, chat2, chat3, chat4])) // 1초 후에 실행);
-      console.log(chat4);
+      ////console.log(chat4);
  
       // 인증 데이터 초기화
       dispatch({
@@ -563,14 +563,14 @@ const CertSheet = props => {
 
       const certresult = await postOwnHouse();
 
-      //console.log('certresult', certresult)
+      //////console.log('certresult', certresult)
       if (certresult) {
         SheetManager.hide("infoCertification");
         const { isGainsTax } = props.payload;
         const chatItem = isGainsTax
           ? gainTax.find(el => el.id === 'allHouse')
           : acquisitionTax.find(el => el.id === 'moment');
-        //console.log(chatItem);
+        //////console.log(chatItem);
         dispatch(setChatDataList([...chatDataList, chatItem]));
 
       }
@@ -864,9 +864,9 @@ const CertSheet = props => {
                   keyboardType="number-pad"
                   onChangeText={(masked, unmasked, obfuscated) => {
                     setResidentNumber(unmasked);
-                    // console.log("mask:", masked);
-                    // console.log("unmask:", unmasked);
-                    // console.log("obfuscated:", obfuscated);
+                    // ////console.log("mask:", masked);
+                    // ////console.log("unmask:", unmasked);
+                    // ////console.log("obfuscated:", obfuscated);
                   }}
                   obfuscationCharacter="*"
                   showObfuscatedValue
@@ -972,9 +972,9 @@ const CertSheet = props => {
                   keyboardType="number-pad"
                   onChangeText={(masked, unmasked, obfuscated) => {
                     setResidentNumber(unmasked);
-                    // console.log("mask:", masked);
-                    // console.log("unmask:", unmasked);
-                    // console.log("obfuscated:", obfuscated);
+                    // ////console.log("mask:", masked);
+                    // ////console.log("unmask:", unmasked);
+                    // ////console.log("obfuscated:", obfuscated);
                   }}
 
                   obfuscationCharacter="*"
@@ -1083,9 +1083,9 @@ const CertSheet = props => {
                     keyboardType="number-pad"
                     onChangeText={(masked, unmasked, obfuscated) => {
                       setResidentNumber(unmasked);
-                      // console.log("mask:", masked);
-                      // console.log("unmask:", unmasked);
-                      // console.log("obfuscated:", obfuscated);
+                      // ////console.log("mask:", masked);
+                      // ////console.log("unmask:", unmasked);
+                      // ////console.log("obfuscated:", obfuscated);
                     }}
                     obfuscationCharacter="*"
                     showObfuscatedValue

@@ -165,7 +165,7 @@ const UpdateBalanceDateAlert = props => {
     if (canProceed) {
     var p = data;
     p.balanceDate = selectedDate;
-   // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
+   // ////console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
     await handleHouseChange(p, p?.isMoveInRight);
      
     actionSheetRef.current?.hide();
@@ -218,8 +218,8 @@ const UpdateBalanceDateAlert = props => {
                 height: 420,
               }}>
               <Calendar
-                currentDate={data?.contractDate ? new Date(data?.contractDate) : new Date()}
-                minDate={data?.contractDate ? new Date(data?.contractDate) : new Date()}
+                currentDate={data?.contractDate ? new Date(data?.contractDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
+                minDate={data?.contractDate ? new Date(data?.contractDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
                 setSelectedDate={setSelectedDate}
 
               />

@@ -23,6 +23,7 @@ import { setCert } from '../../redux/certSlice';
 import { AREA_LIST } from '../../data/areaData';
 import { LogBox } from 'react-native';
 import NetInfo from "@react-native-community/netinfo"
+import dayjs from 'dayjs';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -299,6 +300,75 @@ const CertSheet = props => {
 
   const [isConnected, setIsConnected] = useState(true);
 
+  const getadditionalQuestion = async (questionId, answerValue, houseId, sellDate, sellPrice) => {
+    /*
+    [필수] calcType | String | 계산유형(01:취득세, 02:양도소득세)
+    [선택] questionId | String | 질의ID
+    [선택] answerValue | String | 응답값
+    [선택] sellHouseId | Long | 양도주택ID (  양도소득세 계산 시 세팅)
+    [선택] sellDate | LocalDate | 양도일자 (양도소득세 계산 시 세팅)
+    [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
+*/
+    try {
+      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.accessToken}`
+      };
+
+      const param = {
+        calcType: '02',
+        questionId: questionId,
+        answerValue: answerValue ? answerValue : '',
+        sellHouseId: houseId ? houseId : '',
+        sellDate: sellDate ? dayjs(sellDate).format('YYYY-MM-DD') : null,
+        sellPrice: sellPrice ? sellPrice : 0
+      };
+      ////console.log('[additionalQuestion] additionalQuestion param:', param);
+      //////console.log('[HouseDetail] Fetching house details for item:', item);
+      const response = await axios.post(url, param, { headers });
+      const detaildata = response.data.data;
+      ////console.log('response.data', response.data);
+      if (response.data.errYn == 'Y') {
+        setTimeout(() => {
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg ? response.data.errMsg : '추가질의를 가져오지 못했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+              buttontext: '확인하기',
+            },
+          });
+        }, 500)
+        return {
+          returndata: false
+        };
+      } else {
+        //  ////console.log('[additionalQuestion] additionalQuestion retrieved:', detaildata);
+        // ////console.log('[additionalQuestion] detaildata?.houseType:', detaildata?.houseType);
+        //  ////console.log('[additionalQuestion] additionalQuestion houseInfo:', houseInfo);
+        return {
+          detaildata: detaildata,
+          returndata: true
+        }
+      }
+    } catch (error) {
+      setTimeout(() => {
+        ////console.log(error ? error : 'error');
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: '추가질의를 가져오는데\n알수없는 오류가 발생했습니다.',
+            buttontext: '확인하기',
+          },
+        });
+      }, 500)
+      return {
+        returndata: false
+      };
+    }
+  };
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -368,7 +438,7 @@ const CertSheet = props => {
     const response = await axios.post(url, data, { headers: headers });
     if (response.data.errYn === 'Y') {
       if (response.data.errCode === 'HOUSE-005') {
-        console.log('response.data', response.data);
+        ////console.log('response.data', response.data);
         await SheetManager.show('info', {
           payload: {
             type: 'error',
@@ -418,7 +488,7 @@ const CertSheet = props => {
       return false;
     }
     const list = response.data.data.list ? response.data.data.list : null;
-    //console.log('[hypenHouseAPI]list:', list);
+    //////console.log('[hypenHouseAPI]list:', list);
     //인증서 확인요청 팝업 화면 출력
     dispatch(setOwnHouseList(list));
   };
@@ -430,7 +500,7 @@ const CertSheet = props => {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
     };
-    //console.log('@@@@@@@@@headers:', headers);
+    //////console.log('@@@@@@@@@headers:', headers);
 
     const data = {
       certOrg: certType === 'KB' ? 'kb' : certType === 'naver' ? 'naver' : certType === 'toss' ? 'toss' : certType === 'pass' ? 'pass' : certType === 'payco' ? 'payco' : certType === 'samsung' ? 'samsung' : 'kakao',
@@ -442,8 +512,8 @@ const CertSheet = props => {
     };
 
     try {
-      //console.log('[CertSheet]headers:', headers);
-      // console.log('[CertSheet]data:', data);
+      //////console.log('[CertSheet]headers:', headers);
+      // ////console.log('[CertSheet]data:', data);
       await hypenHouseAPI(url, data, headers);
     } catch (error) {
       SheetManager.show('info', {
@@ -454,7 +524,7 @@ const CertSheet = props => {
           buttontext: '확인하기',
         },
       });
-      console.log('에러', error);
+      ////console.log('에러', error);
     }
   };
 
@@ -478,18 +548,130 @@ const CertSheet = props => {
         const chat3 = gainTax.find(el => el.id === 'ExpenseInquiry');
         const chat4 = gainTax.find(el => el.id === 'ExpenseAnswer');
 
-        dispatch(
-          setHouseInfo({
-            ...houseInfo,
-            additionalAnswerList: [
-              {"Q_0005" : "02",
-              "PERIOD_CERT" : "2년 10개월"}
-            ]
-          })
-        );
+        let tempadditionalAnswerList = houseInfo?.additionalAnswerList || [];
+        let Index1 = tempadditionalAnswerList.findIndex(item => 'Q_0005' in item);
+        let Index2 = tempadditionalAnswerList.findIndex(item => 'PERIOD_CERT' in item);
 
-        dispatch(setChatDataList([...chatDataList, chat1, chat2, chat3, chat4])) // 1초 후에 실행);
-        //console.log(chat4);
+        let newIndex1 = "02";
+        let newIndex2 = "2년 10개월";
+
+        if (Index1 !== -1 && Index2 !== -1) {
+          if (tempadditionalAnswerList[Index1]['Q_0005'] !== newIndex1 || tempadditionalAnswerList[Index2]['PERIOD_CERT'] !== newIndex2) {
+            tempadditionalAnswerList = [
+              ...tempadditionalAnswerList.slice(0, Index1),
+              { ...tempadditionalAnswerList[Index1], 'Q_0005': newIndex1 },
+              ...tempadditionalAnswerList.slice(Index1 + 1)
+            ];
+            tempadditionalAnswerList = [
+              ...tempadditionalAnswerList.slice(0, Index2),
+              { ...tempadditionalAnswerList[Index2], 'PERIOD_CERT': newIndex2 },
+              ...tempadditionalAnswerList.slice(Index2 + 1)
+            ];
+          }
+        } else if (Index1 !== -1 && Index2 === -1) {
+          tempadditionalAnswerList = [
+            ...tempadditionalAnswerList.slice(0, Index1),
+            { ...tempadditionalAnswerList[Index1], 'Q_0005': newIndex1 },
+            ...tempadditionalAnswerList.slice(Index1 + 1),
+            { "PERIOD_CERT": newIndex2 }
+          ];
+        } else {
+          tempadditionalAnswerList = [
+            ...tempadditionalAnswerList,
+            { "Q_0005": newIndex1 },
+            { "PERIOD_CERT": newIndex2 }
+          ];
+        }
+
+        dispatch(setHouseInfo({
+          ...houseInfo,
+          livePeriodYear: '2',
+          livePeriodMonth: '10',
+          additionalAnswerList: tempadditionalAnswerList
+        }));
+        const additionalQuestion = await getadditionalQuestion('PERIOD_CERT', '2년 10개월', houseInfo?.houseId, houseInfo?.sellDate, houseInfo?.sellAmount);
+        ////console.log('additionalQuestion', additionalQuestion);
+        let chat7;
+        if (additionalQuestion.returndata) {
+          if (additionalQuestion.detaildata?.hasNextQuestion === true) {
+            if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0006') {
+              let chatIndex = gainTax.findIndex(el => el.id === 'additionalQuestion');
+              if (chatIndex !== -1) {
+                chat7 = {
+                  ...gainTax[chatIndex],
+                  message: additionalQuestion.detaildata?.nextQuestionContent,
+                  questionId: additionalQuestion.detaildata?.nextQuestionId,
+                  select: gainTax[chatIndex].select.map(item => ({
+                    ...item,
+                    name: item.id === 'additionalQuestionY' ? '예' : '아니요',
+                    answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                    select: ['ExpenseInquiry', 'ExpenseAnswer'],
+                  }))
+                };
+              }
+            } else {
+              let chatIndex = gainTax.findIndex(el => el.id === 'landlord2');
+              chat7 = {
+                ...gainTax[chatIndex],
+              };
+            }
+
+            dispatch(
+              setChatDataList([
+                ...chatDataList,
+                chat1,
+                chat2,
+                chat7
+              ])
+            );
+          } else {
+            if (additionalQuestion.detaildata?.answerSelectList === null && additionalQuestion.detaildata?.nextQuestionContent === null) {
+
+              let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
+              if (tempadditionalAnswerList) {
+                let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0006' in item);
+                if (foundIndex !== -1) {
+                  // 불변성을 유지하면서 Q_0007 값을 삭제
+                  const { 'Q_0006': _, ...rest } = tempadditionalAnswerList[foundIndex];
+                  tempadditionalAnswerList = [
+                    ...tempadditionalAnswerList.slice(0, foundIndex),
+                    rest,
+                    ...tempadditionalAnswerList.slice(foundIndex + 1)
+                  ];
+                  dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+                }
+              }
+            }
+            dispatch(
+              setChatDataList([
+                ...chatDataList,
+                chat1,
+                chat2,
+                chat3,
+                chat4
+              ])
+            );
+          }
+
+        } else {
+          let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
+          if (tempadditionalAnswerList) {
+            let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0006' in item);
+            if (foundIndex !== -1) {
+              // 불변성을 유지하면서 Q_0007 값을 삭제
+              const { 'Q_0006': _, ...rest } = tempadditionalAnswerList[foundIndex];
+              tempadditionalAnswerList = [
+                ...tempadditionalAnswerList.slice(0, foundIndex),
+                rest,
+                ...tempadditionalAnswerList.slice(foundIndex + 1)
+              ];
+              dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+            }
+          }
+          const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+          dispatch(setChatDataList(newChatDataList));
+        }
+        //////console.log(chat4);
 
         // 인증 데이터 초기화
         dispatch(
@@ -704,7 +886,7 @@ const CertSheet = props => {
                 <ListItemButton
                   onPress={() => {
                     actionSheetRef.current?.hide();
-                    //   console.log('certType', certType);
+                    //   ////console.log('certType', certType);
                     navigation.navigate('Gov24', {
                       cert: certType,
                       isGainsTax: props.payload.isGainsTax,
@@ -733,7 +915,7 @@ const CertSheet = props => {
                 <ModalButton
                   disabled={!(agreeCert && agreePrivacy && agreeCopyright && agreeGov24)}
                   onPress={() => {
-                    //console.log('certType', certType);
+                    //////console.log('certType', certType);
                     if (certType === 'KB') {
                       setCurrentPageIndex(1);
                     } else if (certType === 'naver') {
@@ -817,9 +999,9 @@ const CertSheet = props => {
                   value={residentNumber}
                   onChangeText={(masked, unmasked, obfuscated) => {
                     setResidentNumber(unmasked);
-                    // console.log("mask:", masked);
-                    // console.log("unmask:", unmasked);
-                    // console.log("obfuscated:", obfuscated);
+                    // ////console.log("mask:", masked);
+                    // ////console.log("unmask:", unmasked);
+                    // ////console.log("obfuscated:", obfuscated);
                   }}
                   obfuscationCharacter="*"
                   showObfuscatedValue
@@ -880,7 +1062,7 @@ const CertSheet = props => {
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
                       /* onSelect={(selectedItem, index) => {
-                         console.log(selectedItem, index);
+                         ////console.log(selectedItem, index);
                        }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
@@ -907,7 +1089,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                              //console.log(item);
+                              //////console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1001,9 +1183,9 @@ const CertSheet = props => {
                   value={residentNumber}
                   onChangeText={(masked, unmasked, obfuscated) => {
                     setResidentNumber(unmasked);
-                    // console.log("mask:", masked);
-                    // console.log("unmask:", unmasked);
-                    // console.log("obfuscated:", obfuscated);
+                    // ////console.log("mask:", masked);
+                    // ////console.log("unmask:", unmasked);
+                    // ////console.log("obfuscated:", obfuscated);
                   }}
                   obfuscationCharacter="*"
                   showObfuscatedValue
@@ -1064,7 +1246,7 @@ const CertSheet = props => {
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
                       /*onSelect={(selectedItem, index) => {
-                        console.log(selectedItem, index);
+                        ////console.log(selectedItem, index);
                       }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
@@ -1091,7 +1273,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                              //console.log(item);
+                              //////console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1180,9 +1362,9 @@ const CertSheet = props => {
                   value={residentNumber}
                   onChangeText={(masked, unmasked, obfuscated) => {
                     setResidentNumber(unmasked);
-                    // console.log("mask:", masked);
-                    // console.log("unmask:", unmasked);
-                    // console.log("obfuscated:", obfuscated);
+                    // ////console.log("mask:", masked);
+                    // ////console.log("unmask:", unmasked);
+                    // ////console.log("obfuscated:", obfuscated);
                   }}
                   obfuscationCharacter="*"
                   showObfuscatedValue
@@ -1243,7 +1425,7 @@ const CertSheet = props => {
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
                       /* onSelect={(selectedItem, index) => {
-                         console.log(selectedItem, index);
+                         ////console.log(selectedItem, index);
                        }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
@@ -1270,7 +1452,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                              // console.log(item);
+                              // ////console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1367,9 +1549,9 @@ const CertSheet = props => {
                   value={residentNumber}
                   onChangeText={(masked, unmasked, obfuscated) => {
                     setResidentNumber(unmasked);
-                    // console.log("mask:", masked);
-                    // console.log("unmask:", unmasked);
-                    // console.log("obfuscated:", obfuscated);
+                    // ////console.log("mask:", masked);
+                    // ////console.log("unmask:", unmasked);
+                    // ////console.log("obfuscated:", obfuscated);
                   }}
                   obfuscationCharacter="*"
                   showObfuscatedValue
@@ -1430,7 +1612,7 @@ const CertSheet = props => {
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
                       /*  onSelect={(selectedItem, index) => {
-                          console.log(selectedItem, index);
+                          ////console.log(selectedItem, index);
                         }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
@@ -1457,7 +1639,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                              //  console.log(item);
+                              //  ////console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1554,9 +1736,9 @@ const CertSheet = props => {
                   value={residentNumber}
                   onChangeText={(masked, unmasked, obfuscated) => {
                     setResidentNumber(unmasked);
-                    // console.log("mask:", masked);
-                    // console.log("unmask:", unmasked);
-                    // console.log("obfuscated:", obfuscated);
+                    // ////console.log("mask:", masked);
+                    // ////console.log("unmask:", unmasked);
+                    // ////console.log("obfuscated:", obfuscated);
                   }}
                   obfuscationCharacter="*"
                   showObfuscatedValue
@@ -1617,7 +1799,7 @@ const CertSheet = props => {
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
                       /*onSelect={(selectedItem, index) => {
-                        console.log(selectedItem, index);
+                        ////console.log(selectedItem, index);
                       }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
@@ -1644,7 +1826,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                              //console.log(item);
+                              //////console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1741,9 +1923,9 @@ const CertSheet = props => {
                   value={residentNumber}
                   onChangeText={(masked, unmasked, obfuscated) => {
                     setResidentNumber(unmasked);
-                    // console.log("mask:", masked);
-                    // console.log("unmask:", unmasked);
-                    // console.log("obfuscated:", obfuscated);
+                    // ////console.log("mask:", masked);
+                    // ////console.log("unmask:", unmasked);
+                    // ////console.log("obfuscated:", obfuscated);
                   }}
                   obfuscationCharacter="*"
                   showObfuscatedValue
@@ -1804,7 +1986,7 @@ const CertSheet = props => {
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
                       /*onSelect={(selectedItem, index) => {
-                        console.log(selectedItem, index);
+                        ////console.log(selectedItem, index);
                       }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
@@ -1831,7 +2013,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                              //console.log(item);
+                              //////console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1928,9 +2110,9 @@ const CertSheet = props => {
                   value={residentNumber}
                   onChangeText={(masked, unmasked, obfuscated) => {
                     setResidentNumber(unmasked);
-                    // console.log("mask:", masked);
-                    // console.log("unmask:", unmasked);
-                    // console.log("obfuscated:", obfuscated);
+                    // ////console.log("mask:", masked);
+                    // ////console.log("unmask:", unmasked);
+                    // ////console.log("obfuscated:", obfuscated);
                   }}
                   obfuscationCharacter="*"
                   showObfuscatedValue
@@ -1991,7 +2173,7 @@ const CertSheet = props => {
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
                       /*  onSelect={(selectedItem, index) => {
-                          console.log(selectedItem, index);
+                          ////console.log(selectedItem, index);
                         }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
@@ -2018,7 +2200,7 @@ const CertSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                              // console.log(item);
+                              // ////console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>

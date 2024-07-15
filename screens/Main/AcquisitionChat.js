@@ -35,6 +35,7 @@ import TaxCard from '../../components/TaxCard';
 import TaxInfoCard from '../../components/TaxInfoCard';
 import HouseInfo from '../../components/HouseInfo';
 import EditIcon from '../../assets/icons/edit.svg';
+import CalculationWarningCard from '../../components/CalculationWarning';
 
 // Redux
 import { useDispatch, useSelector } from 'react-redux';
@@ -380,7 +381,7 @@ const AcquisitionChat = () => {
         } else {
           const result = response.data;
           const list = result.data.list === undefined ? null : result.data.list;
-          // console.log('[getOwnlist]list:', list);
+          // ////console.log('[getOwnlist]list:', list);
           dispatch(
             setOwnHouseList([
               ...list,
@@ -398,7 +399,7 @@ const AcquisitionChat = () => {
             buttontext: '확인하기',
           }
         });
-        console.log(error ? error : 'error');
+        ////console.log(error ? error : 'error');
       });
   };
 
@@ -473,7 +474,7 @@ const AcquisitionChat = () => {
   }, []);
 
   useEffect(() => {
-    //console.log('modalList', modalList);
+    //////console.log('modalList', modalList);
     const helloChatItem = acquisitionTax.find(el => el.id === 'type');
     dispatch(setChatDataList([helloChatItem]));
 
@@ -522,18 +523,17 @@ const AcquisitionChat = () => {
               <EditButton
                 onPress={() => {
                   setIsEditing(true);
-                  //console.log('item?.id', item?.id);
-                  //console.log('item?.type', item?.type);
+                  //////console.log('item?.id', item?.id);
+                  //////console.log('item?.type', item?.type);
                   if (item?.id === 'ownConfirmOK' && item?.type === 'my') {
                     var newChatDataList = chatDataList.slice(0, index - 1);
                   } else {
                     var newChatDataList = chatDataList.slice(0, index);
                   }
                   dispatch(setChatDataList(newChatDataList));
-                  //console.log('chatDataList last', chatDataList[chatDataList.length - 1]?.id);
-                  if (chatDataList[chatDataList.length - 1]?.id === 'apartmentAddress') {
+                  // console.log('chatDataList last', item?.id);
+                  if (item?.id === ('typeapartment' || 'typevilla' || 'typehouse' || 'typeticket') && item?.type === 'my') {
                     dispatch(clearHouseInfo());
-
                   }
 
 
@@ -562,6 +562,21 @@ const AcquisitionChat = () => {
                 const state = await NetInfo.fetch();
                 const canProceed = await handleNetInfoChange(state);
                 if (canProceed) {
+                  if(houseInfo?.additionalAnswerList){
+                    if(houseInfo?.additionalAnswerList !== null){
+                      const newAdditionalAnswerList = houseInfo?.additionalAnswerList.map(item => {
+                        let key = Object.keys(item)[0];
+                        let value = item[key];
+                        return { "questionId": key, "answerValue": value };
+                      });
+                      dispatch(
+                        setHouseInfo({
+                          ...houseInfo,
+                          additionalAnswerList: newAdditionalAnswerList
+                        })
+                      );
+                    }
+                  }
                   const chat1 = {
                     id: 'calculating',
                     type: 'system',
@@ -626,7 +641,7 @@ const AcquisitionChat = () => {
                     borderRadius: 11,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginRight: 10,
+                    marginRight: 5,
                     paddingHorizontal: 15,
                   }}>
                   <Text
@@ -643,6 +658,33 @@ const AcquisitionChat = () => {
                     }
                   </Text>
                 </View>
+                {/*(houseInfo.houseType !== '3' && houseInfo?.isMoveInRight) && <View
+                  style={{
+                    width: 'auto',
+                    height: 22,
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === (houseInfo.isMoveInRight === true ? 'isMoveInRight' : ''),
+                    )?.color,
+                    borderRadius: 11,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 5,
+                    paddingHorizontal: 15,
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontFamily: 'Pretendard-Medium',
+                      color: '#fff',
+                      lineHeight: 13,
+                      letterSpacing: -0.5,
+                    }}>
+                    {
+                      HOUSE_TYPE.find(el => el.id === (houseInfo.isMoveInRight === true ? 'isMoveInRight' : ''))
+                        ?.name
+                    }
+                  </Text>
+                </View>*/}
                 <View
                   style={{
                     width: 'auto',
@@ -651,7 +693,7 @@ const AcquisitionChat = () => {
                     borderRadius: 11,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginRight: 10,
+
                     paddingHorizontal: 15,
                   }}>
                   <Text
@@ -749,7 +791,7 @@ const AcquisitionChat = () => {
 
   // 시스템 챗 버블 렌더링
   const renderSystemChatItem = ({ item, index }) => {
-    // console.log('renderSystemChatItem item', item.id);
+    // ////console.log('renderSystemChatItem item', item.id);
     if (item?.id === 'goodbye' && !hasShownGoodbye) {
       setHasShownGoodbye(true);
       // modalList에 'review'가 없는 경우에만 추가합니다.
@@ -772,8 +814,9 @@ const AcquisitionChat = () => {
             padding: 20,
           }}>
           <CTACard />
-          <HouseInfo item={houseInfo} navigation={navigation} ChatType='AcquisitionChat'/>
+          <HouseInfo item={houseInfo} navigation={navigation} ChatType='AcquisitionChat' />
           <TaxCard navigation={navigation} />
+          <CalculationWarningCard />
           <TaxInfoCard />
           <DropShadow
             style={{
@@ -841,6 +884,38 @@ const AcquisitionChat = () => {
                           const chatList = [];
                           if (item2?.select) {
                             for (const item3 of item2.select) {
+                              if (item?.questionId === 'Q_0007') {
+                                if (item2?.answer) {
+                                  let tempadditionalAnswerList = houseInfo?.additionalAnswerList || [];
+                                  //console.log('tempadditionalAnswerList1.Q_0001', tempadditionalAnswerList.some(item => 'Q_0001' in item));
+                                  let foundIndex = tempadditionalAnswerList.findIndex(item => 'Q_0007' in item);
+                                  if (foundIndex !== -1) {
+                                    //console.log('tempadditionalAnswerList[foundIndex][Q_0001]', tempadditionalAnswerList[foundIndex]['Q_0001']);
+                                    //console.log('item2.answer', item2.answer);
+                                    if (tempadditionalAnswerList[foundIndex]['Q_0007'] !== item2.answer) {
+                                      // 불변성을 유지하면서 Q_0006 값을 변경
+                                      tempadditionalAnswerList = [
+                                        ...tempadditionalAnswerList.slice(0, foundIndex),
+                                        { ...tempadditionalAnswerList[foundIndex], 'Q_0007': item2.answer },
+                                        ...tempadditionalAnswerList.slice(foundIndex + 1)
+                                      ];
+                                    }
+                                    //console.log('tempadditionalAnswerList[foundIndex][Q_0001]', tempadditionalAnswerList[foundIndex]['Q_0001']);
+                                    dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+                                  } else {
+                                    dispatch(
+                                      setHouseInfo({
+                                        ...houseInfo,
+                                        additionalAnswerList: [
+                                          ...(houseInfo.additionalAnswerList || []),
+                                          { "Q_0007": item2.answer }
+                                        ]
+                                      })
+                                    );
+                                  }
+                                }
+
+                              }
                               const foundItem = acquisitionTax.find(el => el.id === item3);
                               if (foundItem) {
                                 chatList.push(foundItem);
@@ -854,9 +929,9 @@ const AcquisitionChat = () => {
                             item.id === 'aquiAmountSystem' ||
                             item.id === 'apartmentAddressSystem'
                           ) {
-                            //console.log(item.id);
+                            //////console.log(item.id);
                           } else {
-                            // console.log(item.id);
+                            // ////console.log(item.id);
                             dispatch(
                               setChatDataList([
                                 ...chatDataList,
@@ -879,7 +954,7 @@ const AcquisitionChat = () => {
                                                   }
                           */
                           if (item.id === 'type') {
-                            //console.log('item2?.name', item2?.name);
+                            //////console.log('item2?.name', item2?.name);
                             if ((item2?.name === '아파트')) {
                               dispatch(
                                 setHouseInfo({
@@ -905,7 +980,7 @@ const AcquisitionChat = () => {
                                   houseType: '3'
                                 }));
                             }
-                            //  console.log('houseType', houseInfo)
+                            //  ////console.log('houseType', houseInfo)
                           }
 
 
@@ -1028,7 +1103,7 @@ const AcquisitionChat = () => {
                           }
 
                           if (item2?.openSheet) {
-                            // console.log('openSheet');
+                            // ////console.log('openSheet');
                             SheetManager.show(item2.openSheet, {
                               payload: {
                                 navigation: navigation,
@@ -1043,21 +1118,21 @@ const AcquisitionChat = () => {
                           }
 
                           // 매도 계획 여부
-                          /* if (item2.id === 'planSaleYes') {
-                             dispatch(
-                               setHouseInfo({
-                                 ...houseInfo,
-                                 planSale: true,
-                               }),
-                             );
-                           } else if (item2.id === 'planSaleNo') {
-                             dispatch(
-                               setHouseInfo({
-                                 ...houseInfo,
-                                 planSale: false,
-                               }),
-                             );
-                           }*/
+                          if (item2.id === 'planSaleYes') {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                planSale: true,
+                              }),
+                            );
+                          } else if (item2.id === 'planSaleNo') {
+                            dispatch(
+                              setHouseInfo({
+                                ...houseInfo,
+                                planSale: false,
+                              }),
+                            );
+                          }
                         }
                       }}>
                       {item2?.icon ? item2.icon : null}
@@ -1104,9 +1179,9 @@ const AcquisitionChat = () => {
                   부동산 전문 세무사에게 상담 받아보세요!
                 </ChatBubbleText>
                 <ProfileAvatar
-                  source={require('../../assets/images/Gookyoung_Yoon.png')}
+                  source={require('../../assets/images/Minjungum_Lee.png')}
                 />
-                <ProfileName>윤국녕 세무사</ProfileName>
+                <ProfileName>이민정음 세무사</ProfileName>
                 <ProfileEmail>ilbitax86@naver.com</ProfileEmail>
                 <KakaoButton
                   onPress={async () => {
@@ -1211,7 +1286,7 @@ const AcquisitionChat = () => {
                       onPress={e => {
                         const type = '전용면적';
                         onQuestionMarkPress(type, e);
-                        // console.log('houseName', houseInfo?.houseName);
+                        // ////console.log('houseName', houseInfo?.houseName);
                       }}
                     />
                   </View>

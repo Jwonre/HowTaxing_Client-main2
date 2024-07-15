@@ -103,7 +103,7 @@ const HouseInfo = props => {
     });
   };
 
-  //console.log(props);
+  //////console.log(props);
   return (
     <HoustInfoSection>
       <View
@@ -134,8 +134,8 @@ const HouseInfo = props => {
               prevSheet: props.ChatType,
 
             });
-            console.log('navigation', navigation);
-            // console.log('houseinfo.js houseinfo', props.item);
+            ////console.log('navigation', navigation);
+            // ////console.log('houseinfo.js houseinfo', props.item);
           }
         }
         }>

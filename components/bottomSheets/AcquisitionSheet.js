@@ -221,10 +221,10 @@ const AcquisitionSheet = props => {
 
   // 수정하기로 들어온 페이지 이동
   useEffect(() => {
-    //console.log('acAmount:', acAmount);
+    //////console.log('acAmount:', acAmount);
     if (props.payload?.currentPageIndex) {
       setCurrentPageIndex(props.payload?.currentPageIndex);
-      /*  console.log('currentPageIndex', props.payload?.currentPageIndex);
+      /*  ////console.log('currentPageIndex', props.payload?.currentPageIndex);
         if (props.payload?.currentPageIndex === 1) {
           houseInfo?.contractDate ? setSelectedDate(houseInfo?.contractDate) : setSelectedDate(new Date());
           houseInfo?.contractDate ? setSelectedDate2(houseInfo?.buyDate) : setSelectedDate2(new Date());
@@ -318,7 +318,7 @@ const AcquisitionSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: currentPageIndex === 2 ? (isKeyboardVisible ? 400 : 420) : 670,
+        height: currentPageIndex === 2 ? (isKeyboardVisible ? 400 : 420) : 640,
         width: width - 40,
       }}>
       <ScrollView
@@ -340,11 +340,12 @@ const AcquisitionSheet = props => {
             <View
               style={{
                 width: '100%',
-                height: 420,
+                height: 400,
               }}>
               <Calendar
                 setSelectedDate={setSelectedDate}
-                currentDate={new Date()}
+                selectedDate={new Date().setHours(0,0,0,0)}
+                currentDate={new Date().setHours(0,0,0,0)}
               />
             </View>
           </ModalInputSection>
@@ -399,7 +400,7 @@ const AcquisitionSheet = props => {
 
                     progress: 2,
                   };
-                  //console.log('selectedDate2', selectedDate2);
+                  //////console.log('selectedDate2', selectedDate2);
                   dispatch(setChatDataList([...chatDataList, chat2, chat3]));
                 }}
                 style={{
@@ -424,17 +425,18 @@ const AcquisitionSheet = props => {
             <View
               style={{
                 width: '100%',
-                height: 420,
+                height: 400,
               }}>
               {currentPageIndex === 1 && (<Calendar
-                minDate={new Date(houseInfo?.contractDate)}
+                minDate={new Date(houseInfo?.contractDate.setHours(0,0,0,0))}
                 setSelectedDate={setSelectedDate2}
-                currentDate={new Date(currentDate ? currentDate : houseInfo?.contractDate)}
+                selectedDate={new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0,0,0,0)}
+                currentDate={new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0,0,0,0)}
               />)}
             </View>
           </ModalInputSection>
 
-          <ButtonSection>
+          <ButtonSection> 
             <ButtonShadow
               style={{
                 shadowColor: '#fff',
@@ -623,7 +625,7 @@ const AcquisitionSheet = props => {
                   const chat3 = acquisitionTax.find(el => el.id === 'joint');
                   dispatch(setChatDataList([...chatDataList, chat2, chat3]));
                    
-                  //  setTimeout(() => { console.log('aquiAmountDate', houseInfo) }, 500);
+                  //  setTimeout(() => { ////console.log('aquiAmountDate', houseInfo) }, 500);
                 }} style={{
                   backgroundColor: acAmount ? '#2f87ff' : '#E8EAED',
                   borderColor: acAmount ? '#2f87ff' : '#E8EAED',

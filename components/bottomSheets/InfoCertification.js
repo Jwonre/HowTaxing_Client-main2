@@ -152,7 +152,7 @@ const InfoCertification = props => {
     try {
       const response = await axios.post(url, data, { headers });
       if (response.data.errYn === 'Y') {
-        //console.log('[hypenHouseAPI] An error occurred:', response.data);
+        //////console.log('[hypenHouseAPI] An error occurred:', response.data);
 
         if (response.data.errCode === 'HOUSE-005') {
           await SheetManager.show('info', {
@@ -229,7 +229,7 @@ const InfoCertification = props => {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
     };
-    //console.log('@@@@@@@@@headers:', headers);
+    //////console.log('@@@@@@@@@headers:', headers);
 
     const data = {
       certOrg: certType === 'KB' ? 'kb' : certType === 'naver' ? 'naver' : 'toss',
@@ -240,10 +240,10 @@ const InfoCertification = props => {
       userPw: password,
       calcType: calcType,
     };
-    //console.log('certdata : ', data);
+    //////console.log('certdata : ', data);
     try {
-      // console.log('[CertSheet]headers:', headers);
-      // console.log('[CertSheet]data:', data);
+      // ////console.log('[CertSheet]headers:', headers);
+      // ////console.log('[CertSheet]data:', data);
       const response = await hypenHouseAPI(url, data, headers);
 
       if (response) {
@@ -261,7 +261,7 @@ const InfoCertification = props => {
             buttontext: '인증하기',
           }
         });
-        console.log('에러', error);
+        ////console.log('에러', error);
         const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
         dispatch(setChatDataList(newChatDataList));
 
@@ -368,14 +368,14 @@ const InfoCertification = props => {
                   dispatch(setResend(false));
                   setActiveYN(false);
                   const certresult = await postOwnHouse();
-                  //console.log('certresult', certresult)
+                  //////console.log('certresult', certresult)
                   if (certresult) {
                     SheetManager.hide("infoCertification");
                     const { isGainsTax } = props.payload?.isGainsTax;
                     const chatItem = isGainsTax
                       ? gainTax.find(el => el.id === 'allHouse')
                       : acquisitionTax.find(el => el.id === 'moment');
-                    //console.log(chatItem);
+                    //////console.log(chatItem);
                     dispatch(setChatDataList([...chatDataList, chatItem]));
 
                   }

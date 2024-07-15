@@ -27,7 +27,7 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { AREA_LIST } from '../../data/areaData';
 import NetInfo from "@react-native-community/netinfo";
-
+import dayjs from 'dayjs';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -336,7 +336,7 @@ const SearchHouseSheet = props => {
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const navigation = props.payload.navigation;
-  //console.log('houseInfo?.houseType', houseInfo?.houseType)
+  //////console.log('houseInfo?.houseType', houseInfo?.houseType)
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -408,7 +408,7 @@ const SearchHouseSheet = props => {
              }
      
              const list = parsedData.results.juso;
-             console.log('jusolist', list)
+             ////console.log('jusolist', list)
              if (list.length === 0) {
                SheetManager.show('info', {
                  payload: {
@@ -423,7 +423,7 @@ const SearchHouseSheet = props => {
              setListData([...list]);
            })
            .catch(function (error) {
-             console.log(error);
+             ////console.log(error);
            });
   
     };
@@ -469,7 +469,7 @@ const SearchHouseSheet = props => {
         } else {
           // 성공적인 응답 처리 
           const list = response.data.data.jusoList;
-          //     console.log('response', response.data.data)
+          //     ////console.log('response', response.data.data)
           if (list.length === 0) {
             SheetManager.show('info', {
               payload: {
@@ -555,7 +555,7 @@ const SearchHouseSheet = props => {
           setListData([...listData, ...list]);
         })
         .catch(function (error) {
-          console.log(error);
+          ////console.log(error);
         });*/
 
     const accessToken = currentUser.accessToken;
@@ -599,7 +599,7 @@ const SearchHouseSheet = props => {
         } else {
           // 성공적인 응답 처리 
           const list = response.data.data.jusoList;
-          //  console.log('response', response.data.data)
+          //  ////console.log('response', response.data.data)
           if (list.length === 0) {
             SheetManager.show('info', {
               payload: {
@@ -626,7 +626,7 @@ const SearchHouseSheet = props => {
           actionSheetRef: actionSheetRef,
           buttontext: '확인하기',
         });
-        console.log(error ? error : 'error');
+        ////console.log(error ? error : 'error');
 
       });
   };
@@ -653,7 +653,7 @@ const SearchHouseSheet = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      //console.log('Holist response :', response.data.data.dongHoList);
+      //////console.log('Holist response :', response.data.data.dongHoList);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -692,7 +692,7 @@ const SearchHouseSheet = props => {
         actionSheetRef: actionSheetRef,
         buttontext: '확인하기',
       });
-      console.log(error ? error : 'error');
+      ////console.log(error ? error : 'error');
     }
   };
 
@@ -714,7 +714,7 @@ const SearchHouseSheet = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      //console.log('Donglist response :', response.data);
+      //////console.log('Donglist response :', response.data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -731,7 +731,7 @@ const SearchHouseSheet = props => {
         return 'dongerror';
 
       } else {
-        // console.log('donglist response :', response.data.data.dongHoList);
+        // ////console.log('donglist response :', response.data.data.dongHoList);
         const donglist = response.data.data.dongHoList;
         setDongList(donglist);
         return donglist[0];
@@ -746,7 +746,7 @@ const SearchHouseSheet = props => {
         actionSheetRef: actionSheetRef,
         buttontext: '확인하기',
       });
-      console.log(error ? error : 'error');
+      ////console.log(error ? error : 'error');
       return 'dongerror';
     }
   };
@@ -765,23 +765,22 @@ const SearchHouseSheet = props => {
 
       // 요청 바디
       const param = {
-        //[필수] bdKdcd | String | 공동주택여부(1:공동주택 0:비공동주택)
-        //[필수] pnu | String | 고유번호(8자리 이상, 총 19자리)
-        //[선택] dongNm | String | 동명
-        //[선택] hoNm | String | 호명
-        //[선택] detailAdr | String | 상세주소(직접입력 케이스)
-        //[선택] numOfRows | Integer | 검색건수(최대 1000)
-        //[선택] pageNo | Integer | 페이지 번호
-        bdKdcd: item?.bdKdcd,
-        pnu: item?.pnu,
-        dongNm: dong1 ? dong1 : dong2 ? dong2 : '',
-        hoNm: ho1 ? ho1 : ho2 ? ho2 : '',
-        detailAdr: detail ? detail : '',
-        numOfRows: 5,
-        pageNo: 1,
-
+        //[필수] legalDstCode | String | 법정동코드
+        //[필수] roadAddr | String | 도로명주소
+        //[선택] siDo | String | 시도
+        //[선택] siGunGu | String | 시군구
+        //[선택] complexName | String | 단지명
+        //[필수] dongName | String | 동명
+        //[선택] hoName | String | 호
+        legalDstCode: item.admCd,
+        roadAddr: item.roadAddrPart1,
+        siDo: '',
+        siGunGu: '',
+        dongName: dong1 ? dong1 : dong2 ? dong2 : '',
+        hoName: ho1 ? ho1 : ho2 ? ho2 : '',
+        complexName: item.bdNm,
       };
-      /*    console.log('gongsiParams', {
+      /*    ////console.log('gongsiParams', {
             bdKdcd: item?.bdKdcd,
             pnu: item?.pnu,
             dongNm: dong1 ? dong1 : dong2 ? dong2 : '',
@@ -790,20 +789,21 @@ const SearchHouseSheet = props => {
             numOfRows: 5,
             pageNo: 1,
           })*/
-      const response = await axios.post('http://devapp.how-taxing.com/house/pubLandPriceAndArea', param, { headers: headers });
+      const response = await axios.post('http://devapp.how-taxing.com/house/pubLandPriceAndAreaAtDB', param, { headers: headers });
       const data = response.data.data;
+      ////console.log('response', response);
       //console.log('param', param);
       //console.log('gongsiData', data);
-      //    console.log('gongsiData return', data);
+      //    ////console.log('gongsiData return', data);
       if (response.data.errYn === 'Y') {
-        SheetManager.show('info', {
+        /*SheetManager.show('info', {
           payload: {
             type: 'error',
             message: response.data.errMsg ? response.data.errMsg : '공시가격과 전용면적을 불러오는데 문제가 발생했어요.',
             description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
             buttontext: '확인하기',
           },
-        });
+        });*/
 
 
         dispatch(
@@ -822,7 +822,7 @@ const SearchHouseSheet = props => {
         };
       } else {
         const successresult = await successResponse(data, detail, detail2);
-        // console.log('successresult', successresult);
+         ////console.log('successresult', successresult);
         return {
           isPubLandPriceOver100Mil: successresult.isPubLandPriceOver100Mil,
           isAreaOver85: successresult.isAreaOver85,
@@ -830,15 +830,18 @@ const SearchHouseSheet = props => {
       }
     } catch (error) {        // 오류 처리
       console.error(error);
-      SheetManager.show('info', {
+     /* SheetManager.show('info', {
         payload: {
           type: 'error',
           message: '공시가격과 전용면적을 불러오는데 실패했어요. ',
           description: response.data.errMsg + ' ' + response.data.errMsgDtl,
           buttontext: '확인하기',
         },
-      });
+      });*/
       return {
+
+
+
         isPubLandPriceOver100Mil: undefined,
         isAreaOver85: undefined,
       };
@@ -846,16 +849,17 @@ const SearchHouseSheet = props => {
   };
 
   const successResponse = async (data, detail, detail2) => {
-    if (data?.hasPubLandPrice) {
+    ////console.log('successResponse data', data);
+    if (data?.pubLandPrice) {
       if (data?.pubLandPrice > 100000000) {
-        if (data?.hasArea) {
+        if (data?.area) {
           if (data?.area > 85) {
             dispatch(
               setHouseInfo({
                 ...houseInfo,
-                hasPubLandPrice: data?.hasPubLandPrice,
+                hasPubLandPrice: true,
                 pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-                hasArea: data?.hasArea,
+                hasArea: true,
                 area: data?.area ? data?.area : 0,
                 stdrYear: data?.stdrYear,
                 bdMgtSn: selectedItem?.bdMgtSn,
@@ -873,9 +877,9 @@ const SearchHouseSheet = props => {
             dispatch(
               setHouseInfo({
                 ...houseInfo,
-                hasPubLandPrice: data?.hasPubLandPrice,
+                hasPubLandPrice: true,
                 pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-                hasArea: data?.hasArea,
+                hasArea: true,
                 area: data?.area ? data?.area : 0,
                 stdrYear: data?.stdrYear,
                 bdMgtSn: selectedItem?.bdMgtSn,
@@ -894,9 +898,9 @@ const SearchHouseSheet = props => {
           dispatch(
             setHouseInfo({
               ...houseInfo,
-              hasPubLandPrice: data?.hasPubLandPrice,
+              hasPubLandPrice: true,
               pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-              hasArea: data?.hasArea,
+              hasArea: false,
               area: data?.area ? data?.area : 0,
               stdrYear: data?.stdrYear,
               bdMgtSn: selectedItem?.bdMgtSn,
@@ -911,14 +915,14 @@ const SearchHouseSheet = props => {
           return { isPubLandPriceOver100Mil: true };
         }
       } else {
-        if (data?.hasArea) {
+        if (data?.area) {
           if (data?.area > 85) {
             dispatch(
               setHouseInfo({
                 ...houseInfo,
-                hasPubLandPrice: data?.hasPubLandPrice,
+                hasPubLandPrice: true,
                 pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-                hasArea: data?.hasArea,
+                hasArea: true,
                 area: data?.area ? data?.area : 0,
                 stdrYear: data?.stdrYear,
                 bdMgtSn: selectedItem?.bdMgtSn,
@@ -936,9 +940,9 @@ const SearchHouseSheet = props => {
             dispatch(
               setHouseInfo({
                 ...houseInfo,
-                hasPubLandPrice: data?.hasPubLandPrice,
+                hasPubLandPrice: true,
                 pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-                hasArea: data?.hasArea,
+                hasArea: true,
                 area: data?.area ? data?.area : 0,
                 stdrYear: data?.stdrYear,
                 bdMgtSn: selectedItem?.bdMgtSn,
@@ -957,9 +961,9 @@ const SearchHouseSheet = props => {
           dispatch(
             setHouseInfo({
               ...houseInfo,
-              hasPubLandPrice: data?.hasPubLandPrice,
+              hasPubLandPrice: true,
               pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-              hasArea: data?.hasArea,
+              hasArea: false,
               area: data?.area ? data?.area : 0,
               stdrYear: data?.stdrYear,
               bdMgtSn: selectedItem?.bdMgtSn,
@@ -975,14 +979,14 @@ const SearchHouseSheet = props => {
         }
       }
     } else {
-      if (data?.hasArea) {
+      if (data?.area) {
         if (data?.area > 85) {
           dispatch(
             setHouseInfo({
               ...houseInfo,
-              hasPubLandPrice: data?.hasPubLandPrice,
+              hasPubLandPrice: false,
               pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-              hasArea: data?.hasArea,
+              hasArea: true,
               area: data?.area ? data?.area : 0,
               stdrYear: data?.stdrYear,
               bdMgtSn: selectedItem?.bdMgtSn,
@@ -999,9 +1003,9 @@ const SearchHouseSheet = props => {
           dispatch(
             setHouseInfo({
               ...houseInfo,
-              hasPubLandPrice: data?.hasPubLandPrice,
+              hasPubLandPrice: false,
               pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-              hasArea: data?.hasArea,
+              hasArea: true,
               area: data?.area ? data?.area : 0,
               stdrYear: data?.stdrYear,
               bdMgtSn: selectedItem?.bdMgtSn,
@@ -1019,9 +1023,9 @@ const SearchHouseSheet = props => {
         dispatch(
           setHouseInfo({
             ...houseInfo,
-            hasPubLandPrice: data?.hasPubLandPrice,
+            hasPubLandPrice: false,
             pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-            hasArea: data?.hasArea,
+            hasArea: false,
             area: data?.area ? data?.area : 0,
             stdrYear: data?.stdrYear,
             bdMgtSn: selectedItem?.bdMgtSn,
@@ -1042,9 +1046,9 @@ const SearchHouseSheet = props => {
   // 다음으로 버튼 핸들러
   const nextHandler = async () => {
     /*
-        console.log('currentPageIndex', currentPageIndex);
-        console.log('selectedDong', selectedDong);
-        console.log('dongList[0]', dongList[0]);*/
+        ////console.log('currentPageIndex', currentPageIndex);
+        ////console.log('selectedDong', selectedDong);
+        ////console.log('dongList[0]', dongList[0]);*/
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
@@ -1137,7 +1141,7 @@ const SearchHouseSheet = props => {
       const chatpubLandPrice = {
         id: 'pubLandPrice',
         type: 'system',
-        message: '공시가격를 제대로 불러오지 못했어요.\n공시가격이 1억원을 초과하나요?',
+        message: '공시가격을 제대로 불러오지 못했어요.\n공시가격이 1억원을 초과하나요?',
         progress: 1,
         select: [
           {
@@ -1179,7 +1183,7 @@ const SearchHouseSheet = props => {
       }
 
       //리스트 초기화부분
-      //  console.log('selecteditem', selectedItem);
+        ////console.log('selecteditem', selectedItem);
       const gongsireturn = await getGongSiData(selectedItem, selectedDong, dongList[0], selectedHo, hoList[0], detailAddress, detailAddress2);
       const isVilla = props.payload?.data === 'villa';
       const isApartmentOrTicket = props.payload?.data === 'apartment' || props.payload?.data === 'ticketyes' || props.payload?.data === 'ticketno' || props.payload?.data === 'house';
@@ -1262,7 +1266,7 @@ const SearchHouseSheet = props => {
           currentPageIndex === 0
             ? 850
             : currentPageIndex === 1
-              ? 550 + apartmentInfoGroupHeight
+              ? 480 + apartmentInfoGroupHeight
               : currentPageIndex === 2
                 ? keyboardVisible
                   ? 360 + apartmentInfoGroupHeight
@@ -1429,7 +1433,7 @@ const SearchHouseSheet = props => {
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
                       /*   onSelect={(selectedItem, index) => {
-                           console.log(selectedItem, index);
+                           ////console.log(selectedItem, index);
                          }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
@@ -1456,7 +1460,7 @@ const SearchHouseSheet = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                              //  console.log(item);
+                              //  ////console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1530,15 +1534,15 @@ const SearchHouseSheet = props => {
                     const state = await NetInfo.fetch();
                     const canProceed = await handleNetInfoChange(state);
                     if (canProceed) {
-                      //          console.log('선택 item', item);
+                      //          ////console.log('선택 item', item);
                       setAddress(item?.roadAddr);
                       if (props.payload?.data === 'villa' || props.payload?.data === 'apartment') {
                         const firstDong = await getDongData(item);
-                        //console.log('firstDong', firstDong);
+                        //////console.log('firstDong', firstDong);
                         if (firstDong !== 'dongerror') {
                           const Hodata = await getHoData(item, firstDong, 'init');
                           setSelectedItem(item);
-                          //console.log('Hodata', Hodata);
+                          //////console.log('Hodata', Hodata);
                           if (Hodata > 0) {
                             setCurrentPageIndex(1);
                           } else {
@@ -1550,7 +1554,7 @@ const SearchHouseSheet = props => {
                         }
                       } else {
                         setSelectedItem(item);
-                        //console.log('item', item);
+                        //////console.log('item', item);
                         setCurrentPageIndex(2);
                       }
                     } else {
@@ -1648,7 +1652,7 @@ const SearchHouseSheet = props => {
               </PickerContainer>
             </View>
           </SelectGroup>
-          <Button
+          {/*<Button
             onPress={() => {
               setCurrentPageIndex(2);
             }}
@@ -1665,7 +1669,7 @@ const SearchHouseSheet = props => {
               }}>
               직접 입력하기
             </ButtonText>
-          </Button>
+          </Button> 직접입력하기 삭제*/}
           <ButtonSection
             style={{
               marginTop: 0,
@@ -1714,7 +1718,7 @@ const SearchHouseSheet = props => {
           </ModalTitle>
           <ApartmentInfoGroup
             onLayout={event => {
-              // console.log(event.nativeEvent.layout.height);
+              // ////console.log(event.nativeEvent.layout.height);
               setApartmentInfoGroupHeight(event.nativeEvent.layout.height);
             }}>
             <ApartmentInfoTitle>{address}</ApartmentInfoTitle>

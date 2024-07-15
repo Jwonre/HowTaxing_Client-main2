@@ -119,21 +119,23 @@ const TaxCard = props => {
       houseType: houseInfo.houseType === undefined ? '' : houseInfo.houseType,
       houseName: houseInfo.houseName === undefined ? '' : houseInfo.houseName,
       detailAdr: houseInfo.detailAdr === undefined ? '' : houseInfo.detailAdr,
-      contractDate: dayjs(houseInfo.contractDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
-      buyDate: dayjs(houseInfo.buyDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.buyDate).format('YYYY-MM-DD'),
+      contractDate: houseInfo.contractDate === undefined ? '' : dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
+      buyDate: houseInfo.buyDate === undefined ? '' : dayjs(houseInfo.buyDate).format('YYYY-MM-DD'),
       buyPrice: houseInfo.acAmount === undefined ?  0 : houseInfo.acAmount,
       pubLandPrice: houseInfo.pubLandPrice === undefined ? 0 : houseInfo.pubLandPrice,
       isPubLandPriceOver100Mil : houseInfo.isPubLandPriceOver100Mil === undefined ? '' : houseInfo.isPubLandPriceOver100Mil,
       roadAddr: houseInfo.roadAddr === undefined ? '' : houseInfo.roadAddr,
       area: houseInfo.area === undefined ? 0 : houseInfo.area,
-      isAreaOver85 : houseInfo.isAreaOver85 === undefined ? '' : houseInfo.isAreaOver85,
-      isDestruction: houseInfo.isDestruction === undefined ? '' : houseInfo.isDestruction,
+      isAreaOver85 : houseInfo.isAreaOver85 === undefined ? false : houseInfo.isAreaOver85,
+      isDestruction: houseInfo.isDestruction === undefined ? false : houseInfo.isDestruction,
       ownerCnt: houseInfo.ownerCnt === undefined ? 0 : houseInfo.ownerCnt,
       userProportion: houseInfo.userProportion === undefined ? 0 : houseInfo.userProportion,
-      isMoveInRight: houseInfo.isMoveInRight === undefined ? '' : houseInfo.isMoveInRight,
-   //   hasSellPlan: houseInfo.hasSellPlan === undefined ? '' : houseInfo.hasSellPlan,
-      isOwnHouseCntRegist: houseInfo.isOwnHouseCntRegist === undefined ? '' : houseInfo.isOwnHouseCntRegist,
+      isMoveInRight: houseInfo.isMoveInRight === undefined ? false : houseInfo.isMoveInRight,
+      jibunAddr: houseInfo.jibunAddr === undefined ? '' : houseInfo.jibunAddr,
+      //hasSellPlan: houseInfo.planSale === undefined ? '' : houseInfo.planSale,
+      isOwnHouseCntRegist: houseInfo.isOwnHouseCntRegist === undefined ? false : houseInfo.isOwnHouseCntRegist,
       ownHouseCnt: houseInfo.ownHouseCnt  === undefined ? 0 : houseInfo.ownHouseCnt,
+      additionalAnswerList : houseInfo.additionalAnswerList === undefined ? []: houseInfo.additionalAnswerList
     };
     const headers = {
       'Content-Type': 'application/json',
@@ -142,8 +144,8 @@ const TaxCard = props => {
     
     try { 
       const response = await axios.post('http://devapp.how-taxing.com/calculation/buyResult', params, { headers });
-    //  console.log('taxCard params', params)
-    //  console.log('response.data', response.data);
+     console.log('taxCard params', params)
+      console.log('response.data', response.data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {

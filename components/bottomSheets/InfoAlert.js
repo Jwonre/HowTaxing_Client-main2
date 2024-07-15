@@ -132,7 +132,7 @@ const InfoAlert = props => {
   const [errorMessage, setErrorMessage] = useState('');
   const [buttonText, setButtonText] = useState('자세히');
    
-  //console.log('[InfoAlert] props', props);
+  //////console.log('[InfoAlert] props', props);
 
   const toggleText = () => {
     if (buttonText === '자세히') {
@@ -304,7 +304,7 @@ const InfoAlert = props => {
                 }}>
                 <Button
                   onPress={() => {
-                   // console.log(modalList);
+                   // ////console.log(modalList);
                     actionSheetRef.current?.hide();
                      
                   }}

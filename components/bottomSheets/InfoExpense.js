@@ -106,7 +106,7 @@ const InfoExpense = props => {
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
   const { width, height } = useWindowDimensions();
- // console.log('[InfoSimple] props', props);
+ // ////console.log('[InfoSimple] props', props);
 
   return (
     <ActionSheet

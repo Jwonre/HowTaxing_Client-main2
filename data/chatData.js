@@ -132,15 +132,15 @@ export const acquisitionTax = [
     progress: 4,
     select: [
       {
+        id: 'no',
+        name: '본인 인증하기',
+        select: ['certType'],
+      },
+      {
         id: 'yes',
         name: '직접 입력하기',
         openSheet: 'ownHouseCount',
 
-      },
-      {
-        id: 'no',
-        name: '본인 인증하기',
-        select: ['certType'],
       },
     ],
   },
@@ -289,6 +289,29 @@ export const acquisitionTax = [
     progress: 10,
     openSheet: 'review',
   },
+
+  {
+    id: 'additionalQuestion',
+    type: 'system',
+    message: '',
+    progress: 6,
+    select: [
+      {
+        id: 'additionalQuestionY',
+        name: '',
+        select: ['getInfoDone', 'getInfoConfirm'],
+        answer: '',
+      },
+      {
+        id: 'additionalQuestionN',
+        name: '',
+        select: ['getInfoDone', 'getInfoConfirm'],
+        answer: '',
+      },
+    ],
+    questionId: '',
+    
+  },
 ];
 
 export const gainTax = [
@@ -355,19 +378,19 @@ export const gainTax = [
   {
     id: 'cert',
     type: 'system',
-    message: '본인 인증을 진행하시겠어요?',
+    message: '보유 주택을 어떻게 가져올까요?',
     progress: 2,
     select: [
       {
         id: 'yes',
-        name: '네',
+        name: '본인 인증하기',
         select: ['certType'],
 
 
       },
       {
         id: 'no',
-        name: '아니오',
+        name: '직접 입력하기',
       },
     ],
   },
@@ -376,7 +399,7 @@ export const gainTax = [
     type: 'system',
     progress: 2,
     message:
-      '매도하실 주택의 양도소득세를 계산하기 위해\n공공기관에서 보유 중인 주택 정보를 불러오려고\n해요.\n따라서 정보를 가져오려면 본인인증이 필수예요.',
+      '매도하실 주택의 양도소득세를\n계산하려면 보유 주택들이 필요해요.\n공공기관에서 불러오거나\n직접 입력할 수도 있어요.',
   },
   {
     id: 'certType',
@@ -526,6 +549,7 @@ export const gainTax = [
     message:
       '정확한 양도소득세 계산을 위해서 실거주 기간이 추가로 필요해요. 지금 본인인증을 한 번 더 해야해요.',
   },
+
   {
     id: 'Acquiredhouse',
     type: 'system',
@@ -571,19 +595,20 @@ export const gainTax = [
     type: 'system',
     progress: 5,
     message: '',
+    questionId: '',
     select: [
+      {
+        id: 'cert2',
+        name: '본인 인증하기',
+        select: ['certType2'],
+        answer: '02'
+      },
       {
         id: 'directlivePeriod',
         name: '직접 입력하기',
         openSheet: 'directlivePeriod',
         answer: '01'
 
-      },
-      {
-        id: 'cert2',
-        name: '본인 인증하기',
-        select: ['certType2'],
-        answer: '02'
       },
     ],
 
@@ -595,22 +620,22 @@ export const gainTax = [
     message: '실거주 기간을 어떻게 가져올까요?',
     select: [
       {
+        id: 'cert2',
+        name: '본인 인증하기',
+        select: ['certType2'],
+        answer: '02'
+      },
+      {
         id: 'directlivePeriod',
         name: '직접 입력하기',
         openSheet: 'directlivePeriod',
         answer: '01'
 
       },
-      {
-        id: 'cert2',
-        name: '본인 인증하기',
-        select: ['certType2'],
-        answer: '02'
-      },
     ],
 
   },
-  {
+  /*{
     id: 'landlord1',
     type: 'system',
     message: '상생임대인에 해당하시나요?',
@@ -629,26 +654,39 @@ export const gainTax = [
         key: 'landlord',
       },
     ],
-  },
+  },*/
   {
     id: 'landlord2',
     type: 'system',
     message: '상생임대인에 해당하시나요?',
     progress: 3,
+    questionId: 'Q_0006',
     select: [
       {
         id: 'landlordY',
         name: '네',
         select: ['ExpenseInquiry', 'ExpenseAnswer'],
+        answer: '01'
       },
       {
         id: 'landlordN',
         name: '아니오',
         select: ['ExpenseInquiry', 'ExpenseAnswer'],
+        answer: '02'
       },
     ],
   },
+ 
   {
+    id: 'additionalQuestion2',
+    type: 'system',
+    message: '',
+    progress: 3,
+    questionId: '',
+    answer: '',
+  },
+
+    {
     id: 'additionalQuestion',
     type: 'system',
     message: '',
@@ -657,27 +695,20 @@ export const gainTax = [
       {
         id: 'additionalQuestionY',
         name: '',
-        select: ['ExpenseAnswer'],
+        //select: ['ExpenseInquiry', 'ExpenseAnswer'],
+        select: [],
         answer: '',
       },
       {
         id: 'additionalQuestionN',
         name: '',
-        select: ['ExpenseAnswer'],
+       // select: ['ExpenseInquiry', 'ExpenseAnswer'],
+       select: [],
         answer: '',
       },
     ],
     questionId: '',
     
-  },
-
-  {
-    id: 'additionalQuestion2',
-    type: 'system',
-    message: '',
-    progress: 3,
-    questionId: '',
-    answer: '',
   },
 
 

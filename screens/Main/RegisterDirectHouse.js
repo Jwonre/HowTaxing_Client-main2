@@ -231,8 +231,8 @@ const RegisterDirectHouse = props => {
       prevSheetNum = '02';
     } else {
       prevSheetNum = '01';
-    }
-    console.log('prevSheet', prevSheet);
+    } 
+    ////console.log('prevSheet', prevSheet);
     const url = `http://devapp.how-taxing.com/house/list?calcType=${prevSheetNum}`
     const headers = {
       'Content-Type': 'application/json',
@@ -254,7 +254,7 @@ const RegisterDirectHouse = props => {
         );
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
   };
 
@@ -548,7 +548,7 @@ const RegisterDirectHouse = props => {
                       const state = await NetInfo.fetch();
                       const canProceed = await handleNetInfoChange(state);
                       if (canProceed) {
-                        //  console.log('focus', selectedHouseType);
+                        //  ////console.log('focus', selectedHouseType);
                         SheetManager.show('searchHouse2', {
                           payload: {
                             prevScreen: 'RegisterDirectHouse',
@@ -586,7 +586,7 @@ const RegisterDirectHouse = props => {
                       const state = await NetInfo.fetch();
                       const canProceed = await handleNetInfoChange(state);
                       if (canProceed) {
-                        //  console.log('focus', selectedHouseType);
+                        //  ////console.log('focus', selectedHouseType);
                         SheetManager.show('searchHouse2', {
                           payload: {
                             prevScreen: 'RegisterDirectHouse',
@@ -653,7 +653,7 @@ const RegisterDirectHouse = props => {
                 }}
                 onValueChange={isSwitchOn => {
                   setIsMoveInRight(isSwitchOn);
-                  // console.log('directRegister', directRegister);
+                  // ////console.log('directRegister', directRegister);
                 }}
                 activeColor="#2F87FF"
                 disabledColor="#E8EAED"

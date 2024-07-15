@@ -378,7 +378,7 @@ const ExpenseSheet = props => {
             <ButtonShadow>
               <Button
                 onPress={async () => {
-                  // console.log('ExpenseAmount', ExpenseAmount);
+                  // ////console.log('ExpenseAmount', ExpenseAmount);
                   await dispatch(
                     setHouseInfo({
                       ...houseInfo,

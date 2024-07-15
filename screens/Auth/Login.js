@@ -1,15 +1,13 @@
-import { StatusBar, useWindowDimensions, View, Linking } from 'react-native';
-import React, { useRef, useLayoutEffect, useState } from 'react';
+import { StatusBar, useWindowDimensions, View, Linking, BackHandler } from 'react-native';
+import React, { useRef, useLayoutEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation,useFocusEffect } from '@react-navigation/native';
 import getFontSize from '../../utils/getFontSize';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentUser } from '../../redux/currentUserSlice';
 import axios from 'axios';
 import { SheetManager } from 'react-native-actions-sheet';
 import NetInfo from '@react-native-community/netinfo';
-import KakaoSDK from '@actbase/react-kakaosdk';
-
 const Container = styled.ImageBackground.attrs(props => ({
   source: require('../../assets/images/loginBG.png'),
   resizeMode: 'cover',
@@ -129,14 +127,14 @@ const Login = () => {
 
   const handleWebViewMessage = async (event) => {
     const tokens = temp(event);
-    // console.log('Login:', event.nativeEvent.data);
+    // ////console.log('Login:', event.nativeEvent.data);
     if (event.nativeEvent.data.role === 'GUEST') {
       //약관확인 화면으로 이동 후 약관 동의 완료시 handleSignUp 진행
       await navigation.push('CheckTerms');
       const Sighupresult = handleSignUp(event.nativeEvent.data.accessToken);
       if(Sighupresult){
         const tokenObject = { 'accessToken': tokens[0], 'refreshToken': tokens[1] };
-        //   console.log('Login tokenObject:', tokenObject);
+        //   ////console.log('Login tokenObject:', tokenObject);
         dispatch(setCurrentUser(tokenObject));
       } else {
         SheetManager.show('info', {
@@ -148,9 +146,9 @@ const Login = () => {
         });
       }
     } else {
-      //   console.log('Login token:', tokens[0]);
+      //   ////console.log('Login token:', tokens[0]);
       const tokenObject = { 'accessToken': tokens[0], 'refreshToken': tokens[1] };
-      //   console.log('Login tokenObject:', tokenObject);
+      //   ////console.log('Login tokenObject:', tokenObject);
       dispatch(setCurrentUser(tokenObject));
     }
   };
@@ -196,7 +194,7 @@ const Login = () => {
           });*/
           // 성공적인 응답 처리
           // const { id } = response.data;
-          //    console.log("1111111", response);
+          //    ////console.log("1111111", response);
           return true;
         }
       })
@@ -250,7 +248,7 @@ const Login = () => {
     }).then(async res => {
       const { accessToken } = res?.successResponse;
    
-      console.log('accessToken', accessToken);
+      ////console.log('accessToken', accessToken);
    
       if (accessToken) {
         socialLogin(1, accessToken);
@@ -280,11 +278,11 @@ const Login = () => {
         const user = await GoogleSignin.getTokens();
      
         const accessToken = user.accessToken;
-        console.log('accessToken', accessToken);
+        ////console.log('accessToken', accessToken);
      
         socialLogin(2, accessToken);
       } catch (error) {
-        console.log('error', error);
+        ////console.log('error', error);
       }
   
       NetInfo.addEventListener(state => {
@@ -317,10 +315,10 @@ const Login = () => {
       //   // use credentialState response to ensure the user is authenticated
       //   if (credentialState === appleAuth.State.AUTHORIZED) {
       //     // user is authenticated
-      //     console.log('user is authenticated', credentialState);
+      //     ////console.log('user is authenticated', credentialState);
       //   }
       // } else {
-      //   console.log('ios only');
+      //   ////console.log('ios only');
       // }
       //    dispatch(
       //      setCurrentUser({
@@ -417,7 +415,7 @@ const Login = () => {
       .get(`http://devapp.how-taxing.com/user/${id}`)
       .then(response => {
         // 성공적인 응답 처리
-        // console.log(response.data);
+        // ////console.log(response.data);
         const userData = response.data;
         dispatch(setCurrentUser(userData));
       })
@@ -426,6 +424,22 @@ const Login = () => {
         console.error(error);
       });
   };
+  
+  const handleBackPress = () => {
+    BackHandler.exitApp(); // 앱 종료
+    return true;
+  }
+  
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      }
+    }, [handleBackPress])
+  );
+
+
 
   return (
     <Container>

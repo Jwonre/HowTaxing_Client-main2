@@ -449,7 +449,7 @@ const Cert3 = props => {
 
               // 채팅방으로 이동
               navigation.goBack();
-             // console.log('props.route.params.certType', props.route.params.cert);
+             // ////console.log('props.route.params.certType', props.route.params.cert);
               setTimeout(() => {
                 SheetManager.show('cert2', {
                   payload: {

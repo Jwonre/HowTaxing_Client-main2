@@ -71,7 +71,7 @@ const HoustInfoBadge = styled.View`
   align-items: center;
   justify-content: center;
   flex-direction: row;
-  margin-right: auto;
+  margin-right: 5;
   margin-Bottom: 10px;
 `;
 
@@ -82,6 +82,26 @@ font-size: ${getFontSize(10)}px;
   line-height: 12px;
   letter-spacing: -0.5px;
 `;
+
+const NecessaryInfoBadge = styled.View`
+  width: auto;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 11px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  margin-right: 10px;
+`;
+
+const NecessaryInfoBadgeText = styled.Text`
+  font-size: ${getFontSize(10)}px;
+  font-family: Pretendard-Medium;
+  color: #fff;
+  line-height: 12px;
+  letter-spacing: -0.5px;
+`;
+
 
 const InputSection = styled.View`
   flex: 1;
@@ -159,14 +179,14 @@ const HouseDetail = props => {
 
   // const [isMoveInRight, setIsMoveInRight] = useState(false);
 
-  // console.log(item);
+  // ////console.log(item);
   const [location, setLocation] = useState({
     latitude: 37.5326,
     longitude: 127.024612,
   });
 
   useEffect(() => {
-    // console.log('item', item);
+    // ////console.log('item', item);
     getAPTLocation(item?.roadAddr);
   }, []);
 
@@ -217,7 +237,7 @@ const HouseDetail = props => {
         });
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
         SheetManager.show('info', {
           payload: {
             message: '주소를 찾을 수 없습니다.',
@@ -252,7 +272,7 @@ const HouseDetail = props => {
         </TouchableOpacity>
       ),
       headerTitleAlign: 'center',
-      title: '주택 상세 정보',
+      title: (prevSheet === 'confirm2' || prevSheet === 'GainsTaxChat') ? '양도 주택 상세 정보' : '취득 주택 상세 정보',
       headerShadowVisible: false,
       contentStyle: {
         borderTopWidth: 0,
@@ -275,16 +295,28 @@ const HouseDetail = props => {
         <>
           <HouseSection>
             <HoustInfoSection>
-              <HoustInfoBadge
-                style={{
-                  backgroundColor: HOUSE_TYPE.find(
-                    color => color.id === item?.houseType,
-                  ).color,
-                }}>
-                <HoustInfoBadgeText>
-                  {HOUSE_TYPE.find(color => color.id === item?.houseType).name}
-                </HoustInfoBadgeText>
-              </HoustInfoBadge>
+            <View style={{ width: 'auto', flexDirection: 'row' }}>
+                <HoustInfoBadge
+                  style={{
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === item?.houseType,
+                    )?.color,
+                  }}>
+                  <HoustInfoBadgeText>
+                    {HOUSE_TYPE.find(el => el.id === item?.houseType)?.name}
+                  </HoustInfoBadgeText>
+                </HoustInfoBadge>
+                {/*(item?.houseType !== '3' && item?.isMoveInRight) && <HoustInfoBadge
+                  style={{
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === (item?.isMoveInRight === true ? 'isMoveInRight' : ''),
+                    )?.color,
+                  }}>
+                  <HoustInfoBadgeText>
+                    {HOUSE_TYPE.find(el => el.id === (item?.isMoveInRight === true ? 'isMoveInRight' : ''))?.name}
+                  </HoustInfoBadgeText>
+                </HoustInfoBadge>*/}
+              </View>
               <HoustInfoTitle>{item?.houseName}</HoustInfoTitle>
               <HoustInfoText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'left' }}>{item?.houseDetailName}</HoustInfoText>
             </HoustInfoSection>
@@ -342,36 +374,119 @@ const HouseDetail = props => {
                 {item?.houseName ? item?.houseName : ''}
               </InfoContentText>
             </InfoContentItem>
+
             <InfoContentItem>
+              <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>
               <InfoContentLabel>주택유형</InfoContentLabel>
               <InfoContentText>
                 {HOUSE_TYPE.find(color => color.id === item?.houseType).name}
               </InfoContentText>
             </InfoContentItem>
+
             <InfoContentItem>
+              <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>
               <InfoContentLabel>주소      </InfoContentLabel>
               <InfoContentText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{item?.roadAddr}</InfoContentText>
             </InfoContentItem>
+
             <InfoContentItem>
+              <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>
               <InfoContentLabel>상세주소</InfoContentLabel>
               <InfoContentText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{item?.houseName}</InfoContentText>
             </InfoContentItem>
-            <InfoContentItem>
+
+            {(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChat') && <InfoContentItem>
+              <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>
+              <InfoContentLabel>취득계약일자</InfoContentLabel>
+              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{item?.contractDate ? dayjs(item?.contractDate).format(
+                'YYYY년 MM월 DD일',
+              ) : ''}</InfoContentText>
+            </InfoContentItem>}
+            {(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChat') && <InfoContentItem>
+              <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>
+              <InfoContentLabel>취득일자</InfoContentLabel>
+              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>
+                {(item?.buyDate ? dayjs(item?.buyDate).format('YYYY년 MM월 DD일') : '')}
+              </InfoContentText>
+            </InfoContentItem>}
+            {(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChat') && <InfoContentItem>
+              <NecessaryInfoBadge
+                style={{
+                  backgroundColor: HOUSE_TYPE.find(
+                    color => color.id === '8',
+                  ).color,
+                }}>
+                <NecessaryInfoBadgeText>
+                  {HOUSE_TYPE.find(color => color.id === '8').name}
+                </NecessaryInfoBadgeText>
+              </NecessaryInfoBadge>
+              <InfoContentLabel>취득금액</InfoContentLabel>
+              <InfoContentText>
+                {(item?.buyPrice ? numberToKorean(Number(item?.buyPrice)?.toString()) + '원' : '')}
+              </InfoContentText>
+            </InfoContentItem>}
+
+           { /*<InfoContentItem>
               <InfoContentLabel>동호수</InfoContentLabel>
               <InfoContentText>{item?.detailAdr}</InfoContentText>
-            </InfoContentItem>
+            </InfoContentItem>*/}
             <InfoContentItem>
               <InfoContentLabel>공시가격</InfoContentLabel>
               <InfoContentText>
                 {item?.pubLandPrice ? numberToKorean(Number(item?.pubLandPrice)?.toString()) + '원' : (item?.isPubLandPriceOver100Mil === true ? '1억원 초과' : item?.isPubLandPriceOver100Mil === undefined ? '' : '1억원 이하')}
               </InfoContentText>
             </InfoContentItem>
-            <InfoContentItem>
-              <InfoContentLabel>{(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? '양도계약일자' : '취득계약일자'}</InfoContentLabel>
+            {(prevSheet === 'confirm' || prevSheet === 'AcquisitionChat') && <InfoContentItem>
+              <InfoContentLabel>취득계약일자</InfoContentLabel>
               <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{item?.contractDate ? dayjs(item?.contractDate).format(
                 'YYYY년 MM월 DD일',
               ) : ''}</InfoContentText>
-            </InfoContentItem>
+            </InfoContentItem>}
             <InfoContentItem>
               <InfoContentLabel>계약면적</InfoContentLabel>
               <View
@@ -388,16 +503,18 @@ const HouseDetail = props => {
                 </InfoContentText>}
               </View>
             </InfoContentItem>
-            <InfoContentItem>
-              <InfoContentLabel>{(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? '양도일자' : '취득일자'}</InfoContentLabel>
-              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? (item?.sellDate ? dayjs(item?.sellDate).format('YYYY년 MM월 DD일') : '') : (item?.buyDate ? dayjs(item?.buyDate).format('YYYY년 MM월 DD일') : '')}</InfoContentText>
-            </InfoContentItem>
-            <InfoContentItem>
-                <InfoContentLabel>{(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? '양도금액' : '취득금액'}</InfoContentLabel>
-              <InfoContentText>
-                {(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChatlast') ? (item?.sellAmount ? numberToKorean(Number(item?.sellAmount)?.toString()) + '원' : '') : (item?.buyPrice ? numberToKorean(Number(item?.buyPrice)?.toString()) + '원' : '')}
+            {(prevSheet === 'confirm' || prevSheet === 'AcquisitionChat') && <InfoContentItem>
+              <InfoContentLabel>취득일자</InfoContentLabel>
+              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>
+                {(item?.buyDate ? dayjs(item?.buyDate).format('YYYY년 MM월 DD일') : '')}
               </InfoContentText>
-            </InfoContentItem>
+            </InfoContentItem>}
+            {(prevSheet === 'confirm' || prevSheet === 'AcquisitionChat') && <InfoContentItem>
+              <InfoContentLabel>취득금액</InfoContentLabel>
+              <InfoContentText>
+                {(item?.acAmount ? numberToKorean(Number(item?.acAmount)?.toString()) + '원' : '')}
+              </InfoContentText>
+            </InfoContentItem>}
           </InfoContentSection>
           <InputSection>
             <Paper>
@@ -476,7 +593,7 @@ const HouseDetail = props => {
                 onValueChange={value => {
 
                 }}
-                activeColor="#2F87FF"          
+                activeColor="#2F87FF"
                 disabledColor="#E8EAED"
               />
             </InfoContentItem>

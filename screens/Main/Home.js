@@ -197,7 +197,7 @@ const Home = () => {
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const handleBackPress = () => {
-    console.log('LogOut!');
+    ////console.log('LogOut!');
     goLogin();
     return true;
   }
@@ -228,7 +228,7 @@ const Home = () => {
     };
 
     ChannelIO.boot(settings).then(result => {
-      // console.log('ChannelIO.boot', result);
+      // ////console.log('ChannelIO.boot', result);
     });
 
     // 기본 채널톡 버튼 숨기기
@@ -271,7 +271,7 @@ const Home = () => {
           });
           // 성공적인 응답 처리
           // const { id } = response.data;
-          //    console.log("1111111", response);
+          //    ////console.log("1111111", response);
         }
       })
       .catch(error => {
@@ -477,7 +477,7 @@ const Home = () => {
           }}>
           <ChanelTalkIconFloatButton
             onPress={() => {
-              console.log('currentUser',currentUser.accessToken);
+              ////console.log('currentUser',currentUser.accessToken);
               //handleWithDraw(currentUser.accessToken);
               //dispatch(setCurrentUser(null));
             }}>
@@ -499,7 +499,7 @@ const Home = () => {
 
           <LogOutIconFloatButton
             onPress={() => {
-              console.log('LogOut!');
+              ////console.log('LogOut!');
               goLogin();
             }}>
             <LogOutIcon style={style.LogOutIcon} />
@@ -521,7 +521,7 @@ const Home = () => {
 
           <AppInformationIconFloatButton
             onPress={() => {
-              console.log('AppInformation');
+              ////console.log('AppInformation');
               goAppInformation();
             }}>
             <AppInformationIcon style={style.AppInformationIcon} />

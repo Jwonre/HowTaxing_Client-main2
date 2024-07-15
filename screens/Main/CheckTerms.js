@@ -293,7 +293,7 @@ const CheckTerms = props => {
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
-            //    console.log('agreeCert', agreeCert)
+            //    ////console.log('agreeCert', agreeCert)
             navigation.navigate('Cert2', { agreeCert: agreeCert, navigation: navigation },);
           }}>
           <ListItemButtonText>보기</ListItemButtonText>

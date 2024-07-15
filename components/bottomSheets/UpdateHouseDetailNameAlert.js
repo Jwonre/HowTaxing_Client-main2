@@ -174,7 +174,7 @@ const UpdateHouseDetailNameAlert = props => {
     if (canProceed) {
       var p = data;
       p.detailAdr = detailAddress;
-      // console.log('[UpdateHouseDetailNameAlert]nextHandler p:', p);
+      // ////console.log('[UpdateHouseDetailNameAlert]nextHandler p:', p);
       handleHouseChange(p, p?.isMoveInRight);
        
       actionSheetRef.current?.hide();

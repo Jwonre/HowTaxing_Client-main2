@@ -9,6 +9,7 @@ import KeyIcon from '../../assets/images/family_key.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useDispatch, useSelector } from 'react-redux';
+import { setChatDataList } from '../../redux/chatDataListSlice';
 import NetInfo from "@react-native-community/netinfo";
 
 
@@ -76,12 +77,12 @@ const ButtonText = styled.Text`
 const DirectRegister = props => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
-  
+  const chatDataList = useSelector(state => state.chatDataList.value);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-  
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const dispatch = useDispatch();
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -116,19 +117,23 @@ const DirectRegister = props => {
                   index: props.route.params.index,
                 },
               });
-            } else {
+            } else if (props.route.params.prevSheet === 'own2') {
               SheetManager.show('own2', {
                 payload: {
                   navigation: navigation,
                   index: props.route.params.index,
                 },
               });
+            } else {
+              const newChatDataList = chatDataList.slice(0, props.route.params?.index + 1);
+              dispatch(setChatDataList(newChatDataList));
             }
 
 
-          }}>
+
+          }} >
           <BackIcon />
-        </TouchableOpacity>
+        </TouchableOpacity >
       ),
       title: '직접 등록이란',
       headerTitleAlign: 'center',
@@ -156,13 +161,16 @@ const DirectRegister = props => {
               index: props.route.params.index,
             },
           });
-        } else {
+        } else if (props.route.params.prevSheet === 'own2') {
           SheetManager.show('own2', {
             payload: {
               navigation: navigation,
               index: props.route.params.index,
             },
           });
+        } else {
+          const newChatDataList = chatDataList.slice(0, props.route.params?.index + 1);
+          dispatch(setChatDataList(newChatDataList));
         }
         return true;
       };
@@ -208,7 +216,7 @@ const DirectRegister = props => {
             if (canProceed) {
               navigation.push('RegisterDirectHouse', {
                 prevChat: props.route.params?.prevChat,
-                prevSheet: props.route.params?.prevSheet,
+                prevSheet: props.route.params?.prevSheet ? props.route.params?.prevSheet : 'own2',
                 index: props.route.params?.index,
               });
             }

@@ -11,7 +11,8 @@ import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { HOUSE_TYPE } from '../../constants/colors';
-  
+import { setHouseInfo } from '../../redux/houseInfoSlice';
+
 import numberToKorean from '../../utils/numToKorean';
 
 const SheetContainer = styled.View`
@@ -70,7 +71,7 @@ const HoustInfoText = styled.Text`
 
 const HoustInfoBadge = styled.View`
   width: auto;
-  margin-right: auto;
+  margin-right: 5;
   height: 22px;
   padding: 0 10px;
   border-radius: 11px;
@@ -193,9 +194,8 @@ const ConfirmSheet = props => {
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-  const [actionSheetVisible, setActionSheetVisible] = useState(false);
-
-
+  console.log('[ConfirmSheet] houseInfo', houseInfo);
+  // console.log('houseInfo?.additionalAnswerList.find(item => item[Q_0007])', houseInfo?.additionalAnswerList.find(item => item['Q_0007']));
   /* const calculateTax = () => {
      const data = {
        houseId: houseInfo.houseId || '1',
@@ -232,7 +232,7 @@ const ConfirmSheet = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -277,30 +277,42 @@ const ConfirmSheet = props => {
               style={{
                 width: '60%',
               }}>
-              <HoustInfoBadge
-                style={{
-                  backgroundColor: HOUSE_TYPE.find(
-                    el => el.id === houseInfo?.houseType,
-                  )?.color,
-                }}>
-                <HoustInfoBadgeText>
-                  {HOUSE_TYPE.find(el => el.id === houseInfo?.houseType)?.name}
-                </HoustInfoBadgeText>
-              </HoustInfoBadge>
+              <View style={{ width: 'auto', flexDirection: 'row' }}>
+                <HoustInfoBadge
+                  style={{
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === houseInfo?.houseType,
+                    )?.color,
+                  }}>
+                  <HoustInfoBadgeText>
+                    {HOUSE_TYPE.find(el => el.id === houseInfo?.houseType)?.name}
+                  </HoustInfoBadgeText>
+                </HoustInfoBadge>
+                {/*(houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight) && <HoustInfoBadge
+                  style={{
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === houseInfo?.isMoveInRight === true ? 'isMoveInRight' : '',
+                    )?.color,
+                  }}>
+                  <HoustInfoBadgeText>
+                    {HOUSE_TYPE.find(el => el.id === houseInfo?.isMoveInRight === true ? 'isMoveInRight' : '')?.name}
+                  </HoustInfoBadgeText>
+                </HoustInfoBadge>*/}
+              </View>
               <HoustInfoTitle>{houseInfo?.houseName}</HoustInfoTitle>
               <HoustInfoText>{houseInfo?.houseDetailName}</HoustInfoText>
             </View>
             <HoustInfoButton
               onPress={() => {
                 actionSheetRef.current?.hide();
-                //   console.log('detail houseInfo', houseInfo);
+                //   ////console.log('detail houseInfo', houseInfo);
                 props.payload.navigation.navigate('HouseDetail', {
                   item: houseInfo,
                   prevSheet: 'confirm',
                   index: props.payload?.index,
 
                 });
-                //console.log('Detail houseInfo', houseInfo);
+                //////console.log('Detail houseInfo', houseInfo);
               }}>
               <HoustInfoButtonText>자세히 보기</HoustInfoButtonText>
             </HoustInfoButton>
@@ -308,7 +320,7 @@ const ConfirmSheet = props => {
         </DropShadow>
         <InfoContentSection>
           <InfoContentItem>
-            <InfoContentLabel>취득계약일자</InfoContentLabel>
+            <InfoContentLabel>계약일자</InfoContentLabel>
             <InfoContentText>
               {dayjs(houseInfo?.contractDate).format('YYYY년 MM월 DD일')}
             </InfoContentText>
@@ -319,6 +331,7 @@ const ConfirmSheet = props => {
               {dayjs(houseInfo?.buyDate).format('YYYY년 MM월 DD일')}
             </InfoContentText>
           </InfoContentItem>
+
           <InfoContentItem>
             <InfoContentLabel>취득금액</InfoContentLabel>
             <InfoContentText>
@@ -327,7 +340,17 @@ const ConfirmSheet = props => {
           </InfoContentItem>
 
           <InfoContentItem>
-            <InfoContentLabel style={{ width: '110%' }}>기존 주택 보유 수</InfoContentLabel>
+            <InfoContentLabel>종전주택 매도계획</InfoContentLabel>
+            <InfoContentText>
+              {
+                houseInfo?.additionalAnswerList?.find(item => item['Q_0007'])?.['Q_0007'] === '01' ? '3년 이내 매도 계획' :
+                  houseInfo?.additionalAnswerList?.find(item => item['Q_0007'])?.['Q_0007'] === '02' ? '매도 계획 없음' : '매도 계획 없음'
+              }
+            </InfoContentText>
+          </InfoContentItem>
+
+          <InfoContentItem>
+            <InfoContentLabel style={{ width: '110%' }}>주택 보유 수</InfoContentLabel>
             <InfoContentText>{houseInfo?.ownHouseCnt ? houseInfo?.ownHouseCnt : 0}채</InfoContentText>
           </InfoContentItem>
         </InfoContentSection>
@@ -354,7 +377,7 @@ const ConfirmSheet = props => {
                 };
 
                 dispatch(setChatDataList([...chatDataList, chat1]));
-                 
+
               }}
               style={{
                 width: width - 80,

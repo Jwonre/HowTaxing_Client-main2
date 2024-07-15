@@ -75,7 +75,7 @@ const HoustInfoBadge = styled.View`
   align-items: center;
   justify-content: center;
   flex-direction: row;
-  margin-right: auto;
+  margin-right: 5;
   margin-bottom: 10px;
 `;
 
@@ -198,7 +198,7 @@ const OwnedHouseDetail = props => {
 
 
   useEffect(() => {
-    //console.log('props?.payload?.prevSheet', prevSheet)
+    //////console.log('props?.payload?.prevSheet', prevSheet)
     /*if (item?.houseId !== '222') {*/
     if (prevSheet) {
       getHouseDetailInfo();
@@ -208,10 +208,11 @@ const OwnedHouseDetail = props => {
        getHouseDirectDetailInfo();
  
      }*/
+
   }, []);
 
   /* useEffect(() => {
-     console.log('초기 data', data);
+     ////console.log('초기 data', data);
    }, [data]);*/
   //  useEffect(() => {
   //  }, [movingInRight]);
@@ -222,16 +223,16 @@ const OwnedHouseDetail = props => {
 
 
   const handleHouseChange = async (target, newMoveInRight) => {
-    //console.log('[OwnedHouseDetail]onValueChange Yn', newMoveInRight);
-    //console.log('[OwnedHouseDetail]handleHouseChange tempMovingInRight:', tempMovingInRight);
+    //////console.log('[OwnedHouseDetail]onValueChange Yn', newMoveInRight);
+    //////console.log('[OwnedHouseDetail]handleHouseChange tempMovingInRight:', tempMovingInRight);
     //const MIR = (newMoveInRight === null ? tempMovingInRight : newMoveInRight);
     //tempMovingInRight = MIR;
     //setMovingInRight(MIR);
 
-    //console.log('[OwnedHouseDetail]handleHouseChange tempMovingInRight:', MIR);
-    //console.log('[OwnedHouseDetail]handleHouseChange MIR:', tempMovingInRight);
-    //console.log('[OwnedHouseDetail]handleHouseChange data:', data);
-    //console.log('[OwnedHouseDetail]handleHouseChange target:', target);
+    //////console.log('[OwnedHouseDetail]handleHouseChange tempMovingInRight:', MIR);
+    //////console.log('[OwnedHouseDetail]handleHouseChange MIR:', tempMovingInRight);
+    //////console.log('[OwnedHouseDetail]handleHouseChange data:', data);
+    //////console.log('[OwnedHouseDetail]handleHouseChange target:', target);
     /* if (
        data.area !== target.area ||
        data.balanceDate !== target.balanceDate ||
@@ -254,10 +255,10 @@ const OwnedHouseDetail = props => {
        data.userProportion !== target.userProportion
      ) {*/
     dispatch(editOwnHouseList(target));
-    // console.log('edit own house list', ownHouseList);
-    //console.log('MIR', MIR);
+    // ////console.log('edit own house list', ownHouseList);
+    //////console.log('MIR', MIR);
     //target.isMoveInRight = MIR;
-    //console.log('target', target);
+    //////console.log('target', target);
     setData(target);
     //await 
     /* if (data?.houseId !== '222') {      }*/
@@ -333,13 +334,13 @@ const OwnedHouseDetail = props => {
       isMoveInRight: newMoveInRight === undefined ? '' : newMoveInRight,
     };
 
-    //console.log('[OwnedHouseDetail]headers:', headers);
-    //console.log('[OwnedHouseDetail]param:', param);
+    //////console.log('[OwnedHouseDetail]headers:', headers);
+    //////console.log('[OwnedHouseDetail]param:', param);
     try {
-      // console.log('before data', data);
+      // ////console.log('before data', data);
       const response = await axios.put(url, param, { headers: headers });
-      //  console.log('[OwnedHouseDetail]update response:', response);
-      //  console.log('[OwnedHouseDetail]update response.data:', response.data);
+      //  ////console.log('[OwnedHouseDetail]update response:', response);
+      //  ////console.log('[OwnedHouseDetail]update response.data:', response.data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -352,7 +353,7 @@ const OwnedHouseDetail = props => {
         return;
       } else {
         const p = param;
-        //console.log('after data', param)
+        //////console.log('after data', param)
         setData(null);
         setData(p);
       }
@@ -366,7 +367,7 @@ const OwnedHouseDetail = props => {
           buttontext: '확인하기',
         },
       });
-      console.log('에러', e);
+      ////console.log('에러', e);
     }
 
 
@@ -374,7 +375,7 @@ const OwnedHouseDetail = props => {
 
 
   /*const getHouseDirectDetailInfo = async () => {
-    console.log('[OwnedHouseDetail] direct item', item)
+    ////console.log('[OwnedHouseDetail] direct item', item)
     await getAPTLocation(item?.roadAddr);
     setData(item);
     tempMovingInRight = item?.moveInRight;
@@ -390,7 +391,7 @@ const OwnedHouseDetail = props => {
         'Authorization': `Bearer ${currentUser.accessToken}`,
       };
 
-      //console.log('[OwnedHouseDetail] getHouseDetailInfo pData:', pData);
+      //////console.log('[OwnedHouseDetail] getHouseDetailInfo pData:', pData);
 
       const response = await axios.get(url, { headers });
       if (response.data.errYn === 'Y') {
@@ -406,14 +407,14 @@ const OwnedHouseDetail = props => {
 
       } else {
         const houseDetails = response.data.data;
-        //console.log('houseDetails', houseDetails);
+        //////console.log('houseDetails', houseDetails);
         await getAPTLocation(houseDetails.roadAddr);
         setData(houseDetails);
         //const tempMovingInRight = houseDetails.isMoveInRight;
         //setMovingInRight(tempMovingInRight);
 
-        //console.log('[OwnedHouseDetail] getHouseDetailInfo tempMovingInRight:', tempMovingInRight);
-        //console.log('[OwnedHouseDetail] getHouseDetailInfo movingInRight:', movingInRight);
+        //////console.log('[OwnedHouseDetail] getHouseDetailInfo tempMovingInRight:', tempMovingInRight);
+        //////console.log('[OwnedHouseDetail] getHouseDetailInfo movingInRight:', movingInRight);
       }
 
     } catch (error) {
@@ -638,7 +639,7 @@ const OwnedHouseDetail = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
-            //  console.log('초기 data', data)
+            //  ////console.log('초기 data', data)
             if ((data?.houseType === '' || data?.houseType === null || data?.houseType === undefined)) {
               SheetManager.show('info', {
                 payload: {
@@ -721,12 +722,13 @@ const OwnedHouseDetail = props => {
               }); return;
             }
             if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
-              dispatch(editOwnHouseList({ isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
+              dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
             }
+            
 
             navigation.goBack();
             if (!props.route.params?.prevSheet) return;
-            //console.log(props.route.params?.prevSheet);
+            //////console.log(props.route.params?.prevSheet);
 
             SheetManager.show(props.route.params?.prevSheet, {
               payload: {
@@ -867,12 +869,13 @@ const OwnedHouseDetail = props => {
         },
       }); return true;
     }
+
     if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
       dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
     }
     navigation.goBack();
     if (!props.route.params?.prevSheet) return true;
-    //console.log(props.route.params?.prevSheet);
+    //////console.log(props.route.params?.prevSheet);
     SheetManager.show(props.route.params?.prevSheet, {
       payload: {
         navigation,
@@ -906,16 +909,28 @@ const OwnedHouseDetail = props => {
         <>
           <HouseSection>
             <HoustInfoSection>
-              <HoustInfoBadge
-                style={{
-                  backgroundColor: HOUSE_TYPE.find(
-                    color => color.id === (data?.houseType === undefined ? pData?.houseType : data?.houseType),
-                  ).color,
-                }}>
-                <HoustInfoBadgeText>
-                  {HOUSE_TYPE.find(color => color.id === (data?.houseType === undefined ? pData?.houseType : data?.houseType)).name}
-                </HoustInfoBadgeText>
-              </HoustInfoBadge>
+              <View style={{ width: 'auto', flexDirection: 'row' }}>
+                <HoustInfoBadge
+                  style={{
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === item?.houseType,
+                    )?.color,
+                  }}>
+                  <HoustInfoBadgeText>
+                    {HOUSE_TYPE.find(el => el.id === item?.houseType)?.name}
+                  </HoustInfoBadgeText>
+                </HoustInfoBadge>
+                {/*(data?.houseType !== '3' && data?.isMoveInRight) && <HoustInfoBadge
+                  style={{
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === (data?.isMoveInRight === true ? 'isMoveInRight' : ''),
+                    )?.color,
+                  }}>
+                  <HoustInfoBadgeText>
+                    {HOUSE_TYPE.find(el => el.id === (data?.isMoveInRight === true ? 'isMoveInRight' : ''))?.name}
+                  </HoustInfoBadgeText>
+                </HoustInfoBadge>*/}
+              </View>
               <HoustInfoTitle>{data?.houseName}</HoustInfoTitle>
               <HoustInfoText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'left' }}>{data?.detailAdr}</HoustInfoText>
             </HoustInfoSection>
@@ -1049,7 +1064,7 @@ const OwnedHouseDetail = props => {
               </TouchableOpacity>
             </InfoContentItem>
 
-            <InfoContentItem>
+            {(prevSheet === 'own') && <InfoContentItem>
               <InfoContentLabel>공시가격</InfoContentLabel>
               <InfoContentText>
                 {data?.pubLandPrice ? numberToKorean(Number(data?.pubLandPrice)?.toString()) + '원' : (data?.isPubLandPriceOver100Mil === true ? '1억원 초과' : data?.isPubLandPriceOver100Mil === undefined ? '' : '1억원 이하')}
@@ -1065,11 +1080,12 @@ const OwnedHouseDetail = props => {
                       handleHouseChange,
                     },
                   });
-                  // console.log('after data', data);
+                  // ////console.log('after data', data);
                 }}>
                 <EditGreyIcon></EditGreyIcon>
               </TouchableOpacity>
-            </InfoContentItem>
+            </InfoContentItem>}
+
             <InfoContentItem>
               {(prevSheet === 'own2') && <NecessaryInfoBadge
                 style={{
@@ -1093,7 +1109,8 @@ const OwnedHouseDetail = props => {
                 <EditGreyIcon></EditGreyIcon>
               </TouchableOpacity>
             </InfoContentItem>
-            <InfoContentItem>
+
+            {(prevSheet === 'own') && <InfoContentItem>
               <InfoContentLabel>계약면적</InfoContentLabel>
               <View
                 style={{
@@ -1121,7 +1138,9 @@ const OwnedHouseDetail = props => {
                 }}>
                 <EditGreyIcon></EditGreyIcon>
               </TouchableOpacity>
-            </InfoContentItem>
+            </InfoContentItem>}
+
+
             <InfoContentItem>
               {(prevSheet === 'own2') && <NecessaryInfoBadge
                 style={{
@@ -1168,6 +1187,59 @@ const OwnedHouseDetail = props => {
                 <EditGreyIcon></EditGreyIcon>
               </TouchableOpacity>
             </InfoContentItem>
+
+            {(prevSheet === 'own2') && <InfoContentItem>
+              <InfoContentLabel>공시가격</InfoContentLabel>
+              <InfoContentText>
+                {data?.pubLandPrice ? numberToKorean(Number(data?.pubLandPrice)?.toString()) + '원' : (data?.isPubLandPriceOver100Mil === true ? '1억원 초과' : data?.isPubLandPriceOver100Mil === undefined ? '' : '1억원 이하')}
+              </InfoContentText>
+              <TouchableOpacity activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => {
+                  SheetManager.show('updatePubLandPriceAlert', {
+                    payload: {
+                      navigation,
+                      data,
+                      prevSheet,
+                      handleHouseChange,
+                    },
+                  });
+                  // ////console.log('after data', data);
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
+            </InfoContentItem>}
+
+            {(prevSheet === 'own2') && <InfoContentItem>
+              <InfoContentLabel>계약면적</InfoContentLabel>
+              <View
+                style={{
+                  marginLeft: 'auto',
+                }}>
+                <InfoContentText>
+                  {data?.area ? data?.area + 'm2' : (data?.isAreaOver85 === true ? '국민평형(85m2) 초과' : data?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}
+                </InfoContentText>
+              </View>
+              <TouchableOpacity activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    SheetManager.show('updateAreaMeterAlert', {
+                      payload: {
+                        navigation,
+                        data,
+                        prevSheet,
+                        handleHouseChange,
+                      },
+                    });
+                  }
+                }}>
+                <EditGreyIcon></EditGreyIcon>
+              </TouchableOpacity>
+            </InfoContentItem>}
+
           </InfoContentSection>
           <InputSection>
             <Paper>

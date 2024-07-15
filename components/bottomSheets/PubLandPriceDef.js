@@ -89,7 +89,7 @@ const PubLandPriceDef = props => {
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
   const [errorMessage, setErrorMessage] = useState('');
-  //console.log('props', props);
+  //////console.log('props', props);
 
   return (
     <ActionSheet
@@ -134,7 +134,7 @@ const PubLandPriceDef = props => {
             <Button
               onPress={() => {
                 // setErrorMessage(props?.payload?.description);
-                console.log('NO');
+                ////console.log('NO');
                 actionSheetRef.current?.hide();
               }}
               style={{
@@ -166,7 +166,7 @@ const PubLandPriceDef = props => {
             <Button
               onPress={() => {
                 // actionSheetRef.current?.hide();
-                console.log('YES');
+                ////console.log('YES');
                 props.payload.onPress.handlePress('YES');
                 actionSheetRef.current?.hide();
               }}>

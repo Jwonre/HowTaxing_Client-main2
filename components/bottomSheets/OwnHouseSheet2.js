@@ -7,7 +7,7 @@ import {
   Pressable,
   ScrollView,
 } from 'react-native';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
@@ -91,9 +91,9 @@ const Title = styled.Text`
 `;
 
 const InfoMessage = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: ${getFontSize(13)}px;
   font-family: Pretendard-Regular;
-  color: #a3a5a8;
+  color: #FF7401;
   line-height: 20px;
   margin-top: 10px;
 `;
@@ -279,7 +279,7 @@ const OwnHouseSheet2 = props => {
         'Authorization': `Bearer ${currentUser.accessToken}`
       };
 
-      //console.log('[HouseDetail] Fetching house details for item:', item);
+      //////console.log('[HouseDetail] Fetching house details for item:', item);
       const response = await axios.get(url, { headers });
       const detaildata = response.data.data;
       if (response.data.errYn == 'Y') {
@@ -295,29 +295,29 @@ const OwnHouseSheet2 = props => {
           returndata: false
         };
       } else {
-        //console.log('[HouseDetail] House details retrieved:', detaildata);
-        //console.log('[HouseDetail] detaildata?.houseType:', detaildata?.houseType);
-        //console.log('[HouseDetail] House details houseInfo:', houseInfo);
+        // //console.log('[HouseDetail] House details retrieved:', detaildata);
+        //////console.log('[HouseDetail] detaildata?.houseType:', detaildata?.houseType);
+        //////console.log('[HouseDetail] House details houseInfo:', houseInfo);
         return {
           detaildata: detaildata,
           returndata: true
         }
       }
     } catch (error) {
-      //console.log(error);
+      //////console.log(error);
       return {
         returndata: false
       };
     }
   };
 
- 
+
 
 
   const CARD_WIDTH = 180 + 22;
-  /* ownHouseList?.map((item, index) => (
-      console.log('ownHouse:', item)
-    ));*/
+  /*ownHouseList?.map((item, index) => (
+     //console.log('ownHouse:', item)
+   ));*/
   return (
     <ActionSheet
       ref={actionSheetRef}
@@ -351,13 +351,18 @@ const OwnHouseSheet2 = props => {
       }}>
       <SheetContainer width={width}>
         <TitleSection>
-          <Title>
+          {ownHouseList.length !== 0 && (<Title>
             보유하신 주택을 모두 불러왔어요.{'\n'}매도할 주택을 선택해주세요.
-          </Title>
-
+          </Title>)}
+          {ownHouseList.length === 0 && props.payload?.data === 'ok' && (<Title>
+            청약통장을 가지고 있지 않다면{'\n'}보유하신 주택을 직접 등록해주세요.
+          </Title>)}
+          {ownHouseList.length === 0 && !props.payload?.data && (<Title>
+            주택을 불러오지 못했어요.{'\n'}보유하신 주택이 있다면 직접 등록해주세요.
+          </Title>)}
           <InfoMessage>
-            기존에 주거용 오피스텔을 보유하고 계시다면{'\n'}“직접 등록하기”를 통해
-            반드시 등록해주세요.
+            불러온 주택들이 있다면,{'\n'}“자세히 보기”를 통해
+            필수 입력 값들을 반드시 등록해주세요.
           </InfoMessage>
         </TitleSection>
         {ownHouseList?.length > 0 ?
@@ -424,6 +429,16 @@ const OwnHouseSheet2 = props => {
                           {HOUSE_TYPE.find(color => color.id === item.houseType).name}
                         </TagText>
                       </Tag>
+                      {/*(item.houseType !== '3' &&item?.isMoveInRight) && <Tag
+                      style={{
+                        backgroundColor: HOUSE_TYPE.find(
+                          el => el.id === (item?.isMoveInRight === true ? 'isMoveInRight' : ''),
+                        ).color,
+                      }}>
+                      <TagText>
+                        {HOUSE_TYPE.find(color => color.id === item.isMoveInRight === true ? 'isMoveInRight' : '').name}
+                      </TagText>
+                    </Tag>*/}
                       <CardTitle>{item.houseName}</CardTitle>
                       <CardSubTitle>{item.detailAdr}</CardSubTitle>
                       <CardButton
@@ -515,7 +530,7 @@ const OwnHouseSheet2 = props => {
                 paddingHorizontal: 20,
                 paddingBottom: 20,
               }}>
-              이미 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
+              주거용 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
               불러오지 못한 주택이 있을 경우, 정확한 세금계산이 어려워요.
             </SubTitle>
           </HouseSection>
@@ -559,10 +574,10 @@ const OwnHouseSheet2 = props => {
                       }
                     }} style={{ margin: 20 }}></AddHouseCircleIcon>
                   <EmptyTitle>
-                    {'보유하신 주택이 없거나 불러오지 못했어요.'}
+                    {'불러오지 못한 주택이 있을 수 있어요.'}
                   </EmptyTitle>
                   <EmptyTitle>
-                    {'양도 대상 주택을 포함하여 보유 주택 모두 등록해주세요.'}
+                    {'불러오지 못한 주택이 있다면, 직접 등록할 수도 있어요.'}
                   </EmptyTitle>
                 </EmptyCard>
               </DropShadow>
@@ -603,7 +618,7 @@ const OwnHouseSheet2 = props => {
                 paddingHorizontal: 20,
                 paddingBottom: 20,
               }}>
-              이미 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
+              주거용 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
               불러오지 못한 주택이 있을 경우, 정확한 세금계산이 어려워요.
             </SubTitle>
           </HouseSection>
@@ -628,7 +643,7 @@ const OwnHouseSheet2 = props => {
               const state = await NetInfo.fetch();
               const canProceed = await handleNetInfoChange(state);
               if (canProceed) {
-                /* console.log('[OwnHouseSheet2] selectedList:',
+                /* ////console.log('[OwnHouseSheet2] selectedList:',
                    ownHouseList?.find(
                      item => item.houseId === selectedList[0].houseId,
                    ),
@@ -647,14 +662,14 @@ const OwnHouseSheet2 = props => {
                     item => item.houseId === selectedList[0].houseId,
                   ))
                   actionSheetRef.current?.hide();
-
+                  //console.log('response', response);
                   if (response?.returndata) {
                     const chatItem = {
                       id: 'ownConfirmOK',
                       type: 'my',
                       message: '확인 완료',
                     };
-                    // console.log('houseInfo last:', houseInfo);
+                    // ////console.log('houseInfo last:', houseInfo);
 
                     dispatch(
                       setChatDataList([
@@ -665,16 +680,16 @@ const OwnHouseSheet2 = props => {
                     dispatch(
                       setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseList?.length, isOwnHouseCntRegist: true, ...response?.detaildata }),
                     );
-                          setTimeout(() => {
-                             SheetManager.show('gain', {
-                               payload: {
-                                 navigation: props?.payload?.navigation,
-                                 index: props?.payload?.index,
-                                 currentPageIndex: 0,
-                               },
-                             });
-       
-                           }, 200);
+                    setTimeout(() => {
+                      SheetManager.show('gain', {
+                        payload: {
+                          navigation: props?.payload?.navigation,
+                          index: props?.payload?.index,
+                          currentPageIndex: 0,
+                        },
+                      });
+
+                    }, 200);
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
                     dispatch(setChatDataList(newChatDataList));

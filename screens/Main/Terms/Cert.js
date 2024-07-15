@@ -78,7 +78,7 @@ const ContentText = styled.Text`
 
 const Cert = props => {
   const navigation = props.navigation;
-  console.log('navigation2', navigation);
+  ////console.log('navigation2', navigation);
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
   const [activeButton, setActiveButton] = useState(false);

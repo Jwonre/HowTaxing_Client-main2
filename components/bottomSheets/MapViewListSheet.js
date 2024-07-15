@@ -322,7 +322,7 @@ const MapViewListSheet = props => {
     }
 
     if (result === RESULTS.GRANTED) {
-      console.log('checkAndGetCurrentLocation');
+      ////console.log('checkAndGetCurrentLocation');
     }
   };
 
@@ -352,7 +352,7 @@ const MapViewListSheet = props => {
 
   // 현재 위치 가져오기
   const getCurrentLocation = () => {
-    console.log('getCurrentLocation');
+    ////console.log('getCurrentLocation');
     Geolocation.getCurrentPosition(
       info => {
         const { latitude, longitude } = info.coords;
@@ -418,7 +418,7 @@ const MapViewListSheet = props => {
           return;
         }
 
-        console.log('111', parsedData.results.juso);
+        ////console.log('111', parsedData.results.juso);
 
         if (!parsedData.results.juso[0]) {
           SheetManager.show('info', {
@@ -443,7 +443,7 @@ const MapViewListSheet = props => {
         getAddressInfo(parsedData.results.juso[0].roadAddr);
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
   };
 
@@ -462,7 +462,7 @@ const MapViewListSheet = props => {
         return result.data.documents[0].address_name;
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
 
     getAddressInfo(address_name);
@@ -483,7 +483,7 @@ const MapViewListSheet = props => {
     await axios
       .get(url, config)
       .then(async result => {
-        console.log(result.data);
+        ////console.log(result.data);
         // API호출
         // const promises = result.data.data.map(async apt_item => {
         //   return getAPTLocation(apt_item);
@@ -494,7 +494,7 @@ const MapViewListSheet = props => {
 
         const locations = await Promise.all(
           result.data.data.map(async apt_item => {
-            console.log(apt_item);
+            ////console.log(apt_item);
             return getAPTLocation(apt_item);
           }),
         );
@@ -513,7 +513,7 @@ const MapViewListSheet = props => {
         setListData(sortedList);
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
   };
 
@@ -539,7 +539,7 @@ const MapViewListSheet = props => {
         };
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
         SheetManager.show('info', {
           payload: {
             message: '주소를 찾을 수 없어요.',
@@ -583,7 +583,7 @@ const MapViewListSheet = props => {
         setHoList(hos[0]);
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
   };
 
@@ -624,7 +624,7 @@ const MapViewListSheet = props => {
         return result.data.data;
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
 
     return data;

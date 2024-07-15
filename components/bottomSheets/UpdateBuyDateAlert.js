@@ -156,7 +156,7 @@ const UpdateBuyDateAlert = props => {
     if (canProceed) {
       var p = data;
       p.buyDate = selectedDate;
-      // console.log('[UpdateBuyDateAlert]nextHandler p:', p);
+      // ////console.log('[UpdateBuyDateAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
        
       actionSheetRef.current?.hide();
@@ -206,11 +206,12 @@ const UpdateBuyDateAlert = props => {
             <View
               style={{
                 width: '100%',
-                height: 420,
+                height: 400,
               }}>
               <Calendar
-                minDate={data?.contractDate ? new Date(data?.contractDate) : ''}
-                currentDate={data?.buyDate ? new Date(data?.buyDate) : new Date()}
+                minDate={data?.contractDate ? new Date(data?.contractDate).setHours(0,0,0,0) : ''}
+                currentDate={data?.buyDate ? new Date(data?.buyDate).setHours(0,0,0,0) : data?.contractDate ? data?.contractDate > new Date() ? data?.contractDate.setHours(0,0,0,0) : new Date().setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
+                selectedDate={data?.buyDate ? new Date(data?.buyDate).setHours(0,0,0,0) : data?.contractDate ? data?.contractDate > new Date() ? data?.contractDate.setHours(0,0,0,0) : new Date().setHours(0,0,0,0)  : new Date().setHours(0,0,0,0)}
                 setSelectedDate={setSelectedDate}
               />
             </View>

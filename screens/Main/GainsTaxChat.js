@@ -40,6 +40,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import TaxCard2 from '../../components/TaxCard2';
 import TaxInfoCard2 from '../../components/TaxInfoCard2';
+import CalculationWarningCard from '../../components/CalculationWarning';
 import { setHouseInfo, clearHouseInfo } from '../../redux/houseInfoSlice';
 import ownHouseListSlice, { setOwnHouseList } from '../../redux/ownHouseListSlice';
 import dayjs from 'dayjs';
@@ -347,7 +348,6 @@ const GainsTaxChat = () => {
   const [hasShownGoodbye, setHasShownGoodbye] = useState(false);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-
   const [isConnected, setIsConnected] = useState(true);
 
   const getadditionalQuestion = async (questionId, answerValue, houseId, sellDate, sellPrice) => {
@@ -369,43 +369,377 @@ const GainsTaxChat = () => {
       const param = {
         calcType: '02',
         questionId: questionId,
-        answerValue: answerValue,
+        answerValue: answerValue ? answerValue : '',
         sellHouseId: houseId ? houseId : '',
         sellDate: sellDate ? dayjs(sellDate).format('YYYY-MM-DD') : null,
-        sellPrice: sellPrice ? sellPrice : 0
+        sellPrice: sellPrice ? sellPrice : 0,
+        ownHouseCnt: houseInfo?.ownHouseCnt ? houseInfo?.ownHouseCnt : 0
       };
-    //  console.log('[additionalQuestion] param:', param);
-      //console.log('[HouseDetail] Fetching house details for item:', item);
+      //console.log('[additionalQuestion] additionalQuestion param:', param);
       const response = await axios.post(url, param, { headers });
       const detaildata = response.data.data;
+      //console.log('response.data', response.data);
       if (response.data.errYn == 'Y') {
-        SheetManager.show('info', {
-          payload: {
-            type: 'error',
-            message: response.data.errMsg ? response.data.errMsg : '추가질의를 가져오지 못했어요.',
-            description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
-            buttontext: '확인하기',
-          },
-        });
+        setTimeout(() => {
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg ? response.data.errMsg : '추가질의를 가져오지 못했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+              buttontext: '확인하기',
+            },
+          });
+        }, 500)
         return {
           returndata: false
         };
       } else {
-      //  console.log('[additionalQuestion] additionalQuestion retrieved:', detaildata);
-        // console.log('[additionalQuestion] detaildata?.houseType:', detaildata?.houseType);
-      //  console.log('[additionalQuestion] additionalQuestion houseInfo:', houseInfo);
+        //  ////console.log('[additionalQuestion] additionalQuestion retrieved:', detaildata);
+        // ////console.log('[additionalQuestion] detaildata?.houseType:', detaildata?.houseType);
+        //  ////console.log('[additionalQuestion] additionalQuestion houseInfo:', houseInfo);
         return {
           detaildata: detaildata,
           returndata: true
         }
       }
     } catch (error) {
-      console.log(error);
+      setTimeout(() => {
+        ////console.log(error ? error : 'error');
+        SheetManager.show('info', {
+          payload: {
+            message: '추가질의를 가져오는데\n알수없는 오류가 발생했습니다.',
+            type: 'error',
+            buttontext: '확인하기',
+          },
+        });
+      }, 500)
       return {
         returndata: false
       };
     }
   };
+
+  const processItem = async (chatList, item, item2) => {
+    if (item2?.select) {
+      for (const item3 of item2.select) {
+        // console.log('item2.select', item2.select);
+        if (item?.questionId === 'Q_0006') {
+          if (item2?.answer) {
+            //   console.log('q_0006, item2.answer', item2.answer);
+            let tempadditionalAnswerList = houseInfo?.additionalAnswerList || [];
+            //console.log('tempadditionalAnswerList1.Q_0006', tempadditionalAnswerList.some(item => 'Q_0006' in item));
+            let foundIndex = tempadditionalAnswerList.findIndex(item => 'Q_0006' in item);
+            if (foundIndex !== -1) {
+              // console.log('tempadditionalAnswerList[foundIndex][Q_0006]', tempadditionalAnswerList[foundIndex]['Q_0006']);
+              //console.log('item2.answer', item2.answer);
+              if (tempadditionalAnswerList[foundIndex]['Q_0006'] !== item2.answer) {
+                // 불변성을 유지하면서 Q_0006 값을 변경
+                tempadditionalAnswerList = [
+                  ...tempadditionalAnswerList.slice(0, foundIndex),
+                  { ...tempadditionalAnswerList[foundIndex], 'Q_0006': item2.answer },
+                  ...tempadditionalAnswerList.slice(foundIndex + 1)
+                ];
+              }
+              //console.log('tempadditionalAnswerList[foundIndex][Q_0006]', tempadditionalAnswerList[foundIndex]['Q_0006']);
+              dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+            } else {
+              dispatch(
+                setHouseInfo({
+                  ...houseInfo,
+                  additionalAnswerList: [
+                    ...(houseInfo.additionalAnswerList || []),
+                    { "Q_0006": item2.answer }
+                  ]
+                })
+              );
+            }
+          }
+        }
+        let el = gainTax.find(el => el.id === item3);
+        if (el) chatList.push(el);
+
+      }
+
+    }
+  }
+
+  const processItem2 = async (chatList, index, item, item2) => {
+    if (item) {
+      if (item.questionId && item2.answer) {
+        if (item.id === 'additionalQuestion' && item.questionId === 'Q_0008') {
+
+          //console.log('q_0008, item2.answer', item2.answer);
+          let tempadditionalAnswerList = houseInfo?.additionalAnswerList || [];
+          //console.log('tempadditionalAnswerList1.Q_0008', tempadditionalAnswerList.some(item => 'Q_0008' in item));
+          let foundIndex = tempadditionalAnswerList.findIndex(item => 'Q_0008' in item);
+          if (foundIndex !== -1) {
+            // console.log('tempadditionalAnswerList[foundIndex][Q_0008]', tempadditionalAnswerList[foundIndex]['Q_0008']);
+            //   console.log('item2.answer', item2.answer);
+            if (tempadditionalAnswerList[foundIndex]['Q_0008'] !== item2.answer) {
+              // 불변성을 유지하면서 Q_0006 값을 변경
+              tempadditionalAnswerList = [
+                ...tempadditionalAnswerList.slice(0, foundIndex),
+                { ...tempadditionalAnswerList[foundIndex], 'Q_0008': item2.answer },
+                ...tempadditionalAnswerList.slice(foundIndex + 1)
+              ];
+            }
+            //console.log('tempadditionalAnswerList[foundIndex][Q_0001]', tempadditionalAnswerList[foundIndex]['Q_0001']);
+            dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+          } else {
+            dispatch(
+              setHouseInfo({
+                ...houseInfo,
+                additionalAnswerList: [
+                  ...(houseInfo.additionalAnswerList || []),
+                  { "Q_0008": item2.answer }
+                ]
+              })
+            );
+          }
+
+
+          const additionalQuestion = await getadditionalQuestion('Q_0008', item2.answer, houseInfo?.houseId, houseInfo?.sellDate, houseInfo?.sellAmount);
+          //   console.log('additionalQuestion', additionalQuestion);
+          let chat7;
+          let chat11;
+          const chat9 = gainTax.find(el => el.id === 'ExpenseInquiry');
+          const chat10 = gainTax.find(el => el.id === 'ExpenseAnswer');
+          if (additionalQuestion.returndata) {
+            if (additionalQuestion.detaildata?.hasNextQuestion === true) {
+              if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0004') {
+                let chatIndex = gainTax.findIndex(el => el.id === 'additionalQuestion2');
+                if (chatIndex !== -1) {
+                  chat7 = {
+                    ...gainTax[chatIndex],
+                    message: additionalQuestion.detaildata?.nextQuestionContent,
+                    questionId: additionalQuestion.detaildata?.nextQuestionId,
+                    answer: additionalQuestion.detaildata?.selectSelectList ? additionalQuestion.detaildata?.selectSelectList.answerValue : null,
+                  };
+                }
+
+                const additionalQuestion2 = await getadditionalQuestion(additionalQuestion.detaildata?.nextQuestionId, '' ? additionalQuestion.detaildata?.selectSelectList.answerValue : '02', houseInfo?.houseId, houseInfo?.sellDate, houseInfo?.sellAmount);
+                //     console.log('additionalQuestion2', additionalQuestion2);
+                if (additionalQuestion2.returndata) {
+                  if (additionalQuestion2.detaildata?.hasNextQuestion === true) {
+                    if (additionalQuestion2.detaildata?.nextQuestionId === 'Q_0005') {
+                      let chatIndex = gainTax.findIndex(el => el.id === 'residenceperiod');
+                      if (chatIndex !== -1) {
+                        chat11 = {
+                          ...gainTax[chatIndex],
+                          message: additionalQuestion2.detaildata?.nextQuestionContent,
+                          questionId: additionalQuestion2.detaildata?.nextQuestionId,
+                        };
+
+                      } else {
+                        let chatIndex = gainTax.findIndex(el => el.id === 'residenceperiod2');
+                        chat11 = {
+                          ...gainTax[chatIndex],
+                        }
+                      }
+                    }
+
+                  }
+                  chatList.push(chat7, chat11);
+                } else {
+                  let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
+                  if (tempadditionalAnswerList) {
+                    let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0005' in item);
+                    if (foundIndex !== -1) {
+                      // 불변성을 유지하면서 Q_0005 값을 삭제
+                      tempadditionalAnswerList = tempadditionalAnswerList.filter((_, index) => index !== foundIndex);
+                      dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+                    }
+                  }
+                }
+                //    console.log('chatDataList', chatDataList);
+
+                /*setTimeout(() => {
+                  dispatch(
+                    setChatDataList([
+                      ...chatDataList,
+                      chat7,
+                      chat11
+                    ])
+                  );
+                }, 500);*/
+
+              }
+
+            } else {
+              if (additionalQuestion.detaildata?.answerSelectList === null && additionalQuestion.detaildata?.nextQuestionContent === null) {
+                chatList.push(chat9, chat10);
+              }
+              /*  dispatch(
+                  setChatDataList([
+                    ...chatDataList,
+                    chat9,
+                    chat10
+                  ])
+                );*/
+
+            }
+          }
+        } else if (item.id === 'additionalQuestion' && item.questionId === 'Q_0001') {
+
+          //  console.log('q_0001, item2.answer', item2.answer);
+          let tempadditionalAnswerList = houseInfo?.additionalAnswerList || [];
+          //console.log('tempadditionalAnswerList1.Q_0001', tempadditionalAnswerList.some(item => 'Q_0001' in item));
+          let foundIndex = tempadditionalAnswerList.findIndex(item => 'Q_0001' in item);
+          if (foundIndex !== -1) {
+            //console.log('tempadditionalAnswerList[foundIndex][Q_0001]', tempadditionalAnswerList[foundIndex]['Q_0001']);
+            //console.log('item2.answer', item2.answer);
+            if (tempadditionalAnswerList[foundIndex]['Q_0001'] !== item2.answer) {
+              // 불변성을 유지하면서 Q_0006 값을 변경
+              tempadditionalAnswerList = [
+                ...tempadditionalAnswerList.slice(0, foundIndex),
+                { ...tempadditionalAnswerList[foundIndex], 'Q_0001': item2.answer },
+                ...tempadditionalAnswerList.slice(foundIndex + 1)
+              ];
+            }
+            //console.log('tempadditionalAnswerList[foundIndex][Q_0001]', tempadditionalAnswerList[foundIndex]['Q_0001']);
+            dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+          } else {
+            dispatch(
+              setHouseInfo({
+                ...houseInfo,
+                additionalAnswerList: [
+                  ...(houseInfo.additionalAnswerList || []),
+                  { "Q_0001": item2.answer }
+                ]
+              })
+            );
+          }
+
+
+          const additionalQuestion = await getadditionalQuestion('Q_0001', item2.answer, houseInfo?.houseId, houseInfo?.sellDate, houseInfo?.sellAmount);
+          //console.log('additionalQuestion', additionalQuestion);
+          let chat7;
+          let chat11;
+          const chat9 = gainTax.find(el => el.id === 'ExpenseInquiry');
+          const chat10 = gainTax.find(el => el.id === 'ExpenseAnswer');
+          if (additionalQuestion.returndata) {
+            if (additionalQuestion.detaildata?.hasNextQuestion === true) {
+              if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0008') {
+                let chatIndex = gainTax.findIndex(el => el.id === 'additionalQuestion');
+                //  let chatIndex2 = gainTax.findIndex(el => el.id === 'additionalQuestion2');
+                if (chatIndex !== -1) {
+                  chat7 = {
+                    ...gainTax[chatIndex],
+                    message: additionalQuestion.detaildata?.nextQuestionContent,
+                    questionId: additionalQuestion.detaildata?.nextQuestionId,
+                    select: gainTax[chatIndex].select.map(item => ({
+                      ...item,
+                      name: item.id === 'additionalQuestionY' ? '1년 이상 거주 계획' : '1년 이하 거주 계획',
+                      answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                    }))
+                  };
+
+                }
+                chatList.push(chat7);
+                /*dispatch(
+                  setChatDataList([
+                    ...chatDataList,
+                    chat7
+                  ])
+                );*/
+              } else if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0004') {
+                let chatIndex = gainTax.findIndex(el => el.id === 'additionalQuestion2');
+                if (chatIndex !== -1) {
+                  chat7 = {
+                    ...gainTax[chatIndex],
+                    message: additionalQuestion.detaildata?.nextQuestionContent,
+                    questionId: additionalQuestion.detaildata?.nextQuestionId,
+                    answer: additionalQuestion.detaildata?.selectSelectList ? additionalQuestion.detaildata?.selectSelectList.answerValue : null,
+                  };
+                }
+
+                const additionalQuestion2 = await getadditionalQuestion(additionalQuestion.detaildata?.nextQuestionId, '' ? additionalQuestion.detaildata?.selectSelectList.answerValue : '02', houseInfo?.houseId, houseInfo?.sellDate, houseInfo?.sellAmount);
+                //     console.log('additionalQuestion2', additionalQuestion2);
+                if (additionalQuestion2.returndata) {
+                  if (additionalQuestion2.detaildata?.hasNextQuestion === true) {
+                    if (additionalQuestion2.detaildata?.nextQuestionId === 'Q_0005') {
+                      let chatIndex = gainTax.findIndex(el => el.id === 'residenceperiod');
+                      if (chatIndex !== -1) {
+                        chat11 = {
+                          ...gainTax[chatIndex],
+                          message: additionalQuestion2.detaildata?.nextQuestionContent,
+                          questionId: additionalQuestion2.detaildata?.nextQuestionId,
+                        };
+
+                      } else {
+                        let chatIndex = gainTax.findIndex(el => el.id === 'residenceperiod2');
+                        chat11 = {
+                          ...gainTax[chatIndex],
+                        }
+                      }
+                    }
+
+                  }
+                  chatList.push(chat7, chat11);
+                } else {
+                  let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
+                  if (tempadditionalAnswerList) {
+                    let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0005' in item);
+                    if (foundIndex !== -1) {
+                      // 불변성을 유지하면서 Q_0005 값을 삭제
+                      tempadditionalAnswerList = tempadditionalAnswerList.filter((_, index) => index !== foundIndex);
+                      dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+                    }
+                  }
+                }
+                //    console.log('chatDataList', chatDataList);
+
+                /*setTimeout(() => {
+                  dispatch(
+                    setChatDataList([
+                      ...chatDataList,
+                      chat7,
+                      chat11
+                    ])
+                  );
+                }, 500);*/
+
+              }
+            } else {
+              if (additionalQuestion.detaildata?.answerSelectList === null && additionalQuestion.detaildata?.nextQuestionContent === null) {
+                chatList.push(chat9, chat10);
+              }
+              /*   dispatch(
+                   setChatDataList([
+                     ...chatDataList,
+                     chat9,
+                     chat10
+                   ])
+                 );*/
+            }
+          } else {
+            let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
+            if (tempadditionalAnswerList) {
+              let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0008' in item);
+              if (foundIndex !== -1) {
+                // 불변성을 유지하면서 Q_0008 값을 삭제
+                tempadditionalAnswerList = tempadditionalAnswerList.filter((_, index) => index !== foundIndex);
+                dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+              }
+            }
+
+            let tempadditionalAnswerList2 = houseInfo?.additionalAnswerList;
+            if (tempadditionalAnswerList2) {
+              let foundIndex = tempadditionalAnswerList2?.findIndex(item => 'Q_0004' in item);
+              if (foundIndex !== -1) {
+                // 불변성을 유지하면서 Q_0004 값을 삭제
+                tempadditionalAnswerList2 = tempadditionalAnswerList2.filter((_, index) => index !== foundIndex);
+                dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList2 }));
+              }
+            }
+          }
+        }
+      }
+
+
+    }
+  }
+
 
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
@@ -436,14 +770,14 @@ const GainsTaxChat = () => {
     await axios
       .get(url, { headers: headers })
       .then(response => {
-        // console.log('[getOwnlist]response:', response.data);
+        // ////console.log('[getOwnlist]response:', response.data);
         const result = response.data;
         const list = result.data.list === undefined ? null : result.data.list;
         if (result.isError) {
           Alert.alert('검색 결과가 없습니다.');
           return;
         }
-        //  console.log('[getOwnlist]list:', list);
+        //  ////console.log('[getOwnlist]list:', list);
         dispatch(
           setOwnHouseList([
             ...list,
@@ -451,7 +785,7 @@ const GainsTaxChat = () => {
         );
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
   };
 
@@ -590,6 +924,22 @@ const GainsTaxChat = () => {
                 const state = await NetInfo.fetch();
                 const canProceed = await handleNetInfoChange(state);
                 if (canProceed) {
+                  if (houseInfo?.additionalAnswerList) {
+                    if (houseInfo?.additionalAnswerList !== null) {
+                      const newAdditionalAnswerList = houseInfo?.additionalAnswerList.map(item => {
+                        let key = Object.keys(item)[0];
+                        let value = item[key];
+                        return { "questionId": key, "answerValue": value };
+                      });
+                      dispatch(
+                        setHouseInfo({
+                          ...houseInfo,
+                          additionalAnswerList: newAdditionalAnswerList
+                        })
+                      );
+                    }
+                  }
+
                   const chat1 = {
                     id: 'calulating',
                     type: 'system',
@@ -651,7 +1001,7 @@ const GainsTaxChat = () => {
                     borderRadius: 11,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginRight: 10,
+                    marginRight: 5,
                     paddingHorizontal: 15,
                   }}>
                   <Text
@@ -668,6 +1018,33 @@ const GainsTaxChat = () => {
                     }
                   </Text>
                 </View>
+                {/*(houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight) && <View
+                  style={{
+                    width: 'auto',
+                    height: 22,
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === (houseInfo.isMoveInRight === true ? 'isMoveInRight' : ''),
+                    )?.color,
+                    borderRadius: 11,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 5,
+                    paddingHorizontal: 15,
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontFamily: 'Pretendard-Medium',
+                      color: '#fff',
+                      lineHeight: 13,
+                      letterSpacing: -0.5,
+                    }}>
+                    {
+                      HOUSE_TYPE.find(el => el.id === (houseInfo.isMoveInRight === true ? 'isMoveInRight' : ''))
+                        ?.name
+                    }
+                  </Text>
+                </View>*/}
                 <View
                   style={{
                     width: 'auto',
@@ -676,7 +1053,7 @@ const GainsTaxChat = () => {
                     borderRadius: 11,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginRight: 10,
+
                     paddingHorizontal: 15,
                   }}>
                   <Text
@@ -720,7 +1097,7 @@ const GainsTaxChat = () => {
                 const state = await NetInfo.fetch();
                 const canProceed = await handleNetInfoChange(state);
                 if (canProceed) {
-                  //  console.log('gain houseinfo', houseInfo);
+                  //  ////console.log('gain houseinfo', houseInfo);
                   navigation.push(
                     'HouseDetail',
                     {
@@ -774,7 +1151,7 @@ const GainsTaxChat = () => {
   };
 
   const renderSystemChatItem = ({ item, index }) => {
-    // console.log('renderSystemChatItem item', item.id);
+    // ////console.log('renderSystemChatItem item', item.id);
     if (item?.id === 'goodbye' && !hasShownGoodbye) {
       setHasShownGoodbye(true);
       setTimeout(() => {
@@ -795,8 +1172,9 @@ const GainsTaxChat = () => {
             padding: 20,
           }}>
           <CTACard />
-          <HouseInfo item={houseInfo} navigation={navigation} ChatType='GainsTaxChatlast'/>
+          <HouseInfo item={houseInfo} navigation={navigation} ChatType='GainsTaxChatlast' />
           <TaxCard2 navigation={navigation} />
+          <CalculationWarningCard />
           <TaxInfoCard2 />
           <DropShadow
             style={{
@@ -866,6 +1244,23 @@ const GainsTaxChat = () => {
                   />
                 </TouchableOpacity>
                 }
+                {(item?.id === 'additionalQuestion' && item?.questionId === 'Q_0006') && <TouchableOpacity
+                  activeOpacity={0.8}
+                  hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+                  <InfoIcon
+                    onPress={() => {
+                      SheetManager.show('infoExpense', {
+                        payload: {
+                          Title: "상생임대인제도",
+                          Description: "임대차 가격 인상 자제 유도 및 양도세 실거주\n의무 충족을 위한 자가 이주 과정에서의 연\n쇄적 임차인 퇴거 방지를 위해 임대료를 일정\n기준 이하로 올리는 임대인에게 혜택을 제공\n하는 제도, 그 제도에 따른 임대인을 의미해요.\n\n아래 조건들에 해당할 때 해당 제도를 활용할\n수 있어요.",
+                          Detail: "① 신규(갱신) 임대차계약의 임대보증금 또는 임대료\n 증가율이 직전 임대차계약 대비 5% 이하일 것\n② 신규(갱신) 임대차계약이\n2021.12.20~2024.12.31사이에 체결되었을 것\n③ 직전 임대차계약에 따른 임대기간이 1년 6개월\n이상일 것\n④ 신규(갱신) 임대차계약에 따른 임대기간이 2년\n이상일 것",
+                          height: 570,
+                        },
+                      });
+                    }}
+                  />
+                </TouchableOpacity>
+                }
 
               </View>
               {item?.select && (
@@ -886,87 +1281,12 @@ const GainsTaxChat = () => {
                           };
 
                           const chatList = [];
-                       //   console.log('item', item);
-                       //   console.log('item2', item2);
-                       //   console.log('item2.select', item2.select);
+                          //   console.log('item', item);
+                          //    console.log('item2', item2);
+                          //   console.log('item2.select', item2.select);
 
-
-                          if (item2?.select) {
-                            for (const item3 of item2.select) {
-                              if (item?.questionId === 'Q_0001') {
-                                if (item2?.answer) {
-                                  dispatch(
-                                    setHouseInfo({
-                                      ...houseInfo,
-                                      additionalAnswerList: [
-                                        { "Q_0001": item2.answer }
-                                      ]
-                                    })
-                                  );
-                                }
-                              } else if (item2?.questionId === 'Q_0005') {
-                                dispatch(
-                                  setHouseInfo({
-                                    ...houseInfo,
-                                    additionalAnswerList: [
-                                      { "Q_0005": item2.select.answer }
-                                    ]
-                                  })
-                                );
-                              }
-                              if (item?.name === 'residenceperiod2') {
-                                dispatch(
-                                  setHouseInfo({
-                                    ...houseInfo,
-                                    additionalAnswerList: [
-                                      { "Q_0005": item.select.answer }
-                                    ]
-                                  })
-                                );
-                              }
-                              /*     if (item3 === 'additionalQuestion2' || item3 === 'additionalQuestion') {
-                               const QuestionData = await getadditionalQuestion(item2.questionId, item3 === 'additionalQuestion2' ? item2.answer : item2.select.answer, houseInfo.houseId, houseInfo.sellDate, houseInfo.sellAmount);
-                                  console.log('QuestionData.returndata', QuestionData.returndata);
-                                  console.log('.questionId', QuestionData.detaildata?.nextQuestionId);
-                                  console.log('QuestionData.answer', QuestionData.detaildata?.selectSelectList ? QuestionData.detaildata?.selectSelectList.answerValue : 'null');
-                                  if (QuestionData.returndata) {
-                                    if (QuestionData.detaildata?.hasNextQuestion === true) {
-                                      if (QuestionData.detaildata?.nextQuestionId === 'Q_0005') {
-                                        let chatIndex = gainTax.findIndex(el => el.id === 'residenceperiod');
-                                        let chat;
-                                        if (chatIndex !== -1) {
-                                          chat = {
-                                            ...gainTax[chatIndex],
-                                            message: QuestionData.detaildata?.nextQuestionContent,
-                                          };
-                                        }
-                                      }
-                                      chatList.push({ ...chat });
-                                    } else if (QuestionData.detaildata?.nextQuestionId === 'Q_0003') {
-                                      dispatch(
-                                        setHouseInfo({
-                                          ...houseInfo,
-                                          additionalAnswerList: [
-                                            { "Q_0003": item2.select.answer }
-                                          ]
-                                        })
-                                      );
-                                      let chat = gainTax.find(el => el.id === 'ExpenseAnswer');
-                                      chatList.push({ ...chat });
-                                    }
-                                  }
-                                  else {
-                                    let el = gainTax.find(el => el.id === 'residenceperiod2');
-                                    if (el) chatList.push(el);
-                                  }
-                                } else {*/
-                              let el = gainTax.find(el => el.id === item3);
-                              if (el) chatList.push(el);
-                              //    }
-                              //   }
-                            }
-                          }
-
+                          await processItem(chatList, item, item2);
+                          await processItem2(chatList, index, item, item2);
 
                           if (item.id === 'cert' && item2.id === 'no') {
                             const sellAmountSystemIndex = chatDataList.findIndex(
@@ -980,7 +1300,11 @@ const GainsTaxChat = () => {
 
                               dispatch(setChatDataList(newChatDataList));
                             } else {
-                              navigation.replace('GainsTax');
+                              navigation.push('DirectRegister', {
+                                prevChat: 'GainsTaxChat',
+                                index: index,
+                              });
+                              //  navigation.replace('GainsTax');
                             }
                           }
 
@@ -990,13 +1314,13 @@ const GainsTaxChat = () => {
                             item.id === 'sellDateSystem' ||
                             item.id === 'sellAmountSystem'
                           ) {
-                            //     console.log('contractDateSystem');
+                            //     ////console.log('contractDateSystem');
                           } else if (item.id === 'ExpenseAnswer') {
-                            //     console.log('ExpenseAnswer');
+                            //     ////console.log('ExpenseAnswer');
                           } else if ((item.id === 'residenceperiod' || item.id === 'residenceperiod2') && item2.id === 'directlivePeriod') {
-                            //    console.log('directlivePeriod');
+                            //    ////console.log('directlivePeriod');
                           } else {
-                        //    console.log('chatList', chatList);
+                            //    ////console.log('chatList', chatList);
                             dispatch(
                               setChatDataList([
                                 ...chatDataList,
@@ -1005,24 +1329,26 @@ const GainsTaxChat = () => {
                               ]),
                             );
                           }
-                          //  console.log('item2.id : ', item2.id);
-                          //  console.log('index2 : ', index2);
-                          if (item2.id == 'landlordY') {
-                            dispatch(
-                              setHouseInfo({
-                                ...houseInfo,
-                                isLandlord: true,
-                              }),
-                            );
-                          } else if (item2.id == 'landlordN') {
-                            dispatch(
-                              setHouseInfo({
-                                ...houseInfo,
-                                isLandlord: false,
-                              }),
-                            );
-                          }
-                          //         console.log('landlordhouseInfo',houseInfo)
+
+
+                          //  ////console.log('item2.id : ', item2.id);
+                          //  ////console.log('index2 : ', index2);
+                          /* if (item2.id == 'landlordY') {
+                             dispatch(
+                               setHouseInfo({
+                                 ...houseInfo,
+                                 isLandlord: true,
+                               }),
+                             );
+                           } else if (item2.id == 'landlordN') {
+                             dispatch(
+                               setHouseInfo({
+                                 ...houseInfo,
+                                 isLandlord: false,
+                               }),
+                             );
+                           }*/
+                          //         ////console.log('landlordhouseInfo',houseInfo)
                           if (item2.id == 'AcquiredhouseY') {
                             dispatch(
                               setHouseInfo({
@@ -1044,7 +1370,7 @@ const GainsTaxChat = () => {
                               getOwnlist();
                             };
                           }
-                          //  console.log('item2?.openSheet : ', item2?.openSheet)
+                          //  ////console.log('item2?.openSheet : ', item2?.openSheet)
                           if (item2?.openSheet) {
                             SheetManager.show(item2.openSheet, {
                               payload: {
@@ -1103,9 +1429,9 @@ const GainsTaxChat = () => {
                   부동산 전문 세무사에게 상담 받아보세요!
                 </ChatBubbleText>
                 <ProfileAvatar
-                  source={require('../../assets/images/Gookyoung_Yoon.png')}
+                  source={require('../../assets/images/Minjungum_Lee.png')}
                 />
-                <ProfileName>윤국녕 세무사</ProfileName>
+                <ProfileName>이민정음 세무사</ProfileName>
                 <ProfileEmail>ilbitax86@naver.com</ProfileEmail>
                 <KakaoButton
                   onPress={async () => {
@@ -1234,7 +1560,7 @@ const GainsTaxChat = () => {
                   <ModalButton
                     disabled={index < chatDataList.length - 1}
                     onPress={async () => {
-                      // console.log('next');
+                      // ////console.log('next');
                       const state = await NetInfo.fetch();
                       const canProceed = await handleNetInfoChange(state);
                       if (canProceed) {

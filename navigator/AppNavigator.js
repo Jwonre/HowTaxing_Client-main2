@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Screens
+import StartPage from '../screens/Auth/StartPage';
 import Login from '../screens/Auth/Login';
 import Home from '../screens/Main/Home';
 import LoginWebview from '../screens/Auth/LoginWebview';
@@ -83,7 +84,7 @@ const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   const currentUser = useSelector(state => state.currentUser?.value);
-
+  const [firstLaunch, setFirstLaunch] = useState(true);
   const horizontalAnimation = {
     gestureDirection: 'horizontal',
     cardStyleInterpolator: ({ current, layouts }) => {
@@ -215,6 +216,20 @@ const AppNavigator = () => {
             </Stack.Group>
           ) : (
             <Stack.Group>
+              {firstLaunch ? (
+                <Stack.Screen
+                  name="StartPage"
+                  component={StartPage}
+                  listeners={{
+                    transitionEnd: () => {
+                      // StartPage로의 이동이 끝나면 일정 시간 후에 firstLaunch를 false로 설정
+                      setTimeout(() => {
+                        setFirstLaunch(false);
+                      }, 6800);  // 1000ms = 1초 딜레이
+                    },
+                  }}
+                />
+              ) : null}
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="CheckTerms" component={CheckTerms} />
               <Stack.Group screenOptions={{ presentation: 'modal' }}>

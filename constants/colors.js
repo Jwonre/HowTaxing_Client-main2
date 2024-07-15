@@ -39,5 +39,10 @@ export const HOUSE_TYPE = [
     id: '8',
     name: '필수',
     color: '#FF7F00',
-  }
+  },
+  {
+    id: 'isMoveInRight',
+    name: '입주권',
+    color: '#FF7F00',
+  },
 ];

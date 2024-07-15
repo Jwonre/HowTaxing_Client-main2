@@ -294,7 +294,7 @@ const AreaMeterDef = props => {
         errorMessage: error?.errCode,
         buttontext: '확인하기',
       });
-      console.log(error);
+      ////console.log(error);
     }
   };
 
@@ -342,7 +342,7 @@ const AreaMeterDef = props => {
     const chatItem = isGainsTax
       ? gainTax.find(el => el.id === 'allHouse')
       : acquisitionTax.find(el => el.id === 'moment');
-   // console.log(chatItem);
+   // ////console.log(chatItem);
 
     dispatch(setChatDataList([...chatDataList, chatItem]));
   };

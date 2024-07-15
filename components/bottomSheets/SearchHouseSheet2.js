@@ -407,7 +407,7 @@ const SearchHouseSheet2 = props => {
              }
      
              const list = parsedData.results.juso;
-             console.log('jusolist', list)
+             ////console.log('jusolist', list)
              if (list.length === 0) {
                SheetManager.show('info', {
                  payload: {
@@ -422,7 +422,7 @@ const SearchHouseSheet2 = props => {
              setListData([...list]);
            })
            .catch(function (error) {
-             console.log(error);
+             ////console.log(error);
            });
   
     };
@@ -549,7 +549,7 @@ const SearchHouseSheet2 = props => {
           setListData([...listData, ...list]);
         })
         .catch(function (error) {
-          console.log(error);
+          ////console.log(error);
         });*/
 
     const accessToken = currentUser.accessToken;
@@ -616,7 +616,7 @@ const SearchHouseSheet2 = props => {
           actionSheetRef: actionSheetRef,
           buttontext: '확인하기',
         });
-        console.log(error ? error : 'error');
+        ////console.log(error ? error : 'error');
         return;
       });
   };
@@ -640,7 +640,7 @@ const SearchHouseSheet2 = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      //console.log('Holist response :', response.data.data.dongHoList);
+      //////console.log('Holist response :', response.data.data.dongHoList);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -677,7 +677,7 @@ const SearchHouseSheet2 = props => {
         actionSheetRef: actionSheetRef,
         buttontext: '확인하기',
       });
-      console.log(error ? error : 'error');
+      ////console.log(error ? error : 'error');
       if (type === 'init') {
         return 0;
       } else {
@@ -704,7 +704,7 @@ const SearchHouseSheet2 = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      //console.log('Donglist response :', response.data);
+      //////console.log('Donglist response :', response.data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -719,7 +719,7 @@ const SearchHouseSheet2 = props => {
         return 'dongerror';
 
       } else {
-        // console.log('donglist response :', response.data.data.dongHoList);
+        // ////console.log('donglist response :', response.data.data.dongHoList);
         const donglist = response.data.data.dongHoList;
         setDongList(donglist);
         return donglist[0];
@@ -734,7 +734,7 @@ const SearchHouseSheet2 = props => {
         actionSheetRef: actionSheetRef,
         buttontext: '확인하기',
       });
-      console.log(error ? error : 'error');
+      ////console.log(error ? error : 'error');
       return 'dongerror';
     }
   };
@@ -744,7 +744,7 @@ const SearchHouseSheet2 = props => {
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
       actionSheetRef.current?.hide();
-      //   console.log(selectedItem);
+      //   ////console.log(selectedItem);
       dispatch(
         setDirectRegister({
           houseName: selectedItem?.bdNm
@@ -814,7 +814,7 @@ const SearchHouseSheet2 = props => {
               ? keyboardVisible
                 ? 360 + apartmentInfoGroupHeight
                 : 300 + apartmentInfoGroupHeight
-              : 550,
+              : 500,
         width: width - 40,
 
       }}>
@@ -972,7 +972,7 @@ const SearchHouseSheet2 = props => {
                         selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                       }
                       /* onSelect={(selectedItem, index) => {
-                          console.log(selectedItem, index);
+                          ////console.log(selectedItem, index);
                         }}*/
                       renderCustomizedButtonChild={(selectedItem, index) => {
                         return (
@@ -999,7 +999,7 @@ const SearchHouseSheet2 = props => {
                         return (
                           <SelectItem
                             onPress={() => {
-                              //        console.log(item);
+                              //        ////console.log(item);
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
@@ -1081,16 +1081,16 @@ const SearchHouseSheet2 = props => {
                     const state = await NetInfo.fetch();
                     const canProceed = await handleNetInfoChange(state);
                     if (canProceed) {
-                      //       console.log('선택 item', item);
-                      //          console.log('선택 item', item);
+                      //       ////console.log('선택 item', item);
+                      //          ////console.log('선택 item', item);
                       setAddress(item?.roadAddr);
                       if (selectedHouseType === '1' || selectedHouseType === '2') {
                         const firstDong = await getDongData(item);
-                        //console.log('firstDong', firstDong);
+                        //////console.log('firstDong', firstDong);
                         if (firstDong !== 'dongerror') {
                           const Hodata = await getHoData(item, firstDong, 'init');
                           setSelectedItem(item);
-                          console.log('Hodata', Hodata);
+                          ////console.log('Hodata', Hodata);
                           if (Hodata > 0) {
                             setCurrentPageIndex(1);
                           } else {
@@ -1102,7 +1102,7 @@ const SearchHouseSheet2 = props => {
                         }
                       } else {
                         setSelectedItem(item);
-                        //console.log('item', item);
+                        //////console.log('item', item);
                         setCurrentPageIndex(2);
                       }
                     } else {
@@ -1198,7 +1198,7 @@ const SearchHouseSheet2 = props => {
               </PickerContainer>
             </View>
           </SelectGroup>
-          <Button
+          {/*<Button
             onPress={() => {
               setCurrentPageIndex(2);
             }}
@@ -1215,7 +1215,7 @@ const SearchHouseSheet2 = props => {
               }}>
               직접 입력하기
             </ButtonText>
-          </Button>
+          </Button> 직접입력하기 삭제*/}
           <ButtonSection
             style={{
               marginTop: 0,
@@ -1260,7 +1260,7 @@ const SearchHouseSheet2 = props => {
           </ModalTitle>
           <ApartmentInfoGroup
             onLayout={event => {
-              //     console.log(event.nativeEvent.layout.height);
+              //     ////console.log(event.nativeEvent.layout.height);
               setApartmentInfoGroupHeight(event.nativeEvent.layout.height);
             }}>
             <ApartmentInfoTitle>{address}</ApartmentInfoTitle>

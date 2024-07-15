@@ -97,7 +97,7 @@ const PubLandPriceDef = props => {
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
   
- // console.log('props', props);
+ // ////console.log('props', props);
 
   const title =
     props.payload.type === '전용면적' ? '전용면적' : '공시가격';
@@ -157,7 +157,7 @@ const PubLandPriceDef = props => {
             }}>
             <Button
               onPress={() => {
-                console.log('GoBack');
+                ////console.log('GoBack');
                  
                 actionSheetRef.current?.hide();
               }}>

@@ -222,7 +222,7 @@ const UpdatePubLandPriceAlert = props => {
     if (canProceed) {
       var p = data;
       p.pubLandPrice = pubLandPrice;
-      // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
+      // ////console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
        
       actionSheetRef.current?.hide();
@@ -259,7 +259,7 @@ const UpdatePubLandPriceAlert = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>공시가격를 입력해주세요.</ModalTitle>
+          <ModalTitle>공시가격을 입력해주세요.</ModalTitle>
           <ModalSubtitle>{numberToKorean(pubLandPrice)}{(pubLandPrice !== null && pubLandPrice !== 0) ? '원' : ' '}</ModalSubtitle>
           <View
             style={{
@@ -278,7 +278,7 @@ const UpdatePubLandPriceAlert = props => {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <ModalInputContainer>
                 <StyledInput
-                  placeholder="공시가격를 입력해주세요."
+                  placeholder="공시가격을 입력해주세요."
                   keyboardType="number-pad"
                   value={pubLandPrice ? pubLandPrice?.toLocaleString() : null}
                   onChangeText={text => {

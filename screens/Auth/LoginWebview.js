@@ -15,18 +15,18 @@ const LoginWebview = (props) => {
     const uri = { uri: `http://devapp.how-taxing.com/oauth2/authorization/${socialType}` };
     const sendWebMessage = () => {
         webViewRef.current.injectJavaScript(`
-        const url =document?.URL===null ? null:document?.URL ;
-        if((url.indexOf('https://') !== -1) || (url === null)){
-           window.ReactNativeWebView.postMessage('url');
-        }else{
-            const data = document.getElementsByTagName("pre")[0].innerText; // 결과 
-            if (data !== null){
+        const url = document?.URL === null ? null : document?.URL;
+        if ((url.indexOf('https://') !== -1) || (url === null)) {
+            window.ReactNativeWebView.postMessage('url');
+        } else {
+            const preElement = document.getElementsByTagName("pre")[0];
+            const data = preElement.innerText; // 결과 
+            if (data !== null) {
                 window.ReactNativeWebView.postMessage(data);
+                preElement.style.display = 'none'; // 결과 숨기기
             }
         }
-
-      `);
-
+        `);
     };
     const handleWebViewMessage = event => {
         const message = event.nativeEvent.data;
@@ -35,6 +35,7 @@ const LoginWebview = (props) => {
                 flex: 1,
                 width: width,
                 height: height,
+                //display: 'none' 
             });
 
         } else {
@@ -42,10 +43,14 @@ const LoginWebview = (props) => {
                 flex: 1,
                 width: width,
                 height: width,
+               // display: 'none' 
             });
+         //   console.log('message', message)
+         //   console.log('JSON.parse(message)', JSON.parse(message))
+          //  console.log('JSON.parse(message).status', JSON.parse(message).status)
             const parsedMessage = JSON.parse(message);
             if (parsedMessage.errYn === 'Y') {
-                if (parsedMessage.status !== undefined || null) {
+            /*   if (parsedMessage.status !== undefined || null) {
                     SheetManager.show('info', {
                         payload: {
                             type: 'error',
@@ -54,7 +59,7 @@ const LoginWebview = (props) => {
                             buttontext: '확인하기',
                         },
                     });
-                } else {
+                } else {*/
                     SheetManager.show('info', {
                         payload: {
                             type: 'error',
@@ -62,7 +67,7 @@ const LoginWebview = (props) => {
                             buttontext: '확인하기',
                         },
                     });
-                }
+                
 
              /*   Alert.alert(
                     'error',
@@ -78,7 +83,7 @@ const LoginWebview = (props) => {
                     },
                 );*/
             }
-            else if (parsedMessage.errYn === 'N') {
+            else if(parsedMessage.errYn === 'N'){
                 //로그인화면으로 데이터 보냄
                 const data = parsedMessage.data;
                 //console.log('data', data);

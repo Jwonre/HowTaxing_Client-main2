@@ -267,7 +267,7 @@ const ChooseHouseTypeAlert = props => {
             }}>
             <Button
               onPress={() => {
-                //     console.log('ChooseHouseType 이전으로 버튼');
+                //     ////console.log('ChooseHouseType 이전으로 버튼');
                 actionSheetRef.current?.hide();
               }}
               style={{
@@ -290,7 +290,7 @@ const ChooseHouseTypeAlert = props => {
                 if (canProceed) {
                   var p = data;
                   p.houseType = selectedHouseType;
-                  //    console.log('[ChooseHouseTypeAlert] p:', p);
+                  //    ////console.log('[ChooseHouseTypeAlert] p:', p);
                   handleHouseChange(p, p?.isMoveInRight);
                   // ownHouseList가 배열이라면, map 함수를 사용하여 해당 houseId를 가진 객체만 업데이트합니다.
 

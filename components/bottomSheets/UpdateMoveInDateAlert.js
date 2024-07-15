@@ -157,7 +157,7 @@ const UpdateMoveInDateAlert = props => {
     if (canProceed) {
       var p = data;
       p.moveInDate = selectedDate;
-      //console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
+      //////console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
        
       actionSheetRef.current?.hide();
@@ -207,13 +207,13 @@ const UpdateMoveInDateAlert = props => {
             <View
               style={{
                 width: '100%',
-                height: 420,
+                height: 400,
               }}>
               <Calendar
-                minDate={data?.balanceDate ? new Date(data?.balanceDate) : new Date(data?.constractDate) ? new Date(data?.constractDate) : new Date()}
+                minDate={data?.balanceDate ? new Date(data?.balanceDate).setHours(0,0,0,0) : data?.constractDate ? new Date(data?.constractDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
                 value={data?.moveInDate}
                 setSelectedDate={setSelectedDate}
-                currentDate={data?.balanceDate ? new Date(data?.balanceDate) : new Date(data?.constractDate) ? new Date(data?.constractDate) : new Date()}
+                currentDate={data?.balanceDate ? new Date(data?.balanceDate).setHours(0,0,0,0) : data?.constractDate ? new Date(data?.constractDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
               />
             </View>
           </ModalInputSection>

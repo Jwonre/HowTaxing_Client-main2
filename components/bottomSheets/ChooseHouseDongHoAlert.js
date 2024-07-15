@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import NetInfo from "@react-native-community/netinfo"
+import dayjs from 'dayjs';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -168,10 +169,10 @@ const ChooseHouseDongHoAlert = props => {
 
 
   useEffect(() => {
-    // console.log('props.payload?.item', props.payload.currentPageIndex.selectedItem);
-    // console.log('props.payload?.dongList', props.payload.currentPageIndex.dongList);
-    //  console.log('props.payload?.hoList', props.payload.currentPageIndex.hoList);
-    // console.log('props.payload?.currentPageIndex', props.payload);
+    // ////console.log('props.payload?.item', props.payload.currentPageIndex.selectedItem);
+    // ////console.log('props.payload?.dongList', props.payload.currentPageIndex.dongList);
+    //  ////console.log('props.payload?.hoList', props.payload.currentPageIndex.hoList);
+    // ////console.log('props.payload?.currentPageIndex', props.payload);
     setDongList(props.payload?.currentPageIndex.dongList);
     setHoList(props.payload?.currentPageIndex.hoList);
 
@@ -240,7 +241,7 @@ const ChooseHouseDongHoAlert = props => {
 
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });*/
     const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
     const headers = {
@@ -260,7 +261,7 @@ const ChooseHouseDongHoAlert = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      //console.log('Holist response :', response.data.data.dongHoList);
+      //////console.log('Holist response :', response.data.data.dongHoList);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -289,7 +290,7 @@ const ChooseHouseDongHoAlert = props => {
         actionSheetRef: actionSheetRef,
         buttontext: '확인하기',
       });
-      console.log(error);
+      ////console.log(error);
     }
   };
 
@@ -307,23 +308,23 @@ const ChooseHouseDongHoAlert = props => {
 
       // 요청 바디
       const param = {
-        //[필수] bdKdcd | String | 공동주택여부(1:공동주택 0:비공동주택)
-        //[필수] pnu | String | 고유번호(8자리 이상, 총 19자리)
-        //[선택] dongNm | String | 동명
-        //[선택] hoNm | String | 호명
-        //[선택] detailAdr | String | 상세주소(직접입력 케이스)
-        //[선택] numOfRows | Integer | 검색건수(최대 1000)
-        //[선택] pageNo | Integer | 페이지 번호
-        bdKdcd: item?.bdKdcd,
-        pnu: item?.pnu,
-        dongNm: dong1 ? dong1 : dong2 ? dong2 : '',
-        hoNm: ho1 ? ho1 : ho2 ? ho2 : '',
-        detailAdr: '',
-        numOfRows: 5,
-        pageNo: 1,
+        //[필수] legalDstCode | String | 법정동코드
+        //[필수] roadAddr | String | 도로명주소
+        //[선택] siDo | String | 시도
+        //[선택] siGunGu | String | 시군구
+        //[선택] complexName | String | 단지명
+        //[필수] dongName | String | 동명
+        //[선택] hoName | String | 호
+        legalDstCode: item.admCd,
+        roadAddr: item.roadAddrPart1,
+        siDo: '',
+        siGunGu: '',
+        dongName: dong1 ? dong1 : dong2 ? dong2 : '',
+        hoName: ho1 ? ho1 : ho2 ? ho2 : '',
+        complexName: item.bdNm,
 
       };
-      /*    console.log('gongsiParams', {
+      /*    ////console.log('gongsiParams', {
             bdKdcd: item?.bdKdcd,
             pnu: item?.pnu,
             dongNm: dong1 ? dong1 : dong2 ? dong2 : '',
@@ -332,18 +333,18 @@ const ChooseHouseDongHoAlert = props => {
             numOfRows: 5,
             pageNo: 1,
           })*/
-      const response = await axios.post('http://devapp.how-taxing.com/house/pubLandPriceAndArea', param, { headers: headers });
+      const response = await axios.post('http://devapp.how-taxing.com/house/pubLandPriceAndAreaAtDB', param, { headers: headers });
       const data = response.data.data;
-      //    console.log('gongsiData return', data);
+      //    ////console.log('gongsiData return', data);
       if (response.data.errYn === 'Y') {
-        SheetManager.show('info', {
+       /* SheetManager.show('info', {
           payload: {
             type: 'error',
             message: response.data.errMsg ? response.data.errMsg : '공시가격과 전용면적을 가져오는데 문제가 발생했어요.',
             description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             buttontext: '확인하기',
           },
-        });
+        });*/
 
 
         dispatch(
@@ -354,46 +355,46 @@ const ChooseHouseDongHoAlert = props => {
         return {
           isPubLandPriceOver100Mil: undefined,
           isAreaOver85: undefined,
-          result: true,
+          result: true
         };
       } else {
         const successresult = await successResponse(data, detail2);
-        //   console.log('successresult', successresult);
+        //   ////console.log('successresult', successresult);
         return {
           isPubLandPriceOver100Mil: successresult.isPubLandPriceOver100Mil,
           isAreaOver85: successresult.isAreaOver85,
-          result: true,
+          result: true
         };
       }
     } catch (error) {        // 오류 처리
       console.error(error);
-      SheetManager.show('info', {
+     /* SheetManager.show('info', {
         type: 'error',
         message: error?.errMsg,
         errorMessage: error?.errCode,
         closemodal: true,
         actionSheetRef: actionSheetRef,
         buttontext: '확인하기',
-      });
+      });*/
       return {
         isPubLandPriceOver100Mil: undefined,
         isAreaOver85: undefined,
-        result: false,
+        result: false
       };
     }
   };
 
   const successResponse = async (data, detail2) => {
-    if (data?.hasPubLandPrice) {
+    if (data?.pubLandPrice) {
       if (data?.pubLandPrice > 100000000) {
-        if (data?.hasArea) {
+        if (data?.area) {
           if (data?.area > 85) {
             dispatch(
               setHouseInfo({
                 ...houseInfo,
-                hasPubLandPrice: data?.hasPubLandPrice,
+                hasPubLandPrice: true,
                 pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-                hasArea: data?.hasArea,
+                hasArea: true,
                 area: data?.area ? data?.area : 0,
                 stdrYear: data?.stdrYear,
                 detailAdr: detail2,
@@ -406,9 +407,9 @@ const ChooseHouseDongHoAlert = props => {
             dispatch(
               setHouseInfo({
                 ...houseInfo,
-                hasPubLandPrice: data?.hasPubLandPrice,
+                hasPubLandPrice: true,
                 pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-                hasArea: data?.hasArea,
+                hasArea: true,
                 area: data?.area ? data?.area : 0,
                 stdrYear: data?.stdrYear,
                 detailAdr: detail2,
@@ -422,9 +423,9 @@ const ChooseHouseDongHoAlert = props => {
           dispatch(
             setHouseInfo({
               ...houseInfo,
-              hasPubLandPrice: data?.hasPubLandPrice,
+              hasPubLandPrice: true,
               pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-              hasArea: data?.hasArea,
+              hasArea: false,
               area: data?.area ? data?.area : 0,
               stdrYear: data?.stdrYear,
               detailAdr: detail2,
@@ -434,14 +435,14 @@ const ChooseHouseDongHoAlert = props => {
           return { isPubLandPriceOver100Mil: true };
         }
       } else {
-        if (data?.hasArea) {
+        if (data?.area) {
           if (data?.area > 85) {
             dispatch(
               setHouseInfo({
                 ...houseInfo,
-                hasPubLandPrice: data?.hasPubLandPrice,
+                hasPubLandPrice: true,
                 pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-                hasArea: data?.hasArea,
+                hasArea: true,
                 area: data?.area ? data?.area : 0,
                 stdrYear: data?.stdrYear,
                 detailAdr: detail2,
@@ -454,9 +455,9 @@ const ChooseHouseDongHoAlert = props => {
             dispatch(
               setHouseInfo({
                 ...houseInfo,
-                hasPubLandPrice: data?.hasPubLandPrice,
+                hasPubLandPrice: true,
                 pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-                hasArea: data?.hasArea,
+                hasArea: true,
                 area: data?.area ? data?.area : 0,
                 stdrYear: data?.stdrYear,
                 detailAdr: detail2,
@@ -470,9 +471,9 @@ const ChooseHouseDongHoAlert = props => {
           dispatch(
             setHouseInfo({
               ...houseInfo,
-              hasPubLandPrice: data?.hasPubLandPrice,
+              hasPubLandPrice: true,
               pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-              hasArea: data?.hasArea,
+              hasArea: false,
               area: data?.area ? data?.area : 0,
               stdrYear: data?.stdrYear,
               detailAdr: detail2,
@@ -483,14 +484,14 @@ const ChooseHouseDongHoAlert = props => {
         }
       }
     } else {
-      if (data?.hasArea) {
+      if (data?.area) {
         if (data?.area > 85) {
           dispatch(
             setHouseInfo({
               ...houseInfo,
-              hasPubLandPrice: data?.hasPubLandPrice,
+              hasPubLandPrice: false,
               pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-              hasArea: data?.hasArea,
+              hasArea: true,
               area: data?.area ? data?.area : 0,
               stdrYear: data?.stdrYear,
               detailAdr: detail2,
@@ -502,9 +503,9 @@ const ChooseHouseDongHoAlert = props => {
           dispatch(
             setHouseInfo({
               ...houseInfo,
-              hasPubLandPrice: data?.hasPubLandPrice,
+              hasPubLandPrice: false,
               pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-              hasArea: data?.hasArea,
+              hasArea: true,
               area: data?.area ? data?.area : 0,
               stdrYear: data?.stdrYear,
               detailAdr: detail2,
@@ -517,9 +518,9 @@ const ChooseHouseDongHoAlert = props => {
         dispatch(
           setHouseInfo({
             ...houseInfo,
-            hasPubLandPrice: data?.hasPubLandPrice,
+            hasPubLandPrice: false,
             pubLandPrice: data?.pubLandPrice ? data?.pubLandPrice : 0,
-            hasArea: data?.hasArea,
+            hasArea: false,
             area: data?.area ? data?.area : 0,
             stdrYear: data?.stdrYear,
             detailAdr: detail2,
@@ -559,7 +560,7 @@ const ChooseHouseDongHoAlert = props => {
       const chatpubLandPrice = {
         id: 'pubLandPrice',
         type: 'system',
-        message: '공시가격를 제대로 불러오지 못했어요.\n공시가격이 1억원을 초과하나요?',
+        message: '공시가격을 제대로 불러오지 못했어요.\n공시가격이 1억원을 초과하나요?',
         progress: 1,
         select: [
           {
@@ -601,7 +602,7 @@ const ChooseHouseDongHoAlert = props => {
       }
 
       //리스트 초기화부분
-
+      ////console.log('selectedItem',selectedItem);
       const gongsireturn = await getGongSiData(selectedItem, selectedDong, dongList[0], selectedHo, hoList[0], detailAddress2);
       if (gongsireturn?.result) {
         const chatList =

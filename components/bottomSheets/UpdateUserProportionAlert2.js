@@ -208,7 +208,7 @@ const UpdateUserProportionAlert = props => {
     if (canProceed) {
       var p = data;
       p.userProportion = proportion;
-      //console.log('[UpdateUserProportionAlert]nextHandler p:', p);
+      //////console.log('[UpdateUserProportionAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
        
       actionSheetRef.current?.hide();

@@ -129,7 +129,7 @@ const InfoAppinformation = () => {
         <ModalContentSection>
           <ModalTitle>하우택싱 서비스 정보를 알려드릴게요.</ModalTitle>
           <ModalDescription>
-            어플리케이션 버전 : v1.0.0{'\n'}법인명(단체명) : 아토 택스 컨설팅{'\n'}사업자등록번호 : 678-06-02195
+            어플리케이션 버전 : v1.0.0{'\n'}법인명(단체명) : JS 세무회계{'\n'}사업자등록번호 : 416-18-30801
           </ModalDescription>
         </ModalContentSection>
 

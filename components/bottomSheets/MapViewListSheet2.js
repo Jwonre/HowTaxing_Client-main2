@@ -305,7 +305,7 @@ const MapViewListSheet2 = props => {
   useEffect(() => {
     Geolocation.getCurrentPosition(
       info => {
-        console.log(info);
+        ////console.log(info);
         setMyPosition({
           latitude: Number(info.coords.latitude),
           longitude: Number(info.coords.longitude),
@@ -434,7 +434,7 @@ const MapViewListSheet2 = props => {
           return;
         }
 
-        console.log('111', parsedData.results.juso);
+        ////console.log('111', parsedData.results.juso);
 
         if (!parsedData.results.juso[0]) {
           SheetManager.show('info', {
@@ -459,7 +459,7 @@ const MapViewListSheet2 = props => {
         getAddressInfo(parsedData.results.juso[0].roadAddr);
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
   };
 
@@ -478,7 +478,7 @@ const MapViewListSheet2 = props => {
         return result.data.documents[0].address_name;
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
 
     getAddressInfo(address_name);
@@ -498,7 +498,7 @@ const MapViewListSheet2 = props => {
     await axios
       .get(url, config)
       .then(async result => {
-        console.log(result.data);
+        ////console.log(result.data);
         // API호출
         // const promises = result.data.data.map(async apt_item => {
         //   return getAPTLocation(apt_item);
@@ -509,12 +509,12 @@ const MapViewListSheet2 = props => {
 
         const locations = await Promise.all(
           result.data.data.map(async apt_item => {
-            console.log(apt_item);
+            ////console.log(apt_item);
             return getAPTLocation(apt_item);
           }),
         );
 
-        // console.log(locations);
+        // ////console.log(locations);
 
         // list를 현재 위치 기준에서 가까운 순으로 정렬
         const sortedList = locations.sort((a, b) => {
@@ -530,7 +530,7 @@ const MapViewListSheet2 = props => {
         setListData(sortedList);
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
   };
 
@@ -556,7 +556,7 @@ const MapViewListSheet2 = props => {
         };
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
         SheetManager.show('info', {
           payload: {
             message: '주소를 찾을 수 없어요.',
@@ -599,7 +599,7 @@ const MapViewListSheet2 = props => {
         setHoList(hos[0]);
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
   };
 
@@ -786,7 +786,7 @@ const MapViewListSheet2 = props => {
                       isHideCollidedCaptions
                       useTextureView={true}
                       onCameraChange={e => {
-                        console.log(e);
+                        ////console.log(e);
 
                         setZoom(e.zoom);
                         if (e.zoom < 13) {
@@ -920,7 +920,7 @@ const MapViewListSheet2 = props => {
                     itemHeight={40}
                     options={dongList}
                     onChange={index => {
-                     // console.log(index);
+                     // ////console.log(index);
                       setSelectedDong(dongList[index]);
                       setSelectedHo(hoList[0]);
                     }}
@@ -965,7 +965,7 @@ const MapViewListSheet2 = props => {
               }}>
               <Button
                 onPress={() => {
-                 // console.log(myPosition);
+                 // ////console.log(myPosition);
                   setMyPosition({
                     latitude: Number(myPosition?.latitude),
                     longitude: Number(myPosition?.longitude),
@@ -988,7 +988,7 @@ const MapViewListSheet2 = props => {
               <Button
                 onPress={() => {
                   actionSheetRef.current?.hide();
-                  //console.log(selectedDong, selectedHo);
+                  //////console.log(selectedDong, selectedHo);
                   dispatch(
                     setDirectRegister({
                       houseName: selectedItem?.COMPLEX_NM1

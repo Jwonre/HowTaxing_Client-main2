@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { HOUSE_TYPE } from '../../constants/colors';
-
+import { setHouseInfo } from '../../redux/houseInfoSlice';
 
 import numberToKorean from '../../utils/numToKorean';
 
@@ -71,7 +71,7 @@ const HoustInfoText = styled.Text`
 
 const HoustInfoBadge = styled.View`
   width: auto;
-  margin-right: auto;
+  margin-right: 5;
   height: 20px;
   padding: 0 10px;
   border-radius: 11px;
@@ -190,7 +190,7 @@ const ConfirmSheet2 = props => {
   const { width, height } = useWindowDimensions();
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
- // console.log('[ConfirmSheet2] houseInfo', houseInfo);
+  //console.log('[ConfirmSheet2] houseInfo', houseInfo);
 
   /* 
    // 양도세 계산
@@ -227,7 +227,7 @@ const ConfirmSheet2 = props => {
             onPress={() => {
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -272,16 +272,28 @@ const ConfirmSheet2 = props => {
               style={{
                 width: '60%',
               }}>
-              <HoustInfoBadge
-                style={{
-                  backgroundColor: HOUSE_TYPE.find(
-                    el => el.id === houseInfo?.houseType,
-                  )?.color,
-                }}>
-                <HoustInfoBadgeText>
-                  {HOUSE_TYPE.find(el => el.id === houseInfo?.houseType)?.name}
-                </HoustInfoBadgeText>
-              </HoustInfoBadge>
+              <View style={{ width: 'auto', flexDirection: 'row' }}>
+                <HoustInfoBadge
+                  style={{
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === houseInfo?.houseType,
+                    )?.color,
+                  }}>
+                  <HoustInfoBadgeText>
+                    {HOUSE_TYPE.find(el => el.id === houseInfo?.houseType)?.name}
+                  </HoustInfoBadgeText>
+                </HoustInfoBadge>
+                {/*(houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight) && <HoustInfoBadge
+                  style={{
+                    backgroundColor: HOUSE_TYPE.find(
+                      el => el.id === (houseInfo?.isMoveInRight === true ? 'isMoveInRight' : ''),
+                    )?.color,
+                  }}>
+                  <HoustInfoBadgeText>
+                    {HOUSE_TYPE.find(el => el.id === (houseInfo?.isMoveInRight === true ? 'isMoveInRight' : ''))?.name}
+                  </HoustInfoBadgeText>
+                </HoustInfoBadge>*/}
+              </View>
               <HoustInfoTitle>{houseInfo?.houseName}</HoustInfoTitle>
               <HoustInfoText>{houseInfo?.houseDetailName}</HoustInfoText>
             </View>
@@ -307,6 +319,12 @@ const ConfirmSheet2 = props => {
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
+            <InfoContentLabel>취득계약일자</InfoContentLabel>
+            <InfoContentText>
+              {dayjs(houseInfo?.contractDate).format('YYYY년 MM월 DD일')}
+            </InfoContentText>
+          </InfoContentItem>
+          <InfoContentItem>
             <InfoContentLabel>취득일자</InfoContentLabel>
             <InfoContentText>
               {dayjs(houseInfo?.buyDate).format('YYYY년 MM월 DD일')}
@@ -321,7 +339,7 @@ const ConfirmSheet2 = props => {
           <InfoContentItem>
             <InfoContentLabel>양도계약일자</InfoContentLabel>
             <InfoContentText>
-              {dayjs(houseInfo?.contractDate).format('YYYY년 MM월 DD일')}
+              {dayjs(houseInfo?.sellContractDate).format('YYYY년 MM월 DD일')}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
@@ -339,7 +357,18 @@ const ConfirmSheet2 = props => {
           <InfoContentItem>
             <InfoContentLabel>실거주기간</InfoContentLabel>
             <InfoContentText>
-              {((houseInfo?.livePeriodYear === undefined & houseInfo?.livePeriodMonth === undefined) || (houseInfo?.livePeriodYear === 0 & houseInfo?.livePeriodMonth === 0)) ? '거주기간 없음' : houseInfo?.livePeriodMonth !== 0 ? houseInfo?.livePeriodYear !== 0 ? houseInfo?.livePeriodYear + '년 ' + houseInfo?.livePeriodMonth + '개월' : houseInfo?.livePeriodMonth + '개월' : houseInfo?.livePeriodYear + '년'}
+              {
+                ((houseInfo?.livePeriodYear === undefined || houseInfo?.livePeriodYear === '0') &&
+                  (houseInfo?.livePeriodMonth === undefined || houseInfo?.livePeriodMonth === '0'))
+                  ? '거주기간 없음'
+                  : houseInfo?.livePeriodMonth !== '0'
+                    ? (houseInfo?.livePeriodYear !== '0'
+                      ? houseInfo?.livePeriodYear + '년 ' + houseInfo?.livePeriodMonth + '개월'
+                      : houseInfo?.livePeriodMonth + '개월')
+                    : (houseInfo?.livePeriodYear !== '0'
+                      ? houseInfo?.livePeriodYear + '년'
+                      : '')
+              }
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
@@ -369,8 +398,9 @@ const ConfirmSheet2 = props => {
                   type: 'my',
                   message: '확인 완료',
                 };
-                 
+
                 dispatch(setChatDataList([...chatDataList, chat1]));
+
               }}
               style={{
                 width: width - 80,

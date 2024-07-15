@@ -95,7 +95,7 @@ const ButtonText = styled.Text`
 
 
 const UpdateContractDateAlert = props => {
-  
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data } = props.payload;
@@ -109,8 +109,8 @@ const UpdateContractDateAlert = props => {
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -157,9 +157,9 @@ const UpdateContractDateAlert = props => {
     if (canProceed) {
       var p = data;
       p.contractDate = selectedDate;
-      // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
+      // ////console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
-       
+
       actionSheetRef.current?.hide();
     }
   };
@@ -173,7 +173,7 @@ const UpdateContractDateAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -207,12 +207,13 @@ const UpdateContractDateAlert = props => {
             <View
               style={{
                 width: '100%',
-                height: 420,
+                height: 400,
               }}>
               <Calendar
-                currentDate={data?.contractDate ? new Date(data?.contractDate) : new Date()}
-                maxDate={data?.buyDate ? new Date(data?.buyDate) : ''}
+                currentDate={data?.contractDate ? new Date(data?.contractDate).setHours(0,0,0,0) : data?.buyDate ? data?.buyDate > new Date() ? new Date().setHours(0,0,0,0) : new Date(data?.buyDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
+                maxDate={data?.buyDate ? new Date(data?.buyDate).setHours(0,0,0,0) : new Date('2150-12-31')}
                 setSelectedDate={setSelectedDate}
+                selectedDate={data?.contractDate ? new Date(data?.contractDate).setHours(0,0,0,0) : data?.buyDate ? data?.buyDate > new Date() ? new Date().setHours(0,0,0,0) : new Date(data?.buyDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
               />
             </View>
           </ModalInputSection>

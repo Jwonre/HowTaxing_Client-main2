@@ -165,7 +165,7 @@ const UpdateUserProportionAlert = props => {
       var p = data;
       p.userProportion = proportion;
       p.ownerCnt = ownerCnt;
-      //  console.log('[UpdateUserProportionAlert]nextHandler p:', p);
+      //  ////console.log('[UpdateUserProportionAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
        
       actionSheetRef.current?.hide();
@@ -259,7 +259,7 @@ const UpdateUserProportionAlert = props => {
                 } else if (ownerCnt === 2) {
                   setOwnerCnt(2);
                   setProportion(50);
-                  //  console.log('proportion', proportion);
+                  //  ////console.log('proportion', proportion);
                 }
                 if (ownerCnt < 2) {
                   setOwnerCnt(ownerCnt + 1);

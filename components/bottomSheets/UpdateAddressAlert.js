@@ -341,7 +341,7 @@ const UpdateAddressAlert = props => {
              message: error?.errMsg,
              errorMessage: error?.errCode,
            });
-           console.log(error);
+           ////console.log(error);
          });
      };
    */
@@ -384,7 +384,7 @@ const UpdateAddressAlert = props => {
         } else {
           // 성공적인 응답 처리 
           const list = response.data.data.jusoList;
-          // console.log('response', response.data.data)
+          // ////console.log('response', response.data.data)
           if (list.length === 0) {
             SheetManager.show('info', {
               payload: {
@@ -471,7 +471,7 @@ const UpdateAddressAlert = props => {
            message: error?.errMsg,
            errorMessage: error?.errCode,
          });
-         console.log(error);
+         ////console.log(error);
        });*/
     const accessToken = currentUser.accessToken;
     // 요청 헤더
@@ -512,7 +512,7 @@ const UpdateAddressAlert = props => {
         } else {
           // 성공적인 응답 처리 
           const list = response.data.data.jusoList;
-          //console.log('response', response.data.data)
+          //////console.log('response', response.data.data)
           if (list.length === 0) {
             SheetManager.show('info', {
               payload: {
@@ -539,7 +539,7 @@ const UpdateAddressAlert = props => {
           actionSheetRef: actionSheetRef,
           buttontext: '확인하기',
         });
-        console.log(error);
+        ////console.log(error);
       });
 
   };
@@ -587,7 +587,7 @@ const UpdateAddressAlert = props => {
 
       })
       .catch(function (error) {
-        console.log(error);
+        ////console.log(error);
       });
     const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
     const headers = {
@@ -607,7 +607,7 @@ const UpdateAddressAlert = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      //console.log('Holist response :', response.data.data.dongHoList);
+      //////console.log('Holist response :', response.data.data.dongHoList);
       if (response.data.errYn === 'Y') {
 
         SheetManager.show('info', {
@@ -631,7 +631,7 @@ const UpdateAddressAlert = props => {
         message: error?.errMsg,
         errorMessage: error?.errCode,
       });
-      console.log(error);
+      ////console.log(error);
     }
   };*/
 
@@ -665,7 +665,7 @@ const UpdateAddressAlert = props => {
         return;
 
       } else {
-        console.log('donglist response :', response.data.data.dongHoList);
+        ////console.log('donglist response :', response.data.data.dongHoList);
         const donglist = response.data.data.dongHoList;
         setDongList(donglist);
         return donglist[0];
@@ -676,7 +676,7 @@ const UpdateAddressAlert = props => {
         message: error?.errMsg,
         errorMessage: error?.errCode,
       });
-      console.log(error);
+      ////console.log(error);
     }
   };*/
 
@@ -863,7 +863,7 @@ const UpdateAddressAlert = props => {
                       selectedArea ? AREA_LIST[selectedAreaIndex].list : []
                     }
                     /*onSelect={(selectedItem, index) => {
-                      console.log(selectedItem, index);
+                      ////console.log(selectedItem, index);
                     }}*/
                     renderCustomizedButtonChild={(selectedItem, index) => {
                       return (
@@ -890,7 +890,7 @@ const UpdateAddressAlert = props => {
                       return (
                         <SelectItem
                           onPress={() => {
-                            // console.log('item',item);
+                            // ////console.log('item',item);
                             setSelectedArea2(item);
                             selectRef2.current?.closeDropdown();
                           }}>
@@ -970,7 +970,7 @@ const UpdateAddressAlert = props => {
                   const state = await NetInfo.fetch();
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
-                    //console.log('[UpdateAddressAlert]onPress item:', item);
+                    //////console.log('[UpdateAddressAlert]onPress item:', item);
                     setAddress(item?.roadAddr);
                     /*         if (item?.detBdNmList !== '') {
                                const list = item?.detBdNmList?.split(', ').map(dong => {
@@ -989,7 +989,7 @@ const UpdateAddressAlert = props => {
                     p.bdMgtSn = item.bdMgtSn;
                     p.roadAddr = item.roadAddrPart1;
                     p.roadAddrRef = item.roadAddrPart2;
-                    //console.log('[UpdateAddressAlert]onPress p:', p);
+                    //////console.log('[UpdateAddressAlert]onPress p:', p);
                     handleHouseChange(p, p?.isMoveInRight);
                     getAPTLocation(item?.roadAddr);
 

@@ -120,7 +120,7 @@ const Login = () => {
     }).then(async res => {
       const {accessToken} = res?.successResponse;
 
-    //  console.log('accessToken', accessToken);
+    //  ////console.log('accessToken', accessToken);
 
       if (accessToken) {
         socialLogin(1, accessToken);
@@ -143,11 +143,11 @@ const Login = () => {
       const user = await GoogleSignin.getTokens();
 
       const accessToken = user.accessToken;
-     // console.log('accessToken', accessToken);
+     // ////console.log('accessToken', accessToken);
 
       socialLogin(2, accessToken);
     } catch (error) {
-      console.log('error', error);
+      ////console.log('error', error);
     }
   };
 
@@ -174,10 +174,10 @@ const Login = () => {
     //   // use credentialState response to ensure the user is authenticated
     //   if (credentialState === appleAuth.State.AUTHORIZED) {
     //     // user is authenticated
-    //     console.log('user is authenticated', credentialState);
+    //     ////console.log('user is authenticated', credentialState);
     //   }
     // } else {
-    //   console.log('ios only');
+    //   ////console.log('ios only');
     // }
     dispatch(
       setCurrentUser({
@@ -224,7 +224,7 @@ const Login = () => {
       .get(`http://devapp.how-taxing.com/user/${id}`)
       .then(response => {
         // 성공적인 응답 처리
-      //  console.log(response.data);
+      //  ////console.log(response.data);
         const userData = response.data;
         dispatch(setCurrentUser(userData));
       })

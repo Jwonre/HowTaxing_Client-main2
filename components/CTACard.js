@@ -145,9 +145,9 @@ const CTACard = () => {
         여러분의 세금 절감에 많은 도움이 될거에요.
       </CardSubTitle>
       <ProfileAvatar
-        source={require('../assets/images/Gookyoung_Yoon.png')}
+        source={require('../assets/images/Minjungum_Lee.png')}
       />
-      <ProfileName>윤국녕 세무사</ProfileName>
+      <ProfileName>이민정음 세무사</ProfileName>
       <KakaoButton onPress={() => openKakaoLink()}>
         <SocialButtonIcon
           source={require('../assets/images/socialIcon/kakao_ico.png')}
