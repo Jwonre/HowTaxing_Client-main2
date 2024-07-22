@@ -22,13 +22,14 @@ import getFontSize from '../../utils/getFontSize';
 import { gainTax } from '../../data/chatData';
 import { HOUSE_TYPE } from '../../constants/colors';
 import { SheetManager } from 'react-native-actions-sheet';
-import QuestionIcon from '../../assets/icons/question.svg';
+import Toast from 'react-native-root-toast';
 import CTACard from '../../components/CTACard';
 import InfoIcon from '../../assets/icons/info_tooltip_ico.svg';
 import axios from 'axios';
-import numberToKorean from '../../utils/numToKorean';
 import NetInfo from "@react-native-community/netinfo";
 import HouseInfo from '../../components/HouseInfo';
+import Clipboard from '@react-native-clipboard/clipboard';
+import Config from 'react-native-config'
 
 // Icons
 import PencilIcon from '../../assets/icons/pencil.svg';
@@ -271,68 +272,19 @@ const ModalButtonText = styled.Text`
   line-height: 20px;
 `;
 
-const HouseInfoCard = styled.View`
-  width: ${props => props.width - 40}px;
-  height: auto;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
-  background-color: #fff;
-  padding: 20px;
-  align-self: center;
-  border-radius: 10px;
-`;
 
-const HouseInfoCardTitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 20px;
-  margin-bottom: 10px;
-  margin-top: 20px;
-  text-align: center;
-`;
-
-const HouseInfoCardSubTitle = styled.Text`
-  font-size: ${getFontSize(13)}px;
-  font-family: Pretendard-Medium;
-  color: #1b1c1f;
-  line-height: 20px;
-  margin-top: 10px;
-  margin-bottom: 5px;
-  text-align: center;
-`;
-
-const HouseInfoCardListItem = styled.View`
+const ButtonSection = styled.View`
   width: 100%;
-  height: 48px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
+  height: auto;
   background-color: #fff;
-  border-radius: 10px;
-  border-width: 1px;
-  border-color: #e8eaed;
-  align-self: center;
-  margin-top: 10px;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px;
+  border-top-width: 1px;
+  border-top-color: #e8eaed;
 `;
 
-const HouseInfoListLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
-  font-family: Pretendard-Regular;
-  color: #a3a5a8;
-  line-height: 20px;
-  margin-right: 5px;
-`;
-
-const HouseInfoListValue = styled.Text`
-  font-size: ${getFontSize(13)}px;
-  font-family: Pretendard-Bold;
-  color: #2f87ff;
-  line-height: 20px;
-  text-align: right;
-`;
 
 const GainsTaxChat = () => {
   const navigation = useNavigation();
@@ -349,6 +301,8 @@ const GainsTaxChat = () => {
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const [isConnected, setIsConnected] = useState(true);
+  const [Pdata, setPData] = useState({});
+  const [currentItem, setCurrentItem] = useState(null);
 
   const getadditionalQuestion = async (questionId, answerValue, houseId, sellDate, sellPrice) => {
     /*
@@ -360,7 +314,7 @@ const GainsTaxChat = () => {
     [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
 */
     try {
-      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const url = Config.APP_API_URL||`question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -629,8 +583,8 @@ const GainsTaxChat = () => {
                     questionId: additionalQuestion.detaildata?.nextQuestionId,
                     select: gainTax[chatIndex].select.map(item => ({
                       ...item,
-                      name: item.id === 'additionalQuestionY' ? '1년 이상 거주 계획' : '1년 이하 거주 계획',
-                      answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                      name: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent : additionalQuestion?.detaildata?.answerSelectList[1]?.answerContent,
+                      answer: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue : additionalQuestion?.detaildata?.answerSelectList[1]?.answerValue,
                     }))
                   };
 
@@ -762,7 +716,7 @@ const GainsTaxChat = () => {
 
   const getOwnlist = async () => {
     var gain = '02';
-    const url = `http://devapp.how-taxing.com/house/list?calcType=${gain}`
+    const url = Config.APP_API_URL||`house/list?calcType=${gain}`
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -800,6 +754,12 @@ const GainsTaxChat = () => {
     return true;
   }
 
+  useEffect(() => {
+    if (currentItem?.id === 'cta2') {
+      getTaxCard2Info();
+    }
+  }, [currentItem]);
+
   useFocusEffect(
     useCallback(() => {
       BackHandler.addEventListener('hardwareBackPress', handleBackPress)
@@ -808,6 +768,72 @@ const GainsTaxChat = () => {
       }
     }, [handleBackPress])
   );
+
+  const getTaxCard2Info = async () => {
+    const data = {
+      houseId: houseInfo.houseId === undefined ? '' : houseInfo.houseId,
+      sellContractDate: dayjs(houseInfo.sellContractDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.sellContractDate).format('YYYY-MM-DD'),
+      sellDate: dayjs(houseInfo.sellDate).format('YYYY-MM-DD') === undefined ? '' : dayjs(houseInfo.sellDate).format('YYYY-MM-DD'),
+      sellPrice: houseInfo.sellAmount === undefined ? '' : houseInfo.sellAmount,
+      necExpensePrice: houseInfo.necessaryExpense === undefined ? '' : houseInfo.necessaryExpense,
+      isWWLandLord: houseInfo.isLandlord === undefined ? '' : houseInfo.isLandlord,
+      //stayPeriodYear : houseInfo.livePeriodYear === undefined ? '' : houseInfo.livePeriodYear,
+      //stayPeriodMonth : houseInfo.livePeriodMonth === undefined ? '' : houseInfo.livePeriodMonth,
+      //additionalAnswer : null,
+      additionalAnswerList: houseInfo.additionalAnswerList === undefined ? [] : houseInfo.additionalAnswerList
+      //planAnswer : houseInfo.planAnswer === undefined ? '' : houseInfo.planAnswer
+    };
+    //console.log('양도소득세 파라미터', data);
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`
+    };
+    axios
+      .post(Config.APP_API_URL||'calculation/sellResult', data, { headers: headers })
+      .then(response => {
+
+        //console.log('양도소득세 계산 중:', response.data);
+        // 성공적인 응답 처리
+
+        if (response.data.errYn === 'Y') {
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg ? response.data.errMsg : '양도소득세 계산 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
+              closeSheet: true,
+              navigation: props?.navigation,
+              buttontext: '확인하기',
+            },
+          });
+          //  ////console.log('양도소득세 결과', response.data);
+        } else {
+          const data = response.data.data;
+          //  ////console.log('양도소득세 결과', data);
+          setPData(data);
+          // dispatch(setHouseInfo({ ...houseInfo, ...data.list[0] }));
+        }
+
+
+      })
+      .catch(error => {
+        // 오류 처리
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: '양도소득세 계산 중 오류가 발생했습니다.',
+            description: '양도소득세 계산 중 오류가 발생했습니다. 원하시면 주택\n전문 세무사와 상담을 연결시켜드릴게요. 아래 상담하\n기 버튼을 눌러보세요.',
+            id: 'calculation',
+            closeSheet: true,
+            navigation: props?.navigation,
+            buttontext: '확인하기',
+          },
+        });
+        console.error(error);
+      });
+  };
+
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -1064,7 +1090,7 @@ const GainsTaxChat = () => {
                       lineHeight: 13,
                       letterSpacing: -0.5,
                     }}>
-                    매도예정
+                    양도예정
                   </Text>
                 </View>
               </View>
@@ -1151,6 +1177,7 @@ const GainsTaxChat = () => {
   };
 
   const renderSystemChatItem = ({ item, index }) => {
+
     // ////console.log('renderSystemChatItem item', item.id);
     if (item?.id === 'goodbye' && !hasShownGoodbye) {
       setHasShownGoodbye(true);
@@ -1159,13 +1186,17 @@ const GainsTaxChat = () => {
           payload: {
             questionId: 'goodbye',
             navigation: navigation,
+            prevSheet: 'GainsTaxChat',
           },
         });
       }, 1000);
 
     }
 
+
+
     if (item?.id === 'cta2') {
+      setCurrentItem(item);
       return (
         <View
           style={{
@@ -1173,39 +1204,71 @@ const GainsTaxChat = () => {
           }}>
           <CTACard />
           <HouseInfo item={houseInfo} navigation={navigation} ChatType='GainsTaxChatlast' />
-          <TaxCard2 navigation={navigation} />
+          <TaxCard2 navigation={navigation} Pdata={Pdata} />
           <CalculationWarningCard />
-          <TaxInfoCard2 />
-          <DropShadow
-            style={{
-              shadowColor: '#2F87FF',
-              shadowOffset: {
-                width: 0,
-                height: 4,
-              },
-              shadowOpacity: 0.25,
-              shadowRadius: 4,
-              alignSelf: 'center',
-            }}>
-            <ModalButton
-              disabled={index < chatDataList.length - 1}
-              onPress={async () => {
-                const state = await NetInfo.fetch();
-                const canProceed = await handleNetInfoChange(state);
-                if (canProceed) {
-                  const googByeItem = gainTax.find(el => el.id === 'goodbye');
-                  dispatch(setChatDataList([googByeItem]));
-                  dispatch(clearHouseInfo());
-                }
-              }}
+          <TaxInfoCard2 Pdata={Pdata} />
+          <ButtonSection>
+            <DropShadow
               style={{
-                width: width - 40,
-                alignSelf: 'center',
-                marginTop: 20,
+                shadowColor: '#fff',
               }}>
-              <ModalButtonText>확인하기</ModalButtonText>
-            </ModalButton>
-          </DropShadow>
+              <ModalButton
+                disabled={index < chatDataList.length - 1}
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    if (Pdata.calculationResultTextData !== null) {
+                      Clipboard.setString(Pdata.calculationResultTextData);
+                      let toast = Toast.show('복사되었습니다', {
+                        duration: Toast.durations.LONG,
+                        position: 100,
+                        shadow: true,
+                        animation: true,
+                        hideOnPress: true,
+                        delay: 0,
+                      });
+                      setTimeout(function () {
+                        Toast.hide(toast);
+                      }, 3000);
+
+                    }
+                  }
+                }}
+                style={{
+                  width: width - 240,
+                  alignSelf: 'center',
+                  marginTop: 20,
+                  backgroundColor: '#fff',
+                  borderColor: '#E8EAED',
+                  borderWidth: 1, // borderWidth를 추가했습니다
+                }}>
+                <ModalButtonText style={{
+                  color: '#717274',
+                }}>복사하기</ModalButtonText>
+              </ModalButton>
+            </DropShadow>
+            <DropShadow>
+              <ModalButton
+                disabled={index < chatDataList.length - 1}
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    const googByeItem = gainTax.find(el => el.id === 'goodbye');
+                    dispatch(setChatDataList([googByeItem]));
+                    dispatch(clearHouseInfo());
+                  }
+                }}
+                style={{
+                  width: width - 240,
+                  alignSelf: 'center',
+                  marginTop: 20,
+                }}>
+                <ModalButtonText>확인하기</ModalButtonText>
+              </ModalButton>
+            </DropShadow>
+          </ButtonSection>
         </View>
       );
     } else {
@@ -1372,15 +1435,39 @@ const GainsTaxChat = () => {
                           }
                           //  ////console.log('item2?.openSheet : ', item2?.openSheet)
                           if (item2?.openSheet) {
-                            SheetManager.show(item2.openSheet, {
-                              payload: {
-                                navigation: navigation,
-                                data: item2.id,
-                                isGainsTax: true,
-                                currentPageIndex: item2?.currentPageIndex,
-                                index,
-                              },
-                            });
+                            if (item2?.id === 'ok' && item2?.chungYackYn === true) {
+                              SheetManager.show(item2.openSheet, {
+                                payload: {
+                                  navigation: navigation,
+                                  data: item2.id,
+                                  isGainsTax: true,
+                                  currentPageIndex: item2?.currentPageIndex,
+                                  index,
+                                  chungYackYn: item2?.chungYackYn,
+                                },
+                              });
+                            } else if (item2?.id === 'ok' && item2?.chungYackYn === false) {
+                              SheetManager.show(item2.openSheet, {
+                                payload: {
+                                  navigation: navigation,
+                                  data: item2.id,
+                                  isGainsTax: true,
+                                  currentPageIndex: item2?.currentPageIndex,
+                                  index,
+                                  chungYackYn: item2?.chungYackYn,
+                                },
+                              });
+                            } else {
+                              SheetManager.show(item2.openSheet, {
+                                payload: {
+                                  navigation: navigation,
+                                  data: item2.id,
+                                  isGainsTax: true,
+                                  currentPageIndex: item2?.currentPageIndex,
+                                  index,
+                                },
+                              });
+                            }
                           }
                         }
                       }
@@ -1432,12 +1519,12 @@ const GainsTaxChat = () => {
                   source={require('../../assets/images/Minjungum_Lee.png')}
                 />
                 <ProfileName>이민정음 세무사</ProfileName>
-                <ProfileEmail>ilbitax86@naver.com</ProfileEmail>
+                <ProfileEmail>jsyoun@jstaxbiz.com</ProfileEmail>
                 <KakaoButton
                   onPress={async () => {
                     const state = await NetInfo.fetch();
                     const canProceed = await handleNetInfoChange(state);
-                    if (canProceed) { Linking.openURL('http://pf.kakao.com/_jfxgFG') }
+                    if (canProceed) { Linking.openURL('http://pf.kakao.com/_sxdxdxgG') }
                   }}>
                   <SocialButtonIcon
                     source={require('../../assets/images/socialIcon/kakao_ico.png')}
@@ -1655,4 +1742,4 @@ const GainsTaxChat = () => {
   );
 };
 
-export default React.memo(GainsTaxChat);
+export default GainsTaxChat;

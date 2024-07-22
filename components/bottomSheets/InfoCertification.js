@@ -3,6 +3,8 @@
 import { useWindowDimensions, Pressable, View } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
+import { Animated, Easing } from 'react-native';
+import { Svg, Path } from 'react-native-svg';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
@@ -14,6 +16,7 @@ import { setResend } from '../../redux/resendSlice';
 import { acquisitionTax, gainTax } from '../../data/chatData';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
 import axios from 'axios';
+import Config from 'react-native-config'
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -29,6 +32,7 @@ const ModalTitle = styled.Text`
   color: #1b1c1f;
   line-height: 26px;
   text-align: center;
+  margin-bottom: 20px;
 
 `;
 
@@ -119,8 +123,8 @@ const InfoCertification = props => {
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -224,7 +228,7 @@ const InfoCertification = props => {
   };
 
   const postOwnHouse = async () => {
-    const url = 'http://devapp.how-taxing.com/house/search';
+    const url = Config.APP_API_URL||'house/search';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -275,6 +279,57 @@ const InfoCertification = props => {
 
 
 
+  const CircularProgress = ({ size, strokeWidth, progress }) => {
+    const rotation = useRef(new Animated.Value(0)).current;
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = ((100 - progress) / 100) * circumference;
+
+    useEffect(() => {
+      Animated.loop(
+        Animated.timing(rotation, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      ).start();
+    }, []);
+
+    return (
+      <Animated.View style={{ transform: [{ rotate: rotation.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg'],
+      }) }] }}>
+        <Svg width={size} height={size}>
+          <Path
+            stroke="#d3d3d3"
+            fill="transparent"
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={0} // 이 부분을 수정했습니다.
+            d={`M ${size / 2} ${size / 2}
+              m -${radius}, 0
+              a ${radius},${radius} 0 1,0 ${radius * 2},0
+              a ${radius},${radius} 0 1,0 -${radius * 2},0`}
+          />
+          <Path
+            stroke="#A2C62B"
+            fill="transparent"
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={offset} // 이 부분을 그대로 유지했습니다.
+            strokeLinecap="round"
+            d={`M ${size / 2} ${size / 2}
+              m -${radius}, 0
+              a ${radius},${radius} 0 1,0 ${radius * 2},0
+              a ${radius},${radius} 0 1,0 -${radius * 2},0`}
+          />
+        </Svg>
+      </Animated.View>
+    );
+  };
+
   return (
     <ActionSheet
       ref={actionSheetRef}
@@ -297,14 +352,14 @@ const InfoCertification = props => {
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
       gestureEnabled={false}
-      closeOnPressBack={true}
+      closeOnPressBack={false}
       closeOnTouchBackdrop={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 320,
+        height: ActiveYN === false ? 380 : 340,
         width: width - 40
       }}>
       <SheetContainer width={width}>
@@ -345,6 +400,7 @@ const InfoCertification = props => {
               }
             })()}</View>
           <ModalTitle>{props?.payload?.message}</ModalTitle>
+          {(ActiveYN === false) && <CircularProgress size={50} strokeWidth={5} progress={30} />}
         </ModalContentSection>
 
         <ButtonSection>
@@ -373,8 +429,8 @@ const InfoCertification = props => {
                     SheetManager.hide("infoCertification");
                     const { isGainsTax } = props.payload?.isGainsTax;
                     const chatItem = isGainsTax
-                      ? gainTax.find(el => el.id === 'allHouse')
-                      : acquisitionTax.find(el => el.id === 'moment');
+                      ? gainTax.find(el => el.id === 'allHouse1')
+                      : acquisitionTax.find(el => el.id === 'moment1');
                     //////console.log(chatItem);
                     dispatch(setChatDataList([...chatDataList, chatItem]));
 

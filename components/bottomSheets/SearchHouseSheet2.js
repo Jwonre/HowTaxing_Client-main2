@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AREA_LIST } from '../../data/areaData';
 import { setDirectRegister } from '../../redux/directRegisterSlice';
 import NetInfo from "@react-native-community/netinfo";
+import Config from 'react-native-config'
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -222,7 +223,7 @@ const ApartmentInfoGroup = styled.View`
 `;
 
 const ApartmentInfoTitle = styled.Text`
-  width: 60%;
+  width: 80%;
   font-size: ${getFontSize(14)}px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
@@ -399,7 +400,7 @@ const SearchHouseSheet2 = props => {
                SheetManager.show('info', {
                  payload: {
                    type: 'error',
-                   message: parsedData.results.common.errorMessage,
+                   message: parsedData.resultssetListData.common.errorMessage,
                    description: parsedData.results.common.errorMessage,
                  },
                });
@@ -450,7 +451,7 @@ const SearchHouseSheet2 = props => {
     };
 
     axios
-      .post('http://devapp.how-taxing.com/house/roadAddr', data, { headers: headers })
+      .post(Config.APP_API_URL||'house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
@@ -574,7 +575,7 @@ const SearchHouseSheet2 = props => {
 
     };
     axios
-      .post('http://devapp.how-taxing.com/house/roadAddr', data, { headers: headers })
+      .post(Config.APP_API_URL||'house/roadAddr', data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
@@ -622,7 +623,7 @@ const SearchHouseSheet2 = props => {
   };
   // 주택 호 정보 가져오기
   const getHoData = async (address, dongNm, type) => {
-    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
+    const url = Config.APP_API_URL||'house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -687,7 +688,7 @@ const SearchHouseSheet2 = props => {
   };
 
   const getDongData = async (address) => {
-    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
+    const url = Config.APP_API_URL||'house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -744,7 +745,7 @@ const SearchHouseSheet2 = props => {
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
       actionSheetRef.current?.hide();
-      //   ////console.log(selectedItem);
+     // console.log(selectedItem);
       dispatch(
         setDirectRegister({
           houseName: selectedItem?.bdNm

@@ -238,12 +238,12 @@ const GainsTax = () => {
       </IconView>
       <IntroSection>
         <Tag>
-          <TagText>주택 매도</TagText>
+          <TagText>주택 양도</TagText>
         </Tag>
         <Title>양도소득세 계산하기</Title>
 
         <SubTitle>
-          주택을 매도할 예정인데, 양도소득세가 얼마나 나올까요?
+          주택을 양도할 예정인데, 양도소득세가 얼마나 나올까요?
         </SubTitle>
         <HashTagGroup>
           {GAIN_HASHTAG_LIST.map((item, index) => (

@@ -231,10 +231,10 @@ const UpdateMoveOutDateAlert = props => {
                 height: 400,
               }}>
               <Calendar
-                minDate={data?.moveInDate ? new Date(data?.moveInDate).setHours(0,0,0,0) : data?.balanceDate ? new Date(data?.balanceDate).setHours(0,0,0,0) : data?.constractDate ? new Date(data?.constractDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
+                minDate={data?.moveInDate ? new Date(new Date(data?.moveInDate).setHours(0,0,0,0)) : data?.balanceDate ? new Date(new Date(data?.balanceDate).setHours(0,0,0,0)) : data?.constractDate ? new Date(new Date(data?.constractDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
                 value={data?.moveOutDate}
                 setSelectedDate={setSelectedDate}
-                currentDate={data?.moveInDate ? new Date(data?.moveInDate).setHours(0,0,0,0) : data?.balanceDate ? new Date(data?.balanceDate).setHours(0,0,0,0) : data?.constractDate ? new Date(data?.constractDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
+                currentDate={data?.moveInDate ? new Date(new Date(data?.moveInDate).setHours(0,0,0,0)) : data?.balanceDate ? new Date(new Date(data?.balanceDate).setHours(0,0,0,0)) : data?.constractDate ? new Date(new Date(data?.constractDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
               />
             </View>
           </ModalInputSection>

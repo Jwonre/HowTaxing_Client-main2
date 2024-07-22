@@ -91,7 +91,7 @@ const Cert2 = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
-            navigation.goBack();
+            navigation.goBack({tokens: props?.route?.params?.tokens});
           }}>
           <CloseIcon />
         </TouchableOpacity>
@@ -114,7 +114,7 @@ const Cert2 = props => {
   return (
     <Container>
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
         onScroll={({ nativeEvent }) => {
           // 하단 스크롤 시 버튼 활성화
@@ -214,7 +214,7 @@ const Cert2 = props => {
 2. '이용자’는 본 약관에서 규정하는 사항, '회사가 정한 제반 규정, 기타 '회사가 공지하는 사항을 준수하여야 합니다. 또한 '이용자’는 ’회사’의 업무를 방해하는 행위 및 명예를 훼손하는 행위를 하여서는 안 됩니다.
 3. '이용자’는 주소, 연락처, 전자우편 주소 등 회원정보가 변경된 경우 즉시 온라인을 통하여 이를 수정해야합니다. 변경된 정보를 수정하지 않거나 수정이 지연되어 발생하는 책임은 이용자가 부담합니다.
 4. '이용자’는 자신의 회원ID와 비밀번호를 직접 관리해야 합니다. |이용자'의 관리상의 부주의로 발생한 문제에 대하여는 '회사’가 책임을부담하지 않습니다.
-5. '이용자'는 '회사'의 명시적 동의가 없는 한 서비스 이용 권한，기타 이용 계약상의 지위에 대하여 매도, 증여, 담보제공 등의 처분행위를 할 수 없습니다.
+5. '이용자'는 '회사'의 명시적 동의가 없는 한 서비스 이용 권한，기타 이용 계약상의 지위에 대하여 양도, 증여, 담보제공 등의 처분행위를 할 수 없습니다.
 6. '판매회원'은 자신이 제공하는 '상품’에 대하여 정확한 정보를 제공하여야 하며, 본 약관 '판매회원의 의무'에 따른 의무를 준수하여야 합니다. 이를 위반하여 발생하는 모든 책임은 ’판매회원’이 부담합니다.
 7. '일반회원’은 '회사’가 제공하는 '오픈마켓’ 서비스를 통하여 ’상품'을 구매한 경우 이에 대한 대금 지급 의무를 부담합니다.
 
@@ -418,9 +418,8 @@ const Cert2 = props => {
                   agreeCert: true,
                 }),
               );
-
               // 채팅방으로 이동
-              navigation.goBack();
+              navigation.goBack({tokens: props?.route?.params?.tokens});
 
 
             }}>

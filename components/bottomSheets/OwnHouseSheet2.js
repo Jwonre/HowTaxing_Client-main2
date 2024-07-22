@@ -22,6 +22,8 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import NetInfo from "@react-native-community/netinfo";
 import axios from 'axios';
+import Config from 'react-native-config'
+
 const SheetContainer = styled.ScrollView.attrs({
   contentContainerStyle: {
     flexGrow: 1,
@@ -34,7 +36,7 @@ const SheetContainer = styled.ScrollView.attrs({
 `;
 
 const TitleSection = styled.View`
-  width: 100%;
+  width: 110%;
   height: auto;
   background-color: #fff;
   padding: 10px 20px;
@@ -249,7 +251,6 @@ const OwnHouseSheet2 = props => {
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const currentUser = useSelector(state => state.currentUser.value);
-
   const [isConnected, setIsConnected] = useState(true);
 
   const handleNetInfoChange = (state) => {
@@ -273,7 +274,7 @@ const OwnHouseSheet2 = props => {
 
   const getHouseDetailInfo = async (item) => {
     try {
-      const url = `http://devapp.how-taxing.com/house/detail?houseId=${item?.houseId}`;
+      const url = Config.APP_API_URL||`house/detail?houseId=${item?.houseId}`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -352,12 +353,12 @@ const OwnHouseSheet2 = props => {
       <SheetContainer width={width}>
         <TitleSection>
           {ownHouseList.length !== 0 && (<Title>
-            보유하신 주택을 모두 불러왔어요.{'\n'}매도할 주택을 선택해주세요.
+            보유하신 주택을 모두 불러왔어요.{'\n'}양도할 주택을 선택해주세요.
           </Title>)}
-          {ownHouseList.length === 0 && props.payload?.data === 'ok' && (<Title>
+          {ownHouseList.length === 0 && props.payload?.data === 'ok' && props.payload?.chungYackYn === true && (<Title>
             청약통장을 가지고 있지 않다면{'\n'}보유하신 주택을 직접 등록해주세요.
           </Title>)}
-          {ownHouseList.length === 0 && !props.payload?.data && (<Title>
+          {ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) && (<Title>
             주택을 불러오지 못했어요.{'\n'}보유하신 주택이 있다면 직접 등록해주세요.
           </Title>)}
           <InfoMessage>
@@ -450,7 +451,7 @@ const OwnHouseSheet2 = props => {
 
                             props.payload.navigation.push(
                               'OwnedHouseDetail',
-                              { item: item, prevSheet: 'own2', index: props.payload.index, },
+                              { item: item, prevSheet: 'own2', index: props.payload.index, data: props.payload?.data, chungYackYn: props.payload?.chungYackYn },
                               'OwnedHouseDetail',
                             );
                           } else {
@@ -513,6 +514,8 @@ const OwnHouseSheet2 = props => {
                       prevChat: 'GainsTaxChat',
                       prevSheet: 'own2',
                       index: props.payload?.index,
+                      data: props.payload?.data,
+                      chungYackYn: props.payload?.chungYackYn
                     });
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -566,6 +569,8 @@ const OwnHouseSheet2 = props => {
                           prevChat: 'GainsTaxChat',
                           prevSheet: 'own2',
                           index: props.payload?.index,
+                          data: props.payload?.data,
+                          chungYackYn: props.payload?.chungYackYn
                         });
                       } else {
                         const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -601,6 +606,8 @@ const OwnHouseSheet2 = props => {
                       prevChat: 'GainsTaxChat',
                       prevSheet: 'own2',
                       index: props.payload?.index,
+                      data: props.payload?.data,
+                      chungYackYn: props.payload?.chungYackYn
                     });
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);

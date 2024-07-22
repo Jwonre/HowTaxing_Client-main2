@@ -69,6 +69,18 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
+project.ext.envConfigFiles = [
+    developdebug: "env/.env.develop",
+    developrelease: "env/.env.develop", 
+    stagedebug: "env/.env.stage",
+    stagerelease: "env/.env.stage",
+    productdebug: "env/.env.product",    
+    productrelease: "env/.env.product",
+    anothercustombuild: ".env",
+]
+
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -109,6 +121,16 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    flavorDimensions "version"
+    productFlavors {
+        develop {
+        }
+        stage {
+        }
+        product {
         }
     }
 }

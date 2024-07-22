@@ -144,7 +144,7 @@ const ConsultingSheet = props => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-      Linking.openURL('http://pf.kakao.com/_jfxgFG');
+      Linking.openURL('http://pf.kakao.com/_sxdxdxgG');
     } else {
       actionSheetRef.current?.hide();
     }

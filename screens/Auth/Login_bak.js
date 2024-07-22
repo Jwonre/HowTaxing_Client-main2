@@ -14,6 +14,7 @@ import {useDispatch} from 'react-redux';
 import {setCurrentUser} from '../../redux/currentUserSlice';
 import axios from 'axios';
 import {SheetManager} from 'react-native-actions-sheet';
+import Config from 'react-native-config'
 
 const Container = styled.ImageBackground.attrs(props => ({
   source: require('../../assets/images/loginBG.png'),
@@ -195,7 +196,7 @@ const Login = () => {
     };
 
     axios
-      .post('http://devapp.how-taxing.com/user/socialLogin', data)
+      .post(Config.APP_API_URL||'user/socialLogin', data)
       .then(response => {
         if (response.data.isError) {
           SheetManager.show('info', {
@@ -221,7 +222,7 @@ const Login = () => {
   // 유저 정보 가져오기
   const getUserData = async id => {
     await axios
-      .get(`http://devapp.how-taxing.com/user/${id}`)
+      .get(Config.APP_API_URL||`user/${id}`)
       .then(response => {
         // 성공적인 응답 처리
       //  ////console.log(response.data);

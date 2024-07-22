@@ -3,7 +3,7 @@
 buildscript {
     ext {
         buildToolsVersion = "33.0.0"
-        minSdkVersion = 30
+        minSdkVersion = 25
         compileSdkVersion = 33
         targetSdkVersion = 33
         kotlinVersion = '1.7.10' // 사용하려는 Kotlin 버전으로 변경하세요

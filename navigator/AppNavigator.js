@@ -26,6 +26,7 @@ import DoneSendFamilyHouse from '../screens/Main/DoneSendFamilyHouse';
 import GainsTaxChat from '../screens/Main/GainsTaxChat';
 import Privacy from '../screens/Main/Terms/Privacy';
 import NetworkAlert from '../screens/Main/NetworkAlert';
+import Information from '../screens/Main/Information';
 import { SheetProvider, registerSheet } from 'react-native-actions-sheet';
 
 // Action Sheets
@@ -56,9 +57,12 @@ import ConfirmSheet from '../components/bottomSheets/ConfirmSheet';
 import Cert from '../screens/Main/Terms/Cert';
 import Cert2 from '../screens/Main/Terms/Cert2';
 import Cert3 from '../screens/Main/Terms/Cert3';
+import InfoCert from '../screens/Main/Terms/InfoCert';
 import Privacy2 from '../screens/Main/Terms/Privacy2';
 import Privacy3 from '../screens/Main/Terms/Privacy3';
+import InfoPrivacy from '../screens/Main/Terms/InfoPrivacy';
 import Location2 from '../screens/Main/Terms/Location2';
+import InfoLocation from '../screens/Main/Terms/InfoLocation';
 import Copyright3 from '../screens/Main/Terms/Copyright3';
 import Gov24 from '../screens/Main/Terms/Gov24';
 import HouseDetail from '../screens/Main/HouseDetail';
@@ -168,6 +172,15 @@ const AppNavigator = () => {
               <Stack.Screen name="Acquisition" component={Acquisition} />
               <Stack.Screen name="GainsTax" component={GainsTax} />
               <Stack.Screen name="FamilyHouse" component={FamilyHouse} />
+              <Stack.Screen
+                name="Information"
+                component={Information}
+              />
+              <Stack.Group screenOptions={{ presentation: 'modal' }}>
+                <Stack.Screen name="InfoCert" component={InfoCert} />
+                <Stack.Screen name="InfoPrivacy" component={InfoPrivacy} />
+                <Stack.Screen name="InfoLocation" component={InfoLocation} />
+              </Stack.Group>
               <Stack.Screen
                 name="RegisterFamilyHouse"
                 component={RegisterFamilyHouse}

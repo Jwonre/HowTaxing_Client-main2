@@ -81,8 +81,8 @@ const Calendar = props => {
     let newMonths = [];
     let newYears = [];
     //console.log('{{{{{{{{{{minMonth && maxMonth}}}}}}}}}}}}}}}', minMonth, maxMonth);
-    if ((props.minDate || props.maxDate)) {
-      if (props.minDate && !props.maxDate) {
+    if ((props?.minDate || props?.maxDate)) {
+      if (props?.minDate && !props?.maxDate) {
         for (let i = minYear; i <= minYear + 50; i++) {
           newYears.push(i);
         }
@@ -90,12 +90,13 @@ const Calendar = props => {
           newMonths.push(i);
         }
         ////console.log('check1');
-      } else if (props.maxDate && !props.minDate) {
+      } else if (props?.maxDate && !props?.minDate) {
         for (let i = currentyear - 50; i <= maxYear; i++) {
           newYears.push(i);
         }
         if (selectedDate) {
-          if (props.maxDate.getFullYear() === selectedDate.getFullYear()) {
+          //console.log('props?.maxDate', props?.maxDate);
+          if (props?.maxDate?.getFullYear() === selectedDate?.getFullYear()) {
             for (let i = 1; i <= maxMonth + 1; i++) {
               newMonths.push(i);
               //console.log('newMonths', newMonths);
@@ -107,7 +108,7 @@ const Calendar = props => {
             }
           }
         } else {
-          if (props.maxDate.getFullYear() === currentDate.getFullYear()) {
+          if (props?.maxDate?.getFullYear() === currentDate?.getFullYear()) {
             for (let i = 1; i <= maxMonth + 1; i++) {
               newMonths.push(i);
               //console.log('newMonths', newMonths);
@@ -126,7 +127,7 @@ const Calendar = props => {
           newYears.push(i);
         }
         if (selectedDate) {
-          if (props.maxDate.getFullYear() === selectedDate.getFullYear()) {
+          if (props?.maxDate?.getFullYear() === selectedDate?.getFullYear()) {
             for (let i = minMonth; i <= maxMonth + 1; i++) {
               newMonths.push(i);
               //console.log('newMonths', newMonths);
@@ -138,7 +139,7 @@ const Calendar = props => {
             }
           }
         } else {
-          if (props.maxDate.getFullYear() === currentDate.getFullYear()) {
+          if (props?.maxDate?.getFullYear() === currentDate?.getFullYear()) {
             for (let i = minMonth; i <= maxMonth + 1; i++) {
               newMonths.push(i);
               //console.log('newMonths', newMonths);

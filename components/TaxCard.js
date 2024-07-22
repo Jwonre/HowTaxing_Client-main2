@@ -105,79 +105,15 @@ const TagText2 = styled.Text`
 
 
 const TaxCard = props => {
-  const houseInfo = useSelector(state => state.houseInfo.value);
-  const currentUser = useSelector(state => state.currentUser.value);
-  const dispatch = useDispatch();
-  const [Pdata, setPData] = useState({});
+  //console.log('props TaxCard', props);
+  const Pdata = props?.Pdata;
+  const listCnt = Pdata ? Pdata.listCnt : 0;
 
-  useEffect(() => {
-    getTaxCardInfo();
-  }, []);
 
-  const getTaxCardInfo = async () => {
-    const params = {
-      houseType: houseInfo.houseType === undefined ? '' : houseInfo.houseType,
-      houseName: houseInfo.houseName === undefined ? '' : houseInfo.houseName,
-      detailAdr: houseInfo.detailAdr === undefined ? '' : houseInfo.detailAdr,
-      contractDate: houseInfo.contractDate === undefined ? '' : dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
-      buyDate: houseInfo.buyDate === undefined ? '' : dayjs(houseInfo.buyDate).format('YYYY-MM-DD'),
-      buyPrice: houseInfo.acAmount === undefined ?  0 : houseInfo.acAmount,
-      pubLandPrice: houseInfo.pubLandPrice === undefined ? 0 : houseInfo.pubLandPrice,
-      isPubLandPriceOver100Mil : houseInfo.isPubLandPriceOver100Mil === undefined ? '' : houseInfo.isPubLandPriceOver100Mil,
-      roadAddr: houseInfo.roadAddr === undefined ? '' : houseInfo.roadAddr,
-      area: houseInfo.area === undefined ? 0 : houseInfo.area,
-      isAreaOver85 : houseInfo.isAreaOver85 === undefined ? false : houseInfo.isAreaOver85,
-      isDestruction: houseInfo.isDestruction === undefined ? false : houseInfo.isDestruction,
-      ownerCnt: houseInfo.ownerCnt === undefined ? 0 : houseInfo.ownerCnt,
-      userProportion: houseInfo.userProportion === undefined ? 0 : houseInfo.userProportion,
-      isMoveInRight: houseInfo.isMoveInRight === undefined ? false : houseInfo.isMoveInRight,
-      jibunAddr: houseInfo.jibunAddr === undefined ? '' : houseInfo.jibunAddr,
-      //hasSellPlan: houseInfo.planSale === undefined ? '' : houseInfo.planSale,
-      isOwnHouseCntRegist: houseInfo.isOwnHouseCntRegist === undefined ? false : houseInfo.isOwnHouseCntRegist,
-      ownHouseCnt: houseInfo.ownHouseCnt  === undefined ? 0 : houseInfo.ownHouseCnt,
-      additionalAnswerList : houseInfo.additionalAnswerList === undefined ? []: houseInfo.additionalAnswerList
-    };
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${currentUser.accessToken}`,
-    };
-    
-    try { 
-      const response = await axios.post('http://devapp.how-taxing.com/calculation/buyResult', params, { headers });
-     console.log('taxCard params', params)
-      console.log('response.data', response.data);
-      if (response.data.errYn === 'Y') {
-        SheetManager.show('info', {
-          payload: {
-            type: 'error',
-            message: response.data.errMsg ? response.data.errMsg : '취득세 계산 중 오류가 발생했어요.',
-            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
-            closeSheet: true,
-            navigation: props?.navigation,
-            buttontext: '확인하기',
-          },
-        });
-      } else {
-        setPData(response.data.data.list);
-        dispatch(setHouseInfo({ ...houseInfo, ...response.data.data.list[0] }));
-      }
-    } catch (error) {
-      SheetManager.show('info', {
-        payload: {
-          type: 'error',
-          message: '취득세 계산 중 오류가 발생했습니다.',
-          description: '취득세 계산 중 오류가 발생했습니다. 원하시면 주택 전문 세무사와 상담을 연결시켜드릴게요. 아래 상담하기 버튼을 눌러보세요.',
-          id: 'calculation', 
-          closeSheet: true,
-          navigation: props?.navigation,
-          buttontext: '확인하기',
-        }, 
-      });
-      //console.error(error.stack);
-    }
-  };
+
+
   return (
-    Array.from({ length: Pdata.length }).map((_, index) => (
+    Array.from({ length: listCnt }).map((_, index) => (
 
       <Card key={index}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
@@ -195,7 +131,7 @@ const TaxCard = props => {
             </TagText>
           </Tag>
           <TagText2>
-            지분율 : {Number(houseInfo?.userProportion)?.toLocaleString()}%
+          지분율 : {Number(listCnt === 1 ? 100 : 50)}%
           </TagText2>
         </View>
         <InfoContentItem>
@@ -205,7 +141,7 @@ const TaxCard = props => {
               color: '#2F87FF',
               fontFamily: 'Pretendard-Medium',
             }}>
-            {Number(houseInfo?.totalTaxPrice)?.toLocaleString()} 원
+            {Number(Pdata?.list[index]?.totalTaxPrice)?.toLocaleString()} 원
           </InfoContentText>
         </InfoContentItem>
         <InfoContentItem>
@@ -214,16 +150,16 @@ const TaxCard = props => {
             style={{
               fontFamily: 'Pretendard-Medium',
             }}>
-            {Number(houseInfo?.buyTaxPrice)?.toLocaleString()} 원
+            {Number(Pdata?.list[index]?.buyTaxPrice)?.toLocaleString()} 원
           </InfoContentText>
         </InfoContentItem>
         <SubContainer>
-          <InfoContentLabel>취득금액</InfoContentLabel>
+          <InfoContentLabel>{listCnt === 1 ? '취득금액' : '취득금액(지분비율 50%)'}</InfoContentLabel>
           <InfoContentText
             style={{
               color: '#A3A5A8',
             }}>
-            {Number(houseInfo?.buyPrice)?.toLocaleString()} 원
+            {Number(Pdata?.list[index]?.buyPrice)?.toLocaleString()} 원
           </InfoContentText>
         </SubContainer>
         <SubContainer>
@@ -232,7 +168,7 @@ const TaxCard = props => {
             style={{
               color: '#A3A5A8',
             }}>
-            {houseInfo?.buyTaxRate}%
+            {Pdata?.list[index]?.buyTaxRate}%
           </InfoContentText>
         </SubContainer>
         <Divider />
@@ -240,7 +176,7 @@ const TaxCard = props => {
         <InfoContentItem>
           <InfoContentLabel>지방교육세</InfoContentLabel>
           <InfoContentText>
-            {Number(houseInfo?.eduTaxPrice)?.toLocaleString()} 원
+            {Number(Pdata?.list[index]?.eduTaxPrice)?.toLocaleString()} 원
           </InfoContentText>
         </InfoContentItem>
         <SubContainer>
@@ -249,14 +185,14 @@ const TaxCard = props => {
             style={{
               color: '#A3A5A8',
             }}>
-            {houseInfo?.eduTaxRate}%
+            {Pdata?.list[index]?.eduTaxRate}%
           </InfoContentText>
         </SubContainer>
         <Divider />
         <InfoContentItem>
           <InfoContentLabel>농어촌특별세</InfoContentLabel>
           <InfoContentText>
-            {Number(houseInfo?.agrTaxPrice)?.toLocaleString()} 원
+            {Number(Pdata?.list[index]?.agrTaxPrice)?.toLocaleString()} 원
           </InfoContentText>
         </InfoContentItem>
         <SubContainer>
@@ -265,7 +201,7 @@ const TaxCard = props => {
             style={{
               color: '#A3A5A8',
             }}>
-            {houseInfo?.agrTaxRate} %
+            {Pdata?.list[index]?.agrTaxRate} %
           </InfoContentText>
         </SubContainer>
         <Divider />

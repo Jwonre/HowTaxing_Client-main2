@@ -145,7 +145,7 @@ const Cert = props => {
   return (
     <Container>
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         contentContainerStyle={{paddingHorizontal: 20, paddingBottom: 80}}
         onScroll={({nativeEvent}) => {
           // 하단 스크롤 시 버튼 활성화

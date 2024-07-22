@@ -1,6 +1,6 @@
 // 정보 또는 경고 알림창 컴포넌트
 
-import { useWindowDimensions, Pressable, View} from 'react-native';
+import { useWindowDimensions, Pressable, View } from 'react-native';
 import React, { useRef, useState } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
@@ -8,7 +8,7 @@ import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { useDispatch } from 'react-redux';
-  
+
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -40,6 +40,7 @@ const ModalDescription = styled.Text`
   color: #1b1c1f;
   line-height: 22px;
   margin-top: 10px;
+  margin-bottom: 10px;
   text-align: left;
 `;
 
@@ -106,7 +107,7 @@ const InfoExpense = props => {
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
   const { width, height } = useWindowDimensions();
- // ////console.log('[InfoSimple] props', props);
+  // ////console.log('[InfoSimple] props', props);
 
   return (
     <ActionSheet
@@ -117,7 +118,7 @@ const InfoExpense = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -138,11 +139,15 @@ const InfoExpense = props => {
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
-          
-          <ModalTitle><BoldText>{props.payload?.Title}</BoldText>란?</ModalTitle>
-          <View styled={{width: '80%'}}>
-          <ModalDescription>{props.payload?.Description}</ModalDescription>
-          {props.payload?.Title === '상생임대인제도' && <Modaldetail>{props.payload?.Detail}</Modaldetail>}
+
+          <ModalTitle>
+          {props.payload?.Title === '취득금액' ? '혹시 ' : ''}
+          <BoldText>{props.payload?.Title}</BoldText>
+          {props.payload?.Title === '취득금액' ? '이 기억이 안나시나요?' : '란?'}
+          </ModalTitle>
+          <View styled={{ width: '80%' }}>
+            <ModalDescription>{props.payload?.Description}</ModalDescription>
+            {props.payload?.Title === '상생임대인제도' && <Modaldetail>{props.payload?.Detail}</Modaldetail>}
           </View>
         </ModalContentSection>
 
@@ -161,7 +166,7 @@ const InfoExpense = props => {
             }}>
             <Button
               onPress={() => {
-                 
+
                 actionSheetRef.current?.hide();
               }}>
               <ButtonText>돌아가기</ButtonText>

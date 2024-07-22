@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import numberToKorean from '../../utils/numToKorean';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
 import NetInfo from "@react-native-community/netinfo";
+//import InfoIcon from '../../assets/icons/info_tooltip_ico.svg';
 
 import { LogBox } from 'react-native';
 
@@ -222,7 +223,7 @@ const UpdateBuyPriceAlert = props => {
       p.buyPrice = buyPrice;
       //////console.log('[UpdatebuyPriceAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
-       
+
       actionSheetRef.current?.hide();
     }
   };
@@ -236,7 +237,7 @@ const UpdateBuyPriceAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -270,7 +271,7 @@ const UpdateBuyPriceAlert = props => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
               }}>
-              <ModalLabel>취득금액</ModalLabel>
+              <ModalLabel style={{ marginRight: 5 }}>취득금액</ModalLabel>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <ModalInputContainer>

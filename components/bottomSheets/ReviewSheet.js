@@ -2,7 +2,7 @@
 
 import { useWindowDimensions, Pressable, Keyboard, ScrollView } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
-import ActionSheet from 'react-native-actions-sheet';
+import ActionSheet, {SheetManager} from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
@@ -10,7 +10,7 @@ import DropShadow from 'react-native-drop-shadow';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import NetInfo from "@react-native-community/netinfo";
-
+import Config from 'react-native-config'
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -128,14 +128,25 @@ const ReviewInput = styled.TextInput.attrs(props => ({
   overflow: hidden; 
 `;
 
+
+const TextLength = styled.Text`
+  font-size: ${getFontSize(9)}px;
+  font-family: Pretendard-Bold;
+  color: #717274;
+  text-align: right;
+  margin-right: 10px;
+`;
+
+
 const ReviewSheet = props => {
   const navigation = useNavigation();
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
   const [score, setScore] = useState(5);
+  const [text, setText] = useState('');
   const [reviewText, setReviewText] = useState('');
   const [keyboardShow, setKeyboardShow] = useState(false);
-  
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
@@ -160,26 +171,9 @@ const ReviewSheet = props => {
     };
   }, []);
 
-  const uploadReview = async () => {
-    const data = {
-      reviewType: 'service',
-      score,
-      reviewText,
-    };
-    const url = 'http://devapp.how-taxing.com/review/registReview';
 
-    await axios
-      .post(url, data)
-      .then(res => {
-        // ////console.log(res);
-      })
-      .catch(err => {
-        ////console.log(err);
-      });
-  };
+  const [isConnected, setIsConnected] = useState(true);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -196,6 +190,55 @@ const ReviewSheet = props => {
         resolve(true);
       }
     });
+  };
+
+  const uploadReview = async () => {
+    /*
+    [필수] reviewType | String | 리뷰유형(COMMON:공통, BUY:취득세 계산, SELL:양도소득세 계산, CONSULT:상담)
+    [필수] score | Integer | 주택명
+    [선택] reviewContents | String | 상담내용(1000바이트 까지 입력 가능)
+*/
+
+    try {
+      const url = Config.APP_API_URL||`review/registReview`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.accessToken}`
+      };
+
+      const param = {
+        reviewType: props?.payload?.prevSheet === 'AcquisitionChat' ? 'BUY' : 'SELL',
+        score: score,
+        reviewContents: reviewText,
+      };
+      // console.log('[additionalQuestion] additionalQuestion param:', param);
+      const response = await axios.post(url, param, { headers });
+      console.log('response.data', response.data);
+      if (response.data.errYn == 'Y') {
+        await SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: response.data.errMsg ? response.data.errMsg : '리뷰를 저장하는 도중 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+            buttontext: '확인하기',
+          },
+        });
+      } else {
+        //  console.log('[additionalQuestion] additionalQuestion retrieved:', detaildata);
+        //    console.log('[additionalQuestion] detaildata?.houseType:', detaildata?.houseType);
+        //   console.log('[additionalQuestion] additionalQuestion houseInfo:', houseInfo);
+      }
+    } catch (error) {
+      ////console.log(error ? error : 'error');
+      await SheetManager.show('info', {
+        payload: {
+          message: '리뷰를 저장하는데\n알수없는 오류가 발생했습니다.',
+          type: 'error',
+          buttontext: '확인하기',
+        },
+      });
+
+    }
   };
 
 
@@ -246,7 +289,19 @@ const ReviewSheet = props => {
           </StarSection>
           <ReviewItem>
             <ScrollView>
-              <ReviewInput multiline={true} width={width} placeholder="리뷰를 작성해주세요" />
+              <ReviewInput
+                multiline={true}
+                width={width}
+                placeholder="리뷰를 작성해주세요"
+                onChangeText={(input) => {
+                  let byteCount = encodeURI(input).split(/%..|./).length - 1;
+                  if (byteCount <= 1000) {
+                    setText(input);
+                  }
+                }}
+                value={text.slice(0, 1000)}
+              />
+              <TextLength>{encodeURI(text).split(/%..|./).length - 1}/1000</TextLength>
             </ScrollView>
           </ReviewItem>
         </ModalInputSection>
@@ -282,7 +337,7 @@ const ReviewSheet = props => {
               width: '49%',
             }}>
             <Button
-              onPress={async() => {
+              onPress={async () => {
                 const state = await NetInfo.fetch();
                 const canProceed = await handleNetInfoChange(state);
                 if (canProceed) {
@@ -293,7 +348,7 @@ const ReviewSheet = props => {
                   }, 200);
                 } else {
                   actionSheetRef.current?.hide();
-                } 
+                }
               }}>
               <ButtonText>제출하기</ButtonText>
             </Button>

@@ -25,9 +25,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { editOwnHouseList } from '../../redux/ownHouseListSlice';
 import dayjs from 'dayjs';
-
+import InfoIcon from '../../assets/icons/info_tooltip_ico.svg';
 import NetInfo from "@react-native-community/netinfo";
 import numberToKorean from '../../utils/numToKorean';
+import Config from 'react-native-config'
 
 const Container = styled.View`
   flex: 1;
@@ -198,11 +199,12 @@ const OwnedHouseDetail = props => {
 
 
   useEffect(() => {
-    //////console.log('props?.payload?.prevSheet', prevSheet)
+    console.log('props?.payload?.prevSheet', prevSheet)
     /*if (item?.houseId !== '222') {*/
     if (prevSheet) {
       getHouseDetailInfo();
     }
+
 
     /* } else {
        getHouseDirectDetailInfo();
@@ -302,7 +304,7 @@ const OwnedHouseDetail = props => {
     // userProportion | Integer | 본인지분비율
     // moveInRight | boolean | 입주권여부
 
-    const url = 'http://devapp.how-taxing.com/house/modify';
+    const url = Config.APP_API_URL||'house/modify';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -335,9 +337,10 @@ const OwnedHouseDetail = props => {
     };
 
     //////console.log('[OwnedHouseDetail]headers:', headers);
-    //////console.log('[OwnedHouseDetail]param:', param);
+
+    console.log('[OwnedHouseDetail]param:', param);
     try {
-      // ////console.log('before data', data);
+      //console.log('before data', data);
       const response = await axios.put(url, param, { headers: headers });
       //  ////console.log('[OwnedHouseDetail]update response:', response);
       //  ////console.log('[OwnedHouseDetail]update response.data:', response.data);
@@ -385,15 +388,16 @@ const OwnedHouseDetail = props => {
 
   const getHouseDetailInfo = async () => {
     try {
-      const url = `http://devapp.how-taxing.com/house/detail?houseId=${pData?.houseId}`;
+      const url = Config.APP_API_URL||`house/detail?houseId=${pData?.houseId}`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`,
       };
 
-      //////console.log('[OwnedHouseDetail] getHouseDetailInfo pData:', pData);
+      //console.log('[OwnedHouseDetail] getHouseDetailInfo pData:', pData);
 
       const response = await axios.get(url, { headers });
+      console.log('[OwnedHouseDetail] response :', response);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -407,7 +411,7 @@ const OwnedHouseDetail = props => {
 
       } else {
         const houseDetails = response.data.data;
-        //////console.log('houseDetails', houseDetails);
+        console.log('houseDetails', houseDetails);
         await getAPTLocation(houseDetails.roadAddr);
         setData(houseDetails);
         //const tempMovingInRight = houseDetails.isMoveInRight;
@@ -724,7 +728,7 @@ const OwnedHouseDetail = props => {
             if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
               dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
             }
-            
+
 
             navigation.goBack();
             if (!props.route.params?.prevSheet) return;
@@ -733,7 +737,9 @@ const OwnedHouseDetail = props => {
             SheetManager.show(props.route.params?.prevSheet, {
               payload: {
                 navigation,
-                index: props.route.params.index
+                index: props?.route?.params?.index,
+                data: props?.route?.params?.data,
+                chungYackYn: props?.route?.params?.chungYackYn
               },
             });
           }}>
@@ -754,7 +760,9 @@ const OwnedHouseDetail = props => {
                 cancelText: '취소',
                 item: item,
                 prevSheet,
-                index: props.route.params.index,
+                index: props?.route?.params?.index,
+                data: props?.route?.params?.data,
+                chungYackYn: props?.route?.params?.chungYackYn
               },
             });
 
@@ -879,7 +887,9 @@ const OwnedHouseDetail = props => {
     SheetManager.show(props.route.params?.prevSheet, {
       payload: {
         navigation,
-        index: props.route.params.index
+        index: props?.route?.params?.index,
+        data: props?.route?.params?.data,
+        chungYackYn: props?.route?.params?.chungYackYn
       },
     });
     return true;
@@ -1175,7 +1185,22 @@ const OwnedHouseDetail = props => {
                   {HOUSE_TYPE.find(color => color.id === '8').name}
                 </NecessaryInfoBadgeText>
               </NecessaryInfoBadge>}
-              <InfoContentLabel>취득금액</InfoContentLabel>
+              <InfoContentLabel style={{marginRight: 5}}>취득금액</InfoContentLabel>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+                <InfoIcon
+                  onPress={() => {
+                    SheetManager.show('infoExpense', {
+                      payload: {
+                        Title: "취득금액",
+                        Description: "2006년 이전에 취득한 주택의 계약서를\n분실하여 취득금액이 기억나지 않으신다면\n 먼저 부동산전문세무사와 상담해보세요.",
+                        height: 300,
+                      },
+                    });
+                  }}
+                />
+              </TouchableOpacity>
               <InfoContentText>
                 {data?.buyPrice ? numberToKorean(Number(data?.buyPrice)?.toString()) + '원' : ''}
               </InfoContentText>

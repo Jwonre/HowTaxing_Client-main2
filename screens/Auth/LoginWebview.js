@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Alert, Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute } from '@react-navigation/native';
-
+import Config from 'react-native-config'
 
 const LoginWebview = (props) => {
     const navigation = useNavigation();
@@ -12,7 +12,8 @@ const LoginWebview = (props) => {
     const { width, height } = Dimensions.get('window');
     const [webViewStyle, setWebViewStyle] = useState({ width: width, height: height });
     const onWebViewMessage = route.params?.onWebViewMessage;
-    const uri = { uri: `http://devapp.how-taxing.com/oauth2/authorization/${socialType}` };
+    const uri = { uri: Config.APP_API_URL||`oauth2/authorization/${socialType}` };
+    console.log('uri', uri);
     const sendWebMessage = () => {
         webViewRef.current.injectJavaScript(`
         const url = document?.URL === null ? null : document?.URL;
@@ -89,7 +90,7 @@ const LoginWebview = (props) => {
                 //console.log('data', data);
                 onWebViewMessage({ nativeEvent: { data: data } });
             }
-            navigation.goBack();
+          //  navigation.goBack();
         }
 
 

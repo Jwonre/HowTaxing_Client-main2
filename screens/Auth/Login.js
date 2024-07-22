@@ -1,13 +1,15 @@
 import { StatusBar, useWindowDimensions, View, Linking, BackHandler } from 'react-native';
-import React, { useRef, useLayoutEffect, useState, useCallback } from 'react';
+import React, { useRef, useLayoutEffect, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { useRoute, useNavigation,useFocusEffect } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import getFontSize from '../../utils/getFontSize';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentUser } from '../../redux/currentUserSlice';
 import axios from 'axios';
 import { SheetManager } from 'react-native-actions-sheet';
 import NetInfo from '@react-native-community/netinfo';
+import Config from 'react-native-config'
+
 const Container = styled.ImageBackground.attrs(props => ({
   source: require('../../assets/images/loginBG.png'),
   resizeMode: 'cover',
@@ -98,14 +100,20 @@ const Login = () => {
   const route = useRoute();
   const dispatch = useDispatch();
   //const [isConnected, setIsConnected] = useState(true);
-  const agreeMarketing = route.params? route.params.agreeMarketing : false;
+  const agreeMarketing = route.params ? route.params.agreeMarketing : false;
   const accessToken = null;
-  
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -127,98 +135,22 @@ const Login = () => {
 
   const handleWebViewMessage = async (event) => {
     const tokens = temp(event);
-    // ////console.log('Login:', event.nativeEvent.data);
+    //console.log('Login:', event.nativeEvent.data);
     if (event.nativeEvent.data.role === 'GUEST') {
+      await navigation.push('CheckTerms', { tokens: tokens });
       //약관확인 화면으로 이동 후 약관 동의 완료시 handleSignUp 진행
-      await navigation.push('CheckTerms');
-      const Sighupresult = handleSignUp(event.nativeEvent.data.accessToken);
-      if(Sighupresult){
-        const tokenObject = { 'accessToken': tokens[0], 'refreshToken': tokens[1] };
-        //   ////console.log('Login tokenObject:', tokenObject);
-        dispatch(setCurrentUser(tokenObject));
-      } else {
-        SheetManager.show('info', {
-          payload: {
-            message: '로그인에 실패했습니다.',
-            type: 'error',
-            buttontext: '확인하기',
-          }
-        });
-      }
     } else {
-      //   ////console.log('Login token:', tokens[0]);
+      //console.log('Login token:', tokens[0]);
       const tokenObject = { 'accessToken': tokens[0], 'refreshToken': tokens[1] };
-      //   ////console.log('Login tokenObject:', tokenObject);
+      //console.log('Login tokenObject:', tokenObject);
       dispatch(setCurrentUser(tokenObject));
     }
   };
-
   const temp = (event) => {
     const accessToken = event.nativeEvent.data.accessToken;
     const refreshToken = event.nativeEvent.data.refreshToken;
     return [accessToken, refreshToken];
   }
-
-  const handleSignUp = (accessToken) => {
-    // 요청 헤더
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`
-    };
-
-    // 요청 바디
-    const data = {
-      mktAgr: agreeMarketing,
-
-    };
-
-    axios
-      .post('http://devapp.how-taxing.com/user/signUp', data, { headers: headers })
-      .then(response => {
-        if (response.data.errYn === 'Y') {
-          SheetManager.show('info', {
-            payload: {
-              type: 'error',
-              message: response.data.errMsg ? response.data.errMsg : '회원가입 도중에 문제가 발생했어요.',
-              description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
-              buttontext: '확인하기',
-            },
-          });
-          return false;
-        } else {
-         /* SheetManager.show('info', {
-            payload: {
-              type: 'info',
-              message: '회원가입에 성공했습니다.',
-            },
-          });*/
-          // 성공적인 응답 처리
-          // const { id } = response.data;
-          //    ////console.log("1111111", response);
-          return true;
-        }
-      })
-      .catch(error => {
-        // 오류 처리
-        SheetManager.show('info', {
-          payload: {
-            message: '회원가입에 실패했습니다.',
-            description: error?.message,
-            type: 'error',
-            buttontext: '확인하기',
-          }
-        });
-        console.error(error);
-        return false;
-      });
-  };
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
-
 
 
   // 카카오 로그인
@@ -232,7 +164,7 @@ const Login = () => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-    navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'kakao', });
+      navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'kakao', });
     }
 
   };
@@ -258,40 +190,43 @@ const Login = () => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-    navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'naver', });
+      navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'naver', });
     }
   };
-  /*
-    // 구글 로그인
-    const onGoogleLogin = async () => {
-      /*
-      await GoogleSignin.hasPlayServices();
-     
-      const GOOGLE_CLIENT_ID =
-        '797361358853-j9mpkpnq9bgrnmahi46dgkb5loufk5bg.apps.googleusercontent.com';
-      GoogleSignin.configure({
-        webClientId: GOOGLE_CLIENT_ID,
-        offlineAccess: true,
-      });
-      try {
-        await GoogleSignin.signIn();
-        const user = await GoogleSignin.getTokens();
-     
-        const accessToken = user.accessToken;
-        ////console.log('accessToken', accessToken);
-     
-        socialLogin(2, accessToken);
-      } catch (error) {
-        ////console.log('error', error);
-      }
-  
-      NetInfo.addEventListener(state => {
-        if (!state.isConnected) {
-        }
-      });
+
+  // 구글 로그인
+  const onGoogleLogin = async () => {
+    /*
+    await GoogleSignin.hasPlayServices();
+   
+    const GOOGLE_CLIENT_ID =
+      '797361358853-j9mpkpnq9bgrnmahi46dgkb5loufk5bg.apps.googleusercontent.com';
+    GoogleSignin.configure({
+      webClientId: GOOGLE_CLIENT_ID,
+      offlineAccess: true,
+    });
+    try {
+      await GoogleSignin.signIn();
+      const user = await GoogleSignin.getTokens();
+   
+      const accessToken = user.accessToken;
+      ////console.log('accessToken', accessToken);
+   
+      socialLogin(2, accessToken);
+    } catch (error) {
+      ////console.log('error', error);
+    }
+*/  
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
       navigation.navigate('LoginWebview', { onWebViewMessage: handleWebViewMessage, 'socialType': 'google', });
-    };
-  
+    }
+
+
+    
+  };
+  /*
     // 애플 로그인
     const onAppleLogin = async () => {
       // if (appleAuthAndroid.isSupported) {
@@ -376,7 +311,7 @@ const Login = () => {
     };
 
     axios
-      .post('http://devapp.how-taxing.com/user/socialLogin', data)
+      .post(Config.APP_API_URL||'user/socialLogin', data)
       .then(response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
@@ -412,7 +347,7 @@ const Login = () => {
   // 유저 정보 가져오기
   const getUserData = async id => {
     await axios
-      .get(`http://devapp.how-taxing.com/user/${id}`)
+      .get(Config.APP_API_URL||`user/${id}`)
       .then(response => {
         // 성공적인 응답 처리
         // ////console.log(response.data);
@@ -424,12 +359,12 @@ const Login = () => {
         console.error(error);
       });
   };
-  
+
   const handleBackPress = () => {
     BackHandler.exitApp(); // 앱 종료
     return true;
   }
-  
+
   useFocusEffect(
     useCallback(() => {
       BackHandler.addEventListener('hardwareBackPress', handleBackPress)
@@ -450,7 +385,7 @@ const Login = () => {
           <LogoGroup>
             <LogoImage source={require('../../assets/images/logo.png')} />
           </LogoGroup>
-          <View styled={{height: 'auto', minHeight: 40}}>
+          <View styled={{ height: 'auto', minHeight: 40 }}>
             <SansText>어렵지 않은 주택세금</SansText>
           </View>
         </IntroSection>

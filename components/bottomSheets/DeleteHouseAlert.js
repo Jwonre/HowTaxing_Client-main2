@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
 import axios from 'axios';
 import NetInfo from "@react-native-community/netinfo"
+import Config from 'react-native-config'
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -108,7 +109,7 @@ const DeleteHouseAlert = props => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-      const url = `http://devapp.how-taxing.com/house/delete`;
+      const url = Config.APP_API_URL||`house/delete`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -149,7 +150,9 @@ const DeleteHouseAlert = props => {
               payload: {
                 item: item,
                 navigation: navigation,
-                index: props.payload.index,
+                index: props?.payload?.index,
+                data: props?.payload?.data,
+                chungYackYn: props?.payload?.chungYackYn
               },
             });
           }, 300);

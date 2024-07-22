@@ -271,7 +271,7 @@ const InfoAlert = props => {
             {(props?.payload?.type == 'error' && props?.payload?.id == 'calculation') &&
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <KakaoButton
-                  onPress={() => Linking.openURL('http://pf.kakao.com/_jfxgFG')}>
+                  onPress={() => Linking.openURL('http://pf.kakao.com/_sxdxdxgG')}>
                   <SocialButtonIcon
                     source={require('../../assets/images/socialIcon/kakao_ico.png')}
                   />

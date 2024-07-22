@@ -18,7 +18,7 @@ import Switch from 'react-native-draggable-switch';
 import axios from 'axios';
 import getFontSize from '../../utils/getFontSize';
 import NetInfo from "@react-native-community/netinfo";
-
+import Config from 'react-native-config'
 
 // Icons
 import BuildingIcon1 from '../../assets/icons/house/building_type1_ico.svg';
@@ -184,8 +184,6 @@ const InfoContentLabel = styled.Text`
 
 
 
-
-
 const RegisterDirectHouse = props => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -233,7 +231,7 @@ const RegisterDirectHouse = props => {
       prevSheetNum = '01';
     } 
     ////console.log('prevSheet', prevSheet);
-    const url = `http://devapp.how-taxing.com/house/list?calcType=${prevSheetNum}`
+    const url = Config.APP_API_URL||`house/list?calcType=${prevSheetNum}`
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -373,6 +371,8 @@ const RegisterDirectHouse = props => {
           payload: {
             navigation,
             index: props.route.params?.index,
+            data: props?.route?.params?.data,
+            chungYackYn: props?.route?.params?.chungYackYn
           },
         },
       );
@@ -425,9 +425,9 @@ const RegisterDirectHouse = props => {
         isMoveInRight: isMoveInRight,
       };
       //successRegister();
-
+      console.log('data : ', data);
       axios
-        .post('http://devapp.how-taxing.com/house/regist', data, { headers: headers })
+        .post(Config.APP_API_URL||'house/regist', data, { headers: headers })
         .then(async response => {
           if (response.data.errYn === 'Y') {
             SheetManager.show('info', {

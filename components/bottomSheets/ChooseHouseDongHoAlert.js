@@ -25,6 +25,7 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import NetInfo from "@react-native-community/netinfo"
 import dayjs from 'dayjs';
+import Config from 'react-native-config'
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -243,7 +244,7 @@ const ChooseHouseDongHoAlert = props => {
       .catch(function (error) {
         ////console.log(error);
       });*/
-    const url = 'http://devapp.how-taxing.com/house/roadAddrDetail';
+    const url = Config.APP_API_URL||'house/roadAddrDetail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -333,7 +334,7 @@ const ChooseHouseDongHoAlert = props => {
             numOfRows: 5,
             pageNo: 1,
           })*/
-      const response = await axios.post('http://devapp.how-taxing.com/house/pubLandPriceAndAreaAtDB', param, { headers: headers });
+      const response = await axios.post(Config.APP_API_URL||'house/pubLandPriceAndAreaAtDB', param, { headers: headers });
       const data = response.data.data;
       //    ////console.log('gongsiData return', data);
       if (response.data.errYn === 'Y') {

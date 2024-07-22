@@ -1,15 +1,12 @@
 // 개인정보 처리방침
 
-import { TouchableOpacity, useWindowDimensions, ScrollView } from 'react-native';
-import React, { useLayoutEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { TouchableOpacity, useWindowDimensions, ScrollView, BackHandler } from 'react-native';
+import React, { useLayoutEffect, useState, useCallback } from 'react';
+import { useNavigation, useFocusEffect} from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
 import getFontSize from '../../../utils/getFontSize';
-import DropShadow from 'react-native-drop-shadow';
 import { SheetManager } from 'react-native-actions-sheet';
-import { useDispatch, useSelector } from 'react-redux';
-import { setCert } from '../../../redux/certSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -35,31 +32,6 @@ const SubTitle = styled.Text`
   letter-spacing: -0.5px;
 `;
 
-const ButtonSection = styled.View`
-  position: absolute;
-  bottom: 20px;
-  width: 100%;
-`;
-
-const Button = styled.TouchableOpacity.attrs(props => ({
-  activeOpacity: 0.6,
-}))`
-  width: ${props => props.width - 40}px;
-  height: 60px;
-  border-radius: 30px;
-  background-color: ${props => (props.active ? '#2F87FF' : '#e5e5e5')};
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-  align-self: center;
-`;
-
-const ButtonText = styled.Text`
-  font-size: 18px;
-  font-family: Pretendard-Bold;
-  color: ${props => (props.active ? '#fff' : '#a3a5a8')};
-  line-height: 20px;
-`;
 
 const ContentText = styled.Text`
   font-size: 13px;
@@ -69,16 +41,24 @@ const ContentText = styled.Text`
   margin-top: 20px;
 `;
 
-const Privacy2 = props => {
+const InfoPrivacy = props => {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const { width } = useWindowDimensions();
-  const [activeButton, setActiveButton] = useState(false);
-  const { agreeCert, agreePrivacy, agreeLocation, agreeAge, agreeMarketing } = useSelector(
-    state => state.cert.value,
+
+  const handleBackPress = () => {
+    navigation.goBack();
+    // 이전 화면으로 돌아가는 기본 동작 수행
+    return true; // 기본 동작을 중단
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      };
+    }, [handleBackPress])
   );
 
-  
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -86,7 +66,7 @@ const Privacy2 = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
-            navigation.goBack({tokens: props?.route?.params?.tokens});
+            navigation.goBack();
           }}>
           <CloseIcon />
         </TouchableOpacity>
@@ -111,18 +91,7 @@ const Privacy2 = props => {
       <ScrollView
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
-        // 스크롤이 하단에 도달했을 때
-        onScroll={({ nativeEvent }) => {
-          if (
-            nativeEvent.contentOffset.y +
-            nativeEvent.layoutMeasurement.height >=
-            nativeEvent.contentSize.height  - 1
-          ) {
-            setActiveButton(true);
-          } else {
-            setActiveButton(false);
-          }
-        }}>
+      >
         <Title>(필수) 개인정보 수집 및 이용 동의</Title>
         <SubTitle>[필수] 개인정보 수집 및 이용 동의서</SubTitle>
         <ContentText>
@@ -331,42 +300,8 @@ const Privacy2 = props => {
 `}
         </ContentText>
       </ScrollView>
-      <ButtonSection>
-        <DropShadow
-          style={{
-            shadowColor: '#000',
-            shadowOffset: {
-              width: 0,
-              height: 4,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 2,
-          }}>
-          <Button
-            width={width}
-            active={activeButton || agreePrivacy}
-            disabled={!(activeButton || agreePrivacy)}
-            onPress={() => {
-              dispatch(
-                setCert({
-                  agreeAge,
-                  agreeLocation,
-                  agreeMarketing,
-                  agreeCert,
-                  agreePrivacy: true,
-                }),
-              );
-              navigation.goBack({tokens: props?.route?.params?.tokens});
-
-            }}>
-            <ButtonText active={activeButton || agreePrivacy}>
-            동의하기
-            </ButtonText>
-          </Button>
-        </DropShadow>
-      </ButtonSection>
     </Container>
   );
 };
 
-export default Privacy2;
+export default InfoPrivacy;

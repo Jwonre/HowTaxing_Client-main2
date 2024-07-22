@@ -22,7 +22,8 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { acquisitionTax } from '../../data/chatData';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { legacy_createStore } from '@reduxjs/toolkit';
+import Config from 'react-native-config'
+
 dayjs.locale('ko');
 const SheetContainer = styled.View`
   flex: 1;
@@ -107,7 +108,7 @@ const OwnHouseCountSheet = props => {
 */
 
     try {
-      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const url = Config.APP_API_URL||`question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -324,17 +325,17 @@ const OwnHouseCountSheet = props => {
                     progress: 6,
                     questionId: 'Q_0007',
                     message:
-                      '종전주택 매도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 매도 계획이 있나요?',
+                      '종전주택 양도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 양도 계획이 있나요?',
                     select: [
                       {
                         id: 'planSaleYes',
-                        name: '3년 이내 매도 계획',
+                        name: '3년 이내 양도 계획',
                         select: ['getInfoDone', 'getInfoConfirm'],
                         answer: '01'
                       },
                       {
                         id: 'planSaleNo',
-                        name: '매도 계획 없음',
+                        name: '양도 계획 없음',
                         select: ['getInfoDone', 'getInfoConfirm'],
                         answer: '02'
                       },
@@ -357,8 +358,8 @@ const OwnHouseCountSheet = props => {
                             questionId: additionalQuestion.detaildata?.nextQuestionId,
                             select: acquisitionTax[chatIndex].select.map(item => ({
                               ...item,
-                              name: item.id === 'additionalQuestionY' ? '3년 이내 매도 계획' : '매도 계획 없음',
-                              answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                              name: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0].answerContent : additionalQuestion?.detaildata?.answerSelectList[1].answerContent,
+                              answer: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0].answerValue : additionalQuestion?.detaildata?.answerSelectList[1].answerValue,
                               select: ['getInfoDone', 'getInfoConfirm'],
                             }))
                           };
@@ -401,7 +402,7 @@ const OwnHouseCountSheet = props => {
                             }, 300);
                           }
                         } else {
-                           console.log('ownHouseCnt', ownHouseCnt);
+                          // console.log('ownHouseCnt', ownHouseCnt);
                           setTimeout(() => {
                             dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
                           }, 300);

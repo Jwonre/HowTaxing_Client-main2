@@ -136,7 +136,7 @@ const Gov24 = props => {
   return (
     <Container>
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
         // 스크롤이 하단에 도달했을 때
         onScroll={({ nativeEvent }) => {

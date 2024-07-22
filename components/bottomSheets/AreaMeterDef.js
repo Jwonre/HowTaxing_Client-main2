@@ -18,6 +18,7 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { setCert } from '../../redux/certSlice';
+import Config from 'react-native-config'
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -271,7 +272,7 @@ const AreaMeterDef = props => {
   ];
 
   const postOwnHouse = async () => {
-    const url = 'http://devapp.how-taxing.com/house/list';
+    const url = Config.APP_API_URL||'house/list';
 
     const data = {
       certAuthor: certType === 'KB' ? '1' : certType === 'naver' ? '2' : '3',
@@ -340,8 +341,8 @@ const AreaMeterDef = props => {
     actionSheetRef.current?.hide();
     const { isGainsTax } = props.payload;
     const chatItem = isGainsTax
-      ? gainTax.find(el => el.id === 'allHouse')
-      : acquisitionTax.find(el => el.id === 'moment');
+      ? gainTax.find(el => el.id === 'allHouse1')
+      : acquisitionTax.find(el => el.id === 'moment1');
    // ////console.log(chatItem);
 
     dispatch(setChatDataList([...chatDataList, chatItem]));

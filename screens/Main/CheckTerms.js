@@ -1,16 +1,21 @@
 
-import { TouchableOpacity, useWindowDimensions } from 'react-native';
-import React, { useLayoutEffect, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { TouchableOpacity, useWindowDimensions, BackHandler } from 'react-native';
+import React, { useLayoutEffect, useState, useCallback, useRef } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import BackIcon from '../../assets/icons/back_button.svg';
 import CheckOnIcon from '../../assets/icons/check_on.svg';
 import styled from 'styled-components';
 import HomeIcon from '../../assets/images/home_checkterms.svg';
 import FastImage from 'react-native-fast-image';
+import { SheetManager } from 'react-native-actions-sheet';
 import DropShadow from 'react-native-drop-shadow';
 import getFontSize from '../../utils/getFontSize';
 import { useDispatch, useSelector } from 'react-redux';
+import NetInfo from '@react-native-community/netinfo';
+import { setCurrentUser } from '../../redux/currentUserSlice';
+import axios from 'axios';
 import { setCert } from '../../redux/certSlice';
+import Config from 'react-native-config'
 
 const Container = styled.View`
   flex: 1;
@@ -163,10 +168,102 @@ const CheckTerms = props => {
   const navigation = useNavigation()
   const { width, height } = useWindowDimensions()
   const dispatch = useDispatch();
-
   const { agreeAge, agreeCert, agreePrivacy, agreeMarketing, agreeLocation } = useSelector(
     state => state.cert.value,
   );
+  const [isConnected, setIsConnected] = useState(true);
+  const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
+  const hasNavigatedBackRef = useRef(hasNavigatedBack);
+  const handleNetInfoChange = (state) => {
+    return new Promise((resolve, reject) => {
+      if (!state.isConnected && isConnected) {
+        setIsConnected(false);
+        navigation.push('NetworkAlert', navigation);
+        resolve(false);
+      } else if (state.isConnected && !isConnected) {
+        setIsConnected(true);
+        if (!hasNavigatedBackRef.current) {
+          setHasNavigatedBack(true);
+        }
+        resolve(true);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
+
+
+  const handleBackPress = () => {
+    navigation.navigate('Login');
+    return true;
+  }
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      }
+    }, [handleBackPress])
+  );
+
+
+
+  const handleSignUp = async (accessToken, handleSignUpagreeMarketing) => {
+    // 요청 헤더
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`
+    };
+
+    // 요청 바디
+    const data = {
+      mktAgr: handleSignUpagreeMarketing,
+    };
+
+    try {
+
+      const response = await axios.post(Config.APP_API_URL||'user/signUp', data, { headers: headers });
+
+      if (response.data.errYn === 'Y') {
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: response.data.errMsg ? response.data.errMsg : '회원가입 도중에 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
+            buttontext: '확인하기',
+          },
+        });
+        return false;
+      } else {
+        /* SheetManager.show('info', {
+           payload: {
+             type: 'info',
+             message: '회원가입에 성공했습니다.',
+           },
+         });*/
+        // 성공적인 응답 처리
+        // const { id } = response.data;
+        //    ////console.log("1111111", response);
+        return true;
+      }
+    } catch (error) {
+      // 오류 처리
+      SheetManager.show('info', {
+        payload: {
+          message: '회원가입에 실패했습니다.',
+          description: error?.message,
+          type: 'error',
+          buttontext: '확인하기',
+        }
+      });
+      console.error(error);
+      return false;
+    }
+  };
+
+
+
 
 
 
@@ -294,7 +391,7 @@ const CheckTerms = props => {
         <ListItemButton
           onPress={() => {
             //    ////console.log('agreeCert', agreeCert)
-            navigation.navigate('Cert2', { agreeCert: agreeCert, navigation: navigation },);
+            navigation.navigate('Cert2', { agreeCert: agreeCert, navigation: navigation, tokens: props?.route?.params?.tokens },);
           }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
@@ -320,7 +417,7 @@ const CheckTerms = props => {
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
-            navigation.navigate('Privacy2', { agreePrivacy: agreePrivacy, navigation: navigation });
+            navigation.navigate('Privacy2', { agreePrivacy: agreePrivacy, navigation: navigation, tokens: props?.route?.params?.tokens });
           }}>
           <ListItemButtonText>보기</ListItemButtonText>
         </ListItemButton>
@@ -346,7 +443,7 @@ const CheckTerms = props => {
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
-            navigation.navigate('Location2', { agreeLocation: agreeLocation, navigation: navigation });
+            navigation.navigate('Location2', { agreeLocation: agreeLocation, navigation: navigation, tokens: props?.route?.params?.tokens });
 
           }}>
           <ListItemButtonText>보기</ListItemButtonText>
@@ -381,9 +478,30 @@ const CheckTerms = props => {
           <Button
             width={width}
             disabled={!(agreeCert && agreeAge && agreePrivacy && agreeLocation)}
-            onPress={() => {
-              navigation.navigate('Login', { param: agreeMarketing, navigation: navigation });
-            }}
+            onPress={async () => {
+              const state = await NetInfo.fetch();
+              const canProceed = await handleNetInfoChange(state);
+              if (canProceed) {
+               // console.log('props.tokens', props?.route?.params?.tokens);
+                const Sighupresult = await handleSignUp(props?.route?.params?.tokens[0], agreeMarketing);
+                if (Sighupresult) {
+                  const tokenObject = { 'accessToken': props?.route?.params?.tokens[0], 'refreshToken': props?.route?.params?.tokens[1] };
+                //  console.log('Login tokenObject:', tokenObject);
+                  dispatch(setCurrentUser(tokenObject));
+
+                } else {
+                  SheetManager.show('info', {
+                    payload: {
+                      message: '로그인에 실패했습니다.',
+                      type: 'error',
+                      buttontext: '확인하기',
+                    }
+                  });
+                }
+              }
+            }
+            }
+
             style={{
               width: width - 80,
               alignSelf: 'center',

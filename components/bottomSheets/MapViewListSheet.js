@@ -30,6 +30,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { setChatDataList } from '../../redux/chatDataListSlice';
+import Config from 'react-native-config'
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -604,7 +605,7 @@ const MapViewListSheet = props => {
   };
   // 아파트 단지 선택 시 상세 정보 가져오기
  /* const getHouseDetailInfo = async () => {
-    const url = 'http://devapp.how-taxing.com/house/detail';
+    const url = Config.APP_API_URL||'house/detail';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`

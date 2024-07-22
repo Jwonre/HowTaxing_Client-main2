@@ -579,23 +579,7 @@ const HouseDetail = props => {
             </Paper>
             <InfoContentItem>
               <InfoContentLabel>입주권 여부</InfoContentLabel>
-
-              <Switch
-                width={50}
-                height={28}
-                value={item?.isMoveInRight}
-                circleStyle={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 12,
-                  backgroundColor: '#fff',
-                }}
-                onValueChange={value => {
-
-                }}
-                activeColor="#2F87FF"
-                disabledColor="#E8EAED"
-              />
+              <InfoContentText>{item?.isMoveInRight === true ? '여' : '부'}</InfoContentText>
             </InfoContentItem>
           </InputSection>
         </>
@@ -604,4 +588,4 @@ const HouseDetail = props => {
   );
 };
 
-export default React.memo(HouseDetail);
+export default HouseDetail;

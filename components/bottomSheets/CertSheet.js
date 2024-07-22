@@ -17,7 +17,7 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { setCert } from '../../redux/certSlice';
 import { LogBox } from 'react-native';
-
+import Config from 'react-native-config'
 import { setResend } from '../../redux/resendSlice';
 import NetInfo from '@react-native-community/netinfo';
 import ChooseHouseDongHoAlert from './ChooseHouseDongHoAlert';
@@ -423,7 +423,7 @@ const CertSheet = props => {
   };
 
   const postOwnHouse = async () => {
-    const url = 'http://devapp.how-taxing.com/house/search';
+    const url = Config.APP_API_URL||'house/search';
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -563,14 +563,14 @@ const CertSheet = props => {
 
       const certresult = await postOwnHouse();
 
-      //////console.log('certresult', certresult)
+      //console.log('certresult', certresult)
       if (certresult) {
         SheetManager.hide("infoCertification");
         const { isGainsTax } = props.payload;
         const chatItem = isGainsTax
-          ? gainTax.find(el => el.id === 'allHouse')
-          : acquisitionTax.find(el => el.id === 'moment');
-        //////console.log(chatItem);
+          ? gainTax.find(el => el.id === 'allHouse1')
+          : acquisitionTax.find(el => el.id === 'moment1');
+       //console.log(chatItem);
         dispatch(setChatDataList([...chatDataList, chatItem]));
 
       }

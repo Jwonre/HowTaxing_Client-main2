@@ -218,8 +218,8 @@ const UpdateBalanceDateAlert = props => {
                 height: 420,
               }}>
               <Calendar
-                currentDate={data?.contractDate ? new Date(data?.contractDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
-                minDate={data?.contractDate ? new Date(data?.contractDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
+                currentDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
+                minDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
                 setSelectedDate={setSelectedDate}
 
               />

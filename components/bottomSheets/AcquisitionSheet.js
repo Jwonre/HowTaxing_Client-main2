@@ -189,11 +189,7 @@ const ButtonText = styled.Text`
 
 
 const AcquisitionSheet = props => {
-  /*                <TouchableOpacity
-                  activeOpacity={0.8}
-                  hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
-                  <InfoIcon />
-                </TouchableOpacity> 취득금액 ? 부분 삭제 */
+
 
 
   LogBox.ignoreLogs(['to contain units']);
@@ -344,8 +340,8 @@ const AcquisitionSheet = props => {
               }}>
               <Calendar
                 setSelectedDate={setSelectedDate}
-                selectedDate={new Date().setHours(0,0,0,0)}
-                currentDate={new Date().setHours(0,0,0,0)}
+                selectedDate={new Date(new Date().setHours(0,0,0,0))}
+                currentDate={new Date(new Date().setHours(0,0,0,0))}
               />
             </View>
           </ModalInputSection>
@@ -428,10 +424,10 @@ const AcquisitionSheet = props => {
                 height: 400,
               }}>
               {currentPageIndex === 1 && (<Calendar
-                minDate={new Date(houseInfo?.contractDate.setHours(0,0,0,0))}
+                minDate={new Date(new Date(houseInfo?.contractDate.setHours(0,0,0,0)))}
                 setSelectedDate={setSelectedDate2}
-                selectedDate={new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0,0,0,0)}
-                currentDate={new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0,0,0,0)}
+                selectedDate={new Date(new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0,0,0,0))}
+                currentDate={new Date(new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0,0,0,0))}
               />)}
             </View>
           </ModalInputSection>

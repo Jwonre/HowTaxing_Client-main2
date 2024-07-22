@@ -171,7 +171,7 @@ export const acquisitionTax = [
       {
         id: 'Nosubscriptionaccount',
         name: '청약통장 미보유',
-        select: ['moment'],
+        select: ['moment2'],
       },
     ],
   },
@@ -208,7 +208,7 @@ export const acquisitionTax = [
     progress: 4,
   },
   {
-    id: 'allHouse',
+    id: 'allHouse1',
     type: 'system',
     message: '보유 중인 주택을 모두 불러왔어요.',
     progress: 5,
@@ -216,6 +216,21 @@ export const acquisitionTax = [
       {
         id: 'ok',
         name: '보유 주택 확인하기',
+        chungYackYn: false,
+        openSheet: 'own',
+      },
+    ],
+  },
+  {
+    id: 'allHouse2',
+    type: 'system',
+    message: '보유 중인 주택을 모두 불러왔어요.',
+    progress: 5,
+    select: [
+      {
+        id: 'ok',
+        name: '보유 주택 확인하기',
+        chungYackYn: true,
         openSheet: 'own',
       },
     ],
@@ -242,7 +257,7 @@ export const acquisitionTax = [
     ],
   },
   {
-    id: 'moment',
+    id: 'moment1',
     type: 'system',
     message:
       '잠깐!\n불러온 주택 중 입주권이 있다면 입주권이라고 반드시 알려주셔야 해요.',
@@ -251,7 +266,22 @@ export const acquisitionTax = [
       {
         id: 'ok',
         name: '확인하기',
-        select: ['allHouse'],
+        select: ['allHouse1'],
+      },
+    ],
+    questionId: 'moment',
+  },
+  {
+    id: 'moment2',
+    type: 'system',
+    message:
+      '잠깐!\n불러온 주택 중 입주권이 있다면 입주권이라고 반드시 알려주셔야 해요.',
+    progress: 5,
+    select: [
+      {
+        id: 'ok',
+        name: '확인하기',
+        select: ['allHouse2'],
       },
     ],
     questionId: 'moment',
@@ -325,7 +355,7 @@ export const gainTax = [
   {
     id: 'type',
     user: 'system',
-    message: '혹시 임대사업자이신가요?',
+    message: '주택 임대 사업자이신가요?\n(주택임대사업자등록증 대상)',
     progress: 1,
     select: [
       {
@@ -346,7 +376,7 @@ export const gainTax = [
     type: 'system',
     progress: 10,
     message:
-      '임대사업자에 해당되시면\n전문 세무사에게 상담을 문의해보세요.\n어떤 복잡한 상황에도\n최선의 결과를 알려주실 거에요.',
+      '주택 임대 사업자에 해당되시면\n전문 세무사에게 상담을 문의해보세요.\n어떤 복잡한 상황에도\n최선의 결과를 알려주실 거에요.',
   },
 
   {
@@ -356,7 +386,7 @@ export const gainTax = [
     message: '양도소득세 계산에 필요한 정보들을 모두 수집했어요.',
   },
   {
-    id: 'allHouse',
+    id: 'allHouse1',
     type: 'system',
     message: '보유 중인 주택을 모두 불러왔어요.',
     progress: 3,
@@ -364,6 +394,21 @@ export const gainTax = [
       {
         id: 'ok',
         name: '보유 주택 확인하기',
+        chungYackYn: false,
+        openSheet: 'own2',
+      },
+    ],
+  },
+  {
+    id: 'allHouse2',
+    type: 'system',
+    message: '보유 중인 주택을 모두 불러왔어요.',
+    progress: 3,
+    select: [
+      {
+        id: 'ok',
+        name: '보유 주택 확인하기',
+        chungYackYn: true,
         openSheet: 'own2',
       },
     ],
@@ -399,7 +444,7 @@ export const gainTax = [
     type: 'system',
     progress: 2,
     message:
-      '매도하실 주택의 양도소득세를\n계산하려면 보유 주택들이 필요해요.\n공공기관에서 불러오거나\n직접 입력할 수도 있어요.',
+      '양도하실 주택의 양도소득세를\n계산하려면 보유 주택들이 필요해요.\n공공기관에서 불러오거나\n직접 입력할 수도 있어요.',
   },
   {
     id: 'certType',
@@ -428,7 +473,7 @@ export const gainTax = [
       {
         id: 'Nosubscriptionaccount',
         name: '청약통장 미보유',
-        select: ['allHouse'],
+        select: ['allHouse2'],
       },
     ],
   },
@@ -511,7 +556,7 @@ export const gainTax = [
   {
     id: 'ExpenseInquiry',
     type: 'system',
-    message: '지금 매도하려는 이 주택을 취득할 때 소요된 필요 경비에 따라 양도소득세가 달라질 수 있어요.',
+    message: '지금 양도하려는 이 주택을 취득할 때 소요된 필요 경비에 따라 양도소득세가 달라질 수 있어요.',
     progress: 5,
   },
   {
@@ -540,7 +585,7 @@ export const gainTax = [
     type: 'system',
     progress: 5,
     message:
-      '매도하실 주택의 양도금액이 12억을 초과하는군요. 정확한 양도소득세 계산을 위해서 실거주 기간이 추가로 필요해요. 지금 본인인증을 한 번 더 해야해요.',
+      '양도하실 주택의 양도금액이 12억을 초과하는군요. 정확한 양도소득세 계산을 위해서 실거주 기간이 추가로 필요해요. 지금 본인인증을 한 번 더 해야해요.',
   },
   {
     id: 'under12',

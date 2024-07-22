@@ -24,6 +24,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { acquisitionTax } from '../../data/chatData';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import Config from 'react-native-config'
 dayjs.locale('ko');
 
 const SheetContainer = styled.ScrollView.attrs({
@@ -38,7 +39,7 @@ const SheetContainer = styled.ScrollView.attrs({
 `;
 
 const TitleSection = styled.View`
-  width: 100%;
+  width: 110%;
   height: auto;
   background-color: #fff;
   padding: 10px 20px;
@@ -264,7 +265,7 @@ const OwnHouseSheet = props => {
 */
 
     try {
-      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const url = Config.APP_API_URL||`question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -353,7 +354,7 @@ const OwnHouseSheet = props => {
   useEffect(() => {
     dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: [] }));
   }, []);
-  
+
   return (
     <ActionSheet
       ref={actionSheetRef}
@@ -381,7 +382,7 @@ const OwnHouseSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 760,
+        height: ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) ? 780 : 760,
         width: width,
       }}>
       <SheetContainer width={width}>
@@ -389,15 +390,15 @@ const OwnHouseSheet = props => {
           {ownHouseList.length !== 0 && (<Title>
             보유하신 주택을 모두 불러왔어요.{'\n'}불러온 주택들을 확인해주세요.
           </Title>)}
-          {ownHouseList.length === 0 && props.payload?.data === 'ok' && (<Title>
+          {ownHouseList.length === 0 && props.payload?.data === 'ok' && props.payload?.chungYackYn === true && (<Title>
             청약통장을 가지고 있지 않다면{'\n'}보유하신 주택을 직접 등록해주세요.
           </Title>)}
-          {ownHouseList.length === 0 && !props.payload?.data && (<Title>
+          {ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) && (<Title>
             주택을 불러오지 못했어요.{'\n'}보유하신 주택이 있다면 직접 등록해주세요.
           </Title>)}
 
           <InfoMessage>
-            주택을 취득하기 이전에 기존 보유 주택의 매도 계획이 있다면,{'\n'}매도할 주택은
+            주택을 취득하기 이전에 기존 보유 주택의 양도 계획이 있다면,{'\n'}양도할 주택은
             반드시 체크 해제해주세요.
           </InfoMessage>
         </TitleSection>
@@ -486,7 +487,12 @@ const OwnHouseSheet = props => {
 
                           props.payload.navigation.push(
                             'OwnedHouseDetail',
-                            { item: item, prevSheet: 'own', index: props.payload.index, },
+                            {
+                              item: item, prevSheet: 'own', 
+                              index: props.payload.index, 
+                              data: props?.payload?.data,
+                              chungYackYn: props?.payload?.chungYackYn
+                            },
                           );
                           //////console.log('detail item', item);
                         } else {
@@ -549,8 +555,10 @@ const OwnHouseSheet = props => {
                       prevChat: 'AcquisitionChat',
                       prevSheet: 'own',
                       index: props.payload?.index,
-                      chatDataList: chatDataList,
-                      actionSheetRef: actionSheetRef,
+                      //  chatDataList: chatDataList,
+                      //    actionSheetRef: actionSheetRef,
+                      data: props?.payload?.data,
+                      chungYackYn: props?.payload?.chungYackYn
                     });
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -605,6 +613,8 @@ const OwnHouseSheet = props => {
                           prevChat: 'AcquisitionChat',
                           prevSheet: 'own',
                           index: props.payload?.index,
+                          data: props?.payload?.data,
+                          chungYackYn: props?.payload?.chungYackYn,
                         });
                       } else {
                         const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -640,6 +650,8 @@ const OwnHouseSheet = props => {
                       prevChat: 'AcquisitionChat',
                       prevSheet: 'own',
                       index: props.payload?.index,
+                      data: props?.payload?.data,
+                      chungYackYn: props?.payload?.chungYackYn,
                     });
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -695,17 +707,17 @@ const OwnHouseSheet = props => {
                   progress: 6,
                   questionId: 'Q_0007',
                   message:
-                    '종전주택 매도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 매도 계획이 있나요?',
+                    '종전주택 양도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 양도 계획이 있나요?',
                   select: [
                     {
                       id: 'planSaleYes',
-                      name: '3년 이내 매도 계획',
+                      name: '3년 이내 양도 계획',
                       select: ['getInfoDone', 'getInfoConfirm'],
                       answer: '01'
                     },
                     {
                       id: 'planSaleNo',
-                      name: '매도 계획 없음',
+                      name: '양도 계획 없음',
                       select: ['getInfoDone', 'getInfoConfirm'],
                       answer: '02'
                     },
@@ -732,14 +744,14 @@ const OwnHouseSheet = props => {
                           questionId: additionalQuestion.detaildata?.nextQuestionId,
                           select: acquisitionTax[chatIndex].select.map(item => ({
                             ...item,
-                            name: item.id === 'additionalQuestionY' ? '3년 이내 매도 계획' : '매도 계획 없음',
-                            answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                            name: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0].answerContent : additionalQuestion?.detaildata?.answerSelectList[1].answerContent,
+                            answer: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0].answerValue : additionalQuestion?.detaildata?.answerSelectList[1].answerValue,
                             select: ['getInfoDone', 'getInfoConfirm'],
                           }))
                         };
                         setTimeout(() => {
                           dispatch(
-                            setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true})
+                            setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true })
                           );
                         }, 300)
                       }
@@ -778,7 +790,7 @@ const OwnHouseSheet = props => {
                             dispatch(
                               setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true })
                             );
-                          }, 300)  
+                          }, 300)
                         }
                       }
                     }

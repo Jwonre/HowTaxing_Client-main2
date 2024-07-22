@@ -103,6 +103,7 @@ const DirectRegister = props => {
 
 
   useLayoutEffect(() => {
+    console.log('props?.payload?.data', props);
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
@@ -115,6 +116,8 @@ const DirectRegister = props => {
                 payload: {
                   navigation: navigation,
                   index: props.route.params.index,
+                  data: props?.route?.params?.data,
+                  chungYackYn: props?.route?.params?.chungYackYn
                 },
               });
             } else if (props.route.params.prevSheet === 'own2') {
@@ -122,6 +125,8 @@ const DirectRegister = props => {
                 payload: {
                   navigation: navigation,
                   index: props.route.params.index,
+                  data: props?.route?.params?.data,
+                  chungYackYn: props?.route?.params?.chungYackYn
                 },
               });
             } else {
@@ -158,14 +163,18 @@ const DirectRegister = props => {
           SheetManager.show('own', {
             payload: {
               navigation: navigation,
-              index: props.route.params.index,
+              index: props?.route?.params?.index,
+              data: props?.route?.params?.data,
+              chungYackYn: props?.route?.params?.chungYackYn
             },
           });
         } else if (props.route.params.prevSheet === 'own2') {
           SheetManager.show('own2', {
             payload: {
               navigation: navigation,
-              index: props.route.params.index,
+              index: props?.route?.params?.index,
+              data: props?.route?.params?.data,
+              chungYackYn: props?.route?.params?.chungYackYn
             },
           });
         } else {
@@ -180,7 +189,7 @@ const DirectRegister = props => {
       return () => {
         BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
       };
-    }, [navigation, props.route.params])
+    }, [navigation, props?.route?.params])
   );
 
   return (
@@ -215,9 +224,11 @@ const DirectRegister = props => {
             const canProceed = await handleNetInfoChange(state);
             if (canProceed) {
               navigation.push('RegisterDirectHouse', {
-                prevChat: props.route.params?.prevChat,
-                prevSheet: props.route.params?.prevSheet ? props.route.params?.prevSheet : 'own2',
-                index: props.route.params?.index,
+                prevChat: props?.route?.params?.prevChat,
+                prevSheet: props?.route?.params?.prevSheet ? props.route.params?.prevSheet : 'own2',
+                index: props?.route?.params?.index,
+                data: props?.route?.params?.data,
+                chungYackYn: props?.route?.params?.chungYackYn
               });
             }
           }}>

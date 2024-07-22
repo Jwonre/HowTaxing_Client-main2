@@ -273,7 +273,7 @@ const OwnedFamilyHouse = () => {
             보내주세요.
           </Title>
           <SubTitle>
-            주택 매도와 매수를 동시에 거래하신다면,{'\n'}매도 예정되어 있는
+            주택 양도와 매수를 동시에 거래하신다면,{'\n'}양도 예정되어 있는
             주택은 반드시 체크 해제해주세요.
           </SubTitle>
         </IntroSection>

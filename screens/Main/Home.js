@@ -12,7 +12,6 @@ import getFontSize from '../../utils/getFontSize';
 import { SheetManager } from 'react-native-actions-sheet';
 import ChanelTalkIcon from '../../assets/icons/chaneltalk.svg';
 import AppInformationIcon from '../../assets/icons/appinformaion_circle.svg'
-import LogOutIcon from '../../assets/icons/logout_circle.svg';
 import { ChannelIO } from 'react-native-channel-plugin';
 import NetInfo from '@react-native-community/netinfo';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,7 +20,7 @@ import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
 import { setCert } from '../../redux/certSlice';
 import { setCurrentUser } from '../../redux/currentUserSlice';
-
+import Config from 'react-native-config'
 import { setResend } from '../../redux/resendSlice';
 import axios from 'axios';
 
@@ -126,7 +125,7 @@ const IconView = styled.View`
 const ChanelTalkIconFloatContainer = styled.View`
   position: absolute;
   bottom: 25px;
-  right: 25px;
+  right: 110px;
 
 `;
 
@@ -140,7 +139,7 @@ const LogOutIconFloatContainer = styled.View`
 const AppInformationIconFloatContainer = styled.View`
   position: absolute;
   bottom: 25px;
-  right: 195px;
+  right: 25px;
 
 `;
 
@@ -168,6 +167,7 @@ const AppInformationIconFloatButton = styled.TouchableOpacity.attrs(props => ({
   width: 55px;
   height: 55px;
   border-radius: 30px;
+  
 `;
 
 const ShadowContainer = styled(DropShadow)`
@@ -198,7 +198,7 @@ const Home = () => {
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const handleBackPress = () => {
     ////console.log('LogOut!');
-    goLogin();
+    goLogout();
     return true;
   }
 
@@ -238,8 +238,7 @@ const Home = () => {
       ChannelIO.shutdown();
     };
   }, []);
-
-  const handleWithDraw = (accessToken) => {
+  const handleWithLogout = (accessToken) => {
     // 요청 헤더
     const headers = {
       'Content-Type': 'application/json',
@@ -249,36 +248,25 @@ const Home = () => {
     // 요청 바디
 
     axios
-      .post('http://devapp.how-taxing.com/user/withdraw', { headers: headers })
+      .get(Config.APP_API_URL||'user/logout', { headers: headers })
       .then(response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg ? response.data.errMsg : '회원탈퇴에 문제가 발생했어요.',
+              message: response.data.errMsg ? response.data.errMsg : '로그아웃에 문제가 발생했어요.',
               description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
               buttontext: '확인하기',
             },
           });
           return;
-        } else {
-          SheetManager.show('info', {
-            payload: {
-              type: 'info',
-              message: '회원탈퇴에 성공했습니다.',
-              buttontext: '확인하기',
-            },
-          });
-          // 성공적인 응답 처리
-          // const { id } = response.data;
-          //    ////console.log("1111111", response);
         }
       })
       .catch(error => {
         // 오류 처리
         SheetManager.show('info', {
           payload: {
-            message: '회원탈퇴에 실패했습니다.',
+            message: '로그아웃에 실패했어요.',
             description: error?.message,
             type: 'error',
             buttontext: '확인하기',
@@ -287,6 +275,7 @@ const Home = () => {
         console.error(error);
       });
   };
+
   useFocusEffect(
     React.useCallback(() => {
       dispatch(setChatDataList([]));
@@ -312,11 +301,11 @@ const Home = () => {
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected) {
-         
+
         navigation.push('NetworkAlert', navigation);
         resolve(false);
       } else if (state.isConnected) {
-          
+
         if (!hasNavigatedBackRef.current) {
           setHasNavigatedBack(true);
         }
@@ -373,11 +362,11 @@ const Home = () => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-      SheetManager.show('Consulting', {payload: {navigation}});
+      SheetManager.show('Consulting', { payload: { navigation } });
     }
   };
 
-  const goLogin = () => {
+  const goLogout = () => {
     SheetManager.show('logout', {
       payload: {
         type: 'error',
@@ -390,12 +379,14 @@ const Home = () => {
   };
 
   const goAppInformation = () => {
-    SheetManager.show('InfoAppinformation');
+   // SheetManager.show('InfoAppinformation');
+   navigation.navigate('Information');
     return;
   };
 
   const handlePress = buttonIndex => {
     if (buttonIndex === 'YES') {
+      handleWithLogout(currentUser.accessToken);
       dispatch(setCurrentUser(null));
     }
   };
@@ -429,7 +420,7 @@ const Home = () => {
       <ShadowContainer>
         <Card width={width} onPress={goGainsTax}>
           <Tag>
-            <TagText>주택 매도</TagText>
+            <TagText>주택 양도</TagText>
           </Tag>
           <CardTitle>양도소득세 계산하기</CardTitle>
           <HashTagGroup>
@@ -476,16 +467,15 @@ const Home = () => {
             shadowRadius: 10,
           }}>
           <ChanelTalkIconFloatButton
-            onPress={() => {
-              ////console.log('currentUser',currentUser.accessToken);
-              //handleWithDraw(currentUser.accessToken);
-              //dispatch(setCurrentUser(null));
+            onPress={async () => {
+              //console.log('currentUser',currentUser.accessToken);
             }}>
             <ChanelTalkIcon />
           </ChanelTalkIconFloatButton>
         </DropShadow>
       </ChanelTalkIconFloatContainer>
-      <LogOutIconFloatContainer>
+
+      {/*<LogOutIconFloatContainer>
         <DropShadow
           style={{
             shadowColor: '#A3A3A3',
@@ -500,17 +490,17 @@ const Home = () => {
           <LogOutIconFloatButton
             onPress={() => {
               ////console.log('LogOut!');
-              goLogin();
+              goLogout();
             }}>
             <LogOutIcon style={style.LogOutIcon} />
           </LogOutIconFloatButton>
         </DropShadow>
       </LogOutIconFloatContainer>
-
+*/}
       <AppInformationIconFloatContainer>
         <DropShadow
           style={{
-            shadowColor: '#A3A3A3',
+            shadowColor: '#2F87FF',
             shadowOffset: {
               width: 0,
               height: 4,

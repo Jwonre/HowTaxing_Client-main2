@@ -157,7 +157,7 @@ const UpdateContractDateAlert = props => {
     if (canProceed) {
       var p = data;
       p.contractDate = selectedDate;
-      // ////console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
+     // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
 
       actionSheetRef.current?.hide();
@@ -210,10 +210,10 @@ const UpdateContractDateAlert = props => {
                 height: 400,
               }}>
               <Calendar
-                currentDate={data?.contractDate ? new Date(data?.contractDate).setHours(0,0,0,0) : data?.buyDate ? data?.buyDate > new Date() ? new Date().setHours(0,0,0,0) : new Date(data?.buyDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
-                maxDate={data?.buyDate ? new Date(data?.buyDate).setHours(0,0,0,0) : new Date('2150-12-31')}
+                currentDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0,0,0,0)) : data?.buyDate ? new Date(data?.buyDate) > new Date() ? new Date(new Date().setHours(0,0,0,0)) : new Date(new Date(data?.buyDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
+                maxDate={data?.buyDate ? new Date(new Date(data?.buyDate).setHours(0,0,0,0)) : new Date('2150-12-31')}
                 setSelectedDate={setSelectedDate}
-                selectedDate={data?.contractDate ? new Date(data?.contractDate).setHours(0,0,0,0) : data?.buyDate ? data?.buyDate > new Date() ? new Date().setHours(0,0,0,0) : new Date(data?.buyDate).setHours(0,0,0,0) : new Date().setHours(0,0,0,0)}
+                selectedDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0,0,0,0)) : data?.buyDate ? new Date(data?.buyDate) > new Date() ? new Date(new Date().setHours(0,0,0,0)) : new Date(new Date(data?.buyDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
               />
             </View>
           </ModalInputSection>

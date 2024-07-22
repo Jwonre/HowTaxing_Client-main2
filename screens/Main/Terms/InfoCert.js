@@ -1,20 +1,19 @@
 // Note: 전자증명서 서비스 이용약관
 
 import {
+  View,
+  Text,
   TouchableOpacity,
   useWindowDimensions,
   ScrollView,
-  BackHandler,
+  BackHandler
 } from 'react-native';
-import React, { useLayoutEffect, useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useLayoutEffect, useState, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
 import getFontSize from '../../../utils/getFontSize';
-import DropShadow from 'react-native-drop-shadow';
 import { SheetManager } from 'react-native-actions-sheet';
-import { useDispatch, useSelector } from 'react-redux';
-import { setCert } from '../../../redux/certSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -40,31 +39,6 @@ const SubTitle = styled.Text`
   letter-spacing: -0.5px;
 `;
 
-const ButtonSection = styled.View`
-  position: absolute;
-  bottom: 20px;
-  width: 100%;
-`;
-
-const Button = styled.TouchableOpacity.attrs(props => ({
-  activeOpacity: 0.6,
-}))`
-  width: ${props => props.width - 40}px;
-  height: 60px;
-  border-radius: 30px;
-  background-color: ${props => (props.active ? '#2F87FF' : '#e5e5e5')};
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-  align-self: center;
-`;
-
-const ButtonText = styled.Text`
-  font-size: 18px;
-  font-family: Pretendard-Bold;
-  color: ${props => (props.active ? '#fff' : '#a3a5a8')};
-  line-height: 20px;
-`;
 
 const ContentText = styled.Text`
   font-size: 13px;
@@ -74,35 +48,24 @@ const ContentText = styled.Text`
   margin-top: 20px;
 `;
 
-const Cert3 = props => {
-  const navigation = props.navigation;
-  const dispatch = useDispatch();
-  const { width } = useWindowDimensions();
-  const [activeButton, setActiveButton] = useState(false);
-  const {certType, agreeCert, agreePrivacy, agreeLocation, agreeAge, agreeMarketing, agreeCopyright, agreeGov24 } = useSelector(
-    state => state.cert.value,
-  );
+const InfoCert = props => {
+  const navigation = useNavigation();
+
 
   const handleBackPress = () => {
     navigation.goBack();
-    setTimeout(() => {
-      SheetManager.show('cert2', {
-        payload: {
-          index: props.route.params.index,
-          navigation: navigation,
-        },
-      });
-    }, 300);
-    return true;
+    // 이전 화면으로 돌아가는 기본 동작 수행
+    return true; // 기본 동작을 중단
   };
 
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
-    };
-  }, [handleBackPress]);
-
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      };
+    }, [handleBackPress])
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -112,14 +75,6 @@ const Cert3 = props => {
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
-            setTimeout(() => {
-              SheetManager.show('cert2', {
-                payload: {
-                  index: props.route.params.index,
-                  navigation: navigation,
-                },
-              });
-            }, 300);
           }}>
           <CloseIcon />
         </TouchableOpacity>
@@ -143,20 +98,7 @@ const Cert3 = props => {
     <Container>
       <ScrollView
         showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
-        onScroll={({ nativeEvent }) => {
-          // 하단 스크롤 시 버튼 활성화
-
-          if (
-            nativeEvent.contentOffset.y +
-            nativeEvent.layoutMeasurement.height >=
-            nativeEvent.contentSize.height - 1
-          ) {
-            setActiveButton(true);
-          } else {
-            setActiveButton(false);
-          }
-        }}>
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}>
         <Title>(필수) 전자증명서 서비스 이용약관</Title>
         <SubTitle>[필수] 전자증명서 서비스 이용약관 동의서</SubTitle>
         <ContentText>
@@ -420,53 +362,8 @@ const Cert3 = props => {
 `}
         </ContentText>
       </ScrollView>
-      <ButtonSection>
-        <DropShadow
-          style={{
-            shadowColor: '#000',
-            shadowOffset: {
-              width: 0,
-              height: 4,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 2,
-          }}>
-          <Button
-            width={width}
-            active={activeButton || agreeCert}
-            disabled={!(activeButton || agreeCert)}
-            onPress={() => {
-              // 동의하기 버튼 클릭 시 redux에 저장
-              dispatch(
-                setCert({
-                  certType,
-                  agreePrivacy,
-                  agreeCopyright,
-                  agreeGov24,
-                  agreeCert: true,
-                }),
-              );
-
-              // 채팅방으로 이동
-              navigation.goBack();
-             // ////console.log('props.route.params.certType', props.route.params.cert);
-              setTimeout(() => {
-                SheetManager.show('cert2', {
-                  payload: {
-                    index: props.route.params.index,
-                    navigation: props.navigation,
-                  },
-                });
-              }, 300);
-
-
-            }}>
-            <ButtonText active={activeButton || agreeCert}>동의 후 인증하기</ButtonText>
-          </Button>
-        </DropShadow>
-      </ButtonSection>
     </Container>
   );
 };
 
-export default Cert3;
+export default InfoCert;

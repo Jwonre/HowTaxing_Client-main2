@@ -24,7 +24,7 @@ import { gainTax } from '../../data/chatData';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
 import { LogBox } from 'react-native';
 import axios from 'axios';
-
+import Config from 'react-native-config'
 
 dayjs.locale('ko');
 
@@ -226,7 +226,7 @@ const GainSheet = props => {
     [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
 */
     try {
-      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const url = Config.APP_API_URL||`question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -408,9 +408,9 @@ const GainSheet = props => {
               }}>
               <Calendar
                 setSelectedDate={setSelectedDate}
-                minDate={new Date(houseInfo?.buyDate ? houseInfo?.buyDate : '').setHours(0,0,0,0)}
-                currentDate={new Date((new Date(houseInfo?.buyDate) <= currentDate) ? currentDate : houseInfo?.buyDate).setHours(0,0,0,0)}
-                selectedDate={new Date((new Date(houseInfo?.buyDate) <= currentDate) ? currentDate : houseInfo?.buyDate).setHours(0,0,0,0)}
+                minDate={new Date(new Date(houseInfo?.buyDate ? houseInfo?.buyDate : '').setHours(0,0,0,0))}
+                currentDate={new Date(new Date((new Date(houseInfo?.buyDate) <= currentDate) ? currentDate : houseInfo?.buyDate).setHours(0,0,0,0))}
+                selectedDate={new Date(new Date((new Date(houseInfo?.buyDate) <= currentDate) ? currentDate : houseInfo?.buyDate).setHours(0,0,0,0))}
               />
             </View>
           </ModalInputSection>
@@ -493,10 +493,10 @@ const GainSheet = props => {
               }}>
 
               {currentPageIndex === 1 && (<Calendar
-                minDate={new Date(houseInfo?.sellContractDate).setHours(0,0,0,0)}
-                currentDate={new Date(houseInfo?.sellContractDate ? houseInfo?.sellContractDate : currentDate).setHours(0,0,0,0)}
+                minDate={new Date(new Date(houseInfo?.sellContractDate).setHours(0,0,0,0))}
+                currentDate={new Date(new Date(houseInfo?.sellContractDate ? houseInfo?.sellContractDate : currentDate).setHours(0,0,0,0))}
                 setSelectedDate={setSelectedDate2}
-                selectedDate={new Date(houseInfo?.sellContractDate ? houseInfo?.sellContractDate : currentDate).setHours(0,0,0,0)}
+                selectedDate={new Date(new Date(houseInfo?.sellContractDate ? houseInfo?.sellContractDate : currentDate).setHours(0,0,0,0))}
               />)}
             </View>
           </ModalInputSection>
@@ -678,6 +678,9 @@ const GainSheet = props => {
                   };
                   const additionalQuestion = await getadditionalQuestion('', '', houseInfo?.houseId, houseInfo?.sellDate, sellAmount);
                  //console.log('additionalQuestion', additionalQuestion);
+                 //console.log('additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue', additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue);
+                 //console.log('additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent', additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent);
+                 
                   let chat7;
                   let chat11;
                   const chat9 = gainTax.find(el => el.id === 'ExpenseInquiry');
@@ -693,8 +696,8 @@ const GainSheet = props => {
                             questionId: additionalQuestion.detaildata?.nextQuestionId,
                             select: gainTax[chatIndex].select.map(item => ({
                               ...item,
-                              name: item.id === 'additionalQuestionY' ? '1년 이상 거주 계획' : '1년 이내 거주 계획',
-                              answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                              name: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent : additionalQuestion?.detaildata?.answerSelectList[1]?.answerContent,
+                              answer: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue : additionalQuestion?.detaildata?.answerSelectList[1]?.answerValue,
                             }))
                           };
 
@@ -708,6 +711,9 @@ const GainSheet = props => {
                           ])
                         );
                       } else if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0004') {
+
+
+                        
                         let chatIndex = gainTax.findIndex(el => el.id === 'additionalQuestion2');
                         if (chatIndex !== -1) {
                           chat7 = {
@@ -719,7 +725,7 @@ const GainSheet = props => {
                         }
 
                         const additionalQuestion2 = await getadditionalQuestion(additionalQuestion.detaildata?.nextQuestionId, '' ? additionalQuestion.detaildata?.selectSelectList.answerValue : '02', houseInfo?.houseId, houseInfo?.sellDate, sellAmount);
-                        //console.log('additionalQuestion2', additionalQuestion2);
+                        console.log('additionalQuestion2', additionalQuestion2);
                         if (additionalQuestion2.returndata) {
                           if (additionalQuestion2.detaildata?.hasNextQuestion === true) {
                             if (additionalQuestion2.detaildata?.nextQuestionId === 'Q_0005') {
@@ -775,8 +781,8 @@ const GainSheet = props => {
                             questionId: additionalQuestion.detaildata?.nextQuestionId,
                             select: gainTax[chatIndex].select.map(item => ({
                               ...item,
-                              name: item.id === 'additionalQuestionY' ? '1년 이상 거주 계획' : '1년 이내 거주 계획',
-                              answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                              name: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent : additionalQuestion?.detaildata?.answerSelectList[1]?.answerContent,
+                              answer: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue : additionalQuestion?.detaildata?.answerSelectList[1]?.answerValue,
                               //select: ['additionalQuestion'],
                             }))
                           };
@@ -848,4 +854,4 @@ const GainSheet = props => {
   );
 };
 
-export default React.memo(GainSheet);
+export default GainSheet;

@@ -21,7 +21,7 @@ import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { gainTax } from '../../data/chatData';
 import dayjs from 'dayjs';
 import axios from 'axios';
-
+import Config from 'react-native-config'
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -141,7 +141,7 @@ const directlivePeriod = props => {
     [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
 */
     try {
-      const url = `http://devapp.how-taxing.com/question/additionalQuestion`;
+      const url = Config.APP_API_URL||`question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -276,8 +276,8 @@ const directlivePeriod = props => {
               questionId: additionalQuestion.detaildata?.nextQuestionId,
               select: gainTax[chatIndex].select.map(item => ({
                 ...item,
-                name: item.id === 'additionalQuestionY' ? '예' : '아니요',
-                answer: item.id === 'additionalQuestionY' ? '01' : '02',
+                name: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent : additionalQuestion?.detaildata?.answerSelectList[1]?.answerContent,
+                answer: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue : additionalQuestion?.detaildata?.answerSelectList[1]?.answerValue,
                 select: ['ExpenseInquiry', 'ExpenseAnswer'],
               }))
             };

@@ -11,8 +11,7 @@ import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { HOUSE_TYPE } from '../../constants/colors';
-import { setHouseInfo } from '../../redux/houseInfoSlice';
-
+import Config from 'react-native-config'
 import numberToKorean from '../../utils/numToKorean';
 
 const SheetContainer = styled.View`
@@ -194,7 +193,7 @@ const ConfirmSheet = props => {
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-  console.log('[ConfirmSheet] houseInfo', houseInfo);
+  ///console.log('[ConfirmSheet] houseInfo', houseInfo);
   // console.log('houseInfo?.additionalAnswerList.find(item => item[Q_0007])', houseInfo?.additionalAnswerList.find(item => item['Q_0007']));
   /* const calculateTax = () => {
      const data = {
@@ -208,7 +207,7 @@ const ConfirmSheet = props => {
      };
  
      axios
-       .post('http://devapp.how-taxing.com/calculate/buyTax', data)
+       .post(Config.APP_API_URL||'calculate/buyTax', data)
        .then(response => {
          // 성공적인 응답 처리
          const data2 = response.data.data;
@@ -340,11 +339,11 @@ const ConfirmSheet = props => {
           </InfoContentItem>
 
           <InfoContentItem>
-            <InfoContentLabel>종전주택 매도계획</InfoContentLabel>
+            <InfoContentLabel>종전주택 양도계획</InfoContentLabel>
             <InfoContentText>
               {
-                houseInfo?.additionalAnswerList?.find(item => item['Q_0007'])?.['Q_0007'] === '01' ? '3년 이내 매도 계획' :
-                  houseInfo?.additionalAnswerList?.find(item => item['Q_0007'])?.['Q_0007'] === '02' ? '매도 계획 없음' : '매도 계획 없음'
+                houseInfo?.additionalAnswerList?.find(item => item['Q_0007'])?.['Q_0007'] === '01' ? '3년 이내 양도 계획' :
+                  houseInfo?.additionalAnswerList?.find(item => item['Q_0007'])?.['Q_0007'] === '02' ? '양도 계획 없음' : '양도 계획 없음'
               }
             </InfoContentText>
           </InfoContentItem>

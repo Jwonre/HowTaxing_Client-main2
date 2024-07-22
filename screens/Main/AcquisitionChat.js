@@ -25,6 +25,10 @@ import { SheetManager } from 'react-native-actions-sheet';
 import axios from 'axios';
 import numberToKorean from '../../utils/numToKorean';
 import NetInfo from "@react-native-community/netinfo";
+import dayjs from 'dayjs';
+import Clipboard from '@react-native-clipboard/clipboard';
+import Toast from 'react-native-root-toast';
+import Config from 'react-native-config'
 
 // Icons
 import PencilIcon from '../../assets/icons/pencil.svg';
@@ -42,6 +46,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo, clearHouseInfo } from '../../redux/houseInfoSlice';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
+import GainsTax from './GainsTax';
 
 
 const Container = styled.View`
@@ -331,6 +336,19 @@ const HouseInfoListValue = styled.Text`
   text-align: right;
 `;
 
+const ButtonSection = styled.View`
+  width: 100%;
+  height: auto;
+  background-color: #fff;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px;
+  border-top-width: 1px;
+  border-top-color: #e8eaed;
+`;
+
+
 const AcquisitionChat = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -345,6 +363,8 @@ const AcquisitionChat = () => {
   const [hasShownGoodbye, setHasShownGoodbye] = useState(false);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
+  const [Pdata, setPData] = useState({});
+  const [currentItem, setCurrentItem] = useState(null);
 
   const onQuestionMarkPress = (type) => {
     //.log('ques');
@@ -358,7 +378,7 @@ const AcquisitionChat = () => {
   };
   const getOwnlist = async () => {
     var acquisition = '01';
-    const url = `http://devapp.how-taxing.com/house/list?calcType=${acquisition}`
+    const url = Config.APP_API_URL||`house/list?calcType=${acquisition}`
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -423,7 +443,68 @@ const AcquisitionChat = () => {
     });
   };
 
+  const getTaxCardInfo = async () => {
+    const params = {
+      houseType: houseInfo.houseType === undefined ? '' : houseInfo.houseType,
+      houseName: houseInfo.houseName === undefined ? '' : houseInfo.houseName,
+      detailAdr: houseInfo.detailAdr === undefined ? '' : houseInfo.detailAdr,
+      contractDate: houseInfo.contractDate === undefined ? '' : dayjs(houseInfo.contractDate).format('YYYY-MM-DD'),
+      buyDate: houseInfo.buyDate === undefined ? '' : dayjs(houseInfo.buyDate).format('YYYY-MM-DD'),
+      buyPrice: houseInfo.acAmount === undefined ? 0 : houseInfo.acAmount,
+      pubLandPrice: houseInfo.pubLandPrice === undefined ? 0 : houseInfo.pubLandPrice,
+      isPubLandPriceOver100Mil: houseInfo.isPubLandPriceOver100Mil === undefined ? '' : houseInfo.isPubLandPriceOver100Mil,
+      roadAddr: houseInfo.roadAddr === undefined ? '' : houseInfo.roadAddr,
+      area: houseInfo.area === undefined ? 0 : houseInfo.area,
+      isAreaOver85: houseInfo.isAreaOver85 === undefined ? false : houseInfo.isAreaOver85,
+      isDestruction: houseInfo.isDestruction === undefined ? false : houseInfo.isDestruction,
+      ownerCnt: houseInfo.ownerCnt === undefined ? 0 : houseInfo.ownerCnt,
+      userProportion: houseInfo.userProportion === undefined ? 0 : houseInfo.userProportion,
+      isMoveInRight: houseInfo.isMoveInRight === undefined ? false : houseInfo.isMoveInRight,
+      jibunAddr: houseInfo.jibunAddr === undefined ? '' : houseInfo.jibunAddr,
+      //hasSellPlan: houseInfo.planSale === undefined ? '' : houseInfo.planSale,
+      isOwnHouseCntRegist: houseInfo.isOwnHouseCntRegist === undefined ? false : houseInfo.isOwnHouseCntRegist,
+      ownHouseCnt: houseInfo.ownHouseCnt === undefined ? 0 : houseInfo.ownHouseCnt,
+      additionalAnswerList: houseInfo.additionalAnswerList === undefined ? [] : houseInfo.additionalAnswerList
+    };
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`,
+    };
 
+    try {
+      const response = await axios.post(Config.APP_API_URL||'calculation/buyResult', params, { headers });
+      //console.log('taxCard params', params)
+      //console.log('response.data', response.data);
+      if (response.data.errYn === 'Y') {
+        SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: response.data.errMsg ? response.data.errMsg : '취득세 계산 중 오류가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
+            closeSheet: true,
+            navigation: props?.navigation,
+            buttontext: '확인하기',
+          },
+        });
+      } else {
+        setPData(response.data.data);
+        // dispatch(setHouseInfo({ ...houseInfo, ...response.data.data.list[0] }));
+      }
+    } catch (error) {
+      SheetManager.show('info', {
+        payload: {
+          type: 'error',
+          message: '취득세 계산 중 오류가 발생했습니다.',
+          description: '취득세 계산 중 오류가 발생했습니다. 원하시면 주택 전문 세무사와 상담을 연결시켜드릴게요. 아래 상담하기 버튼을 눌러보세요.',
+          id: 'calculation',
+          closeSheet: true,
+          navigation: props?.navigation,
+          buttontext: '확인하기',
+        },
+      });
+      //console.error(error.stack);
+    }
+  };
 
   const handleBackPress = () => {
     SheetManager.show('info', {
@@ -479,6 +560,13 @@ const AcquisitionChat = () => {
     dispatch(setChatDataList([helloChatItem]));
 
   }, []);
+
+
+  useEffect(() => {
+    if (currentItem?.id === 'cta') {
+      getTaxCardInfo();
+    }
+  }, [currentItem]);
 
   useEffect(() => {
     if (isEditing) {
@@ -562,8 +650,8 @@ const AcquisitionChat = () => {
                 const state = await NetInfo.fetch();
                 const canProceed = await handleNetInfoChange(state);
                 if (canProceed) {
-                  if(houseInfo?.additionalAnswerList){
-                    if(houseInfo?.additionalAnswerList !== null){
+                  if (houseInfo?.additionalAnswerList) {
+                    if (houseInfo?.additionalAnswerList !== null) {
                       const newAdditionalAnswerList = houseInfo?.additionalAnswerList.map(item => {
                         let key = Object.keys(item)[0];
                         let value = item[key];
@@ -800,6 +888,7 @@ const AcquisitionChat = () => {
           payload: {
             questionId: 'goodbye',
             navigation: navigation,
+            prevSheet: 'AcquisitionChat'
           },
         });
       }, 600);
@@ -808,6 +897,7 @@ const AcquisitionChat = () => {
 
     // CTA
     if (item?.id === 'cta') {
+      setCurrentItem(item);
       return (
         <View
           style={{
@@ -815,607 +905,661 @@ const AcquisitionChat = () => {
           }}>
           <CTACard />
           <HouseInfo item={houseInfo} navigation={navigation} ChatType='AcquisitionChat' />
-          <TaxCard navigation={navigation} />
+          <TaxCard navigation={navigation} Pdata={Pdata} />
           <CalculationWarningCard />
-          <TaxInfoCard />
-          <DropShadow
-            style={{
-              shadowColor: '#2F87FF',
-              shadowOffset: {
-                width: 0,
-                height: 4,
-              },
-              shadowOpacity: 0.25,
-              shadowRadius: 4,
-              alignSelf: 'center',
-            }}>
-            <ModalButton
+          <TaxInfoCard Pdata={Pdata} />
+          <ButtonSection>
+            <DropShadow
+              style={{
+                shadowColor: '#fff',
+              }}>
+              <ModalButton
+                disabled={index < chatDataList.length - 1}
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    if (Pdata.calculationResultTextData !== null) {
+                      Clipboard.setString(Pdata.calculationResultTextData);
+                      let toast = Toast.show('복사되었습니다', {
+                        duration: Toast.durations.LONG,
+                        position: 100,
+                        shadow: true,
+                        animation: true,
+                        hideOnPress: true,
+                        delay: 0,
+                      });
+                      setTimeout(function () {
+                        Toast.hide(toast);
+                      }, 3000);
+                    }
+                  }
+                }}
+                style={{
+                  width: width - 240,
+                  alignSelf: 'center',
+                  marginTop: 20,
+                  backgroundColor: '#fff',
+                  borderColor: '#E8EAED',
+                  borderWidth: 1, // borderWidth를 추가했습니다
+                }}>
+                <ModalButtonText style={{
+                  color: '#717274',
+                }}>복사하기</ModalButtonText>
+              </ModalButton>
+            </DropShadow>
+            <DropShadow>
+              <ModalButton
+                disabled={index < chatDataList.length - 1}
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    const googByeItem = acquisitionTax.find(
+                      el => el.id === 'goodbye',
+                    );
+                    dispatch(setChatDataList([googByeItem]));
+                    dispatch(clearHouseInfo());
+                  }
+                }}
+                style={{
+                  width: width - 240,
+                  alignSelf: 'center',
+                  marginTop: 20,
+                }}>
+                <ModalButtonText>확인하기</ModalButtonText>
+              </ModalButton>
+            </DropShadow>
+        </ButtonSection>
+        </View >
+      );
+    } else {
+  return (
+    <>
+      <ChatItem
+        animation="fadeInUp"
+        isLast={chatDataList.length - 1 === index}>
+        <Avatar
+          source={{
+            uri: 'https://dnvefa72aowie.cloudfront.net/business-profile/bizPlatform/profile/40388181/1674021254765/MWJlMWNjOGNiMDMzMzE0ZTUwM2ZiZTllZjJkOTZiMGViYTgzNDQxNTE0YWY4ZDU0ZWI3MWQ1N2MzMWU5ZTdmYS5qcGc=.jpeg?q=95&s=1440x1440&t=inside',
+          }}
+        />
+        <ChatBubble>
+          <ChatBubbleText>{item?.message}</ChatBubbleText>
+          {item?.select && (
+            <SelectButtonGroup>
+              {item?.select.map((item2, index2) => (
+                <SelectButton
+                  disabled={index < chatDataList.length - 1}
+                  key={index2}
+                  onPress={async () => {
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      const myChatItem = {
+                        id: item?.id + item2.id,
+                        type: 'my',
+                        message: item2.name,
+                      };
+
+                      const chatList = [];
+                      if (item2?.select) {
+                        for (const item3 of item2.select) {
+                          if (item?.questionId === 'Q_0007') {
+                            if (item2?.answer) {
+                              let tempadditionalAnswerList = houseInfo?.additionalAnswerList || [];
+                              //console.log('tempadditionalAnswerList1.Q_0001', tempadditionalAnswerList.some(item => 'Q_0001' in item));
+                              let foundIndex = tempadditionalAnswerList.findIndex(item => 'Q_0007' in item);
+                              if (foundIndex !== -1) {
+                                //console.log('tempadditionalAnswerList[foundIndex][Q_0001]', tempadditionalAnswerList[foundIndex]['Q_0001']);
+                                //console.log('item2.answer', item2.answer);
+                                if (tempadditionalAnswerList[foundIndex]['Q_0007'] !== item2.answer) {
+                                  // 불변성을 유지하면서 Q_0006 값을 변경
+                                  tempadditionalAnswerList = [
+                                    ...tempadditionalAnswerList.slice(0, foundIndex),
+                                    { ...tempadditionalAnswerList[foundIndex], 'Q_0007': item2.answer },
+                                    ...tempadditionalAnswerList.slice(foundIndex + 1)
+                                  ];
+                                }
+                                //console.log('tempadditionalAnswerList[foundIndex][Q_0001]', tempadditionalAnswerList[foundIndex]['Q_0001']);
+                                dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
+                              } else {
+                                dispatch(
+                                  setHouseInfo({
+                                    ...houseInfo,
+                                    additionalAnswerList: [
+                                      ...(houseInfo.additionalAnswerList || []),
+                                      { "Q_0007": item2.answer }
+                                    ]
+                                  })
+                                );
+                              }
+                            }
+
+                          }
+                          const foundItem = acquisitionTax.find(el => el.id === item3);
+                          if (foundItem) {
+                            chatList.push(foundItem);
+                          }
+                        }
+                      }
+
+                      if (
+                        item.id === 'contractDateSystem' ||
+                        item.id === 'acquisitionDateSystem' ||
+                        item.id === 'aquiAmountSystem' ||
+                        item.id === 'apartmentAddressSystem'
+                      ) {
+                        //////console.log(item.id);
+                      } else {
+                        // ////console.log(item.id);
+                        dispatch(
+                          setChatDataList([
+                            ...chatDataList,
+                            myChatItem,
+                            ...chatList,
+                          ]),
+                        );
+                      }
+                      /*
+                                              if (item2.id === 'OwnHouseCountresult') {
+                                                const OwnHouseCountresultIndex = chatDataList.findIndex(
+                                                  el => el.id === 'getInfoDone',
+                                                );
+                                                const newChatDataList = chatDataList.slice(
+                                                  0,
+                                                  OwnHouseCountresultIndex + 1,
+                                                );
+                      
+                                                dispatch(setChatDataList(newChatDataList));
+                                              }
+                      */
+                      if (item.id === 'type') {
+                        //////console.log('item2?.name', item2?.name);
+                        if ((item2?.name === '아파트')) {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              houseType: '1'
+                            }));
+                        } else if ((item2?.name === '단독주택 · 다가구')) {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              houseType: '4'
+                            }));
+                        } else if ((item2?.name === '연립 · 다세대')) {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              houseType: '2'
+                            }));
+                        } else {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              houseType: '3'
+                            }));
+                        }
+                        //  ////console.log('houseType', houseInfo)
+                      }
+
+
+                      if (item.id === 'ticket' && item.type === 'system') {
+                        dispatch(
+                          setHouseInfo({
+                            ...houseInfo,
+                            isDestruction:
+                              item2.name === '네'
+                                ? true
+                                : false,
+                            isMoveInRight: true,
+                          }),
+                        );
+                      }
+
+                      if (item.id === 'certType' && item.type === 'system') {
+                        if (item2.id === 'Nosubscriptionaccount') {
+                          getOwnlist();
+                        };
+                      }
+
+                      if (item.id === 'pubLandPrice' && item.type === 'system') {
+                        if (item2.id === 'yes') {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              isPubLandPriceOver100Mil: true
+                            }),);
+                        } else {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              isPubLandPriceOver100Mil: false
+                            }),);
+                        }
+                      }
+
+
+                      if (item.id === 'area' && item.type === 'system') {
+                        if (item2.id === 'yes') {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              isAreaOver85: true
+                            }),);
+                        } else {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              isAreaOver85: false
+                            }),);
+                        }
+                      }
+
+
+                      if (item.id === 'apartment' && item.type === 'system') {
+                        if (item2.id === 'yes') {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              houseType: '1'
+                            }),);
+                        } else {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              houseType: '1'
+                            }),);
+                        }
+                      }
+
+                      if (item.id === 'palnSale') {
+                        if (houseInfo?.isDestruction === undefined && houseInfo?.isMoveInRight === undefined) {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              isDestruction: false,
+                              isMoveInRight: false,
+                            }),
+
+                          );
+                        }
+                      }
+
+
+                      if (item2.id === 'only' && item2.type === 'my') {
+                        dispatch(
+                          setHouseInfo({
+                            ...houseInfo,
+                            ownerCnt: 1,
+                            userProportion: 100,
+                          }),
+                        );
+                      }
+
+                      if (item.id === 'moreHouse' && item2.id === 'no') {
+                        if (houseInfo?.isDestruction === undefined && houseInfo?.isMoveInRight === undefined) {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              //   hasSellPlan: false,
+                              isDestruction: false,
+                              isMoveInRight: false,
+                              isOwnHouseCntRegist: true,
+                              ownHouseCnt: 0,
+                            }),
+                          );
+                        } else {
+                          dispatch(
+                            setHouseInfo({
+                              ...houseInfo,
+                              //   hasSellPlan: false,
+                              isOwnHouseCntRegist: true,
+                              ownHouseCnt: 0,
+                            }),
+                          );
+                        }
+
+                      }
+
+                      if (item2?.openSheet) {
+
+                        // ////console.log('openSheet');
+                        if (item2?.id === 'ok' && item2?.chungYackYn === true) {
+                          SheetManager.show(item2.openSheet, {
+                            payload: {
+                              navigation: navigation,
+                              data: item2.id,
+                              data2: item.id,
+                              index,
+                              currentPageIndex: item2?.currentPageIndex,
+                              chungYackYn: item2?.chungYackYn
+                            },
+                          });
+                        } else if (item2?.id === 'ok' && item2?.chungYackYn === false) {
+                          SheetManager.show(item2.openSheet, {
+                            payload: {
+                              navigation: navigation,
+                              data: item2.id,
+                              data2: item.id,
+                              index,
+                              currentPageIndex: item2?.currentPageIndex,
+                              chungYackYn: item2?.chungYackYn
+                            },
+                          });
+                        } else {
+                          SheetManager.show(item2.openSheet, {
+                            payload: {
+                              navigation: navigation,
+                              data: item2.id,
+                              data2: item.id,
+                              index,
+                              currentPageIndex: item2?.currentPageIndex,
+                            },
+                          });
+                        }
+                      }
+
+                      // 양도 계획 여부
+                      if (item2.id === 'planSaleYes') {
+                        dispatch(
+                          setHouseInfo({
+                            ...houseInfo,
+                            planSale: true,
+                          }),
+                        );
+                      } else if (item2.id === 'planSaleNo') {
+                        dispatch(
+                          setHouseInfo({
+                            ...houseInfo,
+                            planSale: false,
+                          }),
+                        );
+                      }
+                    }
+                  }}>
+                  {item2?.icon ? item2.icon : null}
+                  <SelectButtonText>{item2?.name}</SelectButtonText>
+                </SelectButton>
+              ))}
+            </SelectButtonGroup>
+          )}
+          {item?.id === 'getInfoConfirm' && (
+            <SelectButton
               disabled={index < chatDataList.length - 1}
               onPress={async () => {
                 const state = await NetInfo.fetch();
                 const canProceed = await handleNetInfoChange(state);
                 if (canProceed) {
-                  const googByeItem = acquisitionTax.find(
-                    el => el.id === 'goodbye',
-                  );
-                  dispatch(setChatDataList([googByeItem]));
-                  dispatch(clearHouseInfo());
+                  SheetManager.show('confirm', {
+                    payload: {
+                      questionId: item?.id,
+                      navigation: navigation,
+                      index,
+                    },
+                  });
                 }
               }}
               style={{
-                width: width - 40,
-                alignSelf: 'center',
                 marginTop: 20,
               }}>
-              <ModalButtonText>확인하기</ModalButtonText>
-            </ModalButton>
-          </DropShadow>
-        </View>
-      );
-    } else {
-      return (
-        <>
-          <ChatItem
-            animation="fadeInUp"
-            isLast={chatDataList.length - 1 === index}>
-            <Avatar
-              source={{
-                uri: 'https://dnvefa72aowie.cloudfront.net/business-profile/bizPlatform/profile/40388181/1674021254765/MWJlMWNjOGNiMDMzMzE0ZTUwM2ZiZTllZjJkOTZiMGViYTgzNDQxNTE0YWY4ZDU0ZWI3MWQ1N2MzMWU5ZTdmYS5qcGc=.jpeg?q=95&s=1440x1440&t=inside',
-              }}
-            />
-            <ChatBubble>
-              <ChatBubbleText>{item?.message}</ChatBubbleText>
-              {item?.select && (
-                <SelectButtonGroup>
-                  {item?.select.map((item2, index2) => (
-                    <SelectButton
-                      disabled={index < chatDataList.length - 1}
-                      key={index2}
-                      onPress={async () => {
-                        const state = await NetInfo.fetch();
-                        const canProceed = await handleNetInfoChange(state);
-                        if (canProceed) {
-                          const myChatItem = {
-                            id: item?.id + item2.id,
-                            type: 'my',
-                            message: item2.name,
-                          };
-
-                          const chatList = [];
-                          if (item2?.select) {
-                            for (const item3 of item2.select) {
-                              if (item?.questionId === 'Q_0007') {
-                                if (item2?.answer) {
-                                  let tempadditionalAnswerList = houseInfo?.additionalAnswerList || [];
-                                  //console.log('tempadditionalAnswerList1.Q_0001', tempadditionalAnswerList.some(item => 'Q_0001' in item));
-                                  let foundIndex = tempadditionalAnswerList.findIndex(item => 'Q_0007' in item);
-                                  if (foundIndex !== -1) {
-                                    //console.log('tempadditionalAnswerList[foundIndex][Q_0001]', tempadditionalAnswerList[foundIndex]['Q_0001']);
-                                    //console.log('item2.answer', item2.answer);
-                                    if (tempadditionalAnswerList[foundIndex]['Q_0007'] !== item2.answer) {
-                                      // 불변성을 유지하면서 Q_0006 값을 변경
-                                      tempadditionalAnswerList = [
-                                        ...tempadditionalAnswerList.slice(0, foundIndex),
-                                        { ...tempadditionalAnswerList[foundIndex], 'Q_0007': item2.answer },
-                                        ...tempadditionalAnswerList.slice(foundIndex + 1)
-                                      ];
-                                    }
-                                    //console.log('tempadditionalAnswerList[foundIndex][Q_0001]', tempadditionalAnswerList[foundIndex]['Q_0001']);
-                                    dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
-                                  } else {
-                                    dispatch(
-                                      setHouseInfo({
-                                        ...houseInfo,
-                                        additionalAnswerList: [
-                                          ...(houseInfo.additionalAnswerList || []),
-                                          { "Q_0007": item2.answer }
-                                        ]
-                                      })
-                                    );
-                                  }
-                                }
-
-                              }
-                              const foundItem = acquisitionTax.find(el => el.id === item3);
-                              if (foundItem) {
-                                chatList.push(foundItem);
-                              }
-                            }
-                          }
-
-                          if (
-                            item.id === 'contractDateSystem' ||
-                            item.id === 'acquisitionDateSystem' ||
-                            item.id === 'aquiAmountSystem' ||
-                            item.id === 'apartmentAddressSystem'
-                          ) {
-                            //////console.log(item.id);
-                          } else {
-                            // ////console.log(item.id);
-                            dispatch(
-                              setChatDataList([
-                                ...chatDataList,
-                                myChatItem,
-                                ...chatList,
-                              ]),
-                            );
-                          }
-                          /*
-                                                  if (item2.id === 'OwnHouseCountresult') {
-                                                    const OwnHouseCountresultIndex = chatDataList.findIndex(
-                                                      el => el.id === 'getInfoDone',
-                                                    );
-                                                    const newChatDataList = chatDataList.slice(
-                                                      0,
-                                                      OwnHouseCountresultIndex + 1,
-                                                    );
-                          
-                                                    dispatch(setChatDataList(newChatDataList));
-                                                  }
-                          */
-                          if (item.id === 'type') {
-                            //////console.log('item2?.name', item2?.name);
-                            if ((item2?.name === '아파트')) {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  houseType: '1'
-                                }));
-                            } else if ((item2?.name === '단독주택 · 다가구')) {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  houseType: '4'
-                                }));
-                            } else if ((item2?.name === '연립 · 다세대')) {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  houseType: '2'
-                                }));
-                            } else {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  houseType: '3'
-                                }));
-                            }
-                            //  ////console.log('houseType', houseInfo)
-                          }
-
-
-                          if (item.id === 'ticket' && item.type === 'system') {
-                            dispatch(
-                              setHouseInfo({
-                                ...houseInfo,
-                                isDestruction:
-                                  item2.name === '네'
-                                    ? true
-                                    : false,
-                                isMoveInRight: true,
-                              }),
-                            );
-                          }
-
-                          if (item.id === 'certType' && item.type === 'system') {
-                            if (item2.id === 'Nosubscriptionaccount') {
-                              getOwnlist();
-                            };
-                          }
-
-                          if (item.id === 'pubLandPrice' && item.type === 'system') {
-                            if (item2.id === 'yes') {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  isPubLandPriceOver100Mil: true
-                                }),);
-                            } else {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  isPubLandPriceOver100Mil: false
-                                }),);
-                            }
-                          }
-
-
-                          if (item.id === 'area' && item.type === 'system') {
-                            if (item2.id === 'yes') {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  isAreaOver85: true
-                                }),);
-                            } else {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  isAreaOver85: false
-                                }),);
-                            }
-                          }
-
-
-                          if (item.id === 'apartment' && item.type === 'system') {
-                            if (item2.id === 'yes') {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  houseType: '1'
-                                }),);
-                            } else {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  houseType: '1'
-                                }),);
-                            }
-                          }
-
-                          if (item.id === 'palnSale') {
-                            if (houseInfo?.isDestruction === undefined && houseInfo?.isMoveInRight === undefined) {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  isDestruction: false,
-                                  isMoveInRight: false,
-                                }),
-
-                              );
-                            }
-                          }
-
-
-                          if (item2.id === 'only' && item2.type === 'my') {
-                            dispatch(
-                              setHouseInfo({
-                                ...houseInfo,
-                                ownerCnt: 1,
-                                userProportion: 100,
-                              }),
-                            );
-                          }
-
-                          if (item.id === 'moreHouse' && item2.id === 'no') {
-                            if (houseInfo?.isDestruction === undefined && houseInfo?.isMoveInRight === undefined) {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  //   hasSellPlan: false,
-                                  isDestruction: false,
-                                  isMoveInRight: false,
-                                  isOwnHouseCntRegist: true,
-                                  ownHouseCnt: 0,
-                                }),
-                              );
-                            } else {
-                              dispatch(
-                                setHouseInfo({
-                                  ...houseInfo,
-                                  //   hasSellPlan: false,
-                                  isOwnHouseCntRegist: true,
-                                  ownHouseCnt: 0,
-                                }),
-                              );
-                            }
-
-                          }
-
-                          if (item2?.openSheet) {
-                            // ////console.log('openSheet');
-                            SheetManager.show(item2.openSheet, {
-                              payload: {
-                                navigation: navigation,
-                                data: item2.id,
-                                data2: item.id,
-                                index,
-                                currentPageIndex: item2?.currentPageIndex,
-                              },
-                            });
-
-
-                          }
-
-                          // 매도 계획 여부
-                          if (item2.id === 'planSaleYes') {
-                            dispatch(
-                              setHouseInfo({
-                                ...houseInfo,
-                                planSale: true,
-                              }),
-                            );
-                          } else if (item2.id === 'planSaleNo') {
-                            dispatch(
-                              setHouseInfo({
-                                ...houseInfo,
-                                planSale: false,
-                              }),
-                            );
-                          }
-                        }
-                      }}>
-                      {item2?.icon ? item2.icon : null}
-                      <SelectButtonText>{item2?.name}</SelectButtonText>
-                    </SelectButton>
-                  ))}
-                </SelectButtonGroup>
-              )}
-              {item?.id === 'getInfoConfirm' && (
-                <SelectButton
-                  disabled={index < chatDataList.length - 1}
-                  onPress={async () => {
-                    const state = await NetInfo.fetch();
-                    const canProceed = await handleNetInfoChange(state);
-                    if (canProceed) {
-                      SheetManager.show('confirm', {
-                        payload: {
-                          questionId: item?.id,
-                          navigation: navigation,
-                          index,
-                        },
-                      });
-                    }
-                  }}
-                  style={{
-                    marginTop: 20,
-                  }}>
-                  <SelectButtonText>확인하기</SelectButtonText>
-                </SelectButton>
-              )}
-            </ChatBubble>
-          </ChatItem>
-          {item?.id === 'destruction' && (
-            <>
-              <Card
-                style={{
-                  width: width - 40,
-                  alignSelf: 'center',
-                }}>
-                <ChatBubbleText
-                  style={{
-                    textAlign: 'center',
-                  }}>
-                  부동산 전문 세무사에게 상담 받아보세요!
-                </ChatBubbleText>
-                <ProfileAvatar
-                  source={require('../../assets/images/Minjungum_Lee.png')}
-                />
-                <ProfileName>이민정음 세무사</ProfileName>
-                <ProfileEmail>ilbitax86@naver.com</ProfileEmail>
-                <KakaoButton
-                  onPress={async () => {
-                    const state = await NetInfo.fetch();
-                    const canProceed = await handleNetInfoChange(state);
-                    if (canProceed) { Linking.openURL('http://pf.kakao.com/_jfxgFG') }
-                  }
-                  }>
-                  <SocialButtonIcon
-                    source={require('../../assets/images/socialIcon/kakao_ico.png')}
-                  />
-                  <KakaoButtonText>카카오톡으로 상담하기</KakaoButtonText>
-                </KakaoButton>
-              </Card>
-              <DropShadow
-                style={{
-                  shadowColor: 'rgba(0,0,0,0.25)',
-                  shadowOffset: {
-                    width: 0,
-                    height: 4,
-                  },
-                  shadowOpacity: 0.15,
-                  shadowRadius: 4,
-                }}>
-                <Button
-                  width={width}
-                  style={{
-                    marginBottom: 20,
-                  }}
-                  onPress={() => {
-                    navigation.goBack();
-                  }}>
-                  <ButtonText>돌아가기</ButtonText>
-                </Button>
-              </DropShadow>
-            </>
-          )
-          }
-
-          {item?.id === 'calculating' && (
-            <View
-              style={{
-                height: height - 320,
-
-                alignItems: 'center',
-              }}>
-              <ActivityIndicator
-                size={80}
-                color="#A2C62B"
-                animating
-                style={{
-                  marginTop: '30%',
-                }}
-              />
-            </View>
+              <SelectButtonText>확인하기</SelectButtonText>
+            </SelectButton>
           )}
+        </ChatBubble>
+      </ChatItem>
+      {item?.id === 'destruction' && (
+        <>
+          <Card
+            style={{
+              width: width - 40,
+              alignSelf: 'center',
+            }}>
+            <ChatBubbleText
+              style={{
+                textAlign: 'center',
+              }}>
+              부동산 전문 세무사에게 상담 받아보세요!
+            </ChatBubbleText>
+            <ProfileAvatar
+              source={require('../../assets/images/Minjungum_Lee.png')}
+            />
+            <ProfileName>이민정음 세무사</ProfileName>
+            <ProfileEmail>jsyoun@jstaxbiz.com</ProfileEmail>
+            <KakaoButton
+              onPress={async () => {
+                const state = await NetInfo.fetch();
+                const canProceed = await handleNetInfoChange(state);
+                if (canProceed) { Linking.openURL('http://pf.kakao.com/_sxdxdxgG') }
+              }
+              }>
+              <SocialButtonIcon
+                source={require('../../assets/images/socialIcon/kakao_ico.png')}
+              />
+              <KakaoButtonText>카카오톡으로 상담하기</KakaoButtonText>
+            </KakaoButton>
+          </Card>
+          <DropShadow
+            style={{
+              shadowColor: 'rgba(0,0,0,0.25)',
+              shadowOffset: {
+                width: 0,
+                height: 4,
+              },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+            }}>
+            <Button
+              width={width}
+              style={{
+                marginBottom: 20,
+              }}
+              onPress={() => {
+                navigation.goBack();
+              }}>
+              <ButtonText>돌아가기</ButtonText>
+            </Button>
+          </DropShadow>
+        </>
+      )
+      }
 
-          {item?.id === 'apartmentAddressInfoSystem' && (
+      {item?.id === 'calculating' && (
+        <View
+          style={{
+            height: height - 320,
+
+            alignItems: 'center',
+          }}>
+          <ActivityIndicator
+            size={80}
+            color="#A2C62B"
+            animating
+            style={{
+              marginTop: '30%',
+            }}
+          />
+        </View>
+      )}
+
+      {item?.id === 'apartmentAddressInfoSystem' && (
+        <DropShadow
+          style={{
+            shadowColor: 'rgba(0,0,0,0.25)',
+            shadowOffset: {
+              width: 0,
+              height: 10,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            width: '100%',
+          }}>
+          <HouseInfoCard width={width}>
+            <HouseInfoCardTitle>주택 정보</HouseInfoCardTitle>
+            <HouseInfoCardSubTitle>
+              {houseInfo?.houseName} {houseInfo?.detailAdr ? houseInfo?.detailAdr : (houseInfo?.houseDetailName ? '' : '')}
+            </HouseInfoCardSubTitle>
+
+            <HouseInfoCardListItem>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <HouseInfoListLabel>공시가격</HouseInfoListLabel>
+                <QuestionIcon
+                  onPress={e => {
+                    const type = '공시가격';
+                    onQuestionMarkPress(type, e);
+                  }}
+                />
+              </View>
+              <HouseInfoListValue>
+                {(houseInfo?.hasPubLandPrice === false || houseInfo?.hasPubLandPrice === undefined) ? (houseInfo?.isPubLandPriceOver100Mil ? '1억원 초과' : '1억원 이하') : numberToKorean(Number(houseInfo?.pubLandPrice).toString()) + '원'}
+              </HouseInfoListValue>
+            </HouseInfoCardListItem>
+            <HouseInfoCardListItem>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <HouseInfoListLabel>전용면적</HouseInfoListLabel>
+                <QuestionIcon
+                  onPress={e => {
+                    const type = '전용면적';
+                    onQuestionMarkPress(type, e);
+                    // ////console.log('houseName', houseInfo?.houseName);
+                  }}
+                />
+              </View>
+              <View
+                style={{
+                  marginLeft: 'auto',
+                }}>
+                <HouseInfoListValue>
+                  {(houseInfo?.hasArea === false || houseInfo?.hasArea === undefined) ? (houseInfo?.isAreaOver85 ? '국민평형(85㎡) 초과' : '국민평형(85㎡) 이하') : (houseInfo?.isAreaOver85 ? '국민평형(85㎡) 초과' : '국민평형(85㎡) 이하')}
+                </HouseInfoListValue>
+                {houseInfo?.hasArea && <HouseInfoListValue
+                  style={{
+                    fontSize: 10,
+                    color: '#A3A5A8',
+                    lineHeight: 8,
+                  }}>
+                  {'\n' + houseInfo?.area + '㎡'}
+                </HouseInfoListValue>}
+              </View>
+            </HouseInfoCardListItem>
             <DropShadow
               style={{
                 shadowColor: 'rgba(0,0,0,0.25)',
                 shadowOffset: {
                   width: 0,
-                  height: 10,
+                  height: 4,
                 },
-                shadowOpacity: 0.1,
+                shadowOpacity: 0.25,
                 shadowRadius: 4,
-                width: '100%',
+                alignSelf: 'center',
               }}>
-              <HouseInfoCard width={width}>
-                <HouseInfoCardTitle>주택 정보</HouseInfoCardTitle>
-                <HouseInfoCardSubTitle>
-                  {houseInfo?.houseName} {houseInfo?.detailAdr ? houseInfo?.detailAdr : (houseInfo?.houseDetailName ? '' : '')}
-                </HouseInfoCardSubTitle>
-
-                <HouseInfoCardListItem>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}>
-                    <HouseInfoListLabel>공시가격</HouseInfoListLabel>
-                    <QuestionIcon
-                      onPress={e => {
-                        const type = '공시가격';
-                        onQuestionMarkPress(type, e);
-                      }}
-                    />
-                  </View>
-                  <HouseInfoListValue>
-                    {(houseInfo?.hasPubLandPrice === false || houseInfo?.hasPubLandPrice === undefined) ? (houseInfo?.isPubLandPriceOver100Mil ? '1억원 초과' : '1억원 이하') : numberToKorean(Number(houseInfo?.pubLandPrice).toString()) + '원'}
-                  </HouseInfoListValue>
-                </HouseInfoCardListItem>
-                <HouseInfoCardListItem>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}>
-                    <HouseInfoListLabel>전용면적</HouseInfoListLabel>
-                    <QuestionIcon
-                      onPress={e => {
-                        const type = '전용면적';
-                        onQuestionMarkPress(type, e);
-                        // ////console.log('houseName', houseInfo?.houseName);
-                      }}
-                    />
-                  </View>
-                  <View
-                    style={{
-                      marginLeft: 'auto',
-                    }}>
-                    <HouseInfoListValue>
-                      {(houseInfo?.hasArea === false || houseInfo?.hasArea === undefined) ? (houseInfo?.isAreaOver85 ? '국민평형(85㎡) 초과' : '국민평형(85㎡) 이하') : (houseInfo?.isAreaOver85 ? '국민평형(85㎡) 초과' : '국민평형(85㎡) 이하')}
-                    </HouseInfoListValue>
-                    {houseInfo?.hasArea && <HouseInfoListValue
-                      style={{
-                        fontSize: 10,
-                        color: '#A3A5A8',
-                        lineHeight: 8,
-                      }}>
-                      {'\n' + houseInfo?.area + '㎡'}
-                    </HouseInfoListValue>}
-                  </View>
-                </HouseInfoCardListItem>
-                <DropShadow
-                  style={{
-                    shadowColor: 'rgba(0,0,0,0.25)',
-                    shadowOffset: {
-                      width: 0,
-                      height: 4,
-                    },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 4,
-                    alignSelf: 'center',
-                  }}>
-                  <ModalButton
-                    disabled={index < chatDataList.length - 1}
-                    onPress={async () => {
-                      const state = await NetInfo.fetch();
-                      const canProceed = await handleNetInfoChange(state);
-                      if (canProceed) {
-                        SheetManager.show('acquisition', {
-                          payload: {
-                            questionId: item?.id,
-                            navigation: navigation,
-                            index,
-                            currentPageIndex: 0,
-                          },
-                        });
-                      }
-                    }}
-                    style={{
-                      width: width - 80,
-                      alignSelf: 'center',
-                      marginTop: 20,
-                    }}>
-                    <ModalButtonText>다음으로</ModalButtonText>
-                  </ModalButton>
-                </DropShadow>
-              </HouseInfoCard>
-            </DropShadow >
-          )}
-        </>
-      );
-    }
+              <ModalButton
+                disabled={index < chatDataList.length - 1}
+                onPress={async () => {
+                  const state = await NetInfo.fetch();
+                  const canProceed = await handleNetInfoChange(state);
+                  if (canProceed) {
+                    SheetManager.show('acquisition', {
+                      payload: {
+                        questionId: item?.id,
+                        navigation: navigation,
+                        index,
+                        currentPageIndex: 0,
+                      },
+                    });
+                  }
+                }}
+                style={{
+                  width: width - 80,
+                  alignSelf: 'center',
+                  marginTop: 20,
+                }}>
+                <ModalButtonText>다음으로</ModalButtonText>
+              </ModalButton>
+            </DropShadow>
+          </HouseInfoCard>
+        </DropShadow >
+      )}
+    </>
+  );
+}
   };
 
-  return (
-    <Container>
-      <ProgressSection>
-        <ProgressBar
-          style={{
-            backgroundColor:
-              chatDataList[chatDataList.length - 1]?.id === 'cta' ||
-                chatDataList[chatDataList.length - 1]?.id === 'calculating' ||
-                chatDataList[chatDataList.length - 1]?.id === 'goodbye'
-                ? '#A2C62B'
-                : '#2F87FF',
-            width: progress.interpolate({
-              inputRange: [0, 10],
-              outputRange: ['0%', '100%'],
-            }),
-          }}
-        />
-      </ProgressSection>
+return (
+  <Container>
+    <ProgressSection>
+      <ProgressBar
+        style={{
+          backgroundColor:
+            chatDataList[chatDataList.length - 1]?.id === 'cta' ||
+              chatDataList[chatDataList.length - 1]?.id === 'calculating' ||
+              chatDataList[chatDataList.length - 1]?.id === 'goodbye'
+              ? '#A2C62B'
+              : '#2F87FF',
+          width: progress.interpolate({
+            inputRange: [0, 10],
+            outputRange: ['0%', '100%'],
+          }),
+        }}
+      />
+    </ProgressSection>
 
-      <FlatList
-        ref={flatlistRef}
-        data={chatDataList}
-        keyExtractor={(item, index) => {
-          return `chat-${index}`;
+    <FlatList
+      ref={flatlistRef}
+      data={chatDataList}
+      keyExtractor={(item, index) => {
+        return `chat-${index}`;
+      }}
+      style={{
+        width: '100%',
+        height: '100%',
+      }}
+      contentContainerStyle={{
+        flexGrow: 1,
+      }}
+      showsVerticalScrollIndicator={false}
+      renderItem={({ item, index }) =>
+        item?.type === 'my'
+          ? renderMyChatItem({ item, index })
+          : renderSystemChatItem({ item, index })
+
+      }
+    />
+    <Modalize
+      ref={modalizeRef}
+      adjustToContentHeight
+      modalStyle={{
+        width: width - 40,
+        alignSelf: 'center',
+      }}
+      withReactModal
+      withHandle={false}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        onPress={() => {
+          modalizeRef.current?.close();
+
         }}
         style={{
-          width: '100%',
-          height: '100%',
-        }}
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item, index }) =>
-          item?.type === 'my'
-            ? renderMyChatItem({ item, index })
-            : renderSystemChatItem({ item, index })
-
-        }
-      />
-      <Modalize
-        ref={modalizeRef}
-        adjustToContentHeight
-        modalStyle={{
-          width: width - 40,
-          alignSelf: 'center',
-        }}
-        withReactModal
-        withHandle={false}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-          onPress={() => {
-            modalizeRef.current?.close();
-
-          }}
-          style={{
-            alignSelf: 'flex-end',
-            marginTop: 17,
-            marginRight: 17,
-          }}>
-          <CloseIcon width={12} height={12} />
-        </TouchableOpacity>
-      </Modalize>
-    </Container>
-  );
+          alignSelf: 'flex-end',
+          marginTop: 17,
+          marginRight: 17,
+        }}>
+        <CloseIcon width={12} height={12} />
+      </TouchableOpacity>
+    </Modalize>
+  </Container>
+);
 };
 
-export default React.memo(AcquisitionChat);
+export default AcquisitionChat;

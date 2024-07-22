@@ -1,6 +1,6 @@
 // 양도세 결과에서 설명 섹션
 
-import {View} from 'react-native';
+import { View } from 'react-native';
 import React from 'react';
 import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';
@@ -65,7 +65,10 @@ const Divider = styled.View`
   margin-top: 10px;
 `;
 
-const TaxInfoCard2 = () => {
+const TaxInfoCard2 = props => {
+  //console.log('props', props);
+  const Pdata = props?.Pdata;
+  const commentaryListCnt = Pdata ? Pdata.commentaryListCnt : 0;
   return (
     <Card>
       <CardHeader>
@@ -83,31 +86,18 @@ const TaxInfoCard2 = () => {
         </View>
         <Title>계산된 양도소득세에 대해 설명드릴게요</Title>
       </CardHeader>
-
-      <InfoContainer>
-        <InfoNum>1.</InfoNum>
-        <InfoText>
-          둘 중 한 채를 3년 내 처분하는 경우{'\n'}일시적 2주택에 해당하는
-          양도소득세율 적용이 가능합니다.
-        </InfoText>
-      </InfoContainer>
-      <Divider />
-      <InfoContainer>
-        <InfoNum>2.</InfoNum>
-        <InfoText>
-          양도소득시점의 주택 수에 따라{'\n'}1~12%(개정 후) 세율이 적용됩니다.
-        </InfoText>
-      </InfoContainer>
-      <Divider />
-      <InfoContainer>
-        <InfoNum>3.</InfoNum>
-        <InfoText>
-          둘 중 한 채를 3년 내 처분하는 경우{'\n'}일시적 2주택에 해당하는
-          양도소득세율 적용이 가능합니다.
-        </InfoText>
-      </InfoContainer>
+      {Array.from({ length: commentaryListCnt }).map((_, index) => (
+        <React.Fragment key={index}>
+          <InfoContainer>
+            <InfoNum>{index + 1}.</InfoNum>
+            <InfoText>
+              {Pdata?.commentaryList[index]}
+            </InfoText>
+          </InfoContainer>
+          {(index !== commentaryListCnt - 1) && <Divider />}
+        </React.Fragment>
+      ))}
     </Card>
-  );
+  )
 };
-
 export default TaxInfoCard2;

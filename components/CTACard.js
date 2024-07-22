@@ -123,7 +123,7 @@ const CTACard = () => {
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
   
-      Linking.openURL('http://pf.kakao.com/_jfxgFG');
+      Linking.openURL('http://pf.kakao.com/_sxdxdxgG');
     }
   };
 

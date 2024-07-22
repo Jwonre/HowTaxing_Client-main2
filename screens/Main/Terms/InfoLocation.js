@@ -6,16 +6,14 @@ import {
     TouchableOpacity,
     useWindowDimensions,
     ScrollView,
+    BackHandler
 } from 'react-native';
-import React, { useLayoutEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useLayoutEffect, useState, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
 import getFontSize from '../../../utils/getFontSize';
-import DropShadow from 'react-native-drop-shadow';
 import { SheetManager } from 'react-native-actions-sheet';
-import { useDispatch, useSelector } from 'react-redux';
-import { setCert } from '../../../redux/certSlice';
 
 const Container = styled.View`
     flex: 1;
@@ -41,32 +39,6 @@ const SubTitle = styled.Text`
     letter-spacing: -0.5px;
   `;
 
-const ButtonSection = styled.View`
-    position: absolute;
-    bottom: 20px;
-    width: 100%;
-  `;
-
-const Button = styled.TouchableOpacity.attrs(props => ({
-    activeOpacity: 0.6,
-}))`
-    width: ${props => props.width - 40}px;
-    height: 60px;
-    border-radius: 30px;
-    background-color: ${props => (props.active ? '#2F87FF' : '#e5e5e5')};
-    align-items: center;
-    justify-content: center;
-    margin-top: 20px;
-    align-self: center;
-  `;
-
-const ButtonText = styled.Text`
-    font-size: 18px;
-    font-family: Pretendard-Bold;
-    color: ${props => (props.active ? '#fff' : '#a3a5a8')};
-    line-height: 20px;
-  `;
-
 const ContentText = styled.Text`
     font-size: 13px;
     font-family: Pretendard-Regular;
@@ -75,14 +47,23 @@ const ContentText = styled.Text`
     margin-top: 20px;
   `;
 
-const Location2 = props => {
+const InfoLocation = props => {
     const navigation = useNavigation();
-    const dispatch = useDispatch();
-    const { width } = useWindowDimensions();
-    const [activeButton, setActiveButton] = useState(false);
-    const { agreeCert, agreePrivacy, agreeLocation, agreeAge, agreeMarketing } = useSelector(
-        state => state.cert.value,
-    );
+
+    const handleBackPress = () => {
+        navigation.goBack();
+        // 이전 화면으로 돌아가는 기본 동작 수행
+        return true; // 기본 동작을 중단
+      };
+    
+      useFocusEffect(
+        useCallback(() => {
+          BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+          return () => {
+            BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+          };
+        }, [handleBackPress])
+      );
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -91,7 +72,7 @@ const Location2 = props => {
                     activeOpacity={0.6}
                     hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                     onPress={() => {
-                        navigation.goBack({tokens: props?.route?.params?.tokens});
+                        navigation.goBack();
                     }}>
                     <CloseIcon />
                 </TouchableOpacity>
@@ -115,19 +96,7 @@ const Location2 = props => {
         <Container>
             <ScrollView
                 showsVerticalScrollIndicator={true}
-                contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
-                onScroll={({ nativeEvent }) => {
-                    // 하단 스크롤 시 버튼 활성화
-                    if (
-                        nativeEvent.contentOffset.y +
-                        nativeEvent.layoutMeasurement.height >=
-                        nativeEvent.contentSize.height  - 1
-                    ) {
-                        setActiveButton(true);
-                    } else {
-                        setActiveButton(false);
-                    }
-                }}>
+                contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}>
                 <Title>(필수) 위치정보 이용약관</Title>
                 <SubTitle>[필수] 위치정보 이용약관 동의서</SubTitle>
                 <ContentText>
@@ -249,42 +218,8 @@ const Location2 = props => {
 4. 전화 : 010-2667-8347`}
                 </ContentText>
             </ScrollView>
-            <ButtonSection>
-                <DropShadow
-                    style={{
-                        shadowColor: '#000',
-                        shadowOffset: {
-                            width: 0,
-                            height: 4,
-                        },
-                        shadowOpacity: 0.25,
-                        shadowRadius: 2,
-                    }}>
-                    <Button
-                        width={width}
-                        active={activeButton || agreeLocation}
-                        disabled={!(activeButton || agreeLocation)}
-                        onPress={() => {
-                            // 동의하기 버튼 클릭 시 redux에 저장
-                            dispatch(
-                                setCert({
-                                    agreeAge,
-                                    agreePrivacy,
-                                    agreeMarketing,
-                                    agreeCert,
-                                    agreeLocation: true,
-                                }),
-                            );
-
-                            // 채팅방으로 이동
-                            navigation.goBack({tokens: props?.route?.params?.tokens});
-                        }}>
-                        <ButtonText active={activeButton || agreeLocation}>동의하기</ButtonText>
-                    </Button>
-                </DropShadow>
-            </ButtonSection>
         </Container>
     );
 };
 
-export default Location2;
+export default InfoLocation;

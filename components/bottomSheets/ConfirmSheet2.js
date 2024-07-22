@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { HOUSE_TYPE } from '../../constants/colors';
-import { setHouseInfo } from '../../redux/houseInfoSlice';
+import Config from 'react-native-config'
 
 import numberToKorean from '../../utils/numToKorean';
 
@@ -203,7 +203,7 @@ const ConfirmSheet2 = props => {
      };
  
      axios
-       .post('http://devapp.how-taxing.com/calculate/sellTax', data)
+       .post(Config.APP_API_URL||'calculate/sellTax', data)
        .then(response => {
          // 성공적인 응답 처리
          const data2 = response.data.data;
