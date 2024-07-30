@@ -3,7 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "cd android && ./gradlew clean && cd .. && react-native run-android",
+    "android": "cd android && gradlew clean && cd .. && react-native run-android --variant=developrelease",
+    "android:dev:d": "cd android && gradlew clean && cd .. && react-native run-android --variant=developdebug",
+    "android:dev:r": "cd android && gradlew clean && cd .. && react-native run-android --variant=developrelease",
+    "android:prd:d": "cd android && gradlew clean && cd .. && react-native run-android --variant=productdebug",
+    "android:prd:r": "cd android && gradlew clean && cd .. && react-native run-android --variant=productrelease",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",

@@ -272,7 +272,7 @@ const AreaMeterDef = props => {
   ];
 
   const postOwnHouse = async () => {
-    const url = Config.APP_API_URL||'house/list';
+    const url = `${Config.APP_API_URL}house/list`;
 
     const data = {
       certAuthor: certType === 'KB' ? '1' : certType === 'naver' ? '2' : '3',

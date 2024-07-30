@@ -155,23 +155,27 @@ export const acquisitionTax = [
         name: 'KB 간편인증',
         icon: <KBICon />,
         openSheet: 'cert',
+        prevchat: 'AcquisitionChat'
       },
       {
         id: 'naver',
         name: '네이버 간편인증',
         icon: <NaverIcon />,
         openSheet: 'cert',
+        prevchat: 'AcquisitionChat'
       },
       {
         id: 'toss',
         name: '토스 인증',
         icon: <TossIcon />,
         openSheet: 'cert',
+        prevchat: 'AcquisitionChat'
       },
       {
         id: 'Nosubscriptionaccount',
         name: '청약통장 미보유',
         select: ['moment2'],
+        prevchat: 'AcquisitionChat'
       },
     ],
   },
@@ -319,7 +323,6 @@ export const acquisitionTax = [
     progress: 10,
     openSheet: 'review',
   },
-
   {
     id: 'additionalQuestion',
     type: 'system',
@@ -329,18 +332,20 @@ export const acquisitionTax = [
       {
         id: 'additionalQuestionY',
         name: '',
-        select: ['getInfoDone', 'getInfoConfirm'],
+        // select: ['getInfoDone', 'getInfoConfirm'],
+        select: [],
         answer: '',
       },
       {
         id: 'additionalQuestionN',
         name: '',
-        select: ['getInfoDone', 'getInfoConfirm'],
+        // select: ['getInfoDone', 'getInfoConfirm'],
+        select: [],
         answer: '',
       },
     ],
     questionId: '',
-    
+
   },
 ];
 
@@ -457,18 +462,21 @@ export const gainTax = [
         name: 'KB 간편인증',
         icon: <KBICon />,
         openSheet: 'cert',
+        prevchat: 'GainsTaxChat'
       },
       {
         id: 'naver',
         name: '네이버 간편인증',
         icon: <NaverIcon />,
         openSheet: 'cert',
+        prevchat: 'GainsTaxChat'
       },
       {
         id: 'toss',
         name: '토스 인증',
         icon: <TossIcon />,
         openSheet: 'cert',
+        prevchat: 'GainsTaxChat'
       },
       {
         id: 'Nosubscriptionaccount',
@@ -488,18 +496,21 @@ export const gainTax = [
         name: 'KB 간편인증',
         icon: <KBICon />,
         openSheet: 'cert',
+        prevchat: 'GainsTaxChat'
       },
       {
         id: 'naver',
         name: '네이버 간편인증',
         icon: <NaverIcon />,
         openSheet: 'cert',
+        prevchat: 'GainsTaxChat'
       },
       {
         id: 'toss',
         name: '토스 인증',
         icon: <TossIcon />,
         openSheet: 'cert',
+        prevchat: 'GainsTaxChat'
       },
     ],
   },
@@ -514,30 +525,35 @@ export const gainTax = [
         name: 'PASS 간편인증',
         icon: <PASSICon />,
         openSheet: 'cert2',
+        prevchat: 'GainsTaxChat'
       },
       {
         id: 'KAKAO',
         name: '카카오톡 간편인증',
         icon: <KakaoICon />,
         openSheet: 'cert2',
+        prevchat: 'GainsTaxChat'
       },
       {
         id: 'PAYCO',
         name: '페이코 간편인증',
         icon: <PaycoICon />,
         openSheet: 'cert2',
+        prevchat: 'GainsTaxChat'
       },
       {
         id: 'SAMSUNG',
         name: '삼성 패스 인증',
         icon: <SamsungICon />,
         openSheet: 'cert2',
+        prevchat: 'GainsTaxChat'
       },
       {
         id: 'KB',
         name: 'KB 간편인증',
         icon: <KBICon />,
         openSheet: 'cert2',
+        prevchat: 'GainsTaxChat'
       },
     ],
   },
@@ -642,12 +658,12 @@ export const gainTax = [
     message: '',
     questionId: '',
     select: [
-      {
+  /*    {
         id: 'cert2',
         name: '본인 인증하기',
         select: ['certType2'],
         answer: '02'
-      },
+      },*/
       {
         id: 'directlivePeriod',
         name: '직접 입력하기',
@@ -664,12 +680,12 @@ export const gainTax = [
     progress: 5,
     message: '실거주 기간을 어떻게 가져올까요?',
     select: [
-      {
+ /*      {
         id: 'cert2',
         name: '본인 인증하기',
         select: ['certType2'],
         answer: '02'
-      },
+      },*/
       {
         id: 'directlivePeriod',
         name: '직접 입력하기',
@@ -721,7 +737,7 @@ export const gainTax = [
       },
     ],
   },
- 
+
   {
     id: 'additionalQuestion2',
     type: 'system',
@@ -731,7 +747,7 @@ export const gainTax = [
     answer: '',
   },
 
-    {
+  {
     id: 'additionalQuestion',
     type: 'system',
     message: '',
@@ -747,13 +763,13 @@ export const gainTax = [
       {
         id: 'additionalQuestionN',
         name: '',
-       // select: ['ExpenseInquiry', 'ExpenseAnswer'],
-       select: [],
+        // select: ['ExpenseInquiry', 'ExpenseAnswer'],
+        select: [],
         answer: '',
       },
     ],
     questionId: '',
-    
+
   },
 
 

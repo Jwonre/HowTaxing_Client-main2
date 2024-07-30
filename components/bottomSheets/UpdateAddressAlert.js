@@ -369,7 +369,7 @@ const UpdateAddressAlert = props => {
 
     };
     axios
-      .post(Config.APP_API_URL||'house/roadAddr', data, { headers: headers })
+      .post(`${Config.APP_API_URL}house/roadAddr`, data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
@@ -497,7 +497,7 @@ const UpdateAddressAlert = props => {
 
     };
     axios
-      .post(Config.APP_API_URL||'house/roadAddr', data, { headers: headers })
+      .post(`${Config.APP_API_URL}house/roadAddr`, data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
@@ -591,7 +591,7 @@ const UpdateAddressAlert = props => {
       .catch(function (error) {
         ////console.log(error);
       });
-    const url = Config.APP_API_URL||'house/roadAddrDetail';
+    const url = `${Config.APP_API_URL}house/roadAddrDetail`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -638,7 +638,7 @@ const UpdateAddressAlert = props => {
   };*/
 
   /*const getDongData = async (address) => {
-    const url = Config.APP_API_URL||'house/roadAddrDetail';
+    const url = `${Config.APP_API_URL}house/roadAddrDetail`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`

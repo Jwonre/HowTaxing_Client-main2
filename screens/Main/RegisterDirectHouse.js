@@ -19,6 +19,8 @@ import axios from 'axios';
 import getFontSize from '../../utils/getFontSize';
 import NetInfo from "@react-native-community/netinfo";
 import Config from 'react-native-config'
+import { gainTax } from '../../data/chatData';
+
 
 // Icons
 import BuildingIcon1 from '../../assets/icons/house/building_type1_ico.svg';
@@ -30,6 +32,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SheetManager } from 'react-native-actions-sheet';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
 import { setDirectRegister } from '../../redux/directRegisterSlice';
+import { setChatDataList } from '../../redux/chatDataListSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -185,7 +188,8 @@ const InfoContentLabel = styled.Text`
 
 
 const RegisterDirectHouse = props => {
-  const navigation = useNavigation();
+  //console.log("RDH props", props);
+  const navigation = props.navigation ? props.navigation : useNavigation();
   const dispatch = useDispatch();
   const { width, height } = useWindowDimensions();
   const addressInputRef = useRef(null);
@@ -202,6 +206,7 @@ const RegisterDirectHouse = props => {
   const directRegister = useSelector(
     state => state.directRegister.value,
   );
+  const chatDataList = useSelector(state => state.chatDataList.value);
 
   const [isConnected, setIsConnected] = useState(true);
 
@@ -229,9 +234,9 @@ const RegisterDirectHouse = props => {
       prevSheetNum = '02';
     } else {
       prevSheetNum = '01';
-    } 
+    }
     ////console.log('prevSheet', prevSheet);
-    const url = Config.APP_API_URL||`house/list?calcType=${prevSheetNum}`
+    const url = `${Config.APP_API_URL}house/list?calcType=${prevSheetNum}`
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -360,23 +365,38 @@ const RegisterDirectHouse = props => {
   ];
 
   const successRegister = async () => {
-    await getOwnlist();
+    if (props.route.params?.certError) {
+      await getOwnlist();
+      navigation.goBack();
+      navigation.goBack();
+      let el = gainTax.find(el => el.id === 'allHouse2');
+      if (el) {
+        dispatch(
+          setChatDataList([
+            ...chatDataList,
+            el,
+          ]),
+        );
+      }
+    } else {
+      await getOwnlist();
+      navigation.navigate(prevChat);
+      setTimeout(() => {
 
-    navigation.navigate(prevChat);
-    setTimeout(() => {
-
-      SheetManager.show(
-        prevSheet ? prevSheet : props.route.params?.prevSheet,
-        {
-          payload: {
-            navigation,
-            index: props.route.params?.index,
-            data: props?.route?.params?.data,
-            chungYackYn: props?.route?.params?.chungYackYn
+        SheetManager.show(
+          prevSheet ? prevSheet : props.route.params?.prevSheet,
+          {
+            payload: {
+              navigation,
+              index: props.route.params?.index,
+              data: props?.route?.params?.data,
+              chungYackYn: props?.route?.params?.chungYackYn
+            },
           },
-        },
-      );
-    }, 300);
+        );
+      }, 300);
+    }
+
     dispatch(
       setDirectRegister({
         houseName: '',
@@ -425,9 +445,9 @@ const RegisterDirectHouse = props => {
         isMoveInRight: isMoveInRight,
       };
       //successRegister();
-      console.log('data : ', data);
+      //console.log('data : ', data);
       axios
-        .post(Config.APP_API_URL||'house/regist', data, { headers: headers })
+        .post(`${Config.APP_API_URL}house/regist`, data, { headers: headers })
         .then(async response => {
           if (response.data.errYn === 'Y') {
             SheetManager.show('info', {
@@ -543,7 +563,7 @@ const RegisterDirectHouse = props => {
                   onSubmitEditing={() => {
                     addressDetailInputRef.current.focus();
                   }}
-                  onFocus={async() => {
+                  onFocus={async () => {
                     {
                       const state = await NetInfo.fetch();
                       const canProceed = await handleNetInfoChange(state);

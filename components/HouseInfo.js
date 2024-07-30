@@ -115,10 +115,15 @@ const HouseInfo = props => {
             backgroundColor: HOUSE_TYPE.find(
               item => item.id === props.item?.houseType,
             )?.color,
+            flexDirection: 'row',
+            alignContent: 'center',
           }}>
           <HoustInfoBadgeText>
             {HOUSE_TYPE.find(item => item.id === props.item?.houseType)?.name}
           </HoustInfoBadgeText>
+          {(props.item?.houseType !== '3' && props.item?.isMoveInRight === true) && <HoustInfoBadgeText style={{fontSize: 8}}>
+            {'(입주권)'}
+          </HoustInfoBadgeText>}
         </HoustInfoBadge>
         <HoustInfoTitle>{props.item?.houseName}</HoustInfoTitle>
         <HoustInfoText>{props.item?.houseDetailName}</HoustInfoText>

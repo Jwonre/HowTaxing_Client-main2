@@ -311,7 +311,7 @@ const CertSheet = props => {
     [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
 */
     try {
-      const url = Config.APP_API_URL||`question/additionalQuestion`;
+      const url = `${Config.APP_API_URL}question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -495,8 +495,8 @@ const CertSheet = props => {
   };
 
   const postOwnHouse = async () => {
-    //const url = Config.APP_API_URL||'house/search'; real api
-    const url = Config.APP_API_URL||'house/search';
+    //const url = `${Config.APP_API_URL}house/search'; real api
+    const url = `${Config.APP_API_URL}house/search`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -632,7 +632,7 @@ const CertSheet = props => {
               if (tempadditionalAnswerList) {
                 let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0006' in item);
                 if (foundIndex !== -1) {
-                  // 불변성을 유지하면서 Q_0007 값을 삭제
+                  // 불변성을 유지하면서 Q_0006 값을 삭제
                   const { 'Q_0006': _, ...rest } = tempadditionalAnswerList[foundIndex];
                   tempadditionalAnswerList = [
                     ...tempadditionalAnswerList.slice(0, foundIndex),
@@ -659,7 +659,7 @@ const CertSheet = props => {
           if (tempadditionalAnswerList) {
             let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0006' in item);
             if (foundIndex !== -1) {
-              // 불변성을 유지하면서 Q_0007 값을 삭제
+              // 불변성을 유지하면서 Q_0006 값을 삭제
               const { 'Q_0006': _, ...rest } = tempadditionalAnswerList[foundIndex];
               tempadditionalAnswerList = [
                 ...tempadditionalAnswerList.slice(0, foundIndex),

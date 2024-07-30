@@ -109,7 +109,7 @@ const DeleteHouseAlert = props => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-      const url = Config.APP_API_URL||`house/delete`;
+      const url = `${Config.APP_API_URL}house/delete`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`

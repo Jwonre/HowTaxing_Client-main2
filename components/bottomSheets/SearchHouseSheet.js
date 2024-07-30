@@ -450,7 +450,7 @@ const SearchHouseSheet = props => {
 
     };
     axios
-      .post(Config.APP_API_URL||'house/roadAddr', data, { headers: headers })
+      .post(`${Config.APP_API_URL}house/roadAddr`, data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
@@ -580,7 +580,7 @@ const SearchHouseSheet = props => {
 
     };
     axios
-      .post(Config.APP_API_URL||'house/roadAddr', data, { headers: headers })
+      .post(`${Config.APP_API_URL}house/roadAddr`, data, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
@@ -635,7 +635,7 @@ const SearchHouseSheet = props => {
 
   // 주택 호 정보 가져오기
   const getHoData = async (address, dongNm, type) => {
-    const url = Config.APP_API_URL||'house/roadAddrDetail';
+    const url = `${Config.APP_API_URL}house/roadAddrDetail`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -697,7 +697,7 @@ const SearchHouseSheet = props => {
   };
 
   const getDongData = async (address) => {
-    const url = Config.APP_API_URL||'house/roadAddrDetail';
+    const url = `${Config.APP_API_URL}house/roadAddrDetail`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -789,7 +789,7 @@ const SearchHouseSheet = props => {
             numOfRows: 5,
             pageNo: 1,
           })*/
-      const response = await axios.post(Config.APP_API_URL||'house/pubLandPriceAndAreaAtDB', param, { headers: headers });
+      const response = await axios.post(`${Config.APP_API_URL}house/pubLandPriceAndAreaAtDB`, param, { headers: headers });
       const data = response.data.data;
       ////console.log('response', response);
       //console.log('param', param);

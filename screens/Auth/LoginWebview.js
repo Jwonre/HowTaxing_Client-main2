@@ -12,8 +12,11 @@ const LoginWebview = (props) => {
     const { width, height } = Dimensions.get('window');
     const [webViewStyle, setWebViewStyle] = useState({ width: width, height: height });
     const onWebViewMessage = route.params?.onWebViewMessage;
-    const uri = { uri: Config.APP_API_URL||`oauth2/authorization/${socialType}` };
-    console.log('uri', uri);
+    const uri = { uri: `${Config.APP_API_URL}oauth2/authorization/${socialType}` };
+    //console.log('Config', Config);
+    //console.log('Config.getConstants()', Config.getConstants());
+    //console.log('Config.APP_API_URL', Config.APP_API_URL);
+    //console.log('uri', uri);
     const sendWebMessage = () => {
         webViewRef.current.injectJavaScript(`
         const url = document?.URL === null ? null : document?.URL;

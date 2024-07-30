@@ -244,7 +244,7 @@ const ChooseHouseDongHoAlert = props => {
       .catch(function (error) {
         ////console.log(error);
       });*/
-    const url = Config.APP_API_URL||'house/roadAddrDetail';
+    const url = `${Config.APP_API_URL}house/roadAddrDetail`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -334,7 +334,7 @@ const ChooseHouseDongHoAlert = props => {
             numOfRows: 5,
             pageNo: 1,
           })*/
-      const response = await axios.post(Config.APP_API_URL||'house/pubLandPriceAndAreaAtDB', param, { headers: headers });
+      const response = await axios.post(`${Config.APP_API_URL}house/pubLandPriceAndAreaAtDB`, param, { headers: headers });
       const data = response.data.data;
       //    ////console.log('gongsiData return', data);
       if (response.data.errYn === 'Y') {

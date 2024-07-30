@@ -314,7 +314,7 @@ const GainsTaxChat = () => {
     [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
 */
     try {
-      const url = Config.APP_API_URL||`question/additionalQuestion`;
+      const url = `${Config.APP_API_URL}question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -716,7 +716,7 @@ const GainsTaxChat = () => {
 
   const getOwnlist = async () => {
     var gain = '02';
-    const url = Config.APP_API_URL||`house/list?calcType=${gain}`
+    const url = `${Config.APP_API_URL}house/list?calcType=${gain}`
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -789,7 +789,7 @@ const GainsTaxChat = () => {
       'Authorization': `Bearer ${currentUser.accessToken}`
     };
     axios
-      .post(Config.APP_API_URL||'calculation/sellResult', data, { headers: headers })
+      .post(`${Config.APP_API_URL}calculation/sellResult`, data, { headers: headers })
       .then(response => {
 
         //console.log('양도소득세 계산 중:', response.data);
@@ -1029,6 +1029,8 @@ const GainsTaxChat = () => {
                     justifyContent: 'center',
                     marginRight: 5,
                     paddingHorizontal: 15,
+                    flexDirection: 'row',
+                    alignContent: 'center',
                   }}>
                   <Text
                     style={{
@@ -1043,6 +1045,17 @@ const GainsTaxChat = () => {
                         ?.name
                     }
                   </Text>
+                  {houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight === true &&
+                    <Text style={{
+                      fontSize: 9,
+                      fontFamily: 'Pretendard-Medium',
+                      color: '#fff',
+                      lineHeight: 13,
+                      letterSpacing: -0.5,
+                    }}>
+                      {'(입주권)'}
+                    </Text>
+                  }
                 </View>
                 {/*(houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight) && <View
                   style={{
@@ -1177,6 +1190,10 @@ const GainsTaxChat = () => {
   };
 
   const renderSystemChatItem = ({ item, index }) => {
+    if (item?.id === 'cta2') {
+      setCurrentItem(item);
+    }
+
 
     // ////console.log('renderSystemChatItem item', item.id);
     if (item?.id === 'goodbye' && !hasShownGoodbye) {
@@ -1196,7 +1213,7 @@ const GainsTaxChat = () => {
 
 
     if (item?.id === 'cta2') {
-      setCurrentItem(item);
+
       return (
         <View
           style={{
@@ -1220,7 +1237,7 @@ const GainsTaxChat = () => {
                   if (canProceed) {
                     if (Pdata.calculationResultTextData !== null) {
                       Clipboard.setString(Pdata.calculationResultTextData);
-                      let toast = Toast.show('복사되었습니다', {
+                      let toast = Toast.show('복사하였습니다.', {
                         duration: Toast.durations.LONG,
                         position: 100,
                         shadow: true,
@@ -1236,9 +1253,10 @@ const GainsTaxChat = () => {
                   }
                 }}
                 style={{
-                  width: width - 240,
+                  width: (width - 60) / 2,
                   alignSelf: 'center',
-                  marginTop: 20,
+                  marginTop: 10,
+                  marginRight: 10,
                   backgroundColor: '#fff',
                   borderColor: '#E8EAED',
                   borderWidth: 1, // borderWidth를 추가했습니다
@@ -1261,9 +1279,9 @@ const GainsTaxChat = () => {
                   }
                 }}
                 style={{
-                  width: width - 240,
+                  width: (width - 60) / 2,
                   alignSelf: 'center',
-                  marginTop: 20,
+                  marginTop: 10,
                 }}>
                 <ModalButtonText>확인하기</ModalButtonText>
               </ModalButton>
@@ -1300,7 +1318,7 @@ const GainsTaxChat = () => {
                           Title: "상생임대인제도",
                           Description: "임대차 가격 인상 자제 유도 및 양도세 실거주\n의무 충족을 위한 자가 이주 과정에서의 연\n쇄적 임차인 퇴거 방지를 위해 임대료를 일정\n기준 이하로 올리는 임대인에게 혜택을 제공\n하는 제도, 그 제도에 따른 임대인을 의미해요.\n\n아래 조건들에 해당할 때 해당 제도를 활용할\n수 있어요.",
                           Detail: "① 신규(갱신) 임대차계약의 임대보증금 또는 임대료\n 증가율이 직전 임대차계약 대비 5% 이하일 것\n② 신규(갱신) 임대차계약이\n2021.12.20~2024.12.31사이에 체결되었을 것\n③ 직전 임대차계약에 따른 임대기간이 1년 6개월\n이상일 것\n④ 신규(갱신) 임대차계약에 따른 임대기간이 2년\n이상일 것",
-                          height: 570,
+                          height: 580,
                         },
                       });
                     }}
@@ -1317,7 +1335,7 @@ const GainsTaxChat = () => {
                           Title: "상생임대인제도",
                           Description: "임대차 가격 인상 자제 유도 및 양도세 실거주\n의무 충족을 위한 자가 이주 과정에서의 연\n쇄적 임차인 퇴거 방지를 위해 임대료를 일정\n기준 이하로 올리는 임대인에게 혜택을 제공\n하는 제도, 그 제도에 따른 임대인을 의미해요.\n\n아래 조건들에 해당할 때 해당 제도를 활용할\n수 있어요.",
                           Detail: "① 신규(갱신) 임대차계약의 임대보증금 또는 임대료\n 증가율이 직전 임대차계약 대비 5% 이하일 것\n② 신규(갱신) 임대차계약이\n2021.12.20~2024.12.31사이에 체결되었을 것\n③ 직전 임대차계약에 따른 임대기간이 1년 6개월\n이상일 것\n④ 신규(갱신) 임대차계약에 따른 임대기간이 2년\n이상일 것",
-                          height: 570,
+                          height: 580,
                         },
                       });
                     }}
@@ -1366,6 +1384,7 @@ const GainsTaxChat = () => {
                               navigation.push('DirectRegister', {
                                 prevChat: 'GainsTaxChat',
                                 index: index,
+                                certError: false,
                               });
                               //  navigation.replace('GainsTax');
                             }

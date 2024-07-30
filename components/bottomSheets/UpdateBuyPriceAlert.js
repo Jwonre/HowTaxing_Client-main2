@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import numberToKorean from '../../utils/numToKorean';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
 import NetInfo from "@react-native-community/netinfo";
-//import InfoIcon from '../../assets/icons/info_tooltip_ico.svg';
+import InfoIcon from '../../assets/icons/info_tooltip_ico.svg';
 
 import { LogBox } from 'react-native';
 
@@ -272,6 +272,21 @@ const UpdateBuyPriceAlert = props => {
                 justifyContent: 'flex-start',
               }}>
               <ModalLabel style={{ marginRight: 5 }}>취득금액</ModalLabel>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+                <InfoIcon
+                  onPress={() => {
+                    SheetManager.show('infoExpense', {
+                      payload: {
+                        Title: "취득금액",
+                        Description: "2006년 이전에 취득한 주택의 계약서를\n분실하여 취득금액이 기억나지 않으신다면\n 먼저 부동산전문세무사와 상담해보세요.",
+                        height: 300,
+                      },
+                    });
+                  }}
+                />
+              </TouchableOpacity>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <ModalInputContainer>

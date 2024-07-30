@@ -11,7 +11,7 @@ import NetInfo from '@react-native-community/netinfo';
 import Config from 'react-native-config'
 
 const Container = styled.ImageBackground.attrs(props => ({
-  source: require('../../assets/images/loginBG.png'),
+  source: require('../../assets/images/BackGroundLogin.png'),
   resizeMode: 'cover',
 }))`
   flex: 1;
@@ -311,7 +311,7 @@ const Login = () => {
     };
 
     axios
-      .post(Config.APP_API_URL||'user/socialLogin', data)
+      .post(`${Config.APP_API_URL}user/socialLogin`, data)
       .then(response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
@@ -347,7 +347,7 @@ const Login = () => {
   // 유저 정보 가져오기
   const getUserData = async id => {
     await axios
-      .get(Config.APP_API_URL||`user/${id}`)
+      .get(`${Config.APP_API_URL}user/${id}`)
       .then(response => {
         // 성공적인 응답 처리
         // ////console.log(response.data);

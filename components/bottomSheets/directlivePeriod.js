@@ -141,7 +141,7 @@ const directlivePeriod = props => {
     [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
 */
     try {
-      const url = Config.APP_API_URL||`question/additionalQuestion`;
+      const url = `${Config.APP_API_URL}question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`

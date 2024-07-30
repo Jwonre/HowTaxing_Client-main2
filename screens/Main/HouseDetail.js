@@ -295,7 +295,7 @@ const HouseDetail = props => {
         <>
           <HouseSection>
             <HoustInfoSection>
-            <View style={{ width: 'auto', flexDirection: 'row' }}>
+              <View style={{ width: 'auto', flexDirection: 'row'}}>
                 <HoustInfoBadge
                   style={{
                     backgroundColor: HOUSE_TYPE.find(
@@ -305,6 +305,9 @@ const HouseDetail = props => {
                   <HoustInfoBadgeText>
                     {HOUSE_TYPE.find(el => el.id === item?.houseType)?.name}
                   </HoustInfoBadgeText>
+                  {(item?.houseType !== '3' && item?.isMoveInRight === true) && <HoustInfoBadgeText style={{ fontSize: 8 }}>
+                    {'(입주권)'}
+                  </HoustInfoBadgeText>}
                 </HoustInfoBadge>
                 {/*(item?.houseType !== '3' && item?.isMoveInRight) && <HoustInfoBadge
                   style={{
@@ -471,7 +474,7 @@ const HouseDetail = props => {
               </InfoContentText>
             </InfoContentItem>}
 
-           { /*<InfoContentItem>
+            { /*<InfoContentItem>
               <InfoContentLabel>동호수</InfoContentLabel>
               <InfoContentText>{item?.detailAdr}</InfoContentText>
             </InfoContentItem>*/}

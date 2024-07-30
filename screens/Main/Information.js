@@ -139,7 +139,7 @@ const Information = props => {
     // 요청 바디
 
     axios
-      .delete(Config.APP_API_URL||'user/withdraw', { headers: headers })
+      .delete(`${Config.APP_API_URL}user/withdraw`, { headers: headers })
       .then(async response => {
         if (response.data.errYn === 'Y') {
           await SheetManager.show('info', {
@@ -188,7 +188,7 @@ const Information = props => {
     // 요청 바디
 
     axios
-      .get(Config.APP_API_URL||'user/logout', { headers: headers })
+      .get(`${Config.APP_API_URL}user/logout`, { headers: headers })
       .then(response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {

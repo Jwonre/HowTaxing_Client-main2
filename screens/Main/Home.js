@@ -248,7 +248,7 @@ const Home = () => {
     // 요청 바디
 
     axios
-      .get(Config.APP_API_URL||'user/logout', { headers: headers })
+      .get(`${Config.APP_API_URL}user/logout`, { headers: headers })
       .then(response => {
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {

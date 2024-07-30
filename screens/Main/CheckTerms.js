@@ -223,7 +223,7 @@ const CheckTerms = props => {
 
     try {
 
-      const response = await axios.post(Config.APP_API_URL||'user/signUp', data, { headers: headers });
+      const response = await axios.post(`${Config.APP_API_URL}user/signUp`, data, { headers: headers });
 
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {

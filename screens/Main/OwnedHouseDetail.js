@@ -199,7 +199,7 @@ const OwnedHouseDetail = props => {
 
 
   useEffect(() => {
-    console.log('props?.payload?.prevSheet', prevSheet)
+    //console.log('props?.payload?.prevSheet', prevSheet)
     /*if (item?.houseId !== '222') {*/
     if (prevSheet) {
       getHouseDetailInfo();
@@ -304,7 +304,7 @@ const OwnedHouseDetail = props => {
     // userProportion | Integer | 본인지분비율
     // moveInRight | boolean | 입주권여부
 
-    const url = Config.APP_API_URL||'house/modify';
+    const url = `${Config.APP_API_URL}house/modify`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -336,9 +336,8 @@ const OwnedHouseDetail = props => {
       isMoveInRight: newMoveInRight === undefined ? '' : newMoveInRight,
     };
 
-    //////console.log('[OwnedHouseDetail]headers:', headers);
-
-    console.log('[OwnedHouseDetail]param:', param);
+    //console.log('[OwnedHouseDetail]headers:', headers);
+    //console.log('[OwnedHouseDetail]param:', param);
     try {
       //console.log('before data', data);
       const response = await axios.put(url, param, { headers: headers });
@@ -388,7 +387,7 @@ const OwnedHouseDetail = props => {
 
   const getHouseDetailInfo = async () => {
     try {
-      const url = Config.APP_API_URL||`house/detail?houseId=${pData?.houseId}`;
+      const url = `${Config.APP_API_URL}house/detail?houseId=${pData?.houseId}`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`,
@@ -397,7 +396,7 @@ const OwnedHouseDetail = props => {
       //console.log('[OwnedHouseDetail] getHouseDetailInfo pData:', pData);
 
       const response = await axios.get(url, { headers });
-      console.log('[OwnedHouseDetail] response :', response);
+      //console.log('[OwnedHouseDetail] response :', response);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -411,7 +410,7 @@ const OwnedHouseDetail = props => {
 
       } else {
         const houseDetails = response.data.data;
-        console.log('houseDetails', houseDetails);
+        //console.log('houseDetails', houseDetails);
         await getAPTLocation(houseDetails.roadAddr);
         setData(houseDetails);
         //const tempMovingInRight = houseDetails.isMoveInRight;
@@ -726,7 +725,7 @@ const OwnedHouseDetail = props => {
               }); return;
             }
             if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
-              dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
+              dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType, isMoveInRight: data?.isMoveInRight }));
             }
 
 
@@ -879,7 +878,7 @@ const OwnedHouseDetail = props => {
     }
 
     if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
-      dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType }));
+      dispatch(editOwnHouseList({ ...item, isRequiredDataMissing: false, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType, isMoveInRight: data?.isMoveInRight }));
     }
     navigation.goBack();
     if (!props.route.params?.prevSheet) return true;
@@ -923,12 +922,15 @@ const OwnedHouseDetail = props => {
                 <HoustInfoBadge
                   style={{
                     backgroundColor: HOUSE_TYPE.find(
-                      el => el.id === item?.houseType,
+                      el => el.id === data?.houseType,
                     )?.color,
                   }}>
                   <HoustInfoBadgeText>
-                    {HOUSE_TYPE.find(el => el.id === item?.houseType)?.name}
+                    {HOUSE_TYPE.find(el => el.id === data?.houseType)?.name}
                   </HoustInfoBadgeText>
+                  {(data?.houseType !== '3' && data?.isMoveInRight === true) && <HoustInfoBadgeText style={{ fontSize: 8 }}>
+                    {'(입주권)'}
+                  </HoustInfoBadgeText>}
                 </HoustInfoBadge>
                 {/*(data?.houseType !== '3' && data?.isMoveInRight) && <HoustInfoBadge
                   style={{
@@ -1185,8 +1187,8 @@ const OwnedHouseDetail = props => {
                   {HOUSE_TYPE.find(color => color.id === '8').name}
                 </NecessaryInfoBadgeText>
               </NecessaryInfoBadge>}
-              <InfoContentLabel style={{marginRight: 5}}>취득금액</InfoContentLabel>
-              <TouchableOpacity
+              <InfoContentLabel style={{ marginRight: 5 }}>취득금액</InfoContentLabel>
+              {/* <TouchableOpacity
                 activeOpacity={0.8}
                 hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                 <InfoIcon
@@ -1200,7 +1202,7 @@ const OwnedHouseDetail = props => {
                     });
                   }}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity>*/}
               <InfoContentText>
                 {data?.buyPrice ? numberToKorean(Number(data?.buyPrice)?.toString()) + '원' : ''}
               </InfoContentText>
@@ -1375,13 +1377,13 @@ const OwnedHouseDetail = props => {
                     const state = await NetInfo.fetch();
                     const canProceed = await handleNetInfoChange(state);
                     if (canProceed) {
-                      handleHouseChange(data, data?.isMoveInRight);
+                      await handleHouseChange(data, data?.isMoveInRight);
                     }
                   } else {
                     const state = await NetInfo.fetch();
                     const canProceed = await handleNetInfoChange(state);
                     if (canProceed) {
-                      handleHouseChange(data, Yn);
+                      await handleHouseChange(data, Yn);
                     }
                   }
                 }}

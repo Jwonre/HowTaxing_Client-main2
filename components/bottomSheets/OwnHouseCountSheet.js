@@ -105,10 +105,13 @@ const OwnHouseCountSheet = props => {
     [선택] sellHouseId | Long | 양도주택ID (  양도소득세 계산 시 세팅)
     [선택] sellDate | LocalDate | 양도일자 (양도소득세 계산 시 세팅)
     [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
+    [선택] ownHouseCnt | Long | 보유주택수 (취득세 계산 시 세팅)
+    [선택] buyDate | LocalDate | 취득일자 (취득세 계산 시 세팅)
+    [선택] jibunAddr | String | 지번주소 (취득세 계산 시 세팅)
 */
 
     try {
-      const url = Config.APP_API_URL||`question/additionalQuestion`;
+      const url = `${Config.APP_API_URL}question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -121,7 +124,9 @@ const OwnHouseCountSheet = props => {
         sellHouseId: houseId ? houseId : '',
         buyDate: buyDate ? dayjs(buyDate).format('YYYY-MM-DD') : null,
         buyPrice: buyPrice ? buyPrice : 0,
-        ownHouseCnt: HouseCount ? HouseCount : 0
+        ownHouseCnt: HouseCount ? HouseCount : 0,
+        buyDate: houseInfo?.buyDate ? dayjs(houseInfo?.buyDate).format('YYYY-MM-DD') : null,
+        jibunAddr: houseInfo?.jibunAddr ? houseInfo?.jibunAddr : '',
       };
       // console.log('[additionalQuestion] additionalQuestion param:', param);
       const response = await axios.post(url, param, { headers });
@@ -360,7 +365,7 @@ const OwnHouseCountSheet = props => {
                               ...item,
                               name: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0].answerContent : additionalQuestion?.detaildata?.answerSelectList[1].answerContent,
                               answer: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0].answerValue : additionalQuestion?.detaildata?.answerSelectList[1].answerValue,
-                              select: ['getInfoDone', 'getInfoConfirm'],
+                              //  select: ['getInfoDone', 'getInfoConfirm'],
                             }))
                           };
                           setTimeout(() => {
@@ -379,34 +384,9 @@ const OwnHouseCountSheet = props => {
 
                     } else {
                       if (additionalQuestion.detaildata?.answerSelectList === null && additionalQuestion.detaildata?.nextQuestionContent === null) {
-
-                        let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
-                        if (tempadditionalAnswerList) {
-                          let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0007' in item);
-                          if (foundIndex !== -1) {
-                            // 불변성을 유지하면서 Q_0007 값을 삭제
-                            const { 'Q_0007': _, ...rest } = tempadditionalAnswerList[foundIndex];
-                            tempadditionalAnswerList = [
-                              ...tempadditionalAnswerList.slice(0, foundIndex),
-                              rest,
-                              ...tempadditionalAnswerList.slice(foundIndex + 1)
-                            ];
-                            // console.log('ownHouseCnt', ownHouseCnt);
-                            setTimeout(() => {
-                              dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
-                            }, 300);
-
-                          } else {
-                            setTimeout(() => {
-                              dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
-                            }, 300);
-                          }
-                        } else {
-                          // console.log('ownHouseCnt', ownHouseCnt);
-                          setTimeout(() => {
-                            dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
-                          }, 300);
-                        }
+                        setTimeout(() => {
+                          dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: [], ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
+                        }, 300);
                       }
                       dispatch(
                         setChatDataList([
@@ -421,33 +401,9 @@ const OwnHouseCountSheet = props => {
                     }
 
                   } else {
-                    let tempadditionalAnswerList = houseInfo?.additionalAnswerList;
-                    if (tempadditionalAnswerList) {
-                      let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0007' in item);
-                      if (foundIndex !== -1) {
-                        // 불변성을 유지하면서 Q_0007 값을 삭제
-                        const { 'Q_0007': _, ...rest } = tempadditionalAnswerList[foundIndex];
-                        tempadditionalAnswerList = [
-                          ...tempadditionalAnswerList.slice(0, foundIndex),
-                          rest,
-                          ...tempadditionalAnswerList.slice(foundIndex + 1)
-                        ];
-                        setTimeout(() => {
-                          // console.log('ownHouseCnt', ownHouseCnt);
-                          dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
-                        }, 300);
-
-                      } else {
-                        setTimeout(() => {
-                          dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
-                        }, 300);
-                      }
-                    } else {
-                      setTimeout(() => {
-                        // console.log('ownHouseCnt', ownHouseCnt);
-                        dispatch(setHouseInfo({ ...houseInfo, ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
-                      }, 300);
-                    }
+                    setTimeout(() => {
+                      dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: [], ownHouseCnt: ownHouseCnt, isOwnHouseCntRegist: true }));
+                    }, 300);
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
                     dispatch(setChatDataList(newChatDataList));
                   }

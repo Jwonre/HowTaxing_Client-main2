@@ -69,24 +69,22 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
+
 project.ext.envConfigFiles = [
     developdebug: "env/.env.develop",
     developrelease: "env/.env.develop", 
-    stagedebug: "env/.env.stage",
-    stagerelease: "env/.env.stage",
     productdebug: "env/.env.product",    
     productrelease: "env/.env.product",
     anothercustombuild: ".env",
 ]
 
+
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
 android {
     ndkVersion rootProject.ext.ndkVersion
-
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.xmonster.howtaxing"
     defaultConfig {
         applicationId "com.xmonster.howtaxing"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -113,7 +111,7 @@ android {
     }
     buildTypes {
         debug {
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -122,9 +120,19 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
+        
     }
 
     flavorDimensions "version"
+    productFlavors {
+        develop {
+        }
+        product {
+        }
+    }
+    
+
+    /*flavorDimensions "version"
     productFlavors {
         develop {
         }
@@ -132,7 +140,8 @@ android {
         }
         product {
         }
-    }
+    }*/
+
 }
 
 dependencies {

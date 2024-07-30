@@ -193,7 +193,7 @@ const ConfirmSheet = props => {
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-  ///console.log('[ConfirmSheet] houseInfo', houseInfo);
+  console.log('[ConfirmSheet] houseInfo', houseInfo);
   // console.log('houseInfo?.additionalAnswerList.find(item => item[Q_0007])', houseInfo?.additionalAnswerList.find(item => item['Q_0007']));
   /* const calculateTax = () => {
      const data = {
@@ -207,7 +207,7 @@ const ConfirmSheet = props => {
      };
  
      axios
-       .post(Config.APP_API_URL||'calculate/buyTax', data)
+       .post(`${Config.APP_API_URL}calculate/buyTax', data)
        .then(response => {
          // 성공적인 응답 처리
          const data2 = response.data.data;
@@ -282,10 +282,15 @@ const ConfirmSheet = props => {
                     backgroundColor: HOUSE_TYPE.find(
                       el => el.id === houseInfo?.houseType,
                     )?.color,
+                    flexDirection: 'row',
+                    alignContent: 'center',
                   }}>
                   <HoustInfoBadgeText>
                     {HOUSE_TYPE.find(el => el.id === houseInfo?.houseType)?.name}
                   </HoustInfoBadgeText>
+                  {(houseInfo?.houseType !== '3' &&  houseInfo?.isMoveInRight === true) && <HoustInfoBadgeText style={{fontSize: 8}}>
+                    {'(입주권)'}
+                  </HoustInfoBadgeText>}
                 </HoustInfoBadge>
                 {/*(houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight) && <HoustInfoBadge
                   style={{
@@ -381,7 +386,7 @@ const ConfirmSheet = props => {
               style={{
                 width: width - 80,
                 alignSelf: 'center',
-                marginTop: 10,
+                marginTop: 20,
                 marginBottom: 20,
               }}>
               <ModalButtonText>확인하기</ModalButtonText>

@@ -605,7 +605,7 @@ const MapViewListSheet = props => {
   };
   // 아파트 단지 선택 시 상세 정보 가져오기
  /* const getHouseDetailInfo = async () => {
-    const url = Config.APP_API_URL||'house/detail';
+    const url = `${Config.APP_API_URL}house/detail`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`

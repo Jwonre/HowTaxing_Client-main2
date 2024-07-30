@@ -254,6 +254,7 @@ const OwnHouseSheet = props => {
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const CARD_WIDTH = 180 + 22;
 
+
   const getadditionalQuestion = async (questionId, answerValue, houseId, buyDate, buyPrice) => {
     /*
     [필수] calcType | String | 계산유형(01:취득세, 02:양도소득세)
@@ -262,10 +263,13 @@ const OwnHouseSheet = props => {
     [선택] sellHouseId | Long | 양도주택ID (  양도소득세 계산 시 세팅)
     [선택] sellDate | LocalDate | 양도일자 (양도소득세 계산 시 세팅)
     [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
+    [선택] ownHouseCnt | Long | 보유주택수 (취득세 계산 시 세팅)
+    [선택] buyDate | LocalDate | 취득일자 (취득세 계산 시 세팅)
+    [선택] jibunAddr | String | 지번주소 (취득세 계산 시 세팅)
 */
 
     try {
-      const url = Config.APP_API_URL||`question/additionalQuestion`;
+      const url = `${Config.APP_API_URL}question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -278,7 +282,9 @@ const OwnHouseSheet = props => {
         sellHouseId: houseId ? houseId : '',
         buyDate: buyDate ? dayjs(buyDate).format('YYYY-MM-DD') : null,
         buyPrice: buyPrice ? buyPrice : 0,
-        ownHouseCnt: selectedList?.length ? selectedList?.length : 0
+        ownHouseCnt: selectedList?.length ? selectedList?.length : 0,
+        buyDate: houseInfo?.buyDate ? dayjs(houseInfo?.buyDate).format('YYYY-MM-DD') : null,
+        jibunAddr: houseInfo?.jibunAddr ? houseInfo?.jibunAddr : '',
       };
       //console.log('[additionalQuestion] additionalQuestion param:', param);
       const response = await axios.post(url, param, { headers });
@@ -461,10 +467,15 @@ const OwnHouseSheet = props => {
                         backgroundColor: HOUSE_TYPE.find(
                           color => color.id === item.houseType,
                         ).color,
+                        flexDirection: 'row',
+                        alignContent: 'center',
                       }}>
                       <TagText>
                         {HOUSE_TYPE.find(color => color.id === item.houseType).name}
                       </TagText>
+                      {(item?.houseType !== '3' && item?.isMoveInRight === true) && <TagText style={{ fontSize: 8 }}>
+                        {'(입주권)'}
+                      </TagText>}
                     </Tag>
                     {/*(item.houseType !== '3' && item?.isMoveInRight) && <Tag
                       style={{
@@ -488,8 +499,8 @@ const OwnHouseSheet = props => {
                           props.payload.navigation.push(
                             'OwnedHouseDetail',
                             {
-                              item: item, prevSheet: 'own', 
-                              index: props.payload.index, 
+                              item: item, prevSheet: 'own',
+                              index: props.payload.index,
                               data: props?.payload?.data,
                               chungYackYn: props?.payload?.chungYackYn
                             },
@@ -558,7 +569,8 @@ const OwnHouseSheet = props => {
                       //  chatDataList: chatDataList,
                       //    actionSheetRef: actionSheetRef,
                       data: props?.payload?.data,
-                      chungYackYn: props?.payload?.chungYackYn
+                      chungYackYn: props?.payload?.chungYackYn,
+                      certError: false,
                     });
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -615,6 +627,7 @@ const OwnHouseSheet = props => {
                           index: props.payload?.index,
                           data: props?.payload?.data,
                           chungYackYn: props?.payload?.chungYackYn,
+                          certError: false,
                         });
                       } else {
                         const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -652,6 +665,7 @@ const OwnHouseSheet = props => {
                       index: props.payload?.index,
                       data: props?.payload?.data,
                       chungYackYn: props?.payload?.chungYackYn,
+                      certError: false,
                     });
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -746,7 +760,7 @@ const OwnHouseSheet = props => {
                             ...item,
                             name: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0].answerContent : additionalQuestion?.detaildata?.answerSelectList[1].answerContent,
                             answer: item.id === 'additionalQuestionY' ? additionalQuestion?.detaildata?.answerSelectList[0].answerValue : additionalQuestion?.detaildata?.answerSelectList[1].answerValue,
-                            select: ['getInfoDone', 'getInfoConfirm'],
+                            //    select: ['getInfoDone', 'getInfoConfirm'],
                           }))
                         };
                         setTimeout(() => {
@@ -769,30 +783,9 @@ const OwnHouseSheet = props => {
 
                       //console.log('additionalQuestion.detaildata?.answerSelectList' , additionalQuestion.detaildata?.answerSelectList, 'tempadditionalAnswerList', tempadditionalAnswerList);
                       //console.log('additionalQuestion.detaildata?.nextQuestionContent' , additionalQuestion.detaildata?.nextQuestionContent, 'tempadditionalAnswerList', tempadditionalAnswerList);
-                      if (tempadditionalAnswerList) {
-                        let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0007' in item);
-                        if (foundIndex !== -1) {
-                          // 불변성을 유지하면서 Q_0007 값을 삭제
-                          const { 'Q_0007': _, ...rest } = tempadditionalAnswerList[foundIndex];
-                          tempadditionalAnswerList = [
-                            ...tempadditionalAnswerList.slice(0, foundIndex),
-                            rest,
-                            ...tempadditionalAnswerList.slice(foundIndex + 1)
-                          ];
-                          setTimeout(() => {
-                            dispatch(
-                              setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true, additionalAnswerList: tempadditionalAnswerList })
-                            );
-                          }, 300)
-                          //console.log('tempadditionalAnswerList2', tempadditionalAnswerList);
-                        } else {
-                          setTimeout(() => {
-                            dispatch(
-                              setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true })
-                            );
-                          }, 300)
-                        }
-                      }
+                      setTimeout(() => {
+                        dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: [], ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true }));
+                      }, 300);
                     }
                     dispatch(
                       setChatDataList([
@@ -806,29 +799,9 @@ const OwnHouseSheet = props => {
                   }
 
                 } else {
-                  if (tempadditionalAnswerList) {
-                    let foundIndex = tempadditionalAnswerList?.findIndex(item => 'Q_0007' in item);
-                    if (foundIndex !== -1) {
-                      // 불변성을 유지하면서 Q_0007 값을 삭제
-                      const { 'Q_0007': _, ...rest } = tempadditionalAnswerList[foundIndex];
-                      tempadditionalAnswerList = [
-                        ...tempadditionalAnswerList.slice(0, foundIndex),
-                        rest,
-                        ...tempadditionalAnswerList.slice(foundIndex + 1)
-                      ];
-                      setTimeout(() => {
-                        dispatch(
-                          setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true, additionalAnswerList: tempadditionalAnswerList })
-                        );
-                      }, 300)
-                    } else {
-                      setTimeout(() => {
-                        dispatch(
-                          setHouseInfo({ ...houseInfo, ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true })
-                        );
-                      }, 300)
-                    }
-                  }
+                  setTimeout(() => {
+                    dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: [], ownHouseCnt: selectedList?.length, isOwnHouseCntRegist: true }));
+                  }, 300);
                 }
 
 

@@ -80,7 +80,7 @@ const TaxInfoCard2 = () => {
       <InfoContainer>
         <InfoNum>1.</InfoNum>
         <InfoText>
-          지금 보시는 세금 계산 결과는 법적 효력이 없으므로{'\n'}정확한 세금 납부를 위해서는 전문가에게 상담을 추천해요.
+          위 계산 결과는 세액 판단을 위한 참고 자료로 사용 가능하며{'\n'}정확한 세금 납부를 위해서 전문가와의 상담을 추천드려요.
         </InfoText>
       </InfoContainer>
     </Card>

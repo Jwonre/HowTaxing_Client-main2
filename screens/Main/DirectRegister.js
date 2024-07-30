@@ -75,7 +75,8 @@ const ButtonText = styled.Text`
 `;
 
 const DirectRegister = props => {
-  const navigation = useNavigation();
+  //console.log("RD props", props);
+  const navigation = props.navigation ? props.navigation : useNavigation();
   const { width, height } = useWindowDimensions();
   const chatDataList = useSelector(state => state.chatDataList.value);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
@@ -103,7 +104,7 @@ const DirectRegister = props => {
 
 
   useLayoutEffect(() => {
-    console.log('props?.payload?.data', props);
+    //console.log('props?.payload?.data', props);
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
@@ -228,7 +229,8 @@ const DirectRegister = props => {
                 prevSheet: props?.route?.params?.prevSheet ? props.route.params?.prevSheet : 'own2',
                 index: props?.route?.params?.index,
                 data: props?.route?.params?.data,
-                chungYackYn: props?.route?.params?.chungYackYn
+                chungYackYn: props?.route?.params?.chungYackYn,
+                certError: props?.route?.params?.certError,
               });
             }
           }}>

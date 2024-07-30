@@ -274,7 +274,7 @@ const OwnHouseSheet2 = props => {
 
   const getHouseDetailInfo = async (item) => {
     try {
-      const url = Config.APP_API_URL||`house/detail?houseId=${item?.houseId}`;
+      const url = `${Config.APP_API_URL}house/detail?houseId=${item?.houseId}`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -317,7 +317,7 @@ const OwnHouseSheet2 = props => {
 
   const CARD_WIDTH = 180 + 22;
   /*ownHouseList?.map((item, index) => (
-     //console.log('ownHouse:', item)
+     console.log('ownHouse:', item)
    ));*/
   return (
     <ActionSheet
@@ -425,10 +425,15 @@ const OwnHouseSheet2 = props => {
                           backgroundColor: HOUSE_TYPE.find(
                             color => color.id === item.houseType,
                           ).color,
+                          flexDirection: 'row',
+                          alignContent: 'center',
                         }}>
                         <TagText>
                           {HOUSE_TYPE.find(color => color.id === item.houseType).name}
                         </TagText>
+                        {(item?.houseType !== '3' && item?.isMoveInRight === true) && <TagText style={{ fontSize: 8 }}>
+                        {'(입주권)'}
+                      </TagText>}
                       </Tag>
                       {/*(item.houseType !== '3' &&item?.isMoveInRight) && <Tag
                       style={{
@@ -515,7 +520,8 @@ const OwnHouseSheet2 = props => {
                       prevSheet: 'own2',
                       index: props.payload?.index,
                       data: props.payload?.data,
-                      chungYackYn: props.payload?.chungYackYn
+                      chungYackYn: props.payload?.chungYackYn,
+                      certError: false,
                     });
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -570,7 +576,8 @@ const OwnHouseSheet2 = props => {
                           prevSheet: 'own2',
                           index: props.payload?.index,
                           data: props.payload?.data,
-                          chungYackYn: props.payload?.chungYackYn
+                          chungYackYn: props.payload?.chungYackYn,
+                          certError: false,
                         });
                       } else {
                         const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -607,7 +614,8 @@ const OwnHouseSheet2 = props => {
                       prevSheet: 'own2',
                       index: props.payload?.index,
                       data: props.payload?.data,
-                      chungYackYn: props.payload?.chungYackYn
+                      chungYackYn: props.payload?.chungYackYn,
+                      certError: false,
                     });
                   } else {
                     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
@@ -650,8 +658,8 @@ const OwnHouseSheet2 = props => {
               const state = await NetInfo.fetch();
               const canProceed = await handleNetInfoChange(state);
               if (canProceed) {
-                /* ////console.log('[OwnHouseSheet2] selectedList:',
-                   ownHouseList?.find(
+                 ////console.log('[OwnHouseSheet2] selectedList:',
+                  /* ownHouseList?.find(
                      item => item.houseId === selectedList[0].houseId,
                    ),
                  );*/

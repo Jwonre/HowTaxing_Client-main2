@@ -228,7 +228,7 @@ const InfoCertification = props => {
   };
 
   const postOwnHouse = async () => {
-    const url = Config.APP_API_URL||'house/search';
+    const url = `${Config.APP_API_URL}house/search`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`

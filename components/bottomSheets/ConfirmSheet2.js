@@ -203,7 +203,7 @@ const ConfirmSheet2 = props => {
      };
  
      axios
-       .post(Config.APP_API_URL||'calculate/sellTax', data)
+       .post(`${Config.APP_API_URL}calculate/sellTax', data)
        .then(response => {
          // 성공적인 응답 처리
          const data2 = response.data.data;
@@ -278,10 +278,15 @@ const ConfirmSheet2 = props => {
                     backgroundColor: HOUSE_TYPE.find(
                       el => el.id === houseInfo?.houseType,
                     )?.color,
+                    flexDirection: 'row',
+                    alignContent: 'center',
                   }}>
                   <HoustInfoBadgeText>
                     {HOUSE_TYPE.find(el => el.id === houseInfo?.houseType)?.name}
                   </HoustInfoBadgeText>
+                  {(houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight === true) && <HoustInfoBadgeText style={{ fontSize: 8 }}>
+                    {'(입주권)'}
+                  </HoustInfoBadgeText>}
                 </HoustInfoBadge>
                 {/*(houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight) && <HoustInfoBadge
                   style={{
@@ -405,7 +410,7 @@ const ConfirmSheet2 = props => {
               style={{
                 width: width - 80,
                 alignSelf: 'center',
-                marginTop: 10,
+                marginTop: 20,
                 marginBottom: 20,
               }}>
               <ModalButtonText>확인하기</ModalButtonText>

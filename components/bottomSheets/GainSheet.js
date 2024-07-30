@@ -226,7 +226,7 @@ const GainSheet = props => {
     [선택] sellPrice | Long | 양도가액 (양도소득세 계산 시 세팅)
 */
     try {
-      const url = Config.APP_API_URL||`question/additionalQuestion`;
+      const url = `${Config.APP_API_URL}question/additionalQuestion`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
@@ -725,7 +725,7 @@ const GainSheet = props => {
                         }
 
                         const additionalQuestion2 = await getadditionalQuestion(additionalQuestion.detaildata?.nextQuestionId, '' ? additionalQuestion.detaildata?.selectSelectList.answerValue : '02', houseInfo?.houseId, houseInfo?.sellDate, sellAmount);
-                        console.log('additionalQuestion2', additionalQuestion2);
+                        //console.log('additionalQuestion2', additionalQuestion2);
                         if (additionalQuestion2.returndata) {
                           if (additionalQuestion2.detaildata?.hasNextQuestion === true) {
                             if (additionalQuestion2.detaildata?.nextQuestionId === 'Q_0005') {

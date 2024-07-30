@@ -2,12 +2,13 @@
 
 import { useWindowDimensions, Pressable, Keyboard, ScrollView } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
-import ActionSheet, {SheetManager} from 'react-native-actions-sheet';
+import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import axios from 'axios';
 import NetInfo from "@react-native-community/netinfo";
 import Config from 'react-native-config'
@@ -144,9 +145,8 @@ const ReviewSheet = props => {
   const { width, height } = useWindowDimensions();
   const [score, setScore] = useState(5);
   const [text, setText] = useState('');
-  const [reviewText, setReviewText] = useState('');
   const [keyboardShow, setKeyboardShow] = useState(false);
-
+  const currentUser = useSelector(state => state.currentUser.value);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
@@ -194,26 +194,33 @@ const ReviewSheet = props => {
 
   const uploadReview = async () => {
     /*
-    [필수] reviewType | String | 리뷰유형(COMMON:공통, BUY:취득세 계산, SELL:양도소득세 계산, CONSULT:상담)
-    [필수] score | Integer | 주택명
-    [선택] reviewContents | String | 상담내용(1000바이트 까지 입력 가능)
+   console.log('props?.payload?.prevSheet', props?.payload?.prevSheet);
+   console.log('score', score);
+   console.log('text', text);
+   console.log(`${Config.APP_API_URL}review/registReview`);
+   console.log('currentUser.accessToken',currentUser.accessToken);
+  
+   [필수] reviewType | String | 리뷰유형(COMMON:공통, BUY:취득세 계산, SELL:양도소득세 계산, CONSULT:상담)
+   [필수] score | Integer | 주택명
+   [선택] reviewContents | String | 상담내용(1000바이트 까지 입력 가능)
 */
 
     try {
-      const url = Config.APP_API_URL||`review/registReview`;
+      const url = `${Config.APP_API_URL}review/registReview`;
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${currentUser.accessToken}`
       };
-
+      //console.log('url', url);
+      //console.log('headers', headers);
       const param = {
         reviewType: props?.payload?.prevSheet === 'AcquisitionChat' ? 'BUY' : 'SELL',
         score: score,
-        reviewContents: reviewText,
+        reviewContents: text,
       };
-      // console.log('[additionalQuestion] additionalQuestion param:', param);
+      //console.log('[additionalQuestion] additionalQuestion param:', param);
       const response = await axios.post(url, param, { headers });
-      console.log('response.data', response.data);
+      //console.log('response.data', response.data);
       if (response.data.errYn == 'Y') {
         await SheetManager.show('info', {
           payload: {
@@ -224,6 +231,7 @@ const ReviewSheet = props => {
           },
         });
       } else {
+        actionSheetRef.current?.hide();
         //  console.log('[additionalQuestion] additionalQuestion retrieved:', detaildata);
         //    console.log('[additionalQuestion] detaildata?.houseType:', detaildata?.houseType);
         //   console.log('[additionalQuestion] additionalQuestion houseInfo:', houseInfo);
@@ -342,7 +350,6 @@ const ReviewSheet = props => {
                 const canProceed = await handleNetInfoChange(state);
                 if (canProceed) {
                   uploadReview();
-                  actionSheetRef.current?.hide();
                   setTimeout(() => {
                     navigation.navigate('Home');
                   }, 200);

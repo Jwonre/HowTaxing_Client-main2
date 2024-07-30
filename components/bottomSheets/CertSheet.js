@@ -243,7 +243,7 @@ const CertSheet = props => {
   const { certType, agreeCert, agreePrivacy } = useSelector(
     state => state.cert.value,
   );
-
+  //console.log('props', props);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
@@ -348,40 +348,102 @@ const CertSheet = props => {
   const hypenHouseAPI = async (url, data, headers) => {
     try {
       const response = await axios.post(url, data, { headers });
+      // console.log('response.data', response);
       if (response.data.errYn === 'Y') {
         if (response.data.errCode === 'HOUSE-005') {
-          ////console.log('response.data', response.data);
+          //console.log('response.data.errMsg.includes([LOGIN)', response.data.errMsg.includes('[LOGIN'));
+          if (response.data.errMsgDtl) {
+            if (response.data.errMsgDtl.includes("[LOGIN-301]") || response.data.errMsgDtl.includes("[LOGIN-302]")) {
+              SheetManager.hide('infoCertification');
+              await SheetManager.show('info', {
+                payload: {
+                  type: 'error',
+                  message: response.data.errMsg ? response.data.errMsg : '청약홈 인증 중\n오류가 발생했어요.\n입력하신 정보를 다시 확인해주세요.',
+                  description: response.data?.errMsgDtl ? response.data?.errMsgDtl : '',
+                  buttontext: '다시 확인하기',
+                },
+              });
+              dispatch(setResend(false));
+              setTimeout(async () => {
+                const networkState = await NetInfo.fetch();
+                // 네트워크가 연결되어 있을 때만 updateHouseDetailName() 함수를 실행합니다.
+                if (networkState.isConnected) {
+                  SheetManager.show('cert', {
+                    payload: {
+                      cert: cert,
+                      index: props.payload?.index,
+                      currentPageIndex,
+                      name,
+                      phone,
+                      id,
+                      password,
+                      residentNumber,
+                      failreturn: true,
+                    },
+                  });
+                }
+              }, 700);
+              const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+              dispatch(setChatDataList(newChatDataList));
+            }
+            /*else if (response.data.errMsgDtl.includes("[LOGIN-303]")) {
+              await SheetManager.hide('infoCertification');
+              await SheetManager.show('info', {
+                payload: {
+                  type: 'error',
+                  message: response.data.errMsg ? response.data.errMsg : '청약홈 인증 결과\n청약통장을 보유하고 있지 않으시군요.\n보유주택을 직접 등록해주세요.',
+                  description: response.data?.errMsgDtl ? response.data?.errMsgDtl : '',
+                  buttontext: '직접 등록하기',
+                },
+              });
+              dispatch(setResend(false));
+
+              const networkState = await NetInfo.fetch();
+              // 네트워크가 연결되어 있을 때만 updateHouseDetailName() 함수를 실행합니다.
+              if (networkState.isConnected) {
+                navigation.push('DirectRegister', {
+                  prevChat: props?.payload?.isGainsTax ? props?.payload?.isGainsTax == true ? 'GainsTax' : 'AcquisitionChat' : '',
+                  index: props?.payload?.index,
+                  certError: true,
+                });
+              }
+
+              //     const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+              //    dispatch(setChatDataList(newChatDataList));
+            }*/
+          } else {
+            await SheetManager.show('info', {
+              payload: {
+                type: 'error',
+                message: response.data.errMsg ? response.data.errMsg : '청약홈 정보를 불러오는 중\n오류가 발생했어요.\n인증을 다시 진행해주세요.',
+                description: response.data?.errMsgDtl ? response.data?.errMsgDtl : '',
+                buttontext: '인증하기',
+              },
+            });
+            dispatch(setResend(true));
+
+          }
+        } else if (response.data.errCode === 'HOUSE-006') {
+          await SheetManager.hide('infoCertification');
           await SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: response.data.errMsg ? response.data.errMsg : '공공기관에서 보유주택 정보를 가져오는 중 오류가 발생했습니다.',
+              message: response.data.errMsg ? response.data.errMsg : '청약홈 인증 결과\n청약통장을 보유하고 있지 않으시군요.\n보유주택을 직접 등록해주세요.',
               description: response.data?.errMsgDtl ? response.data?.errMsgDtl : '',
-              buttontext: '다시 확인하기',
+              buttontext: '직접 등록하기',
             },
           });
           dispatch(setResend(false));
-          SheetManager.hide('infoCertification');
-          setTimeout(async () => {
-            const networkState = await NetInfo.fetch();
-            // 네트워크가 연결되어 있을 때만 updateHouseDetailName() 함수를 실행합니다.
-            if (networkState.isConnected) {
-              SheetManager.show('cert', {
-                payload: {
-                  cert: cert,
-                  index: props.payload?.index,
-                  currentPageIndex,
-                  name,
-                  phone,
-                  id,
-                  password,
-                  residentNumber,
-                  failreturn: true,
-                },
-              });
-            }
-          }, 900);
-          const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
-          dispatch(setChatDataList(newChatDataList));
+
+          const networkState = await NetInfo.fetch();
+          // 네트워크가 연결되어 있을 때만 updateHouseDetailName() 함수를 실행합니다.
+          if (networkState.isConnected) {
+            navigation.push('DirectRegister', {
+              prevChat: props?.payload?.isGainsTax ? props?.payload?.isGainsTax == true ? 'GainsTax' : 'AcquisitionChat' : '',
+              index: props?.payload?.index,
+              certError: true,
+            });
+          }
 
         } else {
 
@@ -423,7 +485,7 @@ const CertSheet = props => {
   };
 
   const postOwnHouse = async () => {
-    const url = Config.APP_API_URL||'house/search';
+    const url = `${Config.APP_API_URL}house/search`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -497,12 +559,12 @@ const CertSheet = props => {
           return;
         }
       }
- 
+   
     if (chatDataList.find(el => el.id === 'over12')) {
       // 실거주기간 가져와야함
- 
+   
       actionSheetRef.current?.hide();
- 
+   
       const chat1 = gainTax.find(el => el.id === 'real');
       const chat2 = {
         id: 'year',
@@ -510,20 +572,20 @@ const CertSheet = props => {
         progress: 5,
         message: '2년 10개월',
       };
- 
+   
       const chat3 = gainTax.find(el => el.id === 'ExpenseInquiry');
       const chat4 = gainTax.find(el => el.id === 'ExpenseAnswer');
- 
+   
       dispatch(
         setHouseInfo({
           ...houseInfo,
           livePeriod: '34',
         }),
       );
- 
+   
       dispatch(setChatDataList([...chatDataList, chat1, chat2, chat3, chat4])) // 1초 후에 실행);
       ////console.log(chat4);
- 
+   
       // 인증 데이터 초기화
       dispatch({
         setCert: {
@@ -533,10 +595,10 @@ const CertSheet = props => {
        //  agreeThird: false,
         },
       });
- 
+   
       return;
- 
- 
+   
+   
     }
       */
     const state = await NetInfo.fetch();
@@ -570,7 +632,7 @@ const CertSheet = props => {
         const chatItem = isGainsTax
           ? gainTax.find(el => el.id === 'allHouse1')
           : acquisitionTax.find(el => el.id === 'moment1');
-       //console.log(chatItem);
+        //console.log(chatItem);
         dispatch(setChatDataList([...chatDataList, chatItem]));
 
       }
@@ -683,13 +745,13 @@ const CertSheet = props => {
               <ListItemButton
                 onPress={() => {
                   actionSheetRef.current?.hide();
-                    navigation.navigate('Cert', {
-                      cert: certType,
-                      isGainsTax: props.payload.isGainsTax,
-                      index: props.payload.index,
-                      navigation: navigation
-                    });
-                
+                  navigation.navigate('Cert', {
+                    cert: certType,
+                    isGainsTax: props.payload.isGainsTax,
+                    index: props.payload.index,
+                    navigation: navigation
+                  });
+
                 }}>
                 <ListItemButtonText>보기</ListItemButtonText>
               </ListItemButton>
@@ -712,14 +774,14 @@ const CertSheet = props => {
               <ListItemButton
                 onPress={() => {
                   actionSheetRef.current?.hide();
-                    navigation.navigate('Privacy', {
-                      cert: certType,
-                      isGainsTax: props.payload.isGainsTax,
-                      index: props.payload.index,
-                      navigation: navigation
+                  navigation.navigate('Privacy', {
+                    cert: certType,
+                    isGainsTax: props.payload.isGainsTax,
+                    index: props.payload.index,
+                    navigation: navigation
 
-                    });
-                
+                  });
+
                 }}>
                 <ListItemButtonText>보기</ListItemButtonText>
               </ListItemButton>
