@@ -26,7 +26,7 @@ const IntroSection = styled.View`
 `;
 
 const SansText = styled.Text`
-  font-size: ${getFontSize(23)}px;
+  font-size: 23px;
   color: #fff;
   text-align: center;
   font-family: GmarketSansTTFMedium;
@@ -52,7 +52,7 @@ const SocialButton = styled.TouchableOpacity.attrs(props => ({
 
 const SocialButtonText = styled.Text`
   width: auto;
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Regular;
   line-height: 20px;
   letter-spacing: -0.3px;
@@ -216,7 +216,7 @@ const Login = () => {
     } catch (error) {
       ////console.log('error', error);
     }
-*/  
+*/
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
@@ -224,7 +224,7 @@ const Login = () => {
     }
 
 
-    
+
   };
   /*
     // 애플 로그인
@@ -386,25 +386,23 @@ const Login = () => {
             <LogoImage source={require('../../assets/images/logo.png')} />
           </LogoGroup>
           <View styled={{ height: 'auto', minHeight: 40 }}>
-            <SansText>어렵지 않은 주택세금</SansText>
+            <SansText >어렵지 않은 주택세금</SansText>
           </View>
         </IntroSection>
         <SocialButton
           onPress={onKakaoLogin}
           width={width}
-          height={60}
           style={{
             backgroundColor: '#FBE54D',
           }}>
+          <SocialButtonIcon
+            source={require('../../assets/images/socialIcon/kakao_ico.png')}
+          />
           <SocialButtonText
+            
             style={{
               color: '#3B1F1E',
-              height: 20,
             }}>
-            <SocialButtonIcon
-              source={require('../../assets/images/socialIcon/kakao_ico.png')}
-            />
-            {'  '}
             카카오톡으로 시작하기
           </SocialButtonText>
         </SocialButton>
@@ -418,6 +416,7 @@ const Login = () => {
             source={require('../../assets/images/socialIcon/naver_ico.png')}
           />
           <SocialButtonText
+            
             style={{
               color: '#fff',
             }}>

@@ -1,14 +1,15 @@
-// 공시가격 정의 설명 팝업(? 아이콘 누른경우)
+// 정보 또는 경고 알림창 컴포넌트
 
-import { useWindowDimensions, Pressable } from 'react-native';
+import { useWindowDimensions, Pressable, View, ScrollView, Linking } from 'react-native';
 import React, { useRef, useState } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
-import { useNavigation } from '@react-navigation/native';
-import InfoCircleIcon from '../../assets/icons/info_circle.svg';
+import { useDispatch, useSelector } from 'react-redux';
+  
+
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -18,22 +19,25 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  width: 80%;
+  width: 100%;
   font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
   text-align: center;
-  margin-top: 20px;
+
 `;
 
 const ModalDescription = styled.Text`
+  width: 100%;
   font-size: 15px;
   font-family: Pretendard-Regular;
-  color: #a3a5a8;
-  line-height: 26px;
-  margin-top: 10px;
+  font-weight: 500;
+  color: #1b1c1f;
+  line-height: 23px;
   text-align: center;
+  padding: 20px;
+
 `;
 
 const ModalContentSection = styled.View`
@@ -61,7 +65,7 @@ const ButtonSection = styled.View`
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  padding: 20px;
+  padding: 10px;
 `;
 
 const Button = styled.TouchableOpacity.attrs(props => ({
@@ -84,12 +88,12 @@ const ButtonText = styled.Text`
   line-height: 20px;
 `;
 
-const PubLandPriceDef = props => {
-  const navigation = useNavigation();
+
+const InfoConsulting = props => {
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
-  const [errorMessage, setErrorMessage] = useState('');
-  //////console.log('props', props);
+
+
 
   return (
     <ActionSheet
@@ -101,6 +105,7 @@ const PubLandPriceDef = props => {
             hitSlop={20}
             onPress={() => {
               actionSheetRef.current?.hide();
+               
             }}>
             <CloseIcon width={16} height={16} />
           </Pressable>
@@ -108,49 +113,26 @@ const PubLandPriceDef = props => {
       }
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
-      closeOnTouchBackdrop={false}
       gestureEnabled={false}
+      closeOnPressBack={true}
+      closeOnTouchBackdrop={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: errorMessage ? 310 : 280,
-        width: width - 40,
+        height: 340,
+        width: width - 40
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
-          <InfoCircleIcon
-            style={{
-              color: props?.payload?.type === 'info' ? '#2F87FF' : '#FF7401',
-            }}
-          />
           <ModalTitle >{props?.payload?.message}</ModalTitle>
-          {errorMessage && <ModalDescription >{errorMessage}</ModalDescription>}
+          <ModalDescription >
+            {props?.payload?.description}
+          </ModalDescription>
         </ModalContentSection>
 
         <ButtonSection>
-          {props?.payload?.type === 'error' && (
-            <Button
-              onPress={() => {
-                // setErrorMessage(props?.payload?.description);
-                ////console.log('NO');
-                actionSheetRef.current?.hide();
-              }}
-              style={{
-                width: 130,
-                backgroundColor: '#fff',
-                borderColor: '#E8EAED',
-                marginRight: 10,
-              }}>
-              <ButtonText
-                style={{
-                  color: '#717274',
-                }} >
-                아니오
-              </ButtonText>
-            </Button>
-          )}
           <DropShadow
             style={{
               shadowColor: 'rgba(0,0,0,0.25)',
@@ -161,22 +143,21 @@ const PubLandPriceDef = props => {
               shadowOpacity: 0.15,
               shadowRadius: 2,
               alignSelf: 'center',
-              width: 130,
+              width: width - 120,
             }}>
             <Button
               onPress={() => {
-                // actionSheetRef.current?.hide();
-                ////console.log('YES');
-                props.payload.onPress.handlePress('YES');
                 actionSheetRef.current?.hide();
+                 
               }}>
-              <ButtonText >네</ButtonText>
+              <ButtonText >{props?.payload?.buttontext ? props?.payload?.buttontext : '확인하기'}</ButtonText>
             </Button>
           </DropShadow>
+
         </ButtonSection>
       </SheetContainer>
-    </ActionSheet>
+    </ActionSheet >
   );
 };
 
-export default PubLandPriceDef;
+export default InfoConsulting;

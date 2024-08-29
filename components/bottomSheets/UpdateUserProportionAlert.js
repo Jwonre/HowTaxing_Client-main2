@@ -28,7 +28,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -89,7 +89,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -205,7 +205,7 @@ const UpdateUserProportionAlert = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>총 공동 소유자가 몇 명인가요?</ModalTitle>
+          <ModalTitle >총 공동 소유자가 몇 명인가요?</ModalTitle>
           <View
             style={{
               flexDirection: 'row',
@@ -247,7 +247,7 @@ const UpdateUserProportionAlert = props => {
                 color: '#1B1C1F',
                 lineHeight: 20,
                 marginHorizontal: 10,
-              }}>
+              }} >
               {ownerCnt}명
             </Text>
 
@@ -298,7 +298,7 @@ const UpdateUserProportionAlert = props => {
               <ButtonText
                 style={{
                   color: '#717274',
-                }}>
+                }} >
                 이전으로
               </ButtonText>
             </Button>
@@ -309,7 +309,7 @@ const UpdateUserProportionAlert = props => {
                 // 주택 정보 업데이트
                 nextHandler();
               }}>
-              <ButtonText>다음으로</ButtonText>
+              <ButtonText >다음으로</ButtonText>
             </Button>
           </ButtonShadow>
         </ButtonSection>

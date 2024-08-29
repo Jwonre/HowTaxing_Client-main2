@@ -35,7 +35,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -44,7 +44,7 @@ const ModalTitle = styled.Text`
 
 
 const InfoMessage = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Medium;
   color: #A3A5A8;
   line-height: 23px;
@@ -61,7 +61,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalSubtitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -128,7 +128,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -180,7 +180,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -297,7 +297,7 @@ const AcquisitionSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -314,7 +314,7 @@ const AcquisitionSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: currentPageIndex === 2 ? (isKeyboardVisible ? 400 : 420) : 640,
+        height: currentPageIndex === 2 ? (isKeyboardVisible ? 400 : 420) : 620,
         width: width - 40,
       }}>
       <ScrollView
@@ -329,19 +329,20 @@ const AcquisitionSheet = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>계약일자를 선택해주세요.</ModalTitle>
-            <InfoMessage>
-                취득하실 주택의 매매 계약일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
+            <ModalTitle >계약일자를 선택해주세요.</ModalTitle>
+            <InfoMessage >
+              취득하실 주택의 매매 계약일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
             </InfoMessage>
             <View
               style={{
                 width: '100%',
-                height: 400,
+                height: 350,
+                marginTop: 20,
               }}>
               <Calendar
                 setSelectedDate={setSelectedDate}
-                selectedDate={new Date(new Date().setHours(0,0,0,0))}
-                currentDate={new Date(new Date().setHours(0,0,0,0))}
+                selectedDate={new Date(new Date().setHours(0, 0, 0, 0))}
+                currentDate={new Date(new Date().setHours(0, 0, 0, 0))}
               />
             </View>
           </ModalInputSection>
@@ -406,7 +407,7 @@ const AcquisitionSheet = props => {
                   backgroundColor: selectedDate ? '#2f87ff' : '#E8EAED',
                   borderColor: selectedDate ? '#2f87ff' : '#E8EAED',
                 }}>
-                <ModalButtonText active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ModalButtonText>
+                <ModalButtonText active={selectedDate}  style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ModalButtonText>
               </ModalButton>
             </DropShadow>
           </ButtonSection>
@@ -414,25 +415,26 @@ const AcquisitionSheet = props => {
 
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>취득일자를 선택해주세요.</ModalTitle>
-            <InfoMessage>
-                취득하실 주택의 취득예정일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
+            <ModalTitle >취득일자를 선택해주세요.</ModalTitle>
+            <InfoMessage >
+              취득하실 주택의 취득예정일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
             </InfoMessage>
             <View
               style={{
                 width: '100%',
-                height: 400,
+                height: 350,
+                marginTop: 20,
               }}>
               {currentPageIndex === 1 && (<Calendar
-                minDate={new Date(new Date(houseInfo?.contractDate.setHours(0,0,0,0)))}
+                minDate={new Date(new Date(houseInfo?.contractDate.setHours(0, 0, 0, 0)))}
                 setSelectedDate={setSelectedDate2}
-                selectedDate={new Date(new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0,0,0,0))}
-                currentDate={new Date(new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0,0,0,0))}
+                selectedDate={new Date(new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0, 0, 0, 0))}
+                currentDate={new Date(new Date(houseInfo?.contractDate ? houseInfo?.contractDate : currentDate).setHours(0, 0, 0, 0))}
               />)}
             </View>
           </ModalInputSection>
 
-          <ButtonSection> 
+          <ButtonSection>
             <ButtonShadow
               style={{
                 shadowColor: '#fff',
@@ -449,6 +451,7 @@ const AcquisitionSheet = props => {
                   borderColor: '#E8EAED',
                 }}>
                 <ButtonText
+                  
                   style={{
                     color: '#717274',
                   }}>
@@ -502,7 +505,7 @@ const AcquisitionSheet = props => {
                 }}
                 active={selectedDate2}
                 disabled={!(selectedDate2)}>
-                <ButtonText active={selectedDate2} style={{ color: selectedDate2 ? '#fff' : '#717274' }}>다음으로</ButtonText>
+                <ButtonText  active={selectedDate2} style={{ color: selectedDate2 ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>
@@ -510,8 +513,8 @@ const AcquisitionSheet = props => {
 
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>취득금액을 입력해주세요.</ModalTitle>
-            <ModalSubtitle>{numberToKorean(acAmount)}{(acAmount !== null && acAmount !== 0) ? '원' : ' '}</ModalSubtitle>
+            <ModalTitle >취득금액을 입력해주세요.</ModalTitle>
+            <ModalSubtitle >{numberToKorean(acAmount)}{(acAmount !== null && acAmount !== 0) ? '원' : ' '}</ModalSubtitle>
             <View
               style={{
                 paddingHorizontal: 20,
@@ -523,7 +526,7 @@ const AcquisitionSheet = props => {
                   alignItems: 'center',
                   justifyContent: 'flex-start',
                 }}>
-                <ModalLabel>취득금액</ModalLabel>
+                <ModalLabel >취득금액</ModalLabel>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <ModalInputContainer>
@@ -560,7 +563,7 @@ const AcquisitionSheet = props => {
                     onPress={() => {
                       setAcAmount(prev => prev + item);
                     }}>
-                    <ModalSelectButtonText>
+                    <ModalSelectButtonText >
                       {item === 10000000 ? '1천만' : item === 1000000 ? '1백만' : numberToKorean(item)}
                     </ModalSelectButtonText>
                   </ModalSelectButton>
@@ -587,6 +590,7 @@ const AcquisitionSheet = props => {
                   borderColor: '#E8EAED',
                 }}>
                 <ButtonText
+                  
                   style={{
                     color: '#717274',
                   }}>
@@ -620,7 +624,7 @@ const AcquisitionSheet = props => {
                   };
                   const chat3 = acquisitionTax.find(el => el.id === 'joint');
                   dispatch(setChatDataList([...chatDataList, chat2, chat3]));
-                   
+
                   //  setTimeout(() => { ////console.log('aquiAmountDate', houseInfo) }, 500);
                 }} style={{
                   backgroundColor: acAmount ? '#2f87ff' : '#E8EAED',
@@ -628,7 +632,7 @@ const AcquisitionSheet = props => {
                 }}
                 active={acAmount}
                 disabled={!(acAmount)}>
-                <ButtonText active={acAmount} style={{ color: acAmount ? '#fff' : '#717274' }}>다음으로</ButtonText>
+                <ButtonText active={acAmount}  style={{ color: acAmount ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>

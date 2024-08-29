@@ -96,7 +96,7 @@ const ChatBubble = styled.View`
 `;
 
 const ChatBubbleText = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Pretendard-SemiBold;
   color: #000;
   line-height: 30px;
@@ -122,7 +122,7 @@ const SelectButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const SelectButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #000;
   line-height: 20px;
@@ -182,7 +182,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -286,7 +286,7 @@ const HouseInfoCard = styled.View`
 `;
 
 const HouseInfoCardTitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -296,7 +296,7 @@ const HouseInfoCardTitle = styled.Text`
 `;
 
 const HouseInfoCardSubTitle = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -321,7 +321,7 @@ const HouseInfoCardListItem = styled.View`
 `;
 
 const HouseInfoListLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 20px;
@@ -329,7 +329,7 @@ const HouseInfoListLabel = styled.Text`
 `;
 
 const HouseInfoListValue = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Bold;
   color: #2f87ff;
   line-height: 20px;
@@ -344,8 +344,6 @@ const ButtonSection = styled.View`
   flex-direction: row;
   justify-content: space-between;
   padding: 10px;
-  border-top-width: 1px;
-  border-top-color: #e8eaed;
 `;
 
 
@@ -473,8 +471,8 @@ const AcquisitionChat = () => {
 
     try {
       const response = await axios.post(`${Config.APP_API_URL}calculation/buyResult`, params, { headers });
-      //console.log('taxCard params', params)
-      //console.log('response.data', response.data);
+      console.log('taxCard params', params)
+      console.log('response.data', response.data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -482,7 +480,7 @@ const AcquisitionChat = () => {
             message: response.data.errMsg ? response.data.errMsg : '취득세 계산 중 오류가 발생했어요.',
             description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
             closeSheet: true,
-            navigation: props?.navigation,
+            navigation: navigation,
             buttontext: '확인하기',
           },
         });
@@ -498,7 +496,7 @@ const AcquisitionChat = () => {
           description: '취득세 계산 중 오류가 발생했습니다. 원하시면 주택 전문 세무사와 상담을 연결시켜드릴게요. 아래 상담하기 버튼을 눌러보세요.',
           id: 'calculation',
           closeSheet: true,
-          navigation: props?.navigation,
+          navigation: navigation,
           buttontext: '확인하기',
         },
       });
@@ -646,7 +644,7 @@ const AcquisitionChat = () => {
                 ...tempadditionalAnswerList.slice(foundIndex + 1)
               ];
             }
-            
+
             //console.log('tempadditionalAnswerList[foundIndex][Q_0009]', tempadditionalAnswerList);
             setTimeout(() => {
               dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
@@ -669,7 +667,7 @@ const AcquisitionChat = () => {
           let foundIndex = tempadditionalAnswerList.findIndex(item => 'Q_0012' in item);
           //console.log('tfoundIndex', foundIndex);
           if (foundIndex !== -1) {
-           // console.log('tempadditionalAnswerList[foundIndex][Q_0012]', tempadditionalAnswerList[foundIndex]['Q_0012']);
+            // console.log('tempadditionalAnswerList[foundIndex][Q_0012]', tempadditionalAnswerList[foundIndex]['Q_0012']);
             //console.log('item2.answer', item2.answer);
             if (tempadditionalAnswerList[foundIndex]['Q_0012'] !== item2.answer) {
               // 불변성을 유지하면서 Q_0006 값을 변경
@@ -697,12 +695,12 @@ const AcquisitionChat = () => {
           }
         } else if (item?.questionId === 'Q_0013') {
           let tempadditionalAnswerList = houseInfo?.additionalAnswerList || [];
-         // console.log('tempadditionalAnswerList1.Q_0013', tempadditionalAnswerList.some(item => 'Q_0013' in item));
+          // console.log('tempadditionalAnswerList1.Q_0013', tempadditionalAnswerList.some(item => 'Q_0013' in item));
           let foundIndex = tempadditionalAnswerList.findIndex(item => 'Q_0013' in item);
           //console.log('tfoundIndex', foundIndex);
           if (foundIndex !== -1) {
             //console.log('tempadditionalAnswerList[foundIndex][Q_0013]', tempadditionalAnswerList[foundIndex]['Q_0013']);
-           // console.log('item2.answer', item2.answer);
+            // console.log('item2.answer', item2.answer);
             if (tempadditionalAnswerList[foundIndex]['Q_0013'] !== item2.answer) {
               // 불변성을 유지하면서 Q_0006 값을 변경
               tempadditionalAnswerList = [
@@ -711,7 +709,7 @@ const AcquisitionChat = () => {
                 ...tempadditionalAnswerList.slice(foundIndex + 1)
               ];
             }
-           // console.log('tempadditionalAnswerList[foundIndex][Q_0013]', tempadditionalAnswerList[foundIndex]['Q_0013']);
+            // console.log('tempadditionalAnswerList[foundIndex][Q_0013]', tempadditionalAnswerList[foundIndex]['Q_0013']);
             setTimeout(() => {
               dispatch(setHouseInfo({ ...houseInfo, additionalAnswerList: tempadditionalAnswerList }));
             }, 300)
@@ -859,7 +857,7 @@ const AcquisitionChat = () => {
                 );*/
 
             }
-          } 
+          }
         } else if (item.id === 'additionalQuestion' && item.questionId === 'Q_0012') {
           const chat9 = acquisitionTax.find(el => el.id === 'getInfoDone');
           const chat10 = acquisitionTax.find(el => el.id === 'getInfoConfirm');
@@ -972,9 +970,9 @@ const AcquisitionChat = () => {
   const renderMyChatItem = ({ item, index }) => {
     return (
       <>
-        <MyChatItem>
+        <MyChatItem >
           {item?.message !== '보유 주택 확인하기' && <MyChatBubble>
-            <MyChatBubbleText>
+            <MyChatBubbleText >
               {item?.message === '확인하기'
                 ? '확인 완료'
                 : item?.message}
@@ -1064,7 +1062,7 @@ const AcquisitionChat = () => {
                 marginTop: 20,
                 marginBottom: 40,
               }}>
-              <ModalButtonText>계산하기</ModalButtonText>
+              <ModalButtonText >계산하기</ModalButtonText>
             </ModalButton>
           </DropShadow>
         )}
@@ -1107,6 +1105,7 @@ const AcquisitionChat = () => {
                     alignContent: 'center',
                   }}>
                   <Text
+                    
                     style={{
                       fontSize: 11,
                       fontFamily: 'Pretendard-Medium',
@@ -1120,7 +1119,7 @@ const AcquisitionChat = () => {
                     }
                   </Text>
                   {houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight === true &&
-                    <Text style={{
+                    <Text  style={{
                       fontSize: 9,
                       fontFamily: 'Pretendard-Medium',
                       color: '#fff',
@@ -1176,14 +1175,14 @@ const AcquisitionChat = () => {
                       color: '#fff',
                       lineHeight: 13,
                       letterSpacing: -0.5,
-                    }}>
+                    }} >
                     취득예정
                   </Text>
                 </View>
               </View>
-              <Text ellipsizeMode='tail' numberOfLines={1}
+              <Text  ellipsizeMode='tail' numberOfLines={1}
                 style={{
-                  fontSize: getFontSize(15),
+                  fontSize: 15,
                   fontFamily: 'Pretendard-Bold',
                   color: '#1B1C1F',
                   lineHeight: 20,
@@ -1194,7 +1193,7 @@ const AcquisitionChat = () => {
                 }}>
                 {houseInfo?.houseName}
               </Text>
-              <Text ellipsizeMode='tail' numberOfLines={1}
+              <Text  ellipsizeMode='tail' numberOfLines={1}
                 style={{
                   fontSize: 13,
                   fontFamily: 'Pretendard-Regular',
@@ -1238,7 +1237,7 @@ const AcquisitionChat = () => {
                   color: '#717274',
                   lineHeight: 20,
                   letterSpacing: -0.5,
-                }}>
+                }} >
                 자세히 보기
               </Text>
               <View
@@ -1293,9 +1292,9 @@ const AcquisitionChat = () => {
           }}>
           <CTACard />
           <HouseInfo item={houseInfo} navigation={navigation} ChatType='AcquisitionChat' />
-          <TaxCard navigation={navigation} Pdata={Pdata} />
+          <TaxCard navigation={navigation} Pdata={Pdata ? Pdata : null} />
           <CalculationWarningCard />
-          <TaxInfoCard Pdata={Pdata} />
+          <TaxInfoCard Pdata={Pdata ? Pdata : null} />
           <ButtonSection>
             <DropShadow
               style={{
@@ -1334,7 +1333,7 @@ const AcquisitionChat = () => {
                 }}>
                 <ModalButtonText style={{
                   color: '#717274',
-                }}>복사하기</ModalButtonText>
+                }} >복사하기</ModalButtonText>
               </ModalButton>
             </DropShadow>
             <DropShadow>
@@ -1356,7 +1355,7 @@ const AcquisitionChat = () => {
                   alignSelf: 'center',
                   marginTop: 10,
                 }}>
-                <ModalButtonText>확인하기</ModalButtonText>
+                <ModalButtonText >확인하기</ModalButtonText>
               </ModalButton>
             </DropShadow>
           </ButtonSection>
@@ -1374,7 +1373,7 @@ const AcquisitionChat = () => {
               }}
             />
             <ChatBubble>
-              <ChatBubbleText>{item?.message}</ChatBubbleText>
+              <ChatBubbleText >{item?.message}</ChatBubbleText>
               {item?.select && (
                 <SelectButtonGroup>
                   {item?.select.map((item2, index2) => (
@@ -1633,7 +1632,7 @@ const AcquisitionChat = () => {
                         }
                       }}>
                       {item2?.icon ? item2.icon : null}
-                      <SelectButtonText>{item2?.name}</SelectButtonText>
+                      <SelectButtonText >{item2?.name}</SelectButtonText>
                     </SelectButton>
                   ))}
                 </SelectButtonGroup>
@@ -1657,7 +1656,7 @@ const AcquisitionChat = () => {
                   style={{
                     marginTop: 20,
                   }}>
-                  <SelectButtonText>확인하기</SelectButtonText>
+                  <SelectButtonText >확인하기</SelectButtonText>
                 </SelectButton>
               )}
             </ChatBubble>
@@ -1672,14 +1671,14 @@ const AcquisitionChat = () => {
                 <ChatBubbleText
                   style={{
                     textAlign: 'center',
-                  }}>
+                  }} >
                   부동산 전문 세무사에게 상담 받아보세요!
                 </ChatBubbleText>
                 <ProfileAvatar
                   source={require('../../assets/images/Minjungum_Lee.png')}
                 />
-                <ProfileName>이민정음 세무사</ProfileName>
-                <ProfileEmail>jsyoun@jstaxbiz.com</ProfileEmail>
+                <ProfileName >이민정음 세무사</ProfileName>
+                <ProfileEmail >jsyoun@jstaxbiz.com</ProfileEmail>
                 <KakaoButton
                   onPress={async () => {
                     const state = await NetInfo.fetch();
@@ -1690,7 +1689,7 @@ const AcquisitionChat = () => {
                   <SocialButtonIcon
                     source={require('../../assets/images/socialIcon/kakao_ico.png')}
                   />
-                  <KakaoButtonText>카카오톡으로 상담하기</KakaoButtonText>
+                  <KakaoButtonText >카카오톡으로 상담하기</KakaoButtonText>
                 </KakaoButton>
               </Card>
               <DropShadow
@@ -1711,7 +1710,7 @@ const AcquisitionChat = () => {
                   onPress={() => {
                     navigation.goBack();
                   }}>
-                  <ButtonText>돌아가기</ButtonText>
+                  <ButtonText >돌아가기</ButtonText>
                 </Button>
               </DropShadow>
             </>
@@ -1749,8 +1748,8 @@ const AcquisitionChat = () => {
                 width: '100%',
               }}>
               <HouseInfoCard width={width}>
-                <HouseInfoCardTitle>주택 정보</HouseInfoCardTitle>
-                <HouseInfoCardSubTitle>
+                <HouseInfoCardTitle >주택 정보</HouseInfoCardTitle>
+                <HouseInfoCardSubTitle >
                   {houseInfo?.houseName} {houseInfo?.detailAdr ? houseInfo?.detailAdr : (houseInfo?.houseDetailName ? '' : '')}
                 </HouseInfoCardSubTitle>
 
@@ -1760,7 +1759,7 @@ const AcquisitionChat = () => {
                       flexDirection: 'row',
                       alignItems: 'center',
                     }}>
-                    <HouseInfoListLabel>공시가격</HouseInfoListLabel>
+                    <HouseInfoListLabel >공시가격</HouseInfoListLabel>
                     <QuestionIcon
                       onPress={e => {
                         const type = '공시가격';
@@ -1768,7 +1767,7 @@ const AcquisitionChat = () => {
                       }}
                     />
                   </View>
-                  <HouseInfoListValue>
+                  <HouseInfoListValue >
                     {(houseInfo?.hasPubLandPrice === false || houseInfo?.hasPubLandPrice === undefined) ? (houseInfo?.isPubLandPriceOver100Mil ? '1억원 초과' : '1억원 이하') : numberToKorean(Number(houseInfo?.pubLandPrice).toString()) + '원'}
                   </HouseInfoListValue>
                 </HouseInfoCardListItem>
@@ -1778,7 +1777,7 @@ const AcquisitionChat = () => {
                       flexDirection: 'row',
                       alignItems: 'center',
                     }}>
-                    <HouseInfoListLabel>전용면적</HouseInfoListLabel>
+                    <HouseInfoListLabel >전용면적</HouseInfoListLabel>
                     <QuestionIcon
                       onPress={e => {
                         const type = '전용면적';
@@ -1791,10 +1790,11 @@ const AcquisitionChat = () => {
                     style={{
                       marginLeft: 'auto',
                     }}>
-                    <HouseInfoListValue>
+                    <HouseInfoListValue >
                       {(houseInfo?.hasArea === false || houseInfo?.hasArea === undefined) ? (houseInfo?.isAreaOver85 ? '국민평형(85㎡) 초과' : '국민평형(85㎡) 이하') : (houseInfo?.isAreaOver85 ? '국민평형(85㎡) 초과' : '국민평형(85㎡) 이하')}
                     </HouseInfoListValue>
                     {houseInfo?.hasArea && <HouseInfoListValue
+                      
                       style={{
                         fontSize: 10,
                         color: '#A3A5A8',
@@ -1836,7 +1836,7 @@ const AcquisitionChat = () => {
                       alignSelf: 'center',
                       marginTop: 20,
                     }}>
-                    <ModalButtonText>다음으로</ModalButtonText>
+                    <ModalButtonText >다음으로</ModalButtonText>
                   </ModalButton>
                 </DropShadow>
               </HouseInfoCard>

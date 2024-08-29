@@ -25,7 +25,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -86,7 +86,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -157,7 +157,7 @@ const UpdateContractDateAlert = props => {
     if (canProceed) {
       var p = data;
       p.contractDate = selectedDate;
-     // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
+      // console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
 
       actionSheetRef.current?.hide();
@@ -203,17 +203,18 @@ const UpdateContractDateAlert = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>취득 당시 계약일자를 선택해주세요.</ModalTitle>
+            <ModalTitle >취득 당시 계약일자를 선택해주세요.</ModalTitle>
             <View
               style={{
                 width: '100%',
-                height: 400,
+                height: 350,
+                marginTop: 20,
               }}>
               <Calendar
-                currentDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0,0,0,0)) : data?.buyDate ? new Date(data?.buyDate) > new Date() ? new Date(new Date().setHours(0,0,0,0)) : new Date(new Date(data?.buyDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
-                maxDate={data?.buyDate ? new Date(new Date(data?.buyDate).setHours(0,0,0,0)) : new Date('2150-12-31')}
+                currentDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0, 0, 0, 0)) : data?.buyDate ? new Date(data?.buyDate) > new Date() ? new Date(new Date().setHours(0, 0, 0, 0)) : new Date(new Date(data?.buyDate).setHours(0, 0, 0, 0)) : new Date(new Date().setHours(0, 0, 0, 0))}
+                maxDate={data?.buyDate ? new Date(new Date(data?.buyDate).setHours(0, 0, 0, 0)) : new Date('2150-12-31')}
                 setSelectedDate={setSelectedDate}
-                selectedDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0,0,0,0)) : data?.buyDate ? new Date(data?.buyDate) > new Date() ? new Date(new Date().setHours(0,0,0,0)) : new Date(new Date(data?.buyDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
+                selectedDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0, 0, 0, 0)) : data?.buyDate ? new Date(data?.buyDate) > new Date() ? new Date(new Date().setHours(0, 0, 0, 0)) : new Date(new Date(data?.buyDate).setHours(0, 0, 0, 0)) : new Date(new Date().setHours(0, 0, 0, 0))}
               />
             </View>
           </ModalInputSection>
@@ -231,6 +232,7 @@ const UpdateContractDateAlert = props => {
                   borderColor: '#E8EAED',
                 }}>
                 <ButtonText
+                  
                   style={{
                     color: '#717274',
                   }}>
@@ -251,7 +253,7 @@ const UpdateContractDateAlert = props => {
                   backgroundColor: selectedDate ? '#2f87ff' : '#E8EAED',
                   borderColor: selectedDate ? '#2f87ff' : '#E8EAED',
                 }}>
-                <ButtonText active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ButtonText>
+                <ButtonText  active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>

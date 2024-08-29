@@ -13,26 +13,25 @@ const LoginWebview = (props) => {
     const [webViewStyle, setWebViewStyle] = useState({ width: width, height: height });
     const onWebViewMessage = route.params?.onWebViewMessage;
     const uri = { uri: `${Config.APP_API_URL}oauth2/authorization/${socialType}` };
-    //console.log('Config', Config);
-    //console.log('Config.getConstants()', Config.getConstants());
-    //console.log('Config.APP_API_URL', Config.APP_API_URL);
-    //console.log('uri', uri);
+   // const uri = { uri: `http://devapp.how-taxing.com/oauth2/authorization/${socialType}` };
+   
+    //onsole.log('uri', uri);
     const sendWebMessage = () => {
         webViewRef.current.injectJavaScript(`
         const url = document?.URL === null ? null : document?.URL;
-        if ((url.indexOf('https://') !== -1) || (url === null)) {
+        if ((url.indexOf('http://') === -1) || (url === null)) {
             window.ReactNativeWebView.postMessage('url');
         } else {
             const preElement = document.getElementsByTagName("pre")[0];
             const data = preElement.innerText; // 결과 
             if (data !== null) {
                 window.ReactNativeWebView.postMessage(data);
-                preElement.style.display = 'none'; // 결과 숨기기
             }
         }
         `);
     };
     const handleWebViewMessage = event => {
+        //console.log('event.nativeEvent',event.nativeEvent);
         const message = event.nativeEvent.data;
         if (message === 'url') {
             setWebViewStyle({
@@ -47,53 +46,53 @@ const LoginWebview = (props) => {
                 flex: 1,
                 width: width,
                 height: width,
-               // display: 'none' 
+                // display: 'none' 
             });
-         //   console.log('message', message)
-         //   console.log('JSON.parse(message)', JSON.parse(message))
-          //  console.log('JSON.parse(message).status', JSON.parse(message).status)
+            //console.log('message', message)
+            //console.log('JSON.parse(message)', JSON.parse(message))
+            //console.log('JSON.parse(message).status', JSON.parse(message).status)
             const parsedMessage = JSON.parse(message);
             if (parsedMessage.errYn === 'Y') {
-            /*   if (parsedMessage.status !== undefined || null) {
-                    SheetManager.show('info', {
-                        payload: {
-                            type: 'error',
-                            message: response.data.errMsg ? response.data.errMsg : '로그인 중 parsedError가 발생했어요.',
-                            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
-                            buttontext: '확인하기',
-                        },
-                    });
-                } else {*/
-                    SheetManager.show('info', {
-                        payload: {
-                            type: 'error',
-                            message: '로그인에 실패했습니다.',
-                            buttontext: '확인하기',
-                        },
-                    });
-                
-
-             /*   Alert.alert(
-                    'error',
-                    '로그인 중 error 발생',
-                    [
-                        {
-                            text: '확인',
-                            style: 'destructive',
-                        },
-                    ],
-                    {
-                        onDismiss: () => { },
+                /*   if (parsedMessage.status !== undefined || null) {
+                        SheetManager.show('info', {
+                            payload: {
+                                type: 'error',
+                                message: response.data.errMsg ? response.data.errMsg : '로그인 중 parsedError가 발생했어요.',
+                                description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
+                                buttontext: '확인하기',
+                            },
+                        });
+                    } else {*/
+                SheetManager.show('info', {
+                    payload: {
+                        type: 'error',
+                        message: '로그인에 실패했습니다.',
+                        buttontext: '확인하기',
                     },
-                );*/
+                });
+
+
+                /*   Alert.alert(
+                       'error',
+                       '로그인 중 error 발생',
+                       [
+                           {
+                               text: '확인',
+                               style: 'destructive',
+                           },
+                       ],
+                       {
+                           onDismiss: () => { },
+                       },
+                   );*/
             }
-            else if(parsedMessage.errYn === 'N'){
+            else if (parsedMessage.errYn === 'N') {
                 //로그인화면으로 데이터 보냄
                 const data = parsedMessage.data;
                 //console.log('data', data);
                 onWebViewMessage({ nativeEvent: { data: data } });
             }
-          //  navigation.goBack();
+            //  navigation.goBack();
         }
 
 
@@ -109,6 +108,7 @@ const LoginWebview = (props) => {
             onLoad={sendWebMessage}
             onMessage={handleWebViewMessage}
             option={{ tarBarVisible: false }}
+            mixedContentMode="always"
         />
     );
 };

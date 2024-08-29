@@ -21,7 +21,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 32px;
@@ -48,7 +48,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -205,7 +205,7 @@ const DeleteHouseAlert = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>
+          <ModalTitle >
             선택하신 주택을 주택 목록에서{'\n'}정말로 삭제하실 건가요?
           </ModalTitle>
         </ModalInputSection>
@@ -225,7 +225,7 @@ const DeleteHouseAlert = props => {
             <ModalButtonText
               style={{
                 color: '#717274',
-              }}>
+              }} >
               아니오
             </ModalButtonText>
           </ModalButton>
@@ -247,7 +247,7 @@ const DeleteHouseAlert = props => {
               onPress={() => {
                 deleteHouse();
               }}>
-              <ModalButtonText>네</ModalButtonText>
+              <ModalButtonText >네</ModalButtonText>
             </ModalButton>
           </DropShadow>
         </ButtonSection>

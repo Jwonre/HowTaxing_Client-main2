@@ -30,7 +30,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -56,7 +56,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -88,12 +88,12 @@ const JointSheet = props => {
   const [personCount, setPersonCount] = useState(2);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-  
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const navigation = props.payload?.navigation;
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -145,7 +145,7 @@ const JointSheet = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>공동 소유자가 몇 명인가요?</ModalTitle>
+          <ModalTitle >공동 소유자가 몇 명인가요?</ModalTitle>
           <View
             style={{
               flexDirection: 'row',
@@ -178,6 +178,7 @@ const JointSheet = props => {
               <MinusIcon />
             </TouchableOpacity>
             <Text
+              
               style={{
                 fontSize: 20,
                 fontFamily: 'Pretendard-Bold',
@@ -266,7 +267,7 @@ const JointSheet = props => {
                 marginTop: 20,
                 marginBottom: 50,
               }}>
-              <ModalButtonText>다음으로</ModalButtonText>
+              <ModalButtonText >다음으로</ModalButtonText>
             </ModalButton>
           </DropShadow>
         </ButtonSection>

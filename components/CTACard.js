@@ -3,7 +3,7 @@
 import { Linking } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
-import getFontSize from '../utils/getFontSize';
+
 import * as Animatable from 'react-native-animatable';
 import FastImage from 'react-native-fast-image';
 import NetInfo from "@react-native-community/netinfo";
@@ -39,7 +39,7 @@ const ProfileName = styled.Text`
 `;
 
 const CardTitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -132,27 +132,27 @@ const CTACard = () => {
       <CardTitle
         style={{
           textAlign: 'center',
-        }}>
+        }} >
         부동산 전문 세무사에게 상담 받아보세요!
       </CardTitle>
       <CardSubTitle
         style={{
-          fontSize: getFontSize(14),
+          fontSize: 14,
           textAlign: 'center',
           fontFamily: 'Pretendard-Regular',
           color: '#A3A5A8',
-        }}>
+        }} >
         여러분의 세금 절감에 많은 도움이 될거에요.
       </CardSubTitle>
       <ProfileAvatar
         source={require('../assets/images/Minjungum_Lee.png')}
       />
-      <ProfileName>이민정음 세무사</ProfileName>
+      <ProfileName >이민정음 세무사</ProfileName>
       <KakaoButton onPress={() => openKakaoLink()}>
         <SocialButtonIcon
           source={require('../assets/images/socialIcon/kakao_ico.png')}
         />
-        <KakaoButtonText>카카오톡으로 상담하기</KakaoButtonText>
+        <KakaoButtonText >카카오톡으로 상담하기</KakaoButtonText>
       </KakaoButton>
     </Card>
   );

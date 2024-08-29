@@ -19,7 +19,7 @@ const SheetContainer = styled.View`
 
 const ModalTitle = styled.Text`
   width: 80%;
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -28,7 +28,7 @@ const ModalTitle = styled.Text`
 `;
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 26px;
@@ -79,7 +79,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -90,7 +90,7 @@ const LogOutSheet = props => {
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
   const [errorMessage, setErrorMessage] = useState('');
- // ////console.log('props', props);
+  // ////console.log('props', props);
 
   return (
     <ActionSheet
@@ -126,8 +126,8 @@ const LogOutSheet = props => {
               color: props?.payload?.type === 'info' ? '#2F87FF' : '#FF7401',
             }}
           />
-          <ModalTitle>{props?.payload?.message}</ModalTitle>
-          {errorMessage && <ModalDescription>{errorMessage}</ModalDescription>}
+          <ModalTitle >{props?.payload?.message}</ModalTitle>
+          {errorMessage && <ModalDescription >{errorMessage}</ModalDescription>}
         </ModalContentSection>
 
         <ButtonSection>
@@ -145,6 +145,7 @@ const LogOutSheet = props => {
                 marginRight: 10,
               }}>
               <ButtonText
+                
                 style={{
                   color: '#717274',
                 }}>
@@ -171,7 +172,7 @@ const LogOutSheet = props => {
                 props.payload.onPress.handlePress('YES');
                 actionSheetRef.current?.hide();
               }}>
-              <ButtonText>네</ButtonText>
+              <ButtonText >네</ButtonText>
             </Button>
           </DropShadow>
         </ButtonSection>

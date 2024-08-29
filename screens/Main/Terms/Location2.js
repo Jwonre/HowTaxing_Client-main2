@@ -7,7 +7,7 @@ import {
     useWindowDimensions,
     ScrollView,
 } from 'react-native';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
@@ -23,7 +23,7 @@ const Container = styled.View`
   `;
 
 const Title = styled.Text`
-    font-size: ${getFontSize(20)}px;
+    font-size: 20px;
     font-family: Pretendard-Bold;
     color: #1b1c1f;
     line-height: 30px;
@@ -33,7 +33,7 @@ const Title = styled.Text`
   `;
 
 const SubTitle = styled.Text`
-    font-size: ${getFontSize(18)}px;
+    font-size: 18px;
     font-family: Pretendard-Medium;
     color: #1b1c1f;
     line-height: 25px;
@@ -79,7 +79,9 @@ const Location2 = props => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
     const { width } = useWindowDimensions();
-    const [activeButton, setActiveButton] = useState(false);
+    const [activeButton, setActiveButton] = useState(true);
+    const scrollViewRef = useRef(null);
+    const [buttonText, setButtonText] = useState('끝으로 이동하기');
     const { agreeCert, agreePrivacy, agreeLocation, agreeAge, agreeMarketing } = useSelector(
         state => state.cert.value,
     );
@@ -91,7 +93,7 @@ const Location2 = props => {
                     activeOpacity={0.6}
                     hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                     onPress={() => {
-                        navigation.goBack({tokens: props?.route?.params?.tokens});
+                        navigation.goBack({ tokens: props?.route?.params?.tokens });
                     }}>
                     <CloseIcon />
                 </TouchableOpacity>
@@ -114,24 +116,27 @@ const Location2 = props => {
     return (
         <Container>
             <ScrollView
+                ref={scrollViewRef}
                 showsVerticalScrollIndicator={true}
                 contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
                 onScroll={({ nativeEvent }) => {
-                    // 하단 스크롤 시 버튼 활성화
                     if (
                         nativeEvent.contentOffset.y +
                         nativeEvent.layoutMeasurement.height >=
-                        nativeEvent.contentSize.height  - 1
+                        nativeEvent.contentSize.height - 1
                     ) {
-                        setActiveButton(true);
+                        setButtonText('동의하기');
                     } else {
-                        setActiveButton(false);
+                        setButtonText('끝으로 이동하기');
+
                     }
-                }}>
-                <Title>(필수) 위치정보 이용약관</Title>
-                <SubTitle>[필수] 위치정보 이용약관 동의서</SubTitle>
-                <ContentText>
-                    {`위치기반서비스 이용약관
+                }}
+                scrollEventThrottle={16} // 스크롤 이벤트 빈도 조절
+            >
+                <Title >하우택싱 위치기반서비스 이용약관</Title>
+                <SubTitle >하우택싱 위치기반서비스 이용약관 동의서</SubTitle>
+                <ContentText >
+                    {`하우택싱 위치기반서비스 이용약관
 
 제1조 (목적)
 본 약관은 회원(JS세무회계의 서비스 약관에 동의한 자를 말하며 이하 '회원’이라고 합니다)이 JS세무회계(이하 '회사’라고 합니다)가 제공하는 웹페이지 및 ’하우택싱' (회사가 개발 운영하는 모바일애플리케이션을 말합니다 이하 '모바일앱'이라고 합니다)의 서비스를 이용함에 있어 회원과 회사의 권리 및 의무, 기타 제반 사항을 정하는 것을 목적으로 합니다.
@@ -266,21 +271,27 @@ const Location2 = props => {
                         active={activeButton || agreeLocation}
                         disabled={!(activeButton || agreeLocation)}
                         onPress={() => {
-                            // 동의하기 버튼 클릭 시 redux에 저장
-                            dispatch(
-                                setCert({
-                                    agreeAge,
-                                    agreePrivacy,
-                                    agreeMarketing,
-                                    agreeCert,
-                                    agreeLocation: true,
-                                }),
-                            );
+                            if (buttonText === '끝으로 이동하기') {
+                                if (scrollViewRef.current) {
+                                    scrollViewRef.current.scrollTo({ y: 100000, animated: true });
+                                }
+                            } else {
+                                // 동의하기 버튼 클릭 시 redux에 저장
+                                dispatch(
+                                    setCert({
+                                        agreeAge,
+                                        agreePrivacy,
+                                        agreeMarketing,
+                                        agreeCert,
+                                        agreeLocation: true,
+                                    }),
+                                );
 
-                            // 채팅방으로 이동
-                            navigation.goBack({tokens: props?.route?.params?.tokens});
+                                // 채팅방으로 이동
+                                navigation.goBack({ tokens: props?.route?.params?.tokens });
+                            }
                         }}>
-                        <ButtonText active={activeButton || agreeLocation}>동의하기</ButtonText>
+                        <ButtonText active={activeButton || agreeLocation}>{buttonText}</ButtonText>
                     </Button>
                 </DropShadow>
             </ButtonSection>

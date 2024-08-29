@@ -43,7 +43,7 @@ const IntroSection = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(25)}px;
+  font-size: 25px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -66,7 +66,7 @@ const Option = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const OptionText = styled.Text`
-    font-size: ${getFontSize(16)}px;
+    font-size: 16px;
     font-family: Pretendard-Regular;
     color: #1b1c1f;
     line-height: 20px;
@@ -264,26 +264,26 @@ const Information = props => {
         <InformationIcon />
       </IconView>
       <IntroSection>
-        <Title>앱 정보</Title>
+        <Title >앱 정보</Title>
       </IntroSection>
       <ListItem>
         <Option>
-          <OptionText>공지사항</OptionText>
+          <OptionText >공지사항</OptionText>
         </Option>
         <Divider />
         <Option style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <OptionText>버전정보</OptionText>
-          <OptionText>v1.0.0</OptionText>
+          <OptionText >버전정보</OptionText>
+          <OptionText >v1.0.0</OptionText>
         </Option>
         <Divider />
         <Option style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <OptionText>법인명(단체명)</OptionText>
-          <OptionText>JS 세무회계</OptionText>
+          <OptionText >법인명(단체명)</OptionText>
+          <OptionText >JS 세무회계</OptionText>
         </Option>
         <Divider />
         <Option style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <OptionText>사업자등록번호</OptionText>
-          <OptionText>416-18-30801</OptionText>
+          <OptionText >사업자등록번호</OptionText>
+          <OptionText >416-18-30801</OptionText>
         </Option>
         <Divider />
         <Option onPress={async () => {
@@ -291,7 +291,7 @@ const Information = props => {
           const canProceed = await handleNetInfoChange(state);
           if (canProceed) { navigation.navigate('InfoCert') }
         }}>
-          <OptionText>서비스 이용약관</OptionText>
+          <OptionText >서비스 이용약관</OptionText>
         </Option>
         <Divider />
         <Option onPress={async () => {
@@ -299,7 +299,7 @@ const Information = props => {
           const canProceed = await handleNetInfoChange(state);
           if (canProceed) { navigation.navigate('InfoPrivacy') }
         }}>
-          <OptionText>개인정보 처리방침</OptionText>
+          <OptionText >개인정보 처리방침</OptionText>
         </Option>
         <Divider />
         <Option onPress={async () => {
@@ -307,11 +307,11 @@ const Information = props => {
           const canProceed = await handleNetInfoChange(state);
           if (canProceed) { navigation.navigate('InfoLocation') }
         }}>
-          <OptionText>위치정보 이용약관</OptionText>
+          <OptionText >위치정보 이용약관</OptionText>
         </Option>
         <Divider />
         <Option onPress={goLogout}>
-          <OptionText>로그아웃</OptionText>
+          <OptionText >로그아웃</OptionText>
         </Option>
         <Divider />
         <Option onPress={async () => {
@@ -322,7 +322,7 @@ const Information = props => {
           }
         }
         }>
-          <OptionText>회원탈퇴</OptionText>
+          <OptionText >회원탈퇴</OptionText>
         </Option>
       </ListItem>
     </Container>

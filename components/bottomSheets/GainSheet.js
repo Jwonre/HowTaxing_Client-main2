@@ -36,7 +36,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -44,7 +44,7 @@ const ModalTitle = styled.Text`
 `;
 
 const InfoMessage = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Medium;
   color: #A3A5A8;
   line-height: 23px;
@@ -61,7 +61,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalSubtitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -127,7 +127,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -179,7 +179,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -382,7 +382,7 @@ const GainSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: currentPageIndex === 2 ? (isKeyboardVisible ? 400 : 420) : 640,
+        height: currentPageIndex === 2 ? (isKeyboardVisible ? 400 : 420) : 620,
         width: width - 40,
       }}>
       <ScrollView
@@ -397,20 +397,21 @@ const GainSheet = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>양도계약일자를 선택해주세요.</ModalTitle>
-            <InfoMessage>
+            <ModalTitle >양도계약일자를 선택해주세요.</ModalTitle>
+            <InfoMessage >
               양도하실 주택의 매매 계약일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
             </InfoMessage>
             <View
               style={{
                 width: '100%',
-                height: 400,
+                height: 350,
+                marginTop: 20,
               }}>
               <Calendar
                 setSelectedDate={setSelectedDate}
-                minDate={new Date(new Date(houseInfo?.buyDate ? houseInfo?.buyDate : '').setHours(0,0,0,0))}
-                currentDate={new Date(new Date((new Date(houseInfo?.buyDate) <= currentDate) ? currentDate : houseInfo?.buyDate).setHours(0,0,0,0))}
-                selectedDate={new Date(new Date((new Date(houseInfo?.buyDate) <= currentDate) ? currentDate : houseInfo?.buyDate).setHours(0,0,0,0))}
+                minDate={new Date(new Date(houseInfo?.buyDate ? houseInfo?.buyDate : '').setHours(0, 0, 0, 0))}
+                currentDate={new Date(new Date((new Date(houseInfo?.buyDate) <= currentDate) ? currentDate : houseInfo?.buyDate).setHours(0, 0, 0, 0))}
+                selectedDate={new Date(new Date((new Date(houseInfo?.buyDate) <= currentDate) ? currentDate : houseInfo?.buyDate).setHours(0, 0, 0, 0))}
               />
             </View>
           </ModalInputSection>
@@ -474,7 +475,7 @@ const GainSheet = props => {
                   backgroundColor: selectedDate ? '#2f87ff' : '#E8EAED',
                   borderColor: selectedDate ? '#2f87ff' : '#E8EAED',
                 }}>
-                <ModalButtonText active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ModalButtonText>
+                <ModalButtonText  active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ModalButtonText>
               </ModalButton>
             </DropShadow>
           </ButtonSection>
@@ -482,21 +483,22 @@ const GainSheet = props => {
 
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>양도일자를 선택해주세요.</ModalTitle>
-            <InfoMessage>
+            <ModalTitle >양도일자를 선택해주세요.</ModalTitle>
+            <InfoMessage >
               양도하실 주택의 양도예정일자에요.{'\n'}아직 계약 전이라면, 예정일로 선택해주세요.
             </InfoMessage>
             <View
               style={{
                 width: '100%',
-                height: 400,
+                height: 350,
+                marginTop: 20,
               }}>
 
               {currentPageIndex === 1 && (<Calendar
-                minDate={new Date(new Date(houseInfo?.sellContractDate).setHours(0,0,0,0))}
-                currentDate={new Date(new Date(houseInfo?.sellContractDate ? houseInfo?.sellContractDate : currentDate).setHours(0,0,0,0))}
+                minDate={new Date(new Date(houseInfo?.sellContractDate).setHours(0, 0, 0, 0))}
+                currentDate={new Date(new Date(houseInfo?.sellContractDate ? houseInfo?.sellContractDate : currentDate).setHours(0, 0, 0, 0))}
                 setSelectedDate={setSelectedDate2}
-                selectedDate={new Date(new Date(houseInfo?.sellContractDate ? houseInfo?.sellContractDate : currentDate).setHours(0,0,0,0))}
+                selectedDate={new Date(new Date(houseInfo?.sellContractDate ? houseInfo?.sellContractDate : currentDate).setHours(0, 0, 0, 0))}
               />)}
             </View>
           </ModalInputSection>
@@ -520,7 +522,7 @@ const GainSheet = props => {
                 <ButtonText
                   style={{
                     color: '#717274',
-                  }}>
+                  }} >
                   이전으로
                 </ButtonText>
               </Button>
@@ -569,7 +571,7 @@ const GainSheet = props => {
                   backgroundColor: selectedDate2 ? '#2f87ff' : '#E8EAED',
                   borderColor: selectedDate2 ? '#2f87ff' : '#E8EAED',
                 }}>
-                <ButtonText active={selectedDate2} style={{ color: selectedDate2 ? '#fff' : '#717274' }}>다음으로</ButtonText>
+                <ButtonText  active={selectedDate2} style={{ color: selectedDate2 ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>
@@ -577,8 +579,8 @@ const GainSheet = props => {
 
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>양도금액을 입력해주세요.</ModalTitle>
-            <ModalSubtitle>{numberToKorean(sellAmount)}{(sellAmount !== null && sellAmount !== 0) ? '원' : ' '}</ModalSubtitle>
+            <ModalTitle >양도금액을 입력해주세요.</ModalTitle>
+            <ModalSubtitle >{numberToKorean(sellAmount)}{(sellAmount !== null && sellAmount !== 0) ? '원' : ' '}</ModalSubtitle>
             <View
               style={{
                 paddingHorizontal: 20,
@@ -590,10 +592,11 @@ const GainSheet = props => {
                   alignItems: 'center',
                   justifyContent: 'flex-start',
                 }}>
-                <ModalLabel>양도금액</ModalLabel>
+                <ModalLabel >양도금액</ModalLabel>
               </View>
               <ModalInputContainer>
                 <StyledInput
+                  
                   placeholder="양도금액을 입력해주세요."
                   keyboardType="number-pad"
                   value={sellAmount ? sellAmount.toLocaleString() : null}
@@ -625,7 +628,7 @@ const GainSheet = props => {
                     onPress={() => {
                       setAcAmount(prev => prev + item);
                     }}>
-                    <ModalSelectButtonText>
+                    <ModalSelectButtonText >
                       {item === 10000000 ? '1천만' : item === 1000000 ? '1백만' : numberToKorean(item)}
                     </ModalSelectButtonText>
                   </ModalSelectButton>
@@ -654,7 +657,7 @@ const GainSheet = props => {
                 <ButtonText
                   style={{
                     color: '#717274',
-                  }}>
+                  }} >
                   이전으로
                 </ButtonText>
               </Button>
@@ -677,10 +680,10 @@ const GainSheet = props => {
                     },
                   };
                   const additionalQuestion = await getadditionalQuestion('', '', houseInfo?.houseId, houseInfo?.sellDate, sellAmount);
-                 //console.log('additionalQuestion', additionalQuestion);
-                 //console.log('additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue', additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue);
-                 //console.log('additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent', additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent);
-                 
+                  //console.log('additionalQuestion', additionalQuestion);
+                  //console.log('additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue', additionalQuestion?.detaildata?.answerSelectList[0]?.answerValue);
+                  //console.log('additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent', additionalQuestion?.detaildata?.answerSelectList[0]?.answerContent);
+
                   let chat7;
                   let chat11;
                   const chat9 = gainTax.find(el => el.id === 'ExpenseInquiry');
@@ -713,7 +716,7 @@ const GainSheet = props => {
                       } else if (additionalQuestion.detaildata?.nextQuestionId === 'Q_0004') {
 
 
-                        
+
                         let chatIndex = gainTax.findIndex(el => el.id === 'additionalQuestion2');
                         if (chatIndex !== -1) {
                           chat7 = {
@@ -844,7 +847,7 @@ const GainSheet = props => {
                 }}
                 active={sellAmount}
                 disabled={!(sellAmount)}>
-                <ButtonText active={sellAmount} style={{ color: sellAmount ? '#fff' : '#717274' }}>다음으로</ButtonText>
+                <ButtonText  active={sellAmount} style={{ color: sellAmount ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>

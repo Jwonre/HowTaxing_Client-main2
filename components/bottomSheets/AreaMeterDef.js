@@ -28,7 +28,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -44,7 +44,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 26px;
@@ -74,7 +74,7 @@ const CheckCircle = styled.TouchableOpacity.attrs(props => ({
 
 const ListItemTitle = styled.Text`
   flex: 1;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -86,7 +86,7 @@ const ListItemButton = styled.TouchableOpacity.attrs(props => ({
 }))``;
 
 const ListItemButtonText = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 20px;
@@ -168,7 +168,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -218,7 +218,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -411,7 +411,7 @@ const AreaMeterDef = props => {
                 </CheckCircle>
                 <ListItemTitle
                   style={{
-                    fontSize: getFontSize(15),
+                    fontSize: 15,
                     fontFamily: 'Pretendard-Medium',
                   }}>
                   전체 동의하기

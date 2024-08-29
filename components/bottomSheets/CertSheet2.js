@@ -34,7 +34,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -50,7 +50,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 26px;
@@ -80,7 +80,7 @@ const CheckCircle = styled.TouchableOpacity.attrs(props => ({
 
 const ListItemTitle = styled.Text`
   flex: 1;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -92,7 +92,7 @@ const ListItemButton = styled.TouchableOpacity.attrs(props => ({
 }))``;
 
 const ListItemButtonText = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 20px;
@@ -174,7 +174,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -224,7 +224,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -248,7 +248,7 @@ const SelectButtonContainer = styled.View`
 
 
 const SelectButtonText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-SemiBold;
   color: #a3a5a8;
   letter-spacing: -0.3px;
@@ -270,7 +270,7 @@ const SelectItem = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const SelectItemText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -291,6 +291,7 @@ const CertSheet = props => {
   const [selectedArea2, setSelectedArea2] = useState('');
   const selectRef2 = useRef(null);
   const selectRef = useRef(null);
+
   const [isGainsTax, setIsGainsTax] = useState('');
   const { certType, agreeCert, agreePrivacy, agreeCopyright, agreeGov24 } = useSelector(
     state => state.cert.value,
@@ -495,8 +496,8 @@ const CertSheet = props => {
   };
 
   const postOwnHouse = async () => {
-    //const url = `${Config.APP_API_URL}house/search'; real api
-    const url = `${Config.APP_API_URL}house/search`;
+    //const url = `${Config.APP_API_URL}house/loadHouse'; real api
+    const url = `${Config.APP_API_URL}house/loadHouse`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -761,7 +762,7 @@ const CertSheet = props => {
                 </CheckCircle>
                 <ListItemTitle
                   style={{
-                    fontSize: getFontSize(15),
+                    fontSize: 15,
                     fontFamily: 'Pretendard-Medium',
                   }}>
                   전체 동의하기
@@ -2278,7 +2279,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-SemiBold',
     color: '#A3A5A8',
     letterSpacing: -0.3,
@@ -2294,7 +2295,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8EAED',
   },
   rowTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-Regular',
     color: '#1B1C1F',
     letterSpacing: -0.3,

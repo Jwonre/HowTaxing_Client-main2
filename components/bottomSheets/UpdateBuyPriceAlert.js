@@ -29,7 +29,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -37,7 +37,7 @@ const ModalTitle = styled.Text`
 `;
 
 const ModalLabel = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard;
   color: #000;
   line-height: 18px;
@@ -45,7 +45,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalSubtitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard;
   color: #1b1c1f;
   line-height: 20px;
@@ -147,7 +147,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -258,8 +258,8 @@ const UpdateBuyPriceAlert = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>취득 당시 취득금액을 입력해주세요.</ModalTitle>
-          <ModalSubtitle>{numberToKorean(buyPrice)}{(buyPrice !== null && buyPrice !== 0) ? '원' : ' '}</ModalSubtitle>
+          <ModalTitle >취득 당시 취득금액을 입력해주세요.</ModalTitle>
+          <ModalSubtitle >{numberToKorean(buyPrice)}{(buyPrice !== null && buyPrice !== 0) ? '원' : ' '}</ModalSubtitle>
           <View
             style={{
               paddingHorizontal: 20,
@@ -271,7 +271,7 @@ const UpdateBuyPriceAlert = props => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
               }}>
-              <ModalLabel style={{ marginRight: 5 }}>취득금액</ModalLabel>
+              <ModalLabel  style={{ marginRight: 5 }}>취득금액</ModalLabel>
               <TouchableOpacity
                 activeOpacity={0.8}
                 hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
@@ -291,6 +291,7 @@ const UpdateBuyPriceAlert = props => {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <ModalInputContainer>
                 <StyledInput
+                  
                   placeholder="취득금액을 입력해주세요."
                   keyboardType="number-pad"
                   value={buyPrice ? buyPrice?.toLocaleString() : null}
@@ -323,7 +324,7 @@ const UpdateBuyPriceAlert = props => {
                   onPress={() => {
                     setBuyPrice(prev => prev + item);
                   }}>
-                  <ModalSelectButtonText>
+                  <ModalSelectButtonText >
                     {item === 10000000 ? '1천만' : item === 1000000 ? '1백만' : numberToKorean(item)}
                   </ModalSelectButtonText>
                 </ModalSelectButton>
@@ -348,6 +349,7 @@ const UpdateBuyPriceAlert = props => {
                 borderColor: '#E8EAED',
               }}>
               <ButtonText
+                
                 style={{
                   color: '#717274',
                 }}>
@@ -361,7 +363,7 @@ const UpdateBuyPriceAlert = props => {
                 // 주택 정보 업데이트
                 nextHandler();
               }}>
-              <ButtonText>입력하기</ButtonText>
+              <ButtonText >입력하기</ButtonText>
             </Button>
           </ButtonShadow>
         </ButtonSection>

@@ -28,7 +28,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -36,7 +36,7 @@ const ModalTitle = styled.Text`
 `;
 
 const ModalLabel = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard;
   color: #000;
   line-height: 18px;
@@ -44,7 +44,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalSubtitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard;
   color: #1b1c1f;
   line-height: 20px;
@@ -146,7 +146,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -159,7 +159,7 @@ const UpdatePubLandPriceAlert = props => {
   const { navigation } = props.payload?.navigation;
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-  const { handleHouseChange, data} = props.payload;
+  const { handleHouseChange, data } = props.payload;
   LogBox.ignoreLogs(['to contain units']);
   const dispatch = useDispatch();
   const actionSheetRef = useRef(null);
@@ -195,8 +195,8 @@ const UpdatePubLandPriceAlert = props => {
     };
   }, []);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -215,7 +215,7 @@ const UpdatePubLandPriceAlert = props => {
     });
   };
 
-  
+
   const nextHandler = async () => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
@@ -224,7 +224,7 @@ const UpdatePubLandPriceAlert = props => {
       p.pubLandPrice = pubLandPrice;
       // ////console.log('[UpdatePubLandPriceAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
-       
+
       actionSheetRef.current?.hide();
     }
   };
@@ -238,7 +238,7 @@ const UpdatePubLandPriceAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -259,7 +259,7 @@ const UpdatePubLandPriceAlert = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>공시가격을 입력해주세요.</ModalTitle>
+          <ModalTitle >공시가격을 입력해주세요.</ModalTitle>
           <ModalSubtitle>{numberToKorean(pubLandPrice)}{(pubLandPrice !== null && pubLandPrice !== 0) ? '원' : ' '}</ModalSubtitle>
           <View
             style={{
@@ -272,12 +272,13 @@ const UpdatePubLandPriceAlert = props => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
               }}>
-              <ModalLabel>공시가격</ModalLabel>
+              <ModalLabel >공시가격</ModalLabel>
 
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <ModalInputContainer>
                 <StyledInput
+                  
                   placeholder="공시가격을 입력해주세요."
                   keyboardType="number-pad"
                   value={pubLandPrice ? pubLandPrice?.toLocaleString() : null}
@@ -310,7 +311,7 @@ const UpdatePubLandPriceAlert = props => {
                   onPress={() => {
                     setPubLandPrice(prev => prev + item);
                   }}>
-                  <ModalSelectButtonText>
+                  <ModalSelectButtonText >
                     {item === 10000000 ? '1천만' : item === 1000000 ? '1백만' : numberToKorean(item)}
                   </ModalSelectButtonText>
                 </ModalSelectButton>
@@ -348,7 +349,7 @@ const UpdatePubLandPriceAlert = props => {
                 // 주택 정보 업데이트
                 nextHandler();
               }}>
-              <ButtonText>입력하기</ButtonText>
+              <ButtonText >입력하기</ButtonText>
             </Button>
           </ButtonShadow>
         </ButtonSection>

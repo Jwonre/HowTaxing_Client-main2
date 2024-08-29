@@ -40,7 +40,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -63,7 +63,7 @@ const ModalAddressInput = styled.TextInput.attrs(props => ({
   placeholder: '아파트명 혹은 지역명을 입력해주세요',
 }))`
   flex: 1;
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -105,7 +105,7 @@ const MapSearchResultHeader = styled.View`
 `;
 
 const MapSearchResultHeaderTitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 24px;
@@ -126,7 +126,7 @@ const MapSearchResultItem = styled.View`
 `;
 
 const MapSearchResultItemTitle = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -134,7 +134,7 @@ const MapSearchResultItemTitle = styled.Text`
 
 const MapSearchResultItemAddress = styled.Text`
   width: 90%;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -153,7 +153,7 @@ const AddressNumberBadge = styled.View`
 `;
 
 const AddressNumberText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Medium;
   color: #a3a5a8;
   line-height: 16px;
@@ -173,7 +173,7 @@ const MepSearchResultButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const MapSearchResultButtonText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Medium;
   color: #2f87ff;
   line-height: 16px;
@@ -189,7 +189,7 @@ const ApartmentInfoGroup = styled.View`
 
 const ApartmentInfoTitle = styled.Text`
   width: 80%;
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -206,7 +206,7 @@ const SelectGroup = styled.View`
 `;
 
 const SelectLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -246,7 +246,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -287,10 +287,10 @@ const MapViewListSheet = props => {
   const [zoom, setZoom] = useState(20);
 
   const handleBackPress = () => {
-    if(currentPageIndex === 0){
+    if (currentPageIndex === 0) {
       actionSheetRef.current?.hide();
       return true;
-    } else if(currentPageIndex === 1){
+    } else if (currentPageIndex === 1) {
       setCurrentPageIndex(0);
       return true;
     }
@@ -604,33 +604,33 @@ const MapViewListSheet = props => {
     return apartmentNumbers;
   };
   // 아파트 단지 선택 시 상세 정보 가져오기
- /* const getHouseDetailInfo = async () => {
-    const url = `${Config.APP_API_URL}house/detail`;
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${currentUser.accessToken}`
-    };
-
-    const data = await axios
-      .get(url, {
-        params: {
-          houseId: '25',
-        },
-      }, { headers: headers })
-      .then(function (result) {
-        if (result.isError) {
-          Alert.alert('검색 결과가 없습니다.');
-          return;
-        }
-        return result.data.data;
-      })
-      .catch(function (error) {
-        ////console.log(error);
-      });
-
-    return data;
-  };
-*/
+  /* const getHouseDetailInfo = async () => {
+     const url = `${Config.APP_API_URL}house/detail`;
+     const headers = {
+       'Content-Type': 'application/json',
+       'Authorization': `Bearer ${currentUser.accessToken}`
+     };
+ 
+     const data = await axios
+       .get(url, {
+         params: {
+           houseId: '25',
+         },
+       }, { headers: headers })
+       .then(function (result) {
+         if (result.isError) {
+           Alert.alert('검색 결과가 없습니다.');
+           return;
+         }
+         return result.data.data;
+       })
+       .catch(function (error) {
+         ////console.log(error);
+       });
+ 
+     return data;
+   };
+ */
   // 페이지 이동
   useEffect(() => {
     scrollViewRef.current?.scrollTo({
@@ -644,7 +644,7 @@ const MapViewListSheet = props => {
       const SIZE =
         item?.COMPLEX_NM1.length < 3
           ? 80
-          : item?.COMPLEX_NM1.length * getFontSize(10) + 30;
+          : item?.COMPLEX_NM1.length * 10 + 30;
 
       return (
         <Marker
@@ -670,8 +670,8 @@ const MapViewListSheet = props => {
               overflow: 'visible',
             }}>
             <View style={{ ...styles.marker, width: SIZE }}>
-              <Text style={styles.markerTitle}>{item.COMPLEX_NM1}</Text>
-              <Text style={styles.markerSubTitle}>{item.UNIT_CNT}세대</Text>
+              <Text  style={styles.markerTitle}>{item.COMPLEX_NM1}</Text>
+              <Text  style={styles.markerSubTitle}>{item.UNIT_CNT}세대</Text>
               <View style={styles.markerTriangle} />
             </View>
           </DropShadow>
@@ -690,7 +690,7 @@ const MapViewListSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-              const newChatDataList = chatDataList.slice(0, props.payload?.index+1);
+              const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
               actionSheetRef.current?.hide();
             }}>
@@ -746,10 +746,11 @@ const MapViewListSheet = props => {
                   zIndex: 1,
                 }}>
                 <ModalInputSection>
-                  <ModalTitle>취득하실 아파트 단지를 선택해주세요.</ModalTitle>
+                  <ModalTitle >취득하실 아파트 단지를 선택해주세요.</ModalTitle>
 
                   <ModalAddressInputContainer>
                     <ModalAddressInput
+                      
                       placeholder="'아파트명 혹은 지역명을 입력해주세요'"
                       value={searchText}
                       onChangeText={text => {
@@ -782,10 +783,10 @@ const MapViewListSheet = props => {
                       <Text
                         style={{
                           fontFamily: 'Pretendard-Regular',
-                          fontSize: getFontSize(16),
+                          fontSize: 16,
                           color: '#1B1C1F',
                           lineHeight: 24,
-                        }}>
+                        }} >
                         위치 정보를 가져오는 중입니다.
                       </Text>
                     </View>
@@ -860,7 +861,7 @@ const MapViewListSheet = props => {
                 </ModalInputSection>
 
                 <MapSearchResultHeader>
-                  <MapSearchResultHeaderTitle>
+                  <MapSearchResultHeaderTitle >
                     검색 결과
                   </MapSearchResultHeaderTitle>
                 </MapSearchResultHeader>
@@ -883,9 +884,9 @@ const MapViewListSheet = props => {
                       marginTop: 6,
                     }}>
                     <AddressNumberBadge>
-                      <AddressNumberText>지번</AddressNumberText>
+                      <AddressNumberText >지번</AddressNumberText>
                     </AddressNumberBadge>
-                    <MapSearchResultItemAddress>
+                    <MapSearchResultItemAddress >
                       {item?.ADRES}
                     </MapSearchResultItemAddress>
                   </View>
@@ -896,7 +897,7 @@ const MapViewListSheet = props => {
                     setSelectedItem(item);
                     setCurrentPageIndex(1);
                   }}>
-                  <MapSearchResultButtonText>선택</MapSearchResultButtonText>
+                  <MapSearchResultButtonText >선택</MapSearchResultButtonText>
                 </MepSearchResultButton>
               </MapSearchResultItem>
             )}
@@ -907,11 +908,11 @@ const MapViewListSheet = props => {
           <ModalTitle
             style={{
               marginBottom: 20,
-            }}>
+            }} >
             취득하실 아파트 동과 호를 선택해주세요.
           </ModalTitle>
           <ApartmentInfoGroup>
-            <ApartmentInfoTitle>
+            <ApartmentInfoTitle >
               {selectedItem?.COMPLEX_NM1}{' '}
               {selectedDong ? selectedDong : dongList[0]}동{' '}
               {selectedHo ? selectedHo : hoList[0]}호
@@ -919,7 +920,7 @@ const MapViewListSheet = props => {
           </ApartmentInfoGroup>
           <SelectGroup>
             <View style={{ width: '48%' }}>
-              <SelectLabel>동 선택</SelectLabel>
+              <SelectLabel >동 선택</SelectLabel>
               <PickerContainer>
                 {dongList[0] && (
                   <WheelPicker
@@ -933,9 +934,10 @@ const MapViewListSheet = props => {
                     }}
                     itemTextStyle={{
                       fontFamily: 'Pretendard-Regular',
-                      fontSize: getFontSize(18),
+                      fontSize: 18,
                       color: '#1B1C1F',
                     }}
+                    allowFontScaling= {false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}
@@ -950,11 +952,12 @@ const MapViewListSheet = props => {
               </PickerContainer>
             </View>
             <View style={{ width: '48%' }}>
-              <SelectLabel>호 선택</SelectLabel>
+              <SelectLabel >호 선택</SelectLabel>
 
               <PickerContainer>
                 {hoList[0] && hoList.length > 0 && (
                   <WheelPicker
+                    
                     selectedIndex={selectedHo ? hoList.indexOf(selectedHo) : 0}
                     containerStyle={{
                       width: 120,
@@ -963,9 +966,11 @@ const MapViewListSheet = props => {
                     }}
                     itemTextStyle={{
                       fontFamily: 'Pretendard-Regular',
-                      fontSize: getFontSize(18),
+                      fontSize: 18,
                       color: '#1B1C1F',
+
                     }}
+                    allowFontScaling= {false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}
@@ -996,7 +1001,7 @@ const MapViewListSheet = props => {
               <ButtonText
                 style={{
                   color: '#717274',
-                }}>
+                }} >
                 이전으로
               </ButtonText>
             </Button>
@@ -1051,7 +1056,7 @@ const MapViewListSheet = props => {
                       questionId: 'apartment',
                       progress: 4,
                     };
-                    
+
                     const chatList = [chat, chat1, chat2, chat3];
                     dispatch(setChatDataList([...chatDataList, ...chatList]));
                     dispatch(setHouseInfo(
@@ -1062,14 +1067,14 @@ const MapViewListSheet = props => {
                         , jibunAddr: ''
                         , roadAddr: selectedItem?.ADRES
                         , roadAddrRef: ''
-                        , detailAdr: selectedDong ? selectedDong : dongList[0]||'동 '||selectedHo ? selectedHo : hoList[0]||'호'
+                        , detailAdr: selectedDong ? selectedDong : dongList[0] || '동 ' || selectedHo ? selectedHo : hoList[0] || '호'
                         , houseName: selectedItem?.COMPLEX_NM1
                       }));
                   } catch (error) {
                     console.error('Error in onPress handler:', error);
                   }
                 }}>
-                <ButtonText>다음으로</ButtonText>
+                <ButtonText >다음으로</ButtonText>
               </Button>
             </DropShadow>
           </ButtonSection>
@@ -1090,12 +1095,12 @@ const styles = StyleSheet.create({
   markerTitle: {
     width: '100%',
     fontFamily: 'Pretendard-Bold',
-    fontSize: getFontSize(10),
+    fontSize: 10,
     color: '#fff',
   },
   markerSubTitle: {
     fontFamily: 'Pretendard-Regular',
-    fontSize: getFontSize(8),
+    fontSize: 8,
     color: '#fff',
   },
   markerTriangle: {

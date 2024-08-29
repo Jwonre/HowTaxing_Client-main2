@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import InfoCircleIcon from '../../assets/icons/info_circle.svg';
 import { setCurrentUser } from '../../redux/currentUserSlice';
 import { View } from 'react-native-animatable';
-  
+
 
 
 const SheetContainer = styled.View`
@@ -24,7 +24,7 @@ const SheetContainer = styled.View`
 
 const ModalTitle = styled.Text`
   width: 80%;
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -34,7 +34,7 @@ const ModalTitle = styled.Text`
 `;
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 15px;
@@ -117,7 +117,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -131,7 +131,7 @@ const InfoAlert = props => {
   const { width, height } = useWindowDimensions();
   const [errorMessage, setErrorMessage] = useState('');
   const [buttonText, setButtonText] = useState('자세히');
-   
+
   //////console.log('[InfoAlert] props', props);
 
   const toggleText = () => {
@@ -160,11 +160,11 @@ const InfoAlert = props => {
                 props?.payload?.navigation.goBack();
               }
               if (props?.payload?.networkisConnected === false) {
-                if(props?.payload?.CheckTerms === true){
+                if (props?.payload?.CheckTerms === true) {
                   navigation.navigate('Login')
                 }
               }
-               
+
             }}>
             <CloseIcon width={16} height={16} />
           </Pressable>
@@ -180,7 +180,7 @@ const InfoAlert = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: errorMessage ? (props?.payload?.id === 'calculation' ? 450 : 410) : props?.payload?.type === 'error' ? (props?.payload?.id === 'calculation' ? 350 : 330) : 300,
+        height: errorMessage ? (props?.payload?.id === 'calculation' ? 450 : 430) : props?.payload?.type === 'error' ? (props?.payload?.id === 'calculation' ? 350 : 330) : 300,
         width: width - 40
       }}>
       <SheetContainer width={width}>
@@ -190,9 +190,9 @@ const InfoAlert = props => {
               color: props?.payload?.type === 'error' ? '#FF7401' : '#2F87FF',
             }}
           />
-          <ModalTitle>{props?.payload?.message}</ModalTitle>
+          <ModalTitle >{props?.payload?.message}</ModalTitle>
           {errorMessage && <ScrollView style={{ marginHorizontal: 20, maxHeight: 120 }}
-            showsVerticalScrollIndicator={false}><ModalDescription>{errorMessage}</ModalDescription></ScrollView>}
+            showsVerticalScrollIndicator={false}><ModalDescription >{errorMessage}</ModalDescription></ScrollView>}
         </ModalContentSection>
 
 
@@ -224,6 +224,7 @@ const InfoAlert = props => {
                   }}
                 >
                   <ButtonText
+                    
                     style={{
                       color: '#717274',
                     }}
@@ -257,13 +258,13 @@ const InfoAlert = props => {
                       props?.payload?.navigation.goBack();
                     }
                     if (props?.payload?.networkisConnected === false) {
-                      if(props?.payload?.CheckTerms === true){
+                      if (props?.payload?.CheckTerms === true) {
                         navigation.navigate('Login')
                       }
                     }
-                     
+
                   }}>
-                  <ButtonText>{props?.payload?.buttontext ? props?.payload?.buttontext : '확인하기'}</ButtonText>
+                  <ButtonText >{props?.payload?.buttontext ? props?.payload?.buttontext : '확인하기'}</ButtonText>
                 </Button>
               </DropShadow>
 
@@ -275,7 +276,7 @@ const InfoAlert = props => {
                   <SocialButtonIcon
                     source={require('../../assets/images/socialIcon/kakao_ico.png')}
                   />
-                  <KakaoButtonText>카카오톡으로 상담하기</KakaoButtonText>
+                  <KakaoButtonText >카카오톡으로 상담하기</KakaoButtonText>
                 </KakaoButton>
               </View>}
           </View>)}
@@ -304,12 +305,12 @@ const InfoAlert = props => {
                 }}>
                 <Button
                   onPress={() => {
-                   // ////console.log(modalList);
+                    // ////console.log(modalList);
                     actionSheetRef.current?.hide();
-                     
+
                   }}
                   style={{ backgroundColor: '#fff', borderColor: '#E8EAED' }}>
-                  <ButtonText style={{ color: '#717274' }}>아니오</ButtonText>
+                  <ButtonText  style={{ color: '#717274' }}>아니오</ButtonText>
                 </Button>
               </DropShadow>
               <DropShadow
@@ -332,7 +333,7 @@ const InfoAlert = props => {
                     actionSheetRef.current?.hide();
                     props?.payload?.navigation.goBack();
                   }}>
-                  <ButtonText>네</ButtonText>
+                  <ButtonText >네</ButtonText>
                 </Button>
               </DropShadow>
             </View>}

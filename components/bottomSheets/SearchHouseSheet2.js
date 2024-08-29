@@ -36,7 +36,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -61,7 +61,7 @@ const ModalAddressInput = styled.TextInput.attrs(props => ({
   placeholder: '주택명 혹은 지역명을 입력해주세요',
 }))`
   flex: 1;
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -72,7 +72,7 @@ const DetailAddressInput = styled.TextInput.attrs(props => ({
   placeholder: '나머지 상세주소를 입력해주세요',
 }))`
   flex: 1;
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -120,7 +120,7 @@ const SelectButtonContainer = styled.View`
 `;
 
 const SelectButtonText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-SemiBold;
   color: #a3a5a8;
   letter-spacing: -0.3px;
@@ -142,7 +142,7 @@ const SelectItem = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const SelectItemText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -161,7 +161,7 @@ const MapSearchResultItem = styled.View`
 `;
 
 const MapSearchResultItemTitle = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -169,7 +169,7 @@ const MapSearchResultItemTitle = styled.Text`
 
 const MapSearchResultItemAddress = styled.Text`
   width: 90%;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -188,7 +188,7 @@ const AddressNumberBadge = styled.View`
 `;
 
 const AddressNumberText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Medium;
   color: #a3a5a8;
   line-height: 16px;
@@ -208,7 +208,7 @@ const MepSearchResultButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const MapSearchResultButtonText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Medium;
   color: #2f87ff;
   line-height: 16px;
@@ -224,7 +224,7 @@ const ApartmentInfoGroup = styled.View`
 
 const ApartmentInfoTitle = styled.Text`
   width: 80%;
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 30px;
@@ -253,7 +253,7 @@ const SelectGroup = styled.View`
 `;
 
 const SelectLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -282,7 +282,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -298,7 +298,7 @@ const ListFooterButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ListFooterButtonText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Bold;
   color: #a3a5a8;
   line-height: 20px;
@@ -582,7 +582,7 @@ const SearchHouseSheet2 = props => {
             payload: {
               type: 'error',
               message: response.data.errMsg ? response.data.errMsg : '주소 검색 중 오류가 발생했어요.',
-              description: response.data.errMsgDtl ? response.data.errMsgDtl : '', 
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               closemodal: true,
               actionSheetRef: actionSheetRef,
               buttontext: '확인하기',
@@ -745,7 +745,7 @@ const SearchHouseSheet2 = props => {
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
       actionSheetRef.current?.hide();
-     // console.log(selectedItem);
+      // console.log(selectedItem);
       dispatch(
         setDirectRegister({
           houseName: selectedItem?.bdNm
@@ -842,9 +842,10 @@ const SearchHouseSheet2 = props => {
                   zIndex: 10,
                 }}>
                 <ModalInputSection>
-                  <ModalTitle>등록할 주택을 검색해주세요.</ModalTitle>
+                  <ModalTitle >등록할 주택을 검색해주세요.</ModalTitle>
                   <ModalAddressInputContainer>
                     <ModalAddressInput
+                      
                       placeholder="동(읍/면/리)명 또는 도로명주소를 입력해주세요"
                       value={searchText}
                       onChangeText={setSearchText}
@@ -934,7 +935,7 @@ const SearchHouseSheet2 = props => {
                               alignItems: 'center',
                               justifyContent: 'center',
                             }}>
-                            <SelectButtonText>
+                            <SelectButtonText >
                               {selectedArea ? selectedArea : '시/도'}
                             </SelectButtonText>
                             <ChevronDownIcon />
@@ -960,7 +961,7 @@ const SearchHouseSheet2 = props => {
                               }
                               selectRef.current?.closeDropdown();
                             }}>
-                            <SelectItemText>{item.name}</SelectItemText>
+                            <SelectItemText >{item.name}</SelectItemText>
                           </SelectItem>
                         );
                       }}
@@ -983,7 +984,7 @@ const SearchHouseSheet2 = props => {
                               alignItems: 'center',
                               justifyContent: 'center',
                             }}>
-                            <SelectButtonText>
+                            <SelectButtonText >
                               {selectedArea2 ? selectedArea2 : '시/군/구'}
                             </SelectButtonText>
                             <ChevronDownIcon />
@@ -1004,7 +1005,7 @@ const SearchHouseSheet2 = props => {
                               setSelectedArea2(item);
                               selectRef2.current?.closeDropdown();
                             }}>
-                            <SelectItemText>{item}</SelectItemText>
+                            <SelectItemText >{item}</SelectItemText>
                           </SelectItem>
                         );
                       }}
@@ -1049,7 +1050,7 @@ const SearchHouseSheet2 = props => {
                       actionSheetRef.current?.hide();
                     }
                   }}>
-                  <ListFooterButtonText>더 보기</ListFooterButtonText>
+                  <ListFooterButtonText >더 보기</ListFooterButtonText>
                 </ListFooterButton>
               )
             }
@@ -1059,7 +1060,7 @@ const SearchHouseSheet2 = props => {
                   style={{
                     width: '72%',
                   }}>
-                  <MapSearchResultItemTitle>
+                  <MapSearchResultItemTitle >
                     {item?.roadAddr}
                   </MapSearchResultItemTitle>
                   <View
@@ -1070,9 +1071,9 @@ const SearchHouseSheet2 = props => {
                       marginTop: 6,
                     }}>
                     <AddressNumberBadge>
-                      <AddressNumberText>지번</AddressNumberText>
+                      <AddressNumberText >지번</AddressNumberText>
                     </AddressNumberBadge>
-                    <MapSearchResultItemAddress>
+                    <MapSearchResultItemAddress >
                       {item?.jibunAddr}
                     </MapSearchResultItemAddress>
                   </View>
@@ -1085,12 +1086,12 @@ const SearchHouseSheet2 = props => {
                       //       ////console.log('선택 item', item);
                       //          ////console.log('선택 item', item);
                       setAddress(item?.roadAddr);
+                      setSelectedItem(item);
                       if (selectedHouseType === '1' || selectedHouseType === '2') {
                         const firstDong = await getDongData(item);
                         //////console.log('firstDong', firstDong);
                         if (firstDong !== 'dongerror') {
                           const Hodata = await getHoData(item, firstDong, 'init');
-                          setSelectedItem(item);
                           ////console.log('Hodata', Hodata);
                           if (Hodata > 0) {
                             setCurrentPageIndex(1);
@@ -1110,7 +1111,7 @@ const SearchHouseSheet2 = props => {
                       actionSheetRef.current?.hide();
                     }
                   }}>
-                  <MapSearchResultButtonText>선택</MapSearchResultButtonText>
+                  <MapSearchResultButtonText >선택</MapSearchResultButtonText>
                 </MepSearchResultButton>
               </MapSearchResultItem>
             )}
@@ -1123,18 +1124,18 @@ const SearchHouseSheet2 = props => {
           <ModalTitle
             style={{
               marginBottom: 20,
-            }}>
+            }} >
             등록할 주택 동과 호를 선택해주세요.
           </ModalTitle>
           <ApartmentInfoGroup>
-            <ApartmentInfoTitle>
+            <ApartmentInfoTitle >
               {selectedItem?.bdNm} {selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : ''}
               {selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : ''}
             </ApartmentInfoTitle>
           </ApartmentInfoGroup>
           <SelectGroup>
             <View style={{ width: '48%' }}>
-              <SelectLabel>동 선택</SelectLabel>
+              <SelectLabel >동 선택</SelectLabel>
               <PickerContainer>
                 {dongList[0] && (
                   <WheelPicker
@@ -1148,9 +1149,10 @@ const SearchHouseSheet2 = props => {
                     }}
                     itemTextStyle={{
                       fontFamily: 'Pretendard-Regular',
-                      fontSize: getFontSize(18),
+                      fontSize: 18,
                       color: '#1B1C1F',
                     }}
+                    allowFontScaling= {false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}
@@ -1166,7 +1168,7 @@ const SearchHouseSheet2 = props => {
               </PickerContainer>
             </View>
             <View style={{ width: '48%' }}>
-              <SelectLabel>호 선택</SelectLabel>
+              <SelectLabel >호 선택</SelectLabel>
 
               <PickerContainer>
                 {hoList?.length > 0 && (
@@ -1183,9 +1185,10 @@ const SearchHouseSheet2 = props => {
                     }}
                     itemTextStyle={{
                       fontFamily: 'Pretendard-Regular',
-                      fontSize: getFontSize(18),
+                      fontSize: 18,
                       color: '#1B1C1F',
                     }}
+                    allowFontScaling= {false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}
@@ -1237,7 +1240,7 @@ const SearchHouseSheet2 = props => {
                 <ButtonText
                   style={{
                     color: '#717274',
-                  }}>
+                  }} >
                   이전으로
                 </ButtonText>
               </Button>
@@ -1245,7 +1248,7 @@ const SearchHouseSheet2 = props => {
 
             <DropShadow style={styles.dropshadow}>
               <Button onPress={nextHandler}>
-                <ButtonText>다음으로</ButtonText>
+                <ButtonText >다음으로</ButtonText>
               </Button>
             </DropShadow>
           </ButtonSection>
@@ -1256,7 +1259,7 @@ const SearchHouseSheet2 = props => {
           <ModalTitle
             style={{
               marginBottom: 20,
-            }}>
+            }} >
             등록할 주택을 검색해주세요.
           </ModalTitle>
           <ApartmentInfoGroup
@@ -1264,7 +1267,7 @@ const SearchHouseSheet2 = props => {
               //     ////console.log(event.nativeEvent.layout.height);
               setApartmentInfoGroupHeight(event.nativeEvent.layout.height);
             }}>
-            <ApartmentInfoTitle>{address}</ApartmentInfoTitle>
+            <ApartmentInfoTitle >{address}</ApartmentInfoTitle>
           </ApartmentInfoGroup>
           <ModalAddressInputContainer>
             <DetailAddressInput
@@ -1300,7 +1303,7 @@ const SearchHouseSheet2 = props => {
                 <ButtonText
                   style={{
                     color: '#717274',
-                  }}>
+                  }} >
                   이전으로
                 </ButtonText>
               </Button>
@@ -1343,7 +1346,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-SemiBold',
     color: '#A3A5A8',
     letterSpacing: -0.3,
@@ -1359,7 +1362,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8EAED',
   },
   rowTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-Regular',
     color: '#1B1C1F',
     letterSpacing: -0.3,

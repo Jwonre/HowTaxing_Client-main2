@@ -199,11 +199,11 @@ const DirectRegister = props => {
         <IconView>
           <KeyIcon />
         </IconView>
-        <Title>
+        <Title >
           일부 주택은 불러오지 못할 수도 있어요{'\n'}빠진 주택이 있으시다면 직접
           등록해주세요
         </Title>
-        <SubTitle>
+        <SubTitle >
           오피스텔을 보유하신 경우, 정확한 세금 계산을 위해{'\n'}반드시 직접
           등록을 해주셔야 해요.
         </SubTitle>
@@ -234,7 +234,7 @@ const DirectRegister = props => {
               });
             }
           }}>
-          <ButtonText>등록하기</ButtonText>
+          <ButtonText >등록하기</ButtonText>
         </Button>
       </DropShadow>
     </Container>

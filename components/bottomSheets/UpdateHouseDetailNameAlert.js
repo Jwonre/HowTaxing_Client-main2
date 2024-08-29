@@ -8,7 +8,6 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import ActionSheet, {
 } from 'react-native-actions-sheet';
 import styled from 'styled-components';
-import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,7 +22,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -45,10 +44,10 @@ const ModalAddressInputContainer = styled.View`
 
 const DetailAddressInput = styled.TextInput.attrs(props => ({
   placeholderTextColor: '#A3A5A8',
-  placeholder: '나머지 상세주소를 입력해주세요',
+  placeholder: '상세 주소를 입력해주세요',
 }))`
   flex: 1;
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -73,8 +72,8 @@ const ApartmentInfoGroup = styled.View`
 `;
 
 const ApartmentInfoTitle = styled.Text`
-  width: 60%;
-  font-size: ${getFontSize(16)}px;
+  width: 80%;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 30px;
@@ -108,17 +107,17 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
 `;
 
 const UpdateHouseDetailNameAlert = props => {
-  const { navigation }  = props.payload?.navigation;
+  const { navigation } = props.payload?.navigation;
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-  const { handleHouseChange, data } = props.payload;
+  const { handleHouseChange, data, DongHo } = props.payload;
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
@@ -126,7 +125,7 @@ const UpdateHouseDetailNameAlert = props => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [listData, setListData] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const [detailAddress, setDetailAddress] = useState(data.detailAdr);
+  const [detailAddress, setDetailAddress] = useState(DongHo ? DongHo : data.detailAdr);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -147,8 +146,8 @@ const UpdateHouseDetailNameAlert = props => {
     };
   }, []);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -174,9 +173,9 @@ const UpdateHouseDetailNameAlert = props => {
     if (canProceed) {
       var p = data;
       p.detailAdr = detailAddress;
-      // ////console.log('[UpdateHouseDetailNameAlert]nextHandler p:', p);
+      console.log('[UpdateHouseDetailNameAlert]nextHandler p:', p);
       handleHouseChange(p, p?.isMoveInRight);
-       
+
       actionSheetRef.current?.hide();
     }
 
@@ -195,7 +194,7 @@ const UpdateHouseDetailNameAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -218,20 +217,21 @@ const UpdateHouseDetailNameAlert = props => {
       <KeyboardAwareScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="always" >
         <SheetContainer>
           <ModalTitle
+            
             style={{
               marginBottom: 20,
             }}>
-            나머지 상세주소를 입력해주세요.
+            상세 주소를 입력해주세요.
           </ModalTitle>
           <ApartmentInfoGroup
             onLayout={event => {
               // setApartmentInfoGroupHeight(event.nativeEvent.layout.height);
             }}>
-            <ApartmentInfoTitle>{data.roadAddr}</ApartmentInfoTitle>
+            <ApartmentInfoTitle >{data.roadAddr}</ApartmentInfoTitle>
           </ApartmentInfoGroup>
           <ModalAddressInputContainer>
             <DetailAddressInput
-              value={detailAddress}
+              value={DongHo ? DongHo : (detailAddress ? detailAddress : '')}
               onChangeText={setDetailAddress}
             />
           </ModalAddressInputContainer>
@@ -250,6 +250,7 @@ const UpdateHouseDetailNameAlert = props => {
                   borderColor: '#E8EAED',
                 }}>
                 <ButtonText
+                  
                   style={{
                     color: '#717274',
                   }}>
@@ -259,7 +260,7 @@ const UpdateHouseDetailNameAlert = props => {
             </DropShadow>
             <DropShadow style={styles.dropshadow}>
               <Button onPress={nextHandler}>
-                <ButtonText>다음으로</ButtonText>
+                <ButtonText >다음으로</ButtonText>
               </Button>
             </DropShadow>
           </ButtonSection>
@@ -287,7 +288,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-SemiBold',
     color: '#A3A5A8',
     letterSpacing: -0.3,
@@ -303,7 +304,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8EAED',
   },
   rowTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-Regular',
     color: '#1B1C1F',
     letterSpacing: -0.3,

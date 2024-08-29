@@ -177,7 +177,7 @@ const InfoContentItem = styled.View`
 `;
 
 const InfoContentLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #97989a;
   line-height: 20px;
@@ -493,16 +493,16 @@ const RegisterDirectHouse = props => {
             <IconView>
               <KeyIcon />
             </IconView>
-            <Title>
+            <Title >
               일부 주택은 불러오지 못할 수도 있어요{'\n'}빠진 주택이 있으시다면
               직접 등록해주세요
             </Title>
-            <SubTitle>
+            <SubTitle >
               등록하실 주택이 아파트인지, 그 외 주택 형태인지 선택해주세요.
             </SubTitle>
             <Paper>
-              <Label>주택 형태</Label>
-              <DescText>
+              <Label >주택 형태</Label>
+              <DescText >
                 등록하실 주택이 아파트인지, 그 외 주택 형태인지 선택해주세요.
               </DescText>
               <ScrollView
@@ -513,13 +513,14 @@ const RegisterDirectHouse = props => {
                 }}>
                 {HOUSE_TYPE.map((item, index) => (
                   <SelectButton
+                    
                     key={item.id}
                     active={selectedHouseType === item.id}
                     onPress={() => {
                       setSelectedHouseType(item.id);
                     }}>
                     {item.icon}
-                    <SelectButtonText>{item.name}</SelectButtonText>
+                    <SelectButtonText >{item.name}</SelectButtonText>
                   </SelectButton>
                 ))}
               </ScrollView>
@@ -528,12 +529,13 @@ const RegisterDirectHouse = props => {
               style={{
                 paddingHorizontal: 20,
               }}>
-              <Label>주소 정보</Label>
-              <DescText>
+              <Label >주소 정보</Label>
+              <DescText >
                 등록하려는 주택의 주소를 검색하여 선택해주세요.
               </DescText>
               <InputContainer width={width}>
                 <TextInput
+                  
                   ref={addressInputRef}
                   placeholder="주소를 검색해주세요"
                   placeholderTextColor={'#A3A5A8'}
@@ -629,6 +631,7 @@ const RegisterDirectHouse = props => {
                   marginTop: 10,
                 }}>
                 <TextInput
+                  
                   ref={addressDetailInputRef}
                   placeholderTextColor={'#A3A5A8'}
                   placeholder="상세주소"
@@ -659,7 +662,7 @@ const RegisterDirectHouse = props => {
               </InputContainer>
             </Paper>
             <InfoContentItem>
-              <InfoContentLabel>입주권 여부</InfoContentLabel>
+              <InfoContentLabel >입주권 여부</InfoContentLabel>
 
               <Switch
                 width={50}
@@ -696,6 +699,7 @@ const RegisterDirectHouse = props => {
               width={width}
               onPress={registerDirectHouse}>
               <ButtonText
+                
                 disabled={!selectedHouseType || !directRegister.address || !directRegister.addressDetail}
                 active={selectedHouseType && directRegister.address && directRegister.addressDetail}>
                 등록하기

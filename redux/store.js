@@ -1,4 +1,6 @@
 import {configureStore} from '@reduxjs/toolkit';
+import addHouseListSlice from './addHouseListSlice';
+import fixHouseListSlice from './fixHouseListSlice';
 import currentUserSlice from './currentUserSlice';
 import houseInfoSlice from './houseInfoSlice';
 import chatDataListSlice from './chatDataListSlice';
@@ -9,6 +11,8 @@ import resendSlice from './resendSlice';
 
 export const store = configureStore({
   reducer: {
+    addHouseList: addHouseListSlice,
+    fixHouseList: fixHouseListSlice,
     currentUser: currentUserSlice,
     houseInfo: houseInfoSlice,
     chatDataList: chatDataListSlice,

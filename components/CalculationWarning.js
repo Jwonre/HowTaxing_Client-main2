@@ -3,7 +3,7 @@
 import {View} from 'react-native';
 import React from 'react';
 import styled from 'styled-components';
-import getFontSize from '../utils/getFontSize';
+
 import * as Animatable from 'react-native-animatable';
 import ChatBubbleIcon from '../assets/icons/chat_bubble2.svg';
 
@@ -27,7 +27,7 @@ const CardHeader = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -43,7 +43,7 @@ const InfoContainer = styled.View`
 `;
 
 const InfoNum = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Bold;
   color: #FF7401;
   line-height: 20px;
@@ -51,8 +51,9 @@ const InfoNum = styled.Text`
 `;
 
 const InfoText = styled.Text`
+  width: 100%;
   flex: 1;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #FF7401;
   line-height: 20px;
@@ -74,13 +75,13 @@ const TaxInfoCard2 = () => {
           }}>
           <ChatBubbleIcon />
         </View>
-        <Title>잠시만요!</Title>
+        <Title >잠시만요!</Title>
       </CardHeader>
 
       <InfoContainer>
-        <InfoNum>1.</InfoNum>
-        <InfoText>
-          위 계산 결과는 세액 판단을 위한 참고 자료로 사용 가능하며{'\n'}정확한 세금 납부를 위해서 전문가와의 상담을 추천드려요.
+        <InfoNum >1.</InfoNum>
+        <InfoText >
+          위 계산 결과는 세액 판단을 위한 참고 자료로 사용 가능하며 정확한 세금 납부를 위해서 전문가와의 상담을 추천드려요.
         </InfoText>
       </InfoContainer>
     </Card>

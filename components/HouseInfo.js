@@ -3,7 +3,7 @@
 import { View, Text } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
-import getFontSize from '../utils/getFontSize';
+
 import { HOUSE_TYPE } from '../constants/colors';
 import NetInfo from "@react-native-community/netinfo";
 import { useNavigation } from '@react-navigation/native';
@@ -23,7 +23,7 @@ const HoustInfoSection = styled.View`
 
 const HoustInfoTitle = styled.Text`
   width: 105%;
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 24px;
@@ -32,7 +32,7 @@ const HoustInfoTitle = styled.Text`
 `;
 
 const HoustInfoText = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 20px;
@@ -51,7 +51,7 @@ const HoustInfoBadge = styled.View`
 `;
 
 const HoustInfoBadgeText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Medium;
   color: #fff;
   line-height: 12px;
@@ -72,7 +72,7 @@ const HoustInfoButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const HoustInfoButtonText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 20px;
@@ -118,15 +118,15 @@ const HouseInfo = props => {
             flexDirection: 'row',
             alignContent: 'center',
           }}>
-          <HoustInfoBadgeText>
+          <HoustInfoBadgeText >
             {HOUSE_TYPE.find(item => item.id === props.item?.houseType)?.name}
           </HoustInfoBadgeText>
-          {(props.item?.houseType !== '3' && props.item?.isMoveInRight === true) && <HoustInfoBadgeText style={{fontSize: 8}}>
+          {(props.item?.houseType !== '3' && props.item?.isMoveInRight === true) && <HoustInfoBadgeText  style={{fontSize: 8}}>
             {'(입주권)'}
           </HoustInfoBadgeText>}
         </HoustInfoBadge>
-        <HoustInfoTitle>{props.item?.houseName}</HoustInfoTitle>
-        <HoustInfoText>{props.item?.houseDetailName}</HoustInfoText>
+        <HoustInfoTitle >{props.item?.houseName}</HoustInfoTitle>
+        <HoustInfoText >{props.item?.houseDetailName}</HoustInfoText>
       </View>
       <HoustInfoButton
         onPress={async () => {
@@ -144,7 +144,7 @@ const HouseInfo = props => {
           }
         }
         }>
-        <HoustInfoButtonText>자세히 보기</HoustInfoButtonText>
+        <HoustInfoButtonText >자세히 보기</HoustInfoButtonText>
       </HoustInfoButton>
     </HoustInfoSection>
   );

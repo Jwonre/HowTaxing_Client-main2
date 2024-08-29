@@ -23,7 +23,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -31,7 +31,7 @@ const ModalTitle = styled.Text`
 `;
 
 const ModalLabel = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard;
   color: #000;
   line-height: 18px;
@@ -39,7 +39,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalSubtitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard;
   color: #1b1c1f;
   line-height: 20px;
@@ -135,7 +135,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -145,7 +145,7 @@ const ButtonText = styled.Text`
 
 
 const UpdateUserProportionAlert = props => {
-  
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data } = props.payload;
@@ -160,7 +160,7 @@ const UpdateUserProportionAlert = props => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   // 지분율 선택 리스트
   const AC_PROPORTION_LIST = [80, 60, 40, 20];
-  const { navigation }  = props.payload?.navigation;
+  const { navigation } = props.payload?.navigation;
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -181,8 +181,8 @@ const UpdateUserProportionAlert = props => {
     };
   }, []);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -210,7 +210,7 @@ const UpdateUserProportionAlert = props => {
       p.userProportion = proportion;
       //////console.log('[UpdateUserProportionAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
-       
+
       actionSheetRef.current?.hide();
     }
   };
@@ -224,7 +224,7 @@ const UpdateUserProportionAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -245,8 +245,8 @@ const UpdateUserProportionAlert = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>소유자 지분을 입력해주세요.</ModalTitle>
-          <ModalSubtitle>(1/{data.ownerCnt})</ModalSubtitle>
+          <ModalTitle >소유자 지분을 입력해주세요.</ModalTitle>
+          <ModalSubtitle >(1/{data.ownerCnt})</ModalSubtitle>
           <View
             style={{
               paddingHorizontal: 20,
@@ -258,9 +258,10 @@ const UpdateUserProportionAlert = props => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
               }}>
-              <ModalLabel>지분율</ModalLabel>
+              <ModalLabel >지분율</ModalLabel>
             </View>
             <ModalInput
+              
               placeholder="소유자 지분을 입력해주세요."
               keyboardType="number-pad"
               value={proportion ? proportion?.toLocaleString() : null}
@@ -280,7 +281,7 @@ const UpdateUserProportionAlert = props => {
                   onPress={() => {
                     setProportion(item);
                   }}>
-                  <ModalSelectButtonText>
+                  <ModalSelectButtonText >
                     {item}%
                   </ModalSelectButtonText>
                 </ModalSelectButton>
@@ -307,7 +308,7 @@ const UpdateUserProportionAlert = props => {
               <ButtonText
                 style={{
                   color: '#717274',
-                }}>
+                }} >
                 이전으로
               </ButtonText>
             </Button>
@@ -318,7 +319,7 @@ const UpdateUserProportionAlert = props => {
                 // 주택 정보 업데이트
                 nextHandler();
               }}>
-              <ButtonText>다음으로</ButtonText>
+              <ButtonText >다음으로</ButtonText>
             </Button>
           </ButtonShadow>
         </ButtonSection>

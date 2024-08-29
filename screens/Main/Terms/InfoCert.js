@@ -21,7 +21,7 @@ const Container = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -31,7 +31,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(18)}px;
+  font-size: 18px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 25px;
@@ -99,10 +99,10 @@ const InfoCert = props => {
       <ScrollView
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}>
-        <Title>(필수) 전자증명서 서비스 이용약관</Title>
-        <SubTitle>[필수] 전자증명서 서비스 이용약관 동의서</SubTitle>
-        <ContentText>
-          {`서비스 이용약관
+        <Title >하우택싱 서비스 이용약관</Title>
+        <SubTitle >하우택싱 서비스 이용약관 동의서</SubTitle>
+        <ContentText >
+          {`하우택싱 서비스 이용약관
 
 제1조 (목적)
 1. 본 약관은 JS세무회계가 운영하는 인터넷 사이트 ‘하우택싱’(이하 ‘사이트’라 합니다) 및 모바일 애플리케이션 ‘하우택싱’을 통해 제공되는 전자상거래 서비스와 관련하여 당사자의 권리 의무 및 책임사항을 규정하는 것을 목적으로 합니다.

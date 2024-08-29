@@ -39,14 +39,14 @@ const SheetContainer = styled.ScrollView.attrs({
 `;
 
 const TitleSection = styled.View`
-  width: 110%;
+  width: 100%;
   height: auto;
   background-color: #fff;
   padding: 10px 20px;
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Medium;
   color: #97989a;
   line-height: 20px;
@@ -78,14 +78,14 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: ${props => (props.active ? '#fff' : '#717274')};
   line-height: 20px;
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 32px;
@@ -94,7 +94,7 @@ const Title = styled.Text`
 `;
 
 const InfoMessage = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #ff7401;
   line-height: 20px;
@@ -388,22 +388,22 @@ const OwnHouseSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) ? 780 : 760,
+        height: ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) ? 820 : 800,
         width: width,
       }}>
       <SheetContainer width={width}>
         <TitleSection>
-          {ownHouseList.length !== 0 && (<Title>
+          {ownHouseList.length !== 0 && (<Title >
             보유하신 주택을 모두 불러왔어요.{'\n'}불러온 주택들을 확인해주세요.
           </Title>)}
-          {ownHouseList.length === 0 && props.payload?.data === 'ok' && props.payload?.chungYackYn === true && (<Title>
+          {ownHouseList.length === 0 && props.payload?.data === 'ok' && props.payload?.chungYackYn === true && (<Title >
             청약통장을 가지고 있지 않다면{'\n'}보유하신 주택을 직접 등록해주세요.
           </Title>)}
-          {ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) && (<Title>
+          {ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) && (<Title >
             주택을 불러오지 못했어요.{'\n'}보유하신 주택이 있다면 직접 등록해주세요.
           </Title>)}
 
-          <InfoMessage>
+          <InfoMessage >
             주택을 취득하기 이전에 기존 보유 주택의 양도 계획이 있다면,{'\n'}양도할 주택은
             반드시 체크 해제해주세요.
           </InfoMessage>
@@ -470,10 +470,10 @@ const OwnHouseSheet = props => {
                         flexDirection: 'row',
                         alignContent: 'center',
                       }}>
-                      <TagText>
+                      <TagText >
                         {HOUSE_TYPE.find(color => color.id === item.houseType).name}
                       </TagText>
-                      {(item?.houseType !== '3' && item?.isMoveInRight === true) && <TagText style={{ fontSize: 8 }}>
+                      {(item?.houseType !== '3' && item?.isMoveInRight === true) && <TagText  style={{ fontSize: 8 }}>
                         {'(입주권)'}
                       </TagText>}
                     </Tag>
@@ -487,8 +487,8 @@ const OwnHouseSheet = props => {
                         {HOUSE_TYPE.find(color => color.id === item.isMoveInRight === true ? 'isMoveInRight' : '').name}
                       </TagText>
                     </Tag>*/}
-                    <CardTitle>{item.houseName}</CardTitle>
-                    <CardSubTitle>{item.houseDetailName}</CardSubTitle>
+                    <CardTitle >{item.houseName}</CardTitle>
+                    <CardSubTitle >{item.houseDetailName}</CardSubTitle>
                     <CardButton
                       onPress={async () => {
                         const state = await NetInfo.fetch();
@@ -512,7 +512,7 @@ const OwnHouseSheet = props => {
                           actionSheetRef.current?.hide();
                         }
                       }}>
-                      <CardButtonText>자세히 보기</CardButtonText>
+                      <CardButtonText >자세히 보기</CardButtonText>
                     </CardButton>
                   </Card>
                 </DropShadow>
@@ -579,7 +579,7 @@ const OwnHouseSheet = props => {
                   }
                 }}>
                 <AddCircleIcon />
-                <AddButtonText>직접 등록하기</AddButtonText>
+                <AddButtonText >직접 등록하기</AddButtonText>
               </AddButton>
 
             </View>
@@ -588,7 +588,7 @@ const OwnHouseSheet = props => {
                 color: '#2F87FF',
                 paddingHorizontal: 20,
                 paddingBottom: 20,
-              }}>
+              }} >
               주거용 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
               불러오지 못한 주택이 있을 경우, 정확한 세금계산이 어려워요.
             </SubTitle>
@@ -635,10 +635,10 @@ const OwnHouseSheet = props => {
                         actionSheetRef.current?.hide();
                       }
                     }} style={{ margin: 20 }}></AddHouseCircleIcon>
-                  <EmptyTitle>
+                  <EmptyTitle >
                     {'보유하신 주택이 없으시거나 불러오지 못했어요.'}
                   </EmptyTitle>
-                  <EmptyTitle>
+                  <EmptyTitle >
                     {'보유하신 주택이 있으시다면, 직접 등록해주세요.'}
                   </EmptyTitle>
                 </EmptyCard>
@@ -674,7 +674,7 @@ const OwnHouseSheet = props => {
                   }
                 }}>
                 <AddCircleIcon />
-                <AddButtonText>직접 등록하기</AddButtonText>
+                <AddButtonText >직접 등록하기</AddButtonText>
               </AddButton>
 
             </View>
@@ -683,7 +683,7 @@ const OwnHouseSheet = props => {
                 color: '#2F87FF',
                 paddingHorizontal: 20,
                 paddingBottom: 20,
-              }}>
+              }} >
               주거용 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
               불러오지 못한 주택이 있을 경우, 정확한 세금계산이 어려워요.
             </SubTitle>
@@ -715,29 +715,29 @@ const OwnHouseSheet = props => {
                   message: '확인 완료',
                 };
 
-                const chat2 = {
-                  id: 'palnSale',
-                  type: 'system',
-                  progress: 6,
-                  questionId: 'Q_0007',
-                  message:
-                    '종전주택 양도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 양도 계획이 있나요?',
-                  select: [
-                    {
-                      id: 'planSaleYes',
-                      name: '3년 이내 양도 계획',
-                      select: ['getInfoDone', 'getInfoConfirm'],
-                      answer: '01'
-                    },
-                    {
-                      id: 'planSaleNo',
-                      name: '양도 계획 없음',
-                      select: ['getInfoDone', 'getInfoConfirm'],
-                      answer: '02'
-                    },
-                  ],
-                };
-
+                /*   const chat2 = {
+                     id: 'palnSale',
+                     type: 'system',
+                     progress: 6,
+                     questionId: 'Q_0007',
+                     message:
+                       '종전주택 양도 계획에 따라취득세가 다르게 산출될 수 있어요.\n종전주택 양도 계획이 있나요?',
+                     select: [
+                       {
+                         id: 'planSaleYes',
+                         name: '3년 이내 양도 계획',
+                         select: ['getInfoDone', 'getInfoConfirm'],
+                         answer: '01'
+                       },
+                       {
+                         id: 'planSaleNo',
+                         name: '양도 계획 없음',
+                         select: ['getInfoDone', 'getInfoConfirm'],
+                         answer: '02'
+                       },
+                     ],
+                   };
+   */
 
 
 
@@ -817,7 +817,7 @@ const OwnHouseSheet = props => {
               }
               //console.log('houseInfo', houseInfo);
             }}>
-            <ButtonText active={selectedList.length > 0}>확인하기</ButtonText>
+            <ButtonText  active={selectedList.length > 0}>확인하기</ButtonText>
           </Button>
         </DropShadow>
       </SheetContainer>

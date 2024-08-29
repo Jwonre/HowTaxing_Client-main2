@@ -22,7 +22,7 @@ import { setChatDataList } from '../../redux/chatDataListSlice';
 import { gainTax } from '../../data/chatData';
 import { SheetManager } from 'react-native-actions-sheet';
 import CancelCircle from '../../assets/icons/cancel_circle.svg';
-  
+
 
 
 const SheetContainer = styled.View`
@@ -33,7 +33,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -49,7 +49,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalSubtitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -152,14 +152,14 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
 `;
 
 const InfoMessage = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Bold;
   color: #FF7401;
   line-height: 20px;
@@ -176,12 +176,12 @@ const ExpenseSheet = props => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   // 필요경비금액
   const [ExpenseAmount, setExpenseAmount] = useState(
-    houseInfo?.ExpenseAmount ? houseInfo?.ExpenseAmount : 0,
+    houseInfo?.ExpenseAmount ? houseInfo?.ExpenseAmount : null,
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-   
+
 
   // 필요경비금액 선택 리스트
   const AC_AMOUNT_LIST = [50000000, 10000000, 5000000, 1000000];
@@ -244,7 +244,7 @@ const ExpenseSheet = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -276,11 +276,11 @@ const ExpenseSheet = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>필요경비를 입력해주세요.</ModalTitle>
-            <InfoMessage>
+            <ModalTitle >필요경비를 입력해주세요.</ModalTitle>
+            <InfoMessage >
               * 적합한 증빙 없이 현금(계좌이체)으로{'\n'}지출한 필요경비는 인정받지 못할 수 있습니다.
             </InfoMessage>
-            <ModalSubtitle>{numberToKorean(ExpenseAmount)}{(ExpenseAmount !== null && ExpenseAmount !== 0) ? '원' : ' '}</ModalSubtitle>
+            <ModalSubtitle >{numberToKorean(ExpenseAmount === null ? 0 : ExpenseAmount)}{(ExpenseAmount !== null && ExpenseAmount !== 0) ? '원' : null}</ModalSubtitle>
 
             <View
               style={{
@@ -293,13 +293,13 @@ const ExpenseSheet = props => {
                   alignItems: 'center',
                   justifyContent: 'flex-start',
                 }}>
-                <ModalLabel>필요경비</ModalLabel>
+                <ModalLabel >필요경비</ModalLabel>
                 <TouchableOpacity
                   activeOpacity={0.8}
                   hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                   <InfoIcon
                     onPress={() => {
-                       SheetManager.show('infoExpense', {
+                      SheetManager.show('infoExpense', {
                         payload: {
                           Title: "필요경비",
                           Description: "부동산을 취득할 때부터 매매할 때까지 발생\n하는 비용 중 소득세법에서 인정하는 비용들을\n말해요. 취득세, 중개수수료, 보일러 교체비용\n등이 해당돼요. 양도소득세는 양도차익이 클\n수록 세금이 많아지므로 필요경비 금액이 커질\n수록 세금은 줄어들게 돼요.",
@@ -312,9 +312,10 @@ const ExpenseSheet = props => {
               </View>
               <ModalInputContainer>
                 <StyledInput
+                  
                   placeholder="필요경비를 입력해주세요."
                   keyboardType="number-pad"
-                  value={ExpenseAmount ? ExpenseAmount.toLocaleString() : null}
+                  value={ExpenseAmount === null ? '' : ExpenseAmount.toLocaleString()}
                   onChangeText={text => {
                     const numericValue = Number(text.replace(/[^0-9]/g, ''));
                     if (numericValue <= 1000000000000000) {
@@ -324,7 +325,7 @@ const ExpenseSheet = props => {
                     }
                   }}
                 />
-                {(ExpenseAmount !== null && ExpenseAmount !== 0) && (
+                {(ExpenseAmount !== null) && (
                   <TouchableOpacity onPress={() => setExpenseAmount(null)}>
                     <CancelCircle style={{ marginRight: 10 }} width={20} height={20} />
                   </TouchableOpacity>
@@ -343,7 +344,7 @@ const ExpenseSheet = props => {
                     onPress={() => {
                       setExpenseAmount(prev => prev + item);
                     }}>
-                    <ModalSelectButtonText>
+                    <ModalSelectButtonText >
                       {item === 50000000 ? '5천만' : item === 10000000 ? '1천만' : item === 5000000 ? '5백만' : '1백만'}
                     </ModalSelectButtonText>
                   </ModalSelectButton>
@@ -370,7 +371,7 @@ const ExpenseSheet = props => {
                 <ButtonText
                   style={{
                     color: '#717274',
-                  }}>
+                  }} >
                   이전으로
                 </ButtonText>
               </Button>
@@ -379,7 +380,7 @@ const ExpenseSheet = props => {
               <Button
                 onPress={async () => {
                   // ////console.log('ExpenseAmount', ExpenseAmount);
-                  await dispatch(
+                  dispatch(
                     setHouseInfo({
                       ...houseInfo,
                       necessaryExpense: ExpenseAmount ? ExpenseAmount : 50000000,
@@ -420,15 +421,15 @@ const ExpenseSheet = props => {
 
                   const chat3 = gainTax.find(el => el.id === 'getInfoDone');
                   const chat4 = gainTax.find(el => el.id === 'getInfoConfirm');
-                   
+
                   dispatch(setChatDataList([...chatDataList, chatList, chat3, chat4]));
                 }} style={{
-                  backgroundColor: ExpenseAmount ? '#2f87ff' : '#E8EAED',
-                  borderColor: ExpenseAmount ? '#2f87ff' : '#E8EAED',
+                  backgroundColor: ExpenseAmount !== null ? '#2f87ff' : '#E8EAED',
+                  borderColor: ExpenseAmount !== null ? '#2f87ff' : '#E8EAED',
                 }}
-                active={ExpenseAmount}
-                disabled={!(ExpenseAmount)}>
-                <ButtonText active={ExpenseAmount} style={{ color: ExpenseAmount ? '#fff' : '#717274' }}>다음으로</ButtonText>
+                active={ExpenseAmount !== null}
+                disabled={!(ExpenseAmount !== null)}>
+                <ButtonText  active={ExpenseAmount !== null} style={{ color: ExpenseAmount !== '' ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>

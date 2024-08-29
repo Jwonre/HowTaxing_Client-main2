@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { PixelRatio } from 'react-native';
 
 // Screens
 import StartPage from '../screens/Auth/StartPage';
@@ -14,6 +15,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import Acquisition from '../screens/Main/Acquisition';
 import CheckTerms from '../screens/Main/CheckTerms';
 import GainsTax from '../screens/Main/GainsTax';
+import ConsultingReservation from '../screens/Main/ConsultingReservation';
+import FixedHouse from '../screens/Main/FixedHouse';
+import AddHouse from '../screens/Main/AddHouse';
+import FixedHouseList from '../screens/Main/FixedHouseList';
+import AddHouseList from '../screens/Main/AddHouseList';
 import AcquisitionChat from '../screens/Main/AcquisitionChat';
 import FamilyHouse from '../screens/Main/FamilyHouse';
 import RegisterFamilyHouse from '../screens/Main/RegisterFamilyHouse';
@@ -21,6 +27,7 @@ import DoneResisterFamilyHouse from '../screens/Main/DoneResisterFamilyHouse';
 import DirectRegister from '../screens/Main/DirectRegister';
 import RegisterDirectHouse from '../screens/Main/RegisterDirectHouse';
 import OwnedHouseDetail from '../screens/Main/OwnedHouseDetail';
+import FixedHouseDetail from '../screens/Main/FixedHouseDetail';
 import OwnedFamilyHouse from '../screens/Main/OwnedFamilyHouse';
 import DoneSendFamilyHouse from '../screens/Main/DoneSendFamilyHouse';
 import GainsTaxChat from '../screens/Main/GainsTaxChat';
@@ -39,7 +46,8 @@ import ConsultingSheet from '../components/bottomSheets/ConsultingSheet';
 import DeleteHouseAlert from '../components/bottomSheets/DeleteHouseAlert';
 import InfoAlert from '../components/bottomSheets/InfoAlert';
 import InfoCertification from '../components/bottomSheets/InfoCertification';
-import InfoAppinformation from '../components/bottomSheets/InfoAppinformation';
+import InfoConsulting from '../components/bottomSheets/InfoConsulting';
+import InfoBuyPrice from '../components/bottomSheets/InfoBuyPrice';
 import InfoExpense from '../components/bottomSheets/InfoExpense';
 import LogOutSheet from '../components/bottomSheets/LogOutSheet';
 import MapViewListSheet from '../components/bottomSheets/MapViewListSheet';
@@ -87,6 +95,7 @@ import UpdateContractDateAlert from '../components/bottomSheets/UpdateContractDa
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
+  const fontSizeBase = 18;
   const currentUser = useSelector(state => state.currentUser?.value);
   const [firstLaunch, setFirstLaunch] = useState(true);
   const horizontalAnimation = {
@@ -118,7 +127,8 @@ const AppNavigator = () => {
     registerSheet('infoExpense', InfoExpense);
     registerSheet('info', InfoAlert);
     registerSheet('infoCertification', InfoCertification);
-    registerSheet('InfoAppinformation', InfoAppinformation);
+    registerSheet('InfoConsulting', InfoConsulting);
+    registerSheet('InfoBuyPrice', InfoBuyPrice);
     registerSheet('joint', JointSheet);
     registerSheet('ownHouseCount', OwnHouseCountSheet);
     registerSheet('confirm', ConfirmSheet);
@@ -164,13 +174,14 @@ const AppNavigator = () => {
                   headerShown: false,
                   headerheaderTitleStyle: {
                     fontFamily: 'Pretendard-Bold',
-                    fontSize: 18,
+                    fontSize: Math.min(PixelRatio.getFontScale() * fontSizeBase, fontSizeBase),
                     color: '#222',
                   },
                 }}
               />
               <Stack.Screen name="Acquisition" component={Acquisition} />
               <Stack.Screen name="GainsTax" component={GainsTax} />
+              <Stack.Screen name="ConsultingReservation" component={ConsultingReservation} />
               <Stack.Screen name="FamilyHouse" component={FamilyHouse} />
               <Stack.Screen
                 name="Information"
@@ -197,6 +208,26 @@ const AppNavigator = () => {
               <Stack.Screen
                 name="OwnedHouseDetail"
                 component={OwnedHouseDetail}
+              />
+              <Stack.Screen
+                name="FixedHouse"
+                component={FixedHouse}
+              />
+              <Stack.Screen
+                name="AddHouse"
+                component={AddHouse}
+              />
+              <Stack.Screen
+                name="FixedHouseList"
+                component={FixedHouseList}
+              />
+              <Stack.Screen
+                name="AddHouseList"
+                component={AddHouseList}
+              />
+              <Stack.Screen
+                name="FixedHouseDetail"
+                component={FixedHouseDetail}
               />
               <Stack.Screen
                 name="OwnedFamilyHouse"

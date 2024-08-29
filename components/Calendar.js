@@ -1,7 +1,7 @@
-import { View, Text, FlatList, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import getFontSize from '../utils/getFontSize';
+import { FlatList } from 'react-native-gesture-handler';
 import dayjs from 'dayjs';
 import ArrowIcon from '../assets/icons/previous_arrow_ico.svg';
 import BottomAngleBracket from '../assets/icons/bottom_angle_bracket.svg';
@@ -26,7 +26,7 @@ const CalendarWeekday = styled.Text`
 `;
 
 const ModalSubtitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -44,7 +44,7 @@ const SelectGroup = styled.View`
 
 
 const SelectLabel = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: 12px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -52,7 +52,7 @@ const SelectLabel = styled.Text`
 
 const PickerContainer = styled.View`
   width: 100%; 
-  height: 250;
+  height: 200;
   background-color: #f5f7fa;
   border-radius: 10px;
   margin-top: 10px;
@@ -65,7 +65,8 @@ const Calendar = props => {
 
   const [currentDate, setCurrentDate] = useState(props.currentDate ? new Date(props.currentDate) : new Date());
   const [calendarData, setCalendarData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(props.selectedDate ? new Date(props.selectedDate) : null);
+  const [selectedDate, setSelectedDate] = useState(props.selectedDate ? new Date(props.selectedDate) : new Date());
+  
   const currentday = currentDate.getDate();
   const currentyear = currentDate.getFullYear();
   const currentmonth = currentDate.getMonth();
@@ -126,31 +127,39 @@ const Calendar = props => {
         for (let i = minYear; i <= maxYear; i++) {
           newYears.push(i);
         }
+
         if (selectedDate) {
-          if (props?.maxDate?.getFullYear() === selectedDate?.getFullYear()) {
-            for (let i = minMonth; i <= maxMonth + 1; i++) {
-              newMonths.push(i);
-              //console.log('newMonths', newMonths);
+          if (new Date(props?.minDate).getFullYear() === selectedDate?.getFullYear() || new Date(props?.maxDate).getFullYear() === selectedDate?.getFullYear()) {
+            if (new Date(props?.minDate).getFullYear() === new Date(props?.maxDate).getFullYear() && new Date(props?.minDate).getFullYear() === selectedDate?.getFullYear()) {
+              for (let i = minMonth + 1; i <= maxMonth + 1; i++) {
+                newMonths.push(i);
+              }
+            } else if (new Date(props?.minDate).getFullYear() === selectedDate?.getFullYear()) {
+              for (let i = minMonth + 1; i <= 12; i++) {
+                newMonths.push(i);
+              }
+            } else if (new Date(props?.maxDate).getFullYear() === selectedDate?.getFullYear()) {
+              for (let i = 1; i <= maxMonth + 1; i++) {
+                newMonths.push(i);
+              }
             }
-          } else {
-            for (let i = minMonth; i <= 12; i++) {
-              newMonths.push(i);
-              //console.log('newMonths', newMonths); 
-            }
-          }
-        } else {
-          if (props?.maxDate?.getFullYear() === currentDate?.getFullYear()) {
-            for (let i = minMonth; i <= maxMonth + 1; i++) {
-              newMonths.push(i);
-              //console.log('newMonths', newMonths);
-            }
-          } else {
-            for (let i = minMonth; i <= 12; i++) {
-              newMonths.push(i);
-              //console.log('newMonths', newMonths);
-            }
+
           }
         }
+
+        /* else {
+           if (props?.maxDate?.getFullYear() === currentDate?.getFullYear()) {
+             for (let i = minMonth; i <= maxMonth + 1; i++) {
+               newMonths.push(i);
+               //console.log('newMonths', newMonths);
+             }
+           } else {
+             for (let i = minMonth; i <= 12; i++) {
+               newMonths.push(i);
+               //console.log('newMonths', newMonths);
+             }
+           }
+         }*/
         ////console.log('check3');
       }
     } else {
@@ -176,6 +185,11 @@ const Calendar = props => {
         }
       } else if (props.maxDate && !props.minDate) {
         while (date.getMonth() === month && date.getFullYear() === year && date <= props.maxDate) {
+          days.push(date.getDate());
+          date.setDate(date.getDate() + 1);
+        }
+      } else if (props.maxDate && props.minDate) {
+        while (date.getMonth() === selectedDate?.getMonth() && date.getFullYear() === selectedDate?.getFullYear() && date <= props.maxDate) {
           days.push(date.getDate());
           date.setDate(date.getDate() + 1);
         }
@@ -214,11 +228,21 @@ const Calendar = props => {
 
   useEffect(() => {
 
-
     if (new Date(props?.minDate).getFullYear() === selectedDate?.getFullYear() || new Date(props?.maxDate).getFullYear() === selectedDate?.getFullYear()) {
-      for (let i = minMonth + 1; i <= maxMonth + 1; i++) {
-        updatedMonths.push(i);
+      if (new Date(props?.minDate).getFullYear() === new Date(props?.maxDate).getFullYear() && new Date(props?.minDate).getFullYear() === selectedDate?.getFullYear()) {
+        for (let i = minMonth + 1; i <= maxMonth + 1; i++) {
+          updatedMonths.push(i);
+        }
+      } else if (new Date(props?.minDate).getFullYear() === selectedDate?.getFullYear()) {
+        for (let i = minMonth + 1; i <= 12; i++) {
+          updatedMonths.push(i);
+        }
+      } else if (new Date(props?.maxDate).getFullYear() === selectedDate?.getFullYear()) {
+        for (let i = 1; i <= maxMonth + 1; i++) {
+          updatedMonths.push(i);
+        }
       }
+
     } else {
       for (let i = 1; i <= 12; i++) {
         updatedMonths.push(i);
@@ -230,9 +254,9 @@ const Calendar = props => {
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   useEffect(() => {
-    setCurrentPageIndex(0);
+    setCurrentPageIndex(props?.currentPageIndex ? props?.currentPageIndex : 0);
     generateDatesInRange();
-  }, [currentDate]);
+  }, [currentDate, props?.currentPageIndex]);
 
   useEffect(() => {
 
@@ -246,7 +270,8 @@ const Calendar = props => {
   useEffect(() => {
     props.setSelectedDate(selectedDate);
   }, [selectedDate]);
-
+  
+  
   const CalendarHeader = () => {
     const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
     return (
@@ -295,7 +320,7 @@ const Calendar = props => {
   );
 
   const renderDay = ({ item }) => {
-  // console.log('props.minDate', props.minDate);
+    // console.log('props.minDate', props.minDate);
     const isPast = item < props.minDate;
     const islimit = item > props.maxDate;
     const isSunday = item.getDay() === 0;
@@ -325,6 +350,7 @@ const Calendar = props => {
             justifyContent: 'center',
           }}>
           <Text
+
             style={[
               {
                 fontSize: 16,
@@ -356,7 +382,6 @@ const Calendar = props => {
       style={{
         flex: 1,
         backgroundColor: '#fff',
-        marginTop: 30,
       }}>
       {currentPageIndex === 0 && (
         <>
@@ -396,12 +421,12 @@ const Calendar = props => {
                 <ModalSubtitle style={{ marginRight: 10 }} >
                   {currentDate.getFullYear() === selectedDate.getFullYear() && currentDate.getMonth() === selectedDate.getMonth() ? dayjs(selectedDate).format('YYYY년 MM월 DD일') : dayjs(currentDate).format('YYYY년 MM월')}
                 </ModalSubtitle>
-                <BottomAngleBracket hitSlop={{
+                {props.ReservationYn !== 'N' && (<BottomAngleBracket hitSlop={{
                   top: 20,
                   bottom: 20,
                   left: 20,
                   right: 20,
-                }} onPress={() => { setCurrentPageIndex(1) }} />
+                }} onPress={() => { setCurrentPageIndex(1) }} />)}
               </View>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -428,7 +453,7 @@ const Calendar = props => {
           <CalendarSection>
             <FlatList
               key={currentDate.getMonth()}
-              scrollEnabled={false}
+              scrollEnabled={true}
               data={calendarData}
               numColumns={7}
               keyExtractor={item => item.toISOString()}
@@ -436,6 +461,7 @@ const Calendar = props => {
               columnWrapperStyle={{
                 justifyContent: 'space-between',
               }}
+              nestedScrollEnabled={true} // 추가
             />
           </CalendarSection>
         </>
@@ -465,7 +491,7 @@ const Calendar = props => {
                 <ModalSubtitle style={{ marginRight: 10 }} >
                   {selectedDate ? dayjs(selectedDate).format('YYYY년 MM월 DD일') : dayjs(currentDate).format('YYYY년 MM월')}
                 </ModalSubtitle>
-                <TopAngleBracket hitSlop={{
+                {props.ReservationYn !== 'N' && (<TopAngleBracket hitSlop={{
                   top: 20,
                   bottom: 20,
                   left: 20,
@@ -477,16 +503,17 @@ const Calendar = props => {
                 }}
                   style={{
                     transform: [{ rotate: '180deg' }],
-                  }} />
+                  }} />)}
                 <TouchableOpacity>
                 </TouchableOpacity>
               </View>
             </View>
             <SelectGroup>
               <View style={{ width: '40%', marginRight: 10 }}>
-                <SelectLabel>연도</SelectLabel>
+                <SelectLabel >연도</SelectLabel>
                 <PickerContainer>
                   <WheelPicker
+                    key={years}
                     selectedIndex={
                       selectedDate ? years.indexOf(selectedDate.getFullYear()) >= 0 ? years.indexOf(selectedDate.getFullYear()) : 1 : years.indexOf(currentDate.getFullYear())
                     }
@@ -497,9 +524,10 @@ const Calendar = props => {
                     }}
                     itemTextStyle={{
                       fontFamily: 'Pretendard-Regular',
-                      fontSize: getFontSize(18),
+                      fontSize: 18,
                       color: '#1B1C1F',
                     }}
+                    allowFontScaling={false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}
@@ -553,7 +581,7 @@ const Calendar = props => {
                 </PickerContainer>
               </View>
               <View style={{ width: '27%', marginRight: 10 }}>
-                <SelectLabel>월</SelectLabel>
+                <SelectLabel >월</SelectLabel>
                 <PickerContainer>
                   <WheelPicker
                     key={months}
@@ -567,9 +595,10 @@ const Calendar = props => {
                     }}
                     itemTextStyle={{
                       fontFamily: 'Pretendard-Regular',
-                      fontSize: getFontSize(18),
+                      fontSize: 18,
                       color: '#1B1C1F',
                     }}
+                    allowFontScaling={false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}
@@ -587,7 +616,7 @@ const Calendar = props => {
                 </PickerContainer>
               </View>
               <View style={{ width: '27%', marginRight: 10 }}>
-                <SelectLabel>일</SelectLabel>
+                <SelectLabel >일</SelectLabel>
                 <PickerContainer>
                   <WheelPicker
                     key={daysInMonth}
@@ -600,9 +629,10 @@ const Calendar = props => {
                     }}
                     itemTextStyle={{
                       fontFamily: 'Pretendard-Regular',
-                      fontSize: getFontSize(18),
+                      fontSize: 18,
                       color: '#1B1C1F',
                     }}
+                    allowFontScaling={false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}

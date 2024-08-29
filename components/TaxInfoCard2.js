@@ -3,7 +3,7 @@
 import { View } from 'react-native';
 import React from 'react';
 import styled from 'styled-components';
-import getFontSize from '../utils/getFontSize';
+
 import * as Animatable from 'react-native-animatable';
 import ChatBubbleIcon from '../assets/icons/chat_bubble.svg';
 
@@ -27,7 +27,7 @@ const CardHeader = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -43,7 +43,7 @@ const InfoContainer = styled.View`
 `;
 
 const InfoNum = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Bold;
   color: #2f87ff;
   line-height: 20px;
@@ -52,7 +52,7 @@ const InfoNum = styled.Text`
 
 const InfoText = styled.Text`
   flex: 1;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -84,13 +84,13 @@ const TaxInfoCard2 = props => {
           }}>
           <ChatBubbleIcon />
         </View>
-        <Title>계산된 양도소득세에 대해 설명드릴게요</Title>
+        <Title >계산된 양도소득세에 대해 설명드릴게요</Title>
       </CardHeader>
       {Array.from({ length: commentaryListCnt }).map((_, index) => (
         <React.Fragment key={index}>
           <InfoContainer>
-            <InfoNum>{index + 1}.</InfoNum>
-            <InfoText>
+            <InfoNum >{index + 1}.</InfoNum>
+            <InfoText >
               {Pdata?.commentaryList[index]}
             </InfoText>
           </InfoContainer>

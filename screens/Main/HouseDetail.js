@@ -48,7 +48,7 @@ const MapContainer = styled.View`
 
 const HoustInfoTitle = styled.Text`
   width: 100%;
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 24px;
@@ -57,7 +57,7 @@ const HoustInfoTitle = styled.Text`
 `;
 
 const HoustInfoText = styled.Text`
-font-size: ${getFontSize(12)}px;
+font-size: 12px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 20px;
@@ -76,7 +76,7 @@ const HoustInfoBadge = styled.View`
 `;
 
 const HoustInfoBadgeText = styled.Text`
-font-size: ${getFontSize(10)}px;
+font-size: 10px;
   font-family: Pretendard-Medium;
   color: #fff;
   line-height: 12px;
@@ -95,7 +95,7 @@ const NecessaryInfoBadge = styled.View`
 `;
 
 const NecessaryInfoBadgeText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Medium;
   color: #fff;
   line-height: 12px;
@@ -155,7 +155,7 @@ const InfoContentItem = styled.View`
 `;
 
 const InfoContentLabel = styled.Text`
-font-size: ${getFontSize(12)}px;
+font-size: 12px;
   font-family: Pretendard-Regular;
   color: #97989a;
   line-height: 20px;
@@ -163,7 +163,7 @@ font-size: ${getFontSize(12)}px;
 `;
 
 const InfoContentText = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -295,14 +295,14 @@ const HouseDetail = props => {
         <>
           <HouseSection>
             <HoustInfoSection>
-              <View style={{ width: 'auto', flexDirection: 'row'}}>
+              <View style={{ width: 'auto', flexDirection: 'row' }}>
                 <HoustInfoBadge
                   style={{
                     backgroundColor: HOUSE_TYPE.find(
                       el => el.id === item?.houseType,
                     )?.color,
                   }}>
-                  <HoustInfoBadgeText>
+                  <HoustInfoBadgeText >
                     {HOUSE_TYPE.find(el => el.id === item?.houseType)?.name}
                   </HoustInfoBadgeText>
                   {(item?.houseType !== '3' && item?.isMoveInRight === true) && <HoustInfoBadgeText style={{ fontSize: 8 }}>
@@ -320,8 +320,8 @@ const HouseDetail = props => {
                   </HoustInfoBadgeText>
                 </HoustInfoBadge>*/}
               </View>
-              <HoustInfoTitle>{item?.houseName}</HoustInfoTitle>
-              <HoustInfoText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'left' }}>{item?.houseDetailName}</HoustInfoText>
+              <HoustInfoTitle >{item?.houseName}</HoustInfoTitle>
+              <HoustInfoText  ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'left' }}>{item?.houseDetailName}</HoustInfoText>
             </HoustInfoSection>
             <MapContainer>
               <NaverMapView
@@ -372,8 +372,8 @@ const HouseDetail = props => {
           </HouseSection>
           <InfoContentSection>
             <InfoContentItem>
-              <InfoContentLabel>주택명</InfoContentLabel>
-              <InfoContentText>
+              <InfoContentLabel >주택명</InfoContentLabel>
+              <InfoContentText >
                 {item?.houseName ? item?.houseName : ''}
               </InfoContentText>
             </InfoContentItem>
@@ -385,12 +385,12 @@ const HouseDetail = props => {
                     color => color.id === '8',
                   ).color,
                 }}>
-                <NecessaryInfoBadgeText>
+                <NecessaryInfoBadgeText >
                   {HOUSE_TYPE.find(color => color.id === '8').name}
                 </NecessaryInfoBadgeText>
               </NecessaryInfoBadge>
-              <InfoContentLabel>주택유형</InfoContentLabel>
-              <InfoContentText>
+              <InfoContentLabel >주택유형</InfoContentLabel>
+              <InfoContentText >
                 {HOUSE_TYPE.find(color => color.id === item?.houseType).name}
               </InfoContentText>
             </InfoContentItem>
@@ -402,12 +402,12 @@ const HouseDetail = props => {
                     color => color.id === '8',
                   ).color,
                 }}>
-                <NecessaryInfoBadgeText>
+                <NecessaryInfoBadgeText >
                   {HOUSE_TYPE.find(color => color.id === '8').name}
                 </NecessaryInfoBadgeText>
               </NecessaryInfoBadge>
-              <InfoContentLabel>주소      </InfoContentLabel>
-              <InfoContentText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{item?.roadAddr}</InfoContentText>
+              <InfoContentLabel >주소      </InfoContentLabel>
+              <InfoContentText  ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{item?.roadAddr}</InfoContentText>
             </InfoContentItem>
 
             <InfoContentItem>
@@ -417,12 +417,12 @@ const HouseDetail = props => {
                     color => color.id === '8',
                   ).color,
                 }}>
-                <NecessaryInfoBadgeText>
+                <NecessaryInfoBadgeText >
                   {HOUSE_TYPE.find(color => color.id === '8').name}
                 </NecessaryInfoBadgeText>
               </NecessaryInfoBadge>
-              <InfoContentLabel>상세주소</InfoContentLabel>
-              <InfoContentText ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{item?.houseName}</InfoContentText>
+              <InfoContentLabel >상세주소</InfoContentLabel>
+              <InfoContentText  ellipsizeMode='tail' numberOfLines={1} style={{ flex: 1, textAlign: 'right' }}>{item?.houseName}</InfoContentText>
             </InfoContentItem>
 
             {(prevSheet === 'confirm2' || prevSheet === 'GainsTaxChat') && <InfoContentItem>
@@ -432,12 +432,12 @@ const HouseDetail = props => {
                     color => color.id === '8',
                   ).color,
                 }}>
-                <NecessaryInfoBadgeText>
+                <NecessaryInfoBadgeText >
                   {HOUSE_TYPE.find(color => color.id === '8').name}
                 </NecessaryInfoBadgeText>
               </NecessaryInfoBadge>
-              <InfoContentLabel>취득계약일자</InfoContentLabel>
-              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{item?.contractDate ? dayjs(item?.contractDate).format(
+              <InfoContentLabel >취득계약일자</InfoContentLabel>
+              <InfoContentText  style={{ flex: 1, textAlign: 'right' }}>{item?.contractDate ? dayjs(item?.contractDate).format(
                 'YYYY년 MM월 DD일',
               ) : ''}</InfoContentText>
             </InfoContentItem>}
@@ -448,12 +448,12 @@ const HouseDetail = props => {
                     color => color.id === '8',
                   ).color,
                 }}>
-                <NecessaryInfoBadgeText>
+                <NecessaryInfoBadgeText >
                   {HOUSE_TYPE.find(color => color.id === '8').name}
                 </NecessaryInfoBadgeText>
               </NecessaryInfoBadge>
-              <InfoContentLabel>취득일자</InfoContentLabel>
-              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>
+              <InfoContentLabel >취득일자</InfoContentLabel>
+              <InfoContentText style={{ flex: 1, textAlign: 'right' }} >
                 {(item?.buyDate ? dayjs(item?.buyDate).format('YYYY년 MM월 DD일') : '')}
               </InfoContentText>
             </InfoContentItem>}
@@ -464,12 +464,12 @@ const HouseDetail = props => {
                     color => color.id === '8',
                   ).color,
                 }}>
-                <NecessaryInfoBadgeText>
+                <NecessaryInfoBadgeText >
                   {HOUSE_TYPE.find(color => color.id === '8').name}
                 </NecessaryInfoBadgeText>
               </NecessaryInfoBadge>
-              <InfoContentLabel>취득금액</InfoContentLabel>
-              <InfoContentText>
+              <InfoContentLabel >취득금액</InfoContentLabel>
+              <InfoContentText >
                 {(item?.buyPrice ? numberToKorean(Number(item?.buyPrice)?.toString()) + '원' : '')}
               </InfoContentText>
             </InfoContentItem>}
@@ -479,25 +479,26 @@ const HouseDetail = props => {
               <InfoContentText>{item?.detailAdr}</InfoContentText>
             </InfoContentItem>*/}
             <InfoContentItem>
-              <InfoContentLabel>공시가격</InfoContentLabel>
-              <InfoContentText>
+              <InfoContentLabel >공시가격</InfoContentLabel>
+              <InfoContentText >
                 {item?.pubLandPrice ? numberToKorean(Number(item?.pubLandPrice)?.toString()) + '원' : (item?.isPubLandPriceOver100Mil === true ? '1억원 초과' : item?.isPubLandPriceOver100Mil === undefined ? '' : '1억원 이하')}
               </InfoContentText>
             </InfoContentItem>
             {(prevSheet === 'confirm' || prevSheet === 'AcquisitionChat') && <InfoContentItem>
-              <InfoContentLabel>취득계약일자</InfoContentLabel>
-              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>{item?.contractDate ? dayjs(item?.contractDate).format(
+              <InfoContentLabel >취득계약일자</InfoContentLabel>
+              <InfoContentText  style={{ flex: 1, textAlign: 'right' }}>{item?.contractDate ? dayjs(item?.contractDate).format(
                 'YYYY년 MM월 DD일',
               ) : ''}</InfoContentText>
             </InfoContentItem>}
             <InfoContentItem>
-              <InfoContentLabel>계약면적</InfoContentLabel>
+              <InfoContentLabel >계약면적</InfoContentLabel>
               <View
                 style={{
                   marginLeft: 'auto',
                 }}>
-                <InfoContentText>{item?.area ? item?.area + 'm2' : (item?.isAreaOver85 === true ? '국민평형(85m2) 초과' : item?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}</InfoContentText>
+                <InfoContentText >{item?.area ? item?.area + 'm2' : (item?.isAreaOver85 === true ? '국민평형(85m2) 초과' : item?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}</InfoContentText>
                 {item?.area !== 0 || undefined && <InfoContentText
+                  
                   style={{
                     fontSize: 10,
                     color: '#A3A5A8',
@@ -507,14 +508,14 @@ const HouseDetail = props => {
               </View>
             </InfoContentItem>
             {(prevSheet === 'confirm' || prevSheet === 'AcquisitionChat') && <InfoContentItem>
-              <InfoContentLabel>취득일자</InfoContentLabel>
-              <InfoContentText style={{ flex: 1, textAlign: 'right' }}>
+              <InfoContentLabel >취득일자</InfoContentLabel>
+              <InfoContentText  style={{ flex: 1, textAlign: 'right' }}>
                 {(item?.buyDate ? dayjs(item?.buyDate).format('YYYY년 MM월 DD일') : '')}
               </InfoContentText>
             </InfoContentItem>}
             {(prevSheet === 'confirm' || prevSheet === 'AcquisitionChat') && <InfoContentItem>
-              <InfoContentLabel>취득금액</InfoContentLabel>
-              <InfoContentText>
+              <InfoContentLabel >취득금액</InfoContentLabel>
+              <InfoContentText >
                 {(item?.acAmount ? numberToKorean(Number(item?.acAmount)?.toString()) + '원' : '')}
               </InfoContentText>
             </InfoContentItem>}
@@ -529,6 +530,7 @@ const HouseDetail = props => {
                   justifyContent: 'space-between',
                 }}>
                 <Label
+                  
                   style={{
                     marginBottom: 0,
                   }}>
@@ -540,16 +542,16 @@ const HouseDetail = props => {
                 <InfoContentLabel
                   style={{
                     color: '#1B1C1F',
-                    fontSize: getFontSize(14),
-                  }}>
+                    fontSize: 14,
+                  }} >
                   본인
                 </InfoContentLabel>
-                <InfoContentText>
+                <InfoContentText >
                   {Number(item?.ownerCnt) > 1 && (
                     <Text
                       style={{
                         color: '#B5283B',
-                      }}>
+                      }} >
                       공동명의{'  '}
                     </Text>
                   )}
@@ -564,15 +566,15 @@ const HouseDetail = props => {
                       <InfoContentLabel
                         style={{
                           color: '#1B1C1F',
-                          fontSize: getFontSize(14),
-                        }}>
+                          fontSize: 14,
+                        }} >
                         소유자{index + 1}
                       </InfoContentLabel>
-                      <InfoContentText>
+                      <InfoContentText >
                         <Text
                           style={{
                             color: '#B5283B',
-                          }}>
+                          }} >
                           공동명의{'  '}
                         </Text>
                         {50}%
@@ -581,8 +583,8 @@ const HouseDetail = props => {
                   ))}
             </Paper>
             <InfoContentItem>
-              <InfoContentLabel>입주권 여부</InfoContentLabel>
-              <InfoContentText>{item?.isMoveInRight === true ? '여' : '부'}</InfoContentText>
+              <InfoContentLabel >입주권 여부</InfoContentLabel>
+              <InfoContentText >{item?.isMoveInRight === true ? '여' : '부'}</InfoContentText>
             </InfoContentItem>
           </InputSection>
         </>

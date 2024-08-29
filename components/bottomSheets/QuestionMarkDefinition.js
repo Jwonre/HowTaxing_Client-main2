@@ -27,7 +27,7 @@ const ModalContentSection = styled.View`
 `;
 const ModalTitle = styled.Text`
   width: 80%;
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -41,7 +41,7 @@ const BoldText = styled.Text`
 
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Bold;
   width: 75%;
   color: #1b1c1f;
@@ -86,14 +86,13 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
 `;
 
-const PubLandPriceDef = props => {
-  const dispatch = useDispatch();
+const QuestionMarkDefinition = props => {
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
   
@@ -117,7 +116,6 @@ const PubLandPriceDef = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -133,13 +131,13 @@ const PubLandPriceDef = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: props.payload.type === '전용면적' ? 300 : 300,
+        height: 300,
         width: width - 40,
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
           <ModalTitle><BoldText>{title}</BoldText>{'이란?'}</ModalTitle>
-          <View styled={{marginTop: 15}}><ModalDescription>{message}</ModalDescription></View>
+          <View style={{height: 100}}><ModalDescription>{message}</ModalDescription></View>
         </ModalContentSection>
 
         <ButtonSection>
@@ -153,12 +151,10 @@ const PubLandPriceDef = props => {
               shadowOpacity: 0.15,
               shadowRadius: 2,
               alignSelf: 'center',
-              width: width - 120,
+              width: width - 100,
             }}>
             <Button
-              onPress={() => {
-                ////console.log('GoBack');
-                 
+              onPress={() => {                 
                 actionSheetRef.current?.hide();
               }}>
               <ButtonText>돌아가기</ButtonText>
@@ -170,4 +166,4 @@ const PubLandPriceDef = props => {
   );
 };
 
-export default PubLandPriceDef;
+export default QuestionMarkDefinition;

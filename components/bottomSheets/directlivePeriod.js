@@ -31,7 +31,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -57,7 +57,7 @@ const ApartmentInfoGroup = styled.View`
 
 const ApartmentInfoTitle = styled.Text`
   width: 60%;
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 30px;
@@ -86,7 +86,7 @@ const SelectGroup = styled.View`
 `;
 
 const SelectLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -115,7 +115,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -360,7 +360,7 @@ const directlivePeriod = props => {
     },
     itemTextStyle: {
       fontFamily: 'Pretendard-Regular',
-      fontSize: getFontSize(18),
+      fontSize: 18,
       color: '#1B1C1F',
     },
     selectedIndicatorStyle: {
@@ -408,7 +408,7 @@ const directlivePeriod = props => {
         <ModalTitle
           style={{
             marginBottom: 10,
-          }}>
+          }} >
           실거주 기간을 입력해 주세요.
         </ModalTitle>
 
@@ -416,6 +416,7 @@ const directlivePeriod = props => {
           <View style={{ width: '48%' }}>
             <PickerContainer>
               <WheelPicker
+                allowFontScaling= {false}
                 selectedIndex={YearList.indexOf(selectedDate.year)}
                 {...WheelPickerConfig}
                 options={YearList}
@@ -428,6 +429,7 @@ const directlivePeriod = props => {
           <View style={{ width: '48%' }}>
             <PickerContainer>
               <WheelPicker
+                
                 selectedIndex={MonthList.indexOf(selectedDate.month)}
                 {...WheelPickerConfig}
                 options={MonthList}
@@ -460,7 +462,7 @@ const directlivePeriod = props => {
               <ButtonText
                 style={{
                   color: '#717274',
-                }}>
+                }} >
                 이전으로
               </ButtonText>
             </Button>
@@ -468,7 +470,7 @@ const directlivePeriod = props => {
 
           <DropShadow style={styles.dropshadow}>
             <Button onPress={nextHandler}>
-              <ButtonText>다음으로</ButtonText>
+              <ButtonText >다음으로</ButtonText>
             </Button>
           </DropShadow>
         </ButtonSection>
@@ -495,7 +497,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-SemiBold',
     color: '#A3A5A8',
     letterSpacing: -0.3,
@@ -511,7 +513,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8EAED',
   },
   rowTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-Regular',
     color: '#1B1C1F',
     letterSpacing: -0.3,

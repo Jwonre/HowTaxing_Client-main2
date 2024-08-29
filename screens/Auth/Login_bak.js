@@ -47,7 +47,7 @@ const SocialButton = styled.TouchableOpacity.attrs(props => ({
 
 const SocialButtonText = styled.Text`
   width: auto;
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Regular;
   line-height: 20px;
   letter-spacing: -0.3px;

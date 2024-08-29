@@ -45,7 +45,7 @@ const ModalAddressInputContainer = styled.View`
 
 const DetailAddressInput = styled.TextInput.attrs(props => ({
   placeholderTextColor: '#A3A5A8',
-  placeholder: '변경하실 주택명을 입력해주세요',
+  placeholder: '나머지 상세주소를 입력해주세요',
 }))`
   flex: 1;
   font-size: 13px;
@@ -114,17 +114,39 @@ const ButtonText = styled.Text`
   line-height: 20px;
 `;
 
-const UpdateHouseNameAlert = props => {
-
+const UpdateHouseDetailNameAlert = props => {
+  const { navigation } = props.payload?.navigation;
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-  const { handleHouseChange, data } = props.payload;
+  const { handleHouseChange, data, DongHo } = props.payload;
   const actionSheetRef = useRef(null);
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
+  const [isLastPage, setIsLastPage] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const [houseName, setHouseName] = useState(data.houseName);
-  const { navigation } = props;
+  const [listData, setListData] = useState([]);
+  const [searchText, setSearchText] = useState('');
+  const [detailAddress, setDetailAddress] = useState(DongHo ? DongHo : data.detailAdr);
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true); // or some other action
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false); // or some other action
+      },
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
   const [isConnected, setIsConnected] = useState(true);
 
   const handleNetInfoChange = (state) => {
@@ -146,41 +168,21 @@ const UpdateHouseNameAlert = props => {
   };
 
 
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true); // or some other action
-      },
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false); // or some other action
-      },
-    );
-
-    return () => {
-      keyboardDidHideListener.remove();
-      keyboardDidShowListener.remove();
-    };
-  }, []);
-
   const nextHandler = async () => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-      var p = data;
-      p.houseName = houseName;
-      //////console.log('[UpdateHouseDetailNameAlert]nextHandler p:', p);
-      handleHouseChange(p, p?.isMoveInRight);
+      // ////console.log('[UpdateHouseDetailNameAlert]nextHandler p:', p);
 
       actionSheetRef.current?.hide();
     }
 
   };
 
-
+  useEffect(() => {
+    setListData([]);
+    setIsLastPage(false);
+  }, [searchText]);
   return (
     <ActionSheet
       ref={actionSheetRef}
@@ -217,19 +219,17 @@ const UpdateHouseNameAlert = props => {
             style={{
               marginBottom: 20,
             }}>
-            변경하실 주택명을 입력해주세요.
+            상세 주소를 확인해주세요.
           </ModalTitle>
           <ApartmentInfoGroup
             onLayout={event => {
               // setApartmentInfoGroupHeight(event.nativeEvent.layout.height);
             }}>
-            <ApartmentInfoTitle >{data?.houseName}</ApartmentInfoTitle>
+            <ApartmentInfoTitle >{data.roadAddr}</ApartmentInfoTitle>
           </ApartmentInfoGroup>
           <ModalAddressInputContainer>
             <DetailAddressInput
-              
-              value={houseName}
-              onChangeText={setHouseName}
+              value={DongHo ? DongHo : (detailAddress ? detailAddress : '')}
             />
           </ModalAddressInputContainer>
           <ButtonSection width={width}>
@@ -251,13 +251,13 @@ const UpdateHouseNameAlert = props => {
                   style={{
                     color: '#717274',
                   }}>
-                  돌아가기
+                  이전으로
                 </ButtonText>
               </Button>
             </DropShadow>
             <DropShadow style={styles.dropshadow}>
               <Button onPress={nextHandler}>
-                <ButtonText >입력하기</ButtonText>
+                <ButtonText >다음으로</ButtonText>
               </Button>
             </DropShadow>
           </ButtonSection>
@@ -320,4 +320,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default UpdateHouseNameAlert;
+export default UpdateHouseDetailNameAlert;

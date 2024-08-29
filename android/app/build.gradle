@@ -130,8 +130,11 @@ android {
         product {
         }
     }
-    
-
+        sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+        }
+    }
     /*flavorDimensions "version"
     productFlavors {
         develop {

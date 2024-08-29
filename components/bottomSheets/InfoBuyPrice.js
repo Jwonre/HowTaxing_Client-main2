@@ -1,14 +1,13 @@
 // 정보 또는 경고 알림창 컴포넌트
 
-import { useWindowDimensions, Pressable, View, ScrollView, Linking } from 'react-native';
+import { useWindowDimensions, Pressable, View } from 'react-native';
 import React, { useRef, useState } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
 import getFontSize from '../../utils/getFontSize';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
-import { useDispatch, useSelector } from 'react-redux';
-  
+import { useDispatch } from 'react-redux';
 
 
 const SheetContainer = styled.View`
@@ -20,33 +19,49 @@ const SheetContainer = styled.View`
 
 const ModalTitle = styled.Text`
   width: 80%;
-  font-size: ${getFontSize(17)}px;
-  font-family: Pretendard-Bold;
+  font-size: 17px;
+  font-family: Bold;
   color: #1b1c1f;
   line-height: 26px;
   text-align: center;
 
 `;
 
-const ModalDescription = styled.Text`
-  width: 80%;
-  font-size: ${getFontSize(15)}px;
-  font-family: Pretendard-Regular;
-  font-weight: 500;
-  color: #a3a5a8;
-  line-height: 25px;
-  text-align: left;
-  padding: 20px;
 
+const BoldText = styled.Text`
+  font-family: Pretendard-Bold;
+  font-weight: 600;
+`;
+
+const ModalDescription = styled.Text`
+  font-size: 14px;
+  font-family: Bold;
+  width: 75%;
+  color: #1b1c1f;
+  line-height: 22px;
+  margin-top: 15px;
+  text-align: left;
+
+`;
+
+const Modaldetail = styled.Text`
+  width: 100%;
+  font-size: 12px;
+  font-family: Bold;
+  color: #1b1c1f;
+  line-height: 20px;
+  margin-top: 15px;
+  text-align: left;
+  margin-bottom: 10px;
 `;
 
 const ModalContentSection = styled.View`
   width: 100%;
   height: auto;
   margin-top: 10px;
-  background-color: #fff;
-  align-items: center;
+  align-items: center; 
   justify-content: center;
+  text-align: center;
 `;
 
 const ModalHeader = styled.View`
@@ -65,7 +80,7 @@ const ButtonSection = styled.View`
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  padding: 10px;
+  padding: 20px;
 `;
 
 const Button = styled.TouchableOpacity.attrs(props => ({
@@ -79,22 +94,19 @@ const Button = styled.TouchableOpacity.attrs(props => ({
   justify-content: center;
   border-width: 1px;
   border-color: #2f87ff;
+  
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
 `;
 
-
-const InfoAppinformation = () => {
-  const dispatch = useDispatch();
+const InfoBuyPrice = () => {
   const actionSheetRef = useRef(null);
   const { width, height } = useWindowDimensions();
-
-
 
   return (
     <ActionSheet
@@ -105,8 +117,8 @@ const InfoAppinformation = () => {
           <Pressable
             hitSlop={20}
             onPress={() => {
+
               actionSheetRef.current?.hide();
-               
             }}>
             <CloseIcon width={16} height={16} />
           </Pressable>
@@ -114,23 +126,25 @@ const InfoAppinformation = () => {
       }
       overlayColor="#111"
       defaultOverlayOpacity={0.7}
-      gestureEnabled={false}
-      closeOnPressBack={true}
       closeOnTouchBackdrop={false}
+      gestureEnabled={false}
       statusBarTranslucent
       containerStyle={{
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 300,
-        width: width - 40
+        height: 640,
+        width: width - 40,
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
-          <ModalTitle>하우택싱 서비스 정보를 알려드릴게요.</ModalTitle>
-          <ModalDescription>
-            어플리케이션 버전 : v1.0.0{'\n'}법인명(단체명) : JS 세무회계{'\n'}사업자등록번호 : 416-18-30801
-          </ModalDescription>
+
+          <ModalTitle>
+            <BoldText>매매 외 취득원인 및 취득금액이란?</BoldText>
+          </ModalTitle>
+          <View style={{ height: 450}}>
+            <ModalDescription>{'1) 상속으로 취득 :\n상속개시일 당시 상속세 및 증여세법 규정에\n따라 평가한 가액(거래가액, 감정가액, 매매사\n례가액, 기준시가 등)\n2) 증여로 취득 :\n증여일 당시 상속세 및 증여세법 규정에 따라\n평가한 가액(거래가액, 감정가액, 매매사례가\n액, 기준시가 등)\n3) 재산분할청구권의 행사로 배우자로부터 취\n득하는 재산 :\n전 소유자(배우자) 취득 당시의 취득가액\n4) 이혼위자료의 대가로 배우자로부터 취득하\n는 재산 :\n위자료에 갈음하여 대물변제한 가액\n5) 교환자산 :\n교환 당시 취득자산의 기준시가 또는 실지거래\n가액\n6) 이월과세대상 자산 :\n배우자 등의 당초 취득가액'}</ModalDescription>
+          </View>
         </ModalContentSection>
 
         <ButtonSection>
@@ -144,21 +158,20 @@ const InfoAppinformation = () => {
               shadowOpacity: 0.15,
               shadowRadius: 2,
               alignSelf: 'center',
-              width: width - 120,
+              width: width - 100,
             }}>
             <Button
               onPress={() => {
+
                 actionSheetRef.current?.hide();
-                 
               }}>
-              <ButtonText>돌아가기</ButtonText>
+              <ButtonText >돌아가기</ButtonText>
             </Button>
           </DropShadow>
-
         </ButtonSection>
       </SheetContainer>
-    </ActionSheet >
+    </ActionSheet>
   );
 };
 
-export default InfoAppinformation;
+export default InfoBuyPrice;

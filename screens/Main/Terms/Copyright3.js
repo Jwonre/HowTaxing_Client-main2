@@ -1,7 +1,7 @@
 // 개인정보 처리방침
 
 import { TouchableOpacity, useWindowDimensions, ScrollView, BackHandler } from 'react-native';
-import React, { useLayoutEffect, useState, useEffect } from 'react';
+import React, { useLayoutEffect, useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
@@ -17,7 +17,7 @@ const Container = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -27,7 +27,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(18)}px;
+  font-size: 18px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 25px;
@@ -73,8 +73,10 @@ const Copyright3 = props => {
   const navigation = props.navigation;
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
-  const [activeButton, setActiveButton] = useState(false);
-  const { certType, agreeCert, agreePrivacy, agreeLocation, agreeAge, agreeMarketing, agreeCopyright, agreeGov24 } = useSelector(
+  const [activeButton, setActiveButton] = useState(true);
+  const scrollViewRef = useRef(null);
+  const [buttonText, setButtonText] = useState('끝으로 이동하기');
+  const { certType, agreeCert, agreePrivacy, agreeCopyright, agreeGov24 } = useSelector(
     state => state.cert.value,
   );
 
@@ -132,31 +134,32 @@ const Copyright3 = props => {
         letterSpacing: -0.8,
       },
     });
-    setActiveButton(true);
   }, []);
 
   return (
     <Container>
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
         onScroll={({ nativeEvent }) => {
-          // 하단 스크롤 시 버튼 활성화
-
           if (
             nativeEvent.contentOffset.y +
             nativeEvent.layoutMeasurement.height >=
             nativeEvent.contentSize.height - 1
           ) {
-            setActiveButton(true);
+            setButtonText('동의 후 인증하기');
           } else {
-            setActiveButton(false);
-          }
-        }}>
+            setButtonText('끝으로 이동하기');
 
-        <Title>(필수) 정부24 저작권보호정책</Title>
-        <SubTitle>[필수] 정부24 저작권보호정책</SubTitle>
-        <ContentText>
+          }
+        }}
+        scrollEventThrottle={16} // 스크롤 이벤트 빈도 조절
+      >
+
+        <Title >정부24 저작권보호정책</Title>
+        <SubTitle >정부24 저작권보호정책</SubTitle>
+        <ContentText >
           {`저작권보호정책
 정부24의 내용은 저작권법에 의한 보호를 받는 저작물로서, 이에 대한 무단 복제 및 배포를 원칙적으로 금합니다.
 이를 무단 복제 · 배포하는 경우 저작권법 제136조의5 에 의한 저작재산권 침해 죄에 해당될 수 있습니다.
@@ -179,36 +182,42 @@ const Copyright3 = props => {
           }}>
           <Button
             width={width}
-            active={activeButton || agreeCopyright}
+            active={(buttonText === '끝으로 이동하기' ? false : true) || agreeCopyright}
             disabled={!(activeButton || agreeCopyright)}
             onPress={() => {
-              dispatch(
-                setCert({
-                  certType,
-                  agreePrivacy,
-                  agreeCert,
-                  agreeCopyright: true,
-                  agreeGov24,
-                }),
-              );
-              navigation.goBack();
+              if (buttonText === '끝으로 이동하기') {
+                if (scrollViewRef.current) {
+                  scrollViewRef.current.scrollTo({ y: 100000, animated: true });
+                }
+              } else {
+                dispatch(
+                  setCert({
+                    certType,
+                    agreePrivacy,
+                    agreeCert,
+                    agreeCopyright: true,
+                    agreeGov24,
+                  }),
+                );
+                navigation.goBack();
 
-              setTimeout(() => {
-                SheetManager.show('cert2', {
-                  payload: {
-                    index: props.route.params.index,
-                    navigation: navigation,
-                  },
-                });
-              }, 300);
+                setTimeout(() => {
+                  SheetManager.show('cert2', {
+                    payload: {
+                      index: props.route.params.index,
+                      navigation: navigation,
+                    },
+                  });
+                }, 300);
+              }
             }}>
             <ButtonText active={activeButton || agreeCopyright}>
-              동의 후 인증하기
+              {buttonText}
             </ButtonText>
           </Button>
         </DropShadow>
       </ButtonSection>
-    </Container>
+    </Container >
   );
 };
 

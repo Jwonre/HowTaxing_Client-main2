@@ -33,7 +33,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -59,7 +59,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -227,7 +227,7 @@ const OwnHouseCountSheet = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>취득하실 주택 외에 보유 주택수를{'\n'}입력해주세요.</ModalTitle>
+          <ModalTitle >취득하실 주택 외에 보유 주택수를{'\n'}입력해주세요.</ModalTitle>
           <View
             style={{
               flexDirection: 'row',
@@ -266,7 +266,7 @@ const OwnHouseCountSheet = props => {
                 color: '#1B1C1F',
                 lineHeight: 20,
                 marginHorizontal: 10,
-              }}>
+              }} >
               {HouseCount}채
             </Text>
 
@@ -323,8 +323,8 @@ const OwnHouseCountSheet = props => {
                     type: 'my',
                     message: `${HouseCount}채`,
                     questionId: 'HouseCount',
-                  };
-                  const chat2 = {
+                   };
+                 /* const chat2 = {
                     id: 'palnSale',
                     type: 'system',
                     progress: 6,
@@ -345,7 +345,7 @@ const OwnHouseCountSheet = props => {
                         answer: '02'
                       },
                     ],
-                  };
+                  };*/
 
                   const chat4 = acquisitionTax.find(el => el.id === 'getInfoDone');
                   const chat5 = acquisitionTax.find(el => el.id === 'getInfoConfirm');
@@ -423,7 +423,7 @@ const OwnHouseCountSheet = props => {
                 marginTop: 20,
                 marginBottom: 50,
               }}>
-              <ModalButtonText>다음으로</ModalButtonText>
+              <ModalButtonText >다음으로</ModalButtonText>
             </ModalButton>
           </DropShadow>
         </ButtonSection>

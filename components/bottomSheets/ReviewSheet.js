@@ -21,7 +21,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -68,7 +68,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -131,7 +131,7 @@ const ReviewInput = styled.TextInput.attrs(props => ({
 
 
 const TextLength = styled.Text`
-  font-size: ${getFontSize(9)}px;
+  font-size: 9px;
   font-family: Pretendard-Bold;
   color: #717274;
   text-align: right;
@@ -279,7 +279,7 @@ const ReviewSheet = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>
+          <ModalTitle >
             전반적인 서비스 사용 경험에 대한{'\n'}만족도를 평점으로 남겨주세요
           </ModalTitle>
           <StarSection>
@@ -298,6 +298,7 @@ const ReviewSheet = props => {
           <ReviewItem>
             <ScrollView>
               <ReviewInput
+                
                 multiline={true}
                 width={width}
                 placeholder="리뷰를 작성해주세요"
@@ -309,7 +310,7 @@ const ReviewSheet = props => {
                 }}
                 value={text.slice(0, 1000)}
               />
-              <TextLength>{encodeURI(text).split(/%..|./).length - 1}/1000</TextLength>
+              <TextLength >{encodeURI(text).split(/%..|./).length - 1}/1000</TextLength>
             </ScrollView>
           </ReviewItem>
         </ModalInputSection>
@@ -328,7 +329,7 @@ const ReviewSheet = props => {
             <ButtonText
               style={{
                 color: '#717274',
-              }}>
+              }} >
               다음에
             </ButtonText>
           </Button>
@@ -357,7 +358,7 @@ const ReviewSheet = props => {
                   actionSheetRef.current?.hide();
                 }
               }}>
-              <ButtonText>제출하기</ButtonText>
+              <ButtonText >제출하기</ButtonText>
             </Button>
           </DropShadow>
         </ButtonSection>

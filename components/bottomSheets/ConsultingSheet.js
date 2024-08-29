@@ -23,7 +23,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -53,7 +53,7 @@ const ModalHeader = styled.View`
 
 
 const InfoMessage = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Bold;
   color: #A3A5A8;
   line-height: 17px;
@@ -191,22 +191,22 @@ const ConsultingSheet = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>부동산 전문 세무사에게 상담 받아보세요!</ModalTitle>
+            <ModalTitle >부동산 전문 세무사에게 상담 받아보세요!</ModalTitle>
             <View styled={{ height: 'auto', minHeight: 40 }}>
-              <InfoMessage>
+              <InfoMessage >
                 취득세/양도소득세/증여세/상속세 등{'\n'}여러분의 세금을 확 줄여드릴게요.
               </InfoMessage>
             </View>
             <ProfileAvatar
               source={require('../../assets/images/Minjungum_Lee.png')}
             />
-            <ProfileName>이민정음 세무사</ProfileName>
+            <ProfileName >이민정음 세무사</ProfileName>
             <KakaoButton
               onPress={() => openKakaoLink()}>
               <SocialButtonIcon
                 source={require('../../assets/images/socialIcon/kakao_ico.png')}
               />
-              <KakaoButtonText>카카오톡으로 상담하기</KakaoButtonText>
+              <KakaoButtonText >카카오톡으로 상담하기</KakaoButtonText>
             </KakaoButton>
 
           </ModalInputSection>

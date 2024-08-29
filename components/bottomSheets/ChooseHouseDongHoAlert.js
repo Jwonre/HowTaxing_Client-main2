@@ -35,7 +35,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -62,8 +62,8 @@ const ApartmentInfoGroup = styled.View`
 `;
 
 const ApartmentInfoTitle = styled.Text`
-  width: 70%;
-  font-size: ${getFontSize(14)}px;
+  width: 80%;
+  font-size: 14px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 30px;
@@ -92,7 +92,7 @@ const SelectGroup = styled.View`
 `;
 
 const SelectLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -121,7 +121,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -665,14 +665,14 @@ const ChooseHouseDongHoAlert = props => {
           {questionId === 'villa' ? '취득하실 주택 동과 호를 선택해주세요.' : '취득하실 아파트 동과 호를 선택해주세요.'}
         </ModalTitle>
         <ApartmentInfoGroup>
-          <ApartmentInfoTitle>
+          <ApartmentInfoTitle >
             {selectedItem?.bdNm}  {selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : ''}
             {selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : ''}
           </ApartmentInfoTitle>
         </ApartmentInfoGroup>
         <SelectGroup>
           <View style={{ width: '48%' }}>
-            <SelectLabel>동 선택</SelectLabel>
+            <SelectLabel >동 선택</SelectLabel>
             <PickerContainer>
               {dongList[0] && (
                 <WheelPicker
@@ -686,9 +686,10 @@ const ChooseHouseDongHoAlert = props => {
                   }}
                   itemTextStyle={{
                     fontFamily: 'Pretendard-Regular',
-                    fontSize: getFontSize(18),
+                    fontSize: 18,
                     color: '#1B1C1F',
                   }}
+                  allowFontScaling= {false}
                   selectedIndicatorStyle={{
                     backgroundColor: 'transparent',
                   }}
@@ -704,7 +705,7 @@ const ChooseHouseDongHoAlert = props => {
             </PickerContainer>
           </View>
           <View style={{ width: '48%' }}>
-            <SelectLabel>호 선택</SelectLabel>
+            <SelectLabel >호 선택</SelectLabel>
 
             <PickerContainer>
               {hoList?.length > 0 && (
@@ -721,9 +722,10 @@ const ChooseHouseDongHoAlert = props => {
                   }}
                   itemTextStyle={{
                     fontFamily: 'Pretendard-Regular',
-                    fontSize: getFontSize(18),
+                    fontSize: 18,
                     color: '#1B1C1F',
                   }}
+                  allowFontScaling= {false}
                   selectedIndicatorStyle={{
                     backgroundColor: 'transparent',
                   }}
@@ -763,7 +765,7 @@ const ChooseHouseDongHoAlert = props => {
               <ButtonText
                 style={{
                   color: '#717274',
-                }}>
+                }} >
                 이전으로
               </ButtonText>
             </Button>
@@ -771,7 +773,7 @@ const ChooseHouseDongHoAlert = props => {
 
           <DropShadow style={styles.dropshadow}>
             <Button onPress={nextHandler}>
-              <ButtonText>다음으로</ButtonText>
+              <ButtonText >다음으로</ButtonText>
             </Button>
           </DropShadow>
         </ButtonSection>
@@ -798,7 +800,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-SemiBold',
     color: '#A3A5A8',
     letterSpacing: -0.3,
@@ -814,7 +816,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8EAED',
   },
   rowTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-Regular',
     color: '#1B1C1F',
     letterSpacing: -0.3,

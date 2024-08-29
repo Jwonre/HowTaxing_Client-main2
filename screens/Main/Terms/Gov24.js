@@ -1,7 +1,7 @@
 // 개인정보 처리방침
 
-import { TouchableOpacity, useWindowDimensions, ScrollView,   BackHandler } from 'react-native';
-import React, { useLayoutEffect, useState, useEffect } from 'react';
+import { TouchableOpacity, useWindowDimensions, ScrollView, BackHandler } from 'react-native';
+import React, { useLayoutEffect, useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
@@ -17,7 +17,7 @@ const Container = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -27,7 +27,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(18)}px;
+  font-size: 18px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 25px;
@@ -73,8 +73,10 @@ const Gov24 = props => {
   const navigation = props.navigation;
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
-  const [activeButton, setActiveButton] = useState(false);
-  const { certType, agreeCert, agreePrivacy, agreeLocation, agreeAge, agreeMarketing, agreeCopyright, agreeGov24 } = useSelector(
+  const [activeButton, setActiveButton] = useState(true);
+  const scrollViewRef = useRef(null);
+  const [buttonText, setButtonText] = useState('끝으로 이동하기');
+  const { certType, agreeCert, agreePrivacy, agreeCopyright, agreeGov24 } = useSelector(
     state => state.cert.value,
   );
 
@@ -136,23 +138,26 @@ const Gov24 = props => {
   return (
     <Container>
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
-        // 스크롤이 하단에 도달했을 때
         onScroll={({ nativeEvent }) => {
           if (
             nativeEvent.contentOffset.y +
             nativeEvent.layoutMeasurement.height >=
             nativeEvent.contentSize.height - 1
           ) {
-            setActiveButton(true);
+            setButtonText('동의 후 인증하기');
           } else {
-            setActiveButton(false);
+            setButtonText('끝으로 이동하기');
+
           }
-        }}>
-        <Title>(필수) 정부24 이용약관 </Title>
-        <SubTitle>[필수] 정부24 이용약관 </SubTitle>
-        <ContentText>
+        }}
+        scrollEventThrottle={16} // 스크롤 이벤트 빈도 조절
+      >
+        <Title >정부24 이용약관 </Title>
+        <SubTitle >정부24 이용약관 </SubTitle>
+        <ContentText >
           {`제1장 총칙
 제1조(목적)
 본 약관은 정부24 (이하 "당 사이트")가 제공하는 모든 서비스(이하 "서비스")의 이용조건 및 절차, 이용자와 당
@@ -379,30 +384,36 @@ const Gov24 = props => {
           }}>
           <Button
             width={width}
-            active={activeButton || agreeGov24}
+            active={(buttonText === '끝으로 이동하기' ? false : true) || agreeGov24}
             disabled={!(activeButton || agreeGov24)}
             onPress={() => {
-              dispatch(
-                setCert({
-                  certType,
-                  agreeCert,
-                  agreePrivacy,
-                  agreeCopyright,
-                  agreeGov24: true,
-                }),
-              );
-              navigation.goBack();
-              setTimeout(() => {
-                SheetManager.show('cert2', {
-                  payload: {
-                    index: props.route.params.index,
-                    navigation: navigation,
-                  },
-                });
-              }, 300);
+              if (buttonText === '끝으로 이동하기') {
+                if (scrollViewRef.current) {
+                  scrollViewRef.current.scrollTo({ y: 100000, animated: true });
+                }
+              } else {
+                dispatch(
+                  setCert({
+                    certType,
+                    agreeCert,
+                    agreePrivacy,
+                    agreeCopyright,
+                    agreeGov24: true,
+                  }),
+                );
+                navigation.goBack();
+                setTimeout(() => {
+                  SheetManager.show('cert2', {
+                    payload: {
+                      index: props.route.params.index,
+                      navigation: navigation,
+                    },
+                  });
+                }, 300);
+              }
             }}>
             <ButtonText active={activeButton || agreeGov24}>
-            동의 후 인증하기
+              {buttonText}
             </ButtonText>
           </Button>
         </DropShadow>

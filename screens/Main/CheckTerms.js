@@ -33,14 +33,14 @@ const Tag = styled.View`
   width: 68px;
   height: 26px;
   background-color: #fff;
-  border-radius: ${getFontSize(16)}px;
+  border-radius: 16px;
   align-items: center;
   justify-content: center;
   border: 1px solid #FF7401;
 `;
 
 const TagText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Medium;
   color: #FF7401;
   line-height: 16px;
@@ -48,7 +48,7 @@ const TagText = styled.Text`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(25)}px;
+  font-size: 25px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -58,7 +58,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 20px;
@@ -85,7 +85,7 @@ const ListItem = styled.View`
 
 const ListItemTitle = styled.Text`
   flex: 1;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 18px;
@@ -112,7 +112,7 @@ const ListItemButton = styled.TouchableOpacity.attrs(props => ({
 }))``;
 
 const ListItemButtonText = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 15px;
@@ -150,7 +150,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(18)}px;
+  font-size: 18px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -300,11 +300,11 @@ const CheckTerms = props => {
       </IconView>
       <IntroSection>
         <Tag>
-          <TagText>하우택싱</TagText>
+          <TagText >하우택싱</TagText>
         </Tag>
-        <Title>약관을 확인해주세요.</Title>
+        <Title >약관을 확인해주세요.</Title>
 
-        <SubTitle>원활한 하우택싱 서비스 이용을 위해{'\n'}약관에 동의해주세요.</SubTitle>
+        <SubTitle >원활한 하우택싱 서비스 이용을 위해{'\n'}약관에 동의해주세요.</SubTitle>
       </IntroSection>
       <ListItem>
         <CheckCircle onPress={() => {
@@ -334,9 +334,9 @@ const CheckTerms = props => {
         </CheckCircle>
         <ListItemTitle
           style={{
-            fontSize: getFontSize(15),
+            fontSize: 15,
             fontFamily: 'Pretendard-Medium',
-          }}>
+          }} >
           전체 동의하기
         </ListItemTitle>
       </ListItem>
@@ -365,7 +365,7 @@ const CheckTerms = props => {
           }}>
           {agreeAge && <CheckOnIcon />}
         </CheckCircle>
-        <ListItemTitle>
+        <ListItemTitle >
           [필수] 14세 이상입니다.
         </ListItemTitle>
       </ListItem>
@@ -385,7 +385,7 @@ const CheckTerms = props => {
           }}>
           {agreeCert && <CheckOnIcon />}
         </CheckCircle>
-        <ListItemTitle>
+        <ListItemTitle >
           [필수] 하우택싱 서비스 이용약관
         </ListItemTitle>
         <ListItemButton
@@ -393,7 +393,7 @@ const CheckTerms = props => {
             //    ////console.log('agreeCert', agreeCert)
             navigation.navigate('Cert2', { agreeCert: agreeCert, navigation: navigation, tokens: props?.route?.params?.tokens },);
           }}>
-          <ListItemButtonText>보기</ListItemButtonText>
+          <ListItemButtonText >보기</ListItemButtonText>
         </ListItemButton>
       </ListItem>
 
@@ -412,14 +412,14 @@ const CheckTerms = props => {
           }}>
           {agreePrivacy && <CheckOnIcon />}
         </CheckCircle>
-        <ListItemTitle>
+        <ListItemTitle >
           [필수] 개인정보처리방침
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
             navigation.navigate('Privacy2', { agreePrivacy: agreePrivacy, navigation: navigation, tokens: props?.route?.params?.tokens });
           }}>
-          <ListItemButtonText>보기</ListItemButtonText>
+          <ListItemButtonText >보기</ListItemButtonText>
         </ListItemButton>
       </ListItem>
 
@@ -438,7 +438,7 @@ const CheckTerms = props => {
           }}>
           {agreeLocation && <CheckOnIcon />}
         </CheckCircle>
-        <ListItemTitle>
+        <ListItemTitle >
           [필수] 위치정보 이용약관
         </ListItemTitle>
         <ListItemButton
@@ -446,7 +446,7 @@ const CheckTerms = props => {
             navigation.navigate('Location2', { agreeLocation: agreeLocation, navigation: navigation, tokens: props?.route?.params?.tokens });
 
           }}>
-          <ListItemButtonText>보기</ListItemButtonText>
+          <ListItemButtonText >보기</ListItemButtonText>
         </ListItemButton>
       </ListItem>
 
@@ -465,7 +465,7 @@ const CheckTerms = props => {
           }}>
           {agreeMarketing && <CheckOnIcon />}
         </CheckCircle>
-        <ListItemTitle>
+        <ListItemTitle >
           [선택] 마케팅 수신동의
         </ListItemTitle>
 
@@ -512,7 +512,7 @@ const CheckTerms = props => {
                   ? '#2F87FF'
                   : '#E8EAED',
             }}>
-            <ButtonText>시작하기</ButtonText>
+            <ButtonText >시작하기</ButtonText>
           </Button>
         </ShadowContainer>
       </ButtonSection>

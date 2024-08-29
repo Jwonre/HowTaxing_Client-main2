@@ -5,7 +5,7 @@ import {
   View
 } from 'react-native';
 import styled from 'styled-components';
-import getFontSize from '../utils/getFontSize';
+
 import * as Animatable from 'react-native-animatable';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -40,7 +40,7 @@ const InfoContentItem = styled.View`
 `;
 
 const InfoContentLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -48,7 +48,7 @@ const InfoContentLabel = styled.Text`
 `;
 
 const InfoContentText = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -103,8 +103,8 @@ const TagText2 = styled.Text`
 
 
 const TaxCard2 = props => {
- // console.log('props TaxCard2', props);
-  const Pdata = props?.Pdata;
+  // console.log('props TaxCard2', props);
+  const Pdata = props?.Pdata ? props?.Pdata : null;
   const listCnt = Pdata ? Pdata.listCnt : 0;
 
   return (
@@ -120,20 +120,21 @@ const TaxCard2 = props => {
                 color => color.id === '7',
               ).color,
             }}>
-            <TagText>
+            <TagText >
               {
                 HOUSE_TYPE.find(color => color.id === '7')
                   .name + (index + 1)
               }
             </TagText>
           </Tag>
-          <TagText2>
-          지분율 : {Number(listCnt === 1 ? 100 : 50)}%
+          <TagText2 >
+            지분율 : {Number(listCnt === 1 ? 100 : 50)}%
           </TagText2>
         </View>
         <InfoContentItem>
-          <InfoContentLabel>총 납부세액</InfoContentLabel>
+          <InfoContentLabel >총 납부세액</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#2F87FF',
               fontFamily: 'Pretendard-Medium',
@@ -142,8 +143,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </InfoContentItem>
         <InfoContentItem>
-          <InfoContentLabel>양도소득세</InfoContentLabel>
+          <InfoContentLabel >양도소득세</InfoContentLabel>
           <InfoContentText
+            
             style={{
               fontFamily: 'Pretendard-Medium',
             }}>
@@ -151,8 +153,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </InfoContentItem>
         <InfoContentItem>
-          <InfoContentLabel>지방소득세</InfoContentLabel>
+          <InfoContentLabel >지방소득세</InfoContentLabel>
           <InfoContentText
+            
             style={{
               fontFamily: 'Pretendard-Medium',
             }}>
@@ -160,8 +163,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </InfoContentItem>
         <SubContainer>
-          <InfoContentLabel>{listCnt === 1 ? '양도금액' : '양도금액(지분비율 50%)'}</InfoContentLabel>
+          <InfoContentLabel >{listCnt === 1 ? '양도금액' : '양도금액(지분비율 50%)'}</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -169,8 +173,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </SubContainer>
         <SubContainer>
-          <InfoContentLabel>{listCnt === 1 ? '취득금액' : '취득금액(지분비율 50%)'}</InfoContentLabel>
+          <InfoContentLabel >{listCnt === 1 ? '취득금액' : '취득금액(지분비율 50%)'}</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -178,8 +183,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </SubContainer>
         <SubContainer>
-          <InfoContentLabel>{listCnt === 1 ? '필요경비' : '필요경비(지분비율 50%)'}</InfoContentLabel>
+          <InfoContentLabel >{listCnt === 1 ? '필요경비' : '필요경비(지분비율 50%)'}</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -188,8 +194,9 @@ const TaxCard2 = props => {
         </SubContainer>
         <Divider />
         <SubContainer>
-          <InfoContentLabel>양도차익</InfoContentLabel>
+          <InfoContentLabel >양도차익</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -197,8 +204,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </SubContainer>
         <SubContainer>
-          <InfoContentLabel>비과세 양도차익</InfoContentLabel>
+          <InfoContentLabel >비과세 양도차익</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -206,8 +214,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </SubContainer>
         <SubContainer>
-          <InfoContentLabel>과세 대상 양도차익</InfoContentLabel>
+          <InfoContentLabel >과세 대상 양도차익</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -216,8 +225,9 @@ const TaxCard2 = props => {
         </SubContainer>
         <Divider />
         <SubContainer>
-          <InfoContentLabel>장기보유특별공제</InfoContentLabel>
+          <InfoContentLabel >장기보유특별공제</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -225,8 +235,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </SubContainer>
         <SubContainer>
-          <InfoContentLabel>양도소득금액</InfoContentLabel>
+          <InfoContentLabel >양도소득금액</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -235,8 +246,9 @@ const TaxCard2 = props => {
         </SubContainer>
         <Divider />
         <SubContainer>
-          <InfoContentLabel>{listCnt === 1 ? '기본공제' : '기본공제(납세의무자별)'}</InfoContentLabel>
+          <InfoContentLabel >{listCnt === 1 ? '기본공제' : '기본공제(납세의무자별)'}</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -244,8 +256,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </SubContainer>
         <SubContainer>
-          <InfoContentLabel>과세표준</InfoContentLabel>
+          <InfoContentLabel >과세표준</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -253,8 +266,9 @@ const TaxCard2 = props => {
           </InfoContentText>
         </SubContainer>
         <SubContainer>
-          <InfoContentLabel>세율</InfoContentLabel>
+          <InfoContentLabel >세율</InfoContentLabel>
           <InfoContentText
+            
             style={{
               color: '#A3A5A8',
             }}>
@@ -262,8 +276,8 @@ const TaxCard2 = props => {
           </InfoContentText>
         </SubContainer>
         <SubContainer>
-          <InfoContentLabel>누진공제</InfoContentLabel>
-          <InfoContentText style={{ color: '#A3A5A8' }}>
+          <InfoContentLabel >누진공제</InfoContentLabel>
+          <InfoContentText  style={{ color: '#A3A5A8' }}>
             {Number(Pdata?.list[index]?.progDeductionPrice).toLocaleString()} 원
           </InfoContentText>
         </SubContainer>

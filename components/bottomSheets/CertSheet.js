@@ -20,7 +20,8 @@ import { LogBox } from 'react-native';
 import Config from 'react-native-config'
 import { setResend } from '../../redux/resendSlice';
 import NetInfo from '@react-native-community/netinfo';
-import ChooseHouseDongHoAlert from './ChooseHouseDongHoAlert';
+import { setFixHouseList } from '../../redux/fixHouseListSlice';
+import { setHouseInfo } from '../../redux/houseInfoSlice';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -30,7 +31,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -46,7 +47,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 20px;
@@ -77,7 +78,7 @@ const CheckCircle = styled.TouchableOpacity.attrs(props => ({
 
 const ListItemTitle = styled.Text`
   flex: 1;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -89,7 +90,7 @@ const ListItemButton = styled.TouchableOpacity.attrs(props => ({
 }))``;
 
 const ListItemButtonText = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 20px;
@@ -171,7 +172,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -222,7 +223,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -230,6 +231,7 @@ const ButtonText = styled.Text`
 
 const CertSheet = props => {
   LogBox.ignoreLogs(['to contain units']);
+  const scrollViewRef = useRef(null);
   const actionSheetRef = useRef(null);
   const cert = props.payload.data;
   const navigation = props.payload?.navigation;
@@ -237,6 +239,7 @@ const CertSheet = props => {
   const { width, height } = useWindowDimensions();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const currentUser = useSelector(state => state.currentUser.value);
+  const fixHouseList = useSelector(state => state.fixHouseList.value);
   const [isGainsTax, setIsGainsTax] = useState('');
   //const [certresult, setCertresult] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -246,7 +249,6 @@ const CertSheet = props => {
   //console.log('props', props);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-
   const [isConnected, setIsConnected] = useState(true);
 
   const handleNetInfoChange = (state) => {
@@ -299,7 +301,13 @@ const CertSheet = props => {
     // 키보드가 보여질 때 높이를 설정
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
-      (e) => setKeyboardHeight(e.endCoordinates.height)
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+        //console.log('scrollViewRef.current', scrollViewRef.current);
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToPosition(0, 100, true);
+        }
+      }
     );
 
     // 키보드가 사라질 때 높이를 초기화
@@ -326,6 +334,58 @@ const CertSheet = props => {
   const input3 = useRef(null);
   const [scrollHeight, setScrollHeight] = useState(420);
 
+
+  const registerDirectHouse = async (list) => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      const accessToken = currentUser.accessToken;
+      // 요청 헤더
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      };
+
+      // 요청 바디
+      const data = list;
+      //console.log('data : ', data);
+      axios
+        .post(`${Config.APP_API_URL}house/saveAllHouse`, data, { headers: headers })
+        .then(async response => {
+          if (response.data.errYn === 'Y') {
+            SheetManager.show('info', {
+              payload: {
+                type: 'error',
+                message: response.data.errMsg ? response.data.errMsg : '보유주택 수정·등록 중 오류가 발생했습니다.',
+                description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+                buttontext: '확인하기',
+              },
+            });
+            return;
+
+            } else {  
+            const returndata = response.data.data;
+            dispatch(setOwnHouseList([
+              ...returndata,
+            ]));
+            //console.log('[hypenHouseAPI] response.data : ', response.data);
+          }
+        })
+        .catch(error => {
+          // 오류 처리
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: '보유주택 수정·등록 중 오류가 발생했습니다.',
+              buttontext: '확인하기',
+            },
+          });
+          console.error(error);
+        });
+    }
+  };
+
+
   //https://www.npmjs.com/package/react-native-mask-input
   const rlno_mask = [
     /\d/,
@@ -348,13 +408,14 @@ const CertSheet = props => {
   const hypenHouseAPI = async (url, data, headers) => {
     try {
       const response = await axios.post(url, data, { headers });
-      // console.log('response.data', response);
+      //console.log('response', response);
+      //console.log('response.data', response.data);
       if (response.data.errYn === 'Y') {
         if (response.data.errCode === 'HOUSE-005') {
           //console.log('response.data.errMsg.includes([LOGIN)', response.data.errMsg.includes('[LOGIN'));
           if (response.data.errMsgDtl) {
-            if (response.data.errMsgDtl.includes("[LOGIN-301]") || response.data.errMsgDtl.includes("[LOGIN-302]")) {
-              SheetManager.hide('infoCertification');
+            if (response.data.errMsgDtl.includes("[LOGIN-301]") || response.data.errMsgDtl.includes("[LOGIN-302]") || response.data.errMsgDtl.includes("[LOGIN-999]")) {
+              await SheetManager.hide('infoCertification');
               await SheetManager.show('info', {
                 payload: {
                   type: 'error',
@@ -382,9 +443,19 @@ const CertSheet = props => {
                     },
                   });
                 }
-              }, 700);
+              }, 300);
               const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
               dispatch(setChatDataList(newChatDataList));
+            } else {
+              await SheetManager.show('info', {
+                payload: {
+                  type: 'error',
+                  message: response.data.errMsg ? response.data.errMsg : '청약홈 정보를 불러오는 중\n오류가 발생했어요.\n인증을 다시 진행해주세요.',
+                  description: response.data?.errMsgDtl ? response.data?.errMsgDtl : '',
+                  buttontext: '인증하기',
+                },
+              });
+              dispatch(setResend(true));
             }
             /*else if (response.data.errMsgDtl.includes("[LOGIN-303]")) {
               await SheetManager.hide('infoCertification');
@@ -461,14 +532,42 @@ const CertSheet = props => {
         }
         return false;
       } else {
-        const list = response.data.data.list ? response.data.data.list : null;
-        dispatch(setOwnHouseList(list));
-        return true;
+        setTimeout(async () => {
+          SheetManager.hide("infoCertification");
+        }, 300);
+        var list = response.data.data ? response.data.data : false;
+        //console.log('[hypenHouseAPI] list:', list);
+        const state = await NetInfo.fetch();
+        const canProceed = await handleNetInfoChange(state);
+        if (canProceed) {
+          list = list.map((item, index) => ({ ...item, index }));
+          //console.log('[hypenHouseAPI] list:', list);
+          if (list) {
+            if (list.some(item => item.complete === false)) {
+              setTimeout(async () => {
+                dispatch(
+                  setFixHouseList(
+                    list
+                  ));
+               // console.log('[hypenHouseAPI] props.payload?.isGainsTax:', props.payload?.isGainsTax);
+                navigation.push('FixedHouseList',{isGainsTax : props.payload?.isGainsTax === true ? true : false, chatListindex : props?.payload?.index});
+              }, 300);
+              return false;
+            } else {
+              await registerDirectHouse(list);
+              return true;
+            }
+          } else {
+            dispatch(setOwnHouseList([]));
+            return true;
+          }
+        }
+
       }
     } catch (error) {
 
       setTimeout(async () => {
-        console.error('[hypenHouseAPI] An error occurred:', error ? error : '');
+        //console.error('[hypenHouseAPI] An error occurred:', error ? error : '');
         SheetManager.show('info', {
           payload: {
             message: '청약홈에서 정보를 불러오는 중\n오류가 발생했어요.\n인증을 다시 진행해주세요.',
@@ -485,7 +584,7 @@ const CertSheet = props => {
   };
 
   const postOwnHouse = async () => {
-    const url = `${Config.APP_API_URL}house/search`;
+    const url = `${Config.APP_API_URL}house/loadHouse`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -627,7 +726,6 @@ const CertSheet = props => {
 
       //console.log('certresult', certresult)
       if (certresult) {
-        SheetManager.hide("infoCertification");
         const { isGainsTax } = props.payload;
         const chatItem = isGainsTax
           ? gainTax.find(el => el.id === 'allHouse1')
@@ -680,8 +778,8 @@ const CertSheet = props => {
       {currentPageIndex === 0 && (
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>본인인증을 진행해주세요</ModalTitle>
-            <ModalDescription>
+            <ModalTitle >본인인증을 진행해주세요</ModalTitle>
+            <ModalDescription >
               전자증명서 이용을 위해{'\n'}서비스 약관에 동의해주세요
             </ModalDescription>
             <ListItem style={{ marginTop: 25 }}>
@@ -710,8 +808,9 @@ const CertSheet = props => {
                 {agreeCert && agreePrivacy && <CheckOnIcon />}
               </CheckCircle>
               <ListItemTitle
+
                 style={{
-                  fontSize: getFontSize(15),
+                  fontSize: 15,
                   fontFamily: 'Pretendard-Medium',
                 }}>
                 전체 동의하기
@@ -739,7 +838,7 @@ const CertSheet = props => {
                 }}>
                 {agreeCert && <CheckOnIcon />}
               </CheckCircle>
-              <ListItemTitle>
+              <ListItemTitle >
                 [필수] 전자증명서 서비스 이용 약관
               </ListItemTitle>
               <ListItemButton
@@ -753,7 +852,7 @@ const CertSheet = props => {
                   });
 
                 }}>
-                <ListItemButtonText>보기</ListItemButtonText>
+                <ListItemButtonText >보기</ListItemButtonText>
               </ListItemButton>
             </ListItem>
             <ListItem style={{ marginTop: 20 }}>
@@ -770,7 +869,7 @@ const CertSheet = props => {
                 }}>
                 {agreePrivacy && <CheckOnIcon />}
               </CheckCircle>
-              <ListItemTitle>[필수] 청약홈 개인정보 수집 및 이용 동의</ListItemTitle>
+              <ListItemTitle >[필수] 청약홈 개인정보 수집 및 이용 동의</ListItemTitle>
               <ListItemButton
                 onPress={() => {
                   actionSheetRef.current?.hide();
@@ -783,7 +882,7 @@ const CertSheet = props => {
                   });
 
                 }}>
-                <ListItemButtonText>보기</ListItemButtonText>
+                <ListItemButtonText >보기</ListItemButtonText>
               </ListItemButton>
             </ListItem>
             {/*<ListItem style={{ marginTop: 20 }}>
@@ -859,6 +958,7 @@ const CertSheet = props => {
                       : '#E8EAED',
                 }}>
                 <ModalButtonText
+
                   style={{
                     color:
                       agreeCert && agreePrivacy
@@ -875,16 +975,18 @@ const CertSheet = props => {
 
       {currentPageIndex === 1 && (
         <KeyboardAwareScrollView
-          style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
-          extraScrollHeight={keyboardHeight}
+          ref={scrollViewRef}
+          style={{ flex: 1 }}
+          keyboardShouldPersistTaps="always"
         >
           <SheetContainer width={width}>
             <ModalInputSection>
               <CertLogoImage
                 source={require('../../assets/images/certLogo/kb_logo.png')}
               />
-              <ModalTitle>KB 간편 인증 정보 입력</ModalTitle>
+              <ModalTitle >KB 간편 인증 정보 입력</ModalTitle>
               <ModalDescription
+
                 style={{
                   lineHeight: 20,
                 }}>
@@ -892,7 +994,7 @@ const CertSheet = props => {
                 입력해주세요
               </ModalDescription>
               <ModalInputContainer>
-                <ModalLabel>이름</ModalLabel>
+                <ModalLabel >이름</ModalLabel>
                 <ModalInput
                   ref={input1}
                   onSubmitEditing={() => input2.current.focus()}
@@ -906,7 +1008,7 @@ const CertSheet = props => {
                 />
               </ModalInputContainer>
               <ModalInputContainer>
-                <ModalLabel>휴대폰 번호</ModalLabel>
+                <ModalLabel >휴대폰 번호</ModalLabel>
                 <ModalInput
                   ref={input2}
                   onSubmitEditing={() => input3.current.focus()}
@@ -919,7 +1021,7 @@ const CertSheet = props => {
                 />
               </ModalInputContainer>
               <ModalInputContainer>
-                <ModalLabel>주민등록번호</ModalLabel>
+                <ModalLabel >주민등록번호</ModalLabel>
                 <RegisterNumberInput
                   ref={input3}
                   value={residentNumber}
@@ -954,6 +1056,7 @@ const CertSheet = props => {
                     borderColor: '#E8EAED',
                   }}>
                   <ButtonText
+
                     style={{
                       color: '#717274',
                     }}>
@@ -974,7 +1077,8 @@ const CertSheet = props => {
                     color: name && phone.length === 11 && residentNumber.length === 13
                       ? '#fff'
                       : '#717274',
-                  }} > 다음으로</ButtonText>
+                  }}
+                  > 다음으로</ButtonText>
                 </Button>
               </ButtonShadow>
             </ButtonSection>
@@ -984,16 +1088,18 @@ const CertSheet = props => {
       }
       {currentPageIndex === 2 && (
         <KeyboardAwareScrollView
-          style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
-          extraScrollHeight={keyboardHeight}
+          ref={scrollViewRef}
+          style={{ flex: 1 }}
+          keyboardShouldPersistTaps="always"
         >
           <SheetContainer width={width}>
             <ModalInputSection>
               <CertLogoImage
                 source={require('../../assets/images/certLogo/naver_logo.png')}
               />
-              <ModalTitle>네이버 간편 인증 정보 입력</ModalTitle>
+              <ModalTitle >네이버 간편 인증 정보 입력</ModalTitle>
               <ModalDescription
+
                 style={{
                   lineHeight: 20,
                 }}>
@@ -1002,7 +1108,7 @@ const CertSheet = props => {
               </ModalDescription>
 
               <ModalInputContainer>
-                <ModalLabel>아이디</ModalLabel>
+                <ModalLabel >아이디</ModalLabel>
                 <ModalInput
                   ref={input1}
                   onSubmitEditing={() => input2.current.focus()}
@@ -1014,7 +1120,7 @@ const CertSheet = props => {
                 />
               </ModalInputContainer>
               <ModalInputContainer>
-                <ModalLabel>비밀번호</ModalLabel>
+                <ModalLabel >비밀번호</ModalLabel>
                 <ModalInput
                   ref={input2}
                   onSubmitEditing={() => input3.current.focus()}
@@ -1027,7 +1133,7 @@ const CertSheet = props => {
                 />
               </ModalInputContainer>
               <ModalInputContainer>
-                <ModalLabel>주민등록번호</ModalLabel>
+                <ModalLabel >주민등록번호</ModalLabel>
                 <RegisterNumberInput
                   ref={input3}
                   value={residentNumber}
@@ -1066,7 +1172,8 @@ const CertSheet = props => {
                   <ButtonText
                     style={{
                       color: '#717274',
-                    }}>
+                    }}
+                  >
                     이전으로
                   </ButtonText>
                 </Button>
@@ -1095,24 +1202,26 @@ const CertSheet = props => {
       {
         currentPageIndex === 3 && (
           <KeyboardAwareScrollView
-            style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
-            extraScrollHeight={keyboardHeight}
+            //extraScrollHeight={keyboardHeight}
+            ref={scrollViewRef}
+            style={{ flex: 1 }}
+            keyboardShouldPersistTaps="always"
           >
             <SheetContainer width={width}>
               <ModalInputSection>
                 <CertLogoImage
                   source={require('../../assets/images/certLogo/toss_logo.png')}
                 />
-                <ModalTitle>토스 간편 인증 정보 입력</ModalTitle>
+                <ModalTitle >토스 간편 인증 정보 입력</ModalTitle>
                 <ModalDescription
                   style={{
                     lineHeight: 20,
-                  }}>
+                  }} >
                   인증사별 고객 정보가 필요해요{'\n'}아래 표시된 정보들을
                   입력해주세요
                 </ModalDescription>
                 <ModalInputContainer>
-                  <ModalLabel>이름</ModalLabel>
+                  <ModalLabel >이름</ModalLabel>
                   <ModalInput placeholder="이름"
                     ref={input1}
                     onSubmitEditing={() => input2.current.focus()}
@@ -1125,7 +1234,7 @@ const CertSheet = props => {
                   />
                 </ModalInputContainer>
                 <ModalInputContainer>
-                  <ModalLabel>휴대폰 번호</ModalLabel>
+                  <ModalLabel >휴대폰 번호</ModalLabel>
                   <ModalInput
                     ref={input2}
                     onSubmitEditing={() => input3.current.focus()}
@@ -1138,7 +1247,7 @@ const CertSheet = props => {
                   />
                 </ModalInputContainer>
                 <ModalInputContainer>
-                  <ModalLabel>주민등록번호</ModalLabel>
+                  <ModalLabel >주민등록번호</ModalLabel>
                   <RegisterNumberInput
                     ref={input3}
                     value={residentNumber}
@@ -1176,7 +1285,7 @@ const CertSheet = props => {
                     <ButtonText
                       style={{
                         color: '#717274',
-                      }}>
+                      }} >
                       이전으로
                     </ButtonText>
                   </Button>

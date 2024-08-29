@@ -6,7 +6,7 @@ import {
   ScrollView,
   BackHandler,
 } from 'react-native';
-import React, { useLayoutEffect, useState, useEffect } from 'react';
+import React, { useLayoutEffect, useRef, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
@@ -22,7 +22,7 @@ const Container = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -32,7 +32,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(18)}px;
+  font-size: 18px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 25px;
@@ -78,8 +78,10 @@ const Cert3 = props => {
   const navigation = props.navigation;
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
-  const [activeButton, setActiveButton] = useState(false);
-  const {certType, agreeCert, agreePrivacy, agreeLocation, agreeAge, agreeMarketing, agreeCopyright, agreeGov24 } = useSelector(
+  const [activeButton, setActiveButton] = useState(true);
+  const scrollViewRef = useRef(null);
+  const [buttonText, setButtonText] = useState('끝으로 이동하기');
+  const { certType, agreeCert, agreePrivacy, agreeLocation, agreeAge, agreeMarketing, agreeCopyright, agreeGov24 } = useSelector(
     state => state.cert.value,
   );
 
@@ -142,25 +144,27 @@ const Cert3 = props => {
   return (
     <Container>
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
         onScroll={({ nativeEvent }) => {
-          // 하단 스크롤 시 버튼 활성화
-
           if (
             nativeEvent.contentOffset.y +
             nativeEvent.layoutMeasurement.height >=
             nativeEvent.contentSize.height - 1
           ) {
-            setActiveButton(true);
+            setButtonText('동의 후 인증하기');
           } else {
-            setActiveButton(false);
+            setButtonText('끝으로 이동하기');
+
           }
-        }}>
-        <Title>(필수) 전자증명서 서비스 이용약관</Title>
-        <SubTitle>[필수] 전자증명서 서비스 이용약관 동의서</SubTitle>
-        <ContentText>
-          {`서비스 이용약관
+        }}
+        scrollEventThrottle={16} // 스크롤 이벤트 빈도 조절
+      >
+        <Title >하우택싱 서비스 이용약관</Title>
+        <SubTitle >하우택싱 서비스 이용약관 동의서</SubTitle>
+        <ContentText >
+          {`하우택싱 서비스 이용약관
 
 제1조 (목적)
 1. 본 약관은 JS세무회계가 운영하는 인터넷 사이트 ‘하우택싱’(이하 ‘사이트’라 합니다) 및 모바일 애플리케이션 ‘하우택싱’을 통해 제공되는 전자상거래 서비스와 관련하여 당사자의 권리 의무 및 책임사항을 규정하는 것을 목적으로 합니다.
@@ -432,35 +436,41 @@ const Cert3 = props => {
           }}>
           <Button
             width={width}
-            active={activeButton || agreeCert}
+            active={(buttonText === '끝으로 이동하기' ? false : true) || agreeCert}
             disabled={!(activeButton || agreeCert)}
             onPress={() => {
-              // 동의하기 버튼 클릭 시 redux에 저장
-              dispatch(
-                setCert({
-                  certType,
-                  agreePrivacy,
-                  agreeCopyright,
-                  agreeGov24,
-                  agreeCert: true,
-                }),
-              );
+              if (buttonText === '끝으로 이동하기') {
+                if (scrollViewRef.current) {
+                  scrollViewRef.current.scrollTo({ y: 100000, animated: true });
+                }
+              } else {
+                // 동의하기 버튼 클릭 시 redux에 저장
+                dispatch(
+                  setCert({
+                    certType,
+                    agreePrivacy,
+                    agreeCopyright,
+                    agreeGov24,
+                    agreeCert: true,
+                  }),
+                );
 
-              // 채팅방으로 이동
-              navigation.goBack();
-             // ////console.log('props.route.params.certType', props.route.params.cert);
-              setTimeout(() => {
-                SheetManager.show('cert2', {
-                  payload: {
-                    index: props.route.params.index,
-                    navigation: props.navigation,
-                  },
-                });
-              }, 300);
+                // 채팅방으로 이동
+                navigation.goBack();
+                // ////console.log('props.route.params.certType', props.route.params.cert);
+                setTimeout(() => {
+                  SheetManager.show('cert2', {
+                    payload: {
+                      index: props.route.params.index,
+                      navigation: props.navigation,
+                    },
+                  });
+                }, 300);
 
 
+              }
             }}>
-            <ButtonText active={activeButton || agreeCert}>동의 후 인증하기</ButtonText>
+            <ButtonText active={activeButton || agreeCert}>{buttonText}</ButtonText>
           </Button>
         </DropShadow>
       </ButtonSection>

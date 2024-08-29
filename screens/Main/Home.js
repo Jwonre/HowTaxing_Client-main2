@@ -35,11 +35,11 @@ const HelloSection = styled.View`
   padding: 25px;
   justify-content: flex-end;
   align-items: flex-start;
-  margin-top: 40px;
+  margin-top: 50px;
 `;
 
 const HelloText = styled.Text`
-  font-size: ${getFontSize(19)}px;
+  font-size: 19px;
   font-family: Pretendard-Bold;
   color: #222;
   letter-spacing: -0.5px;
@@ -47,7 +47,7 @@ const HelloText = styled.Text`
 `;
 
 const MessageTitle = styled.Text`
-  font-size: ${getFontSize(22)}px;
+  font-size: 22px;
   font-family: Pretendard-Bold;
   color: #222;
   letter-spacing: -0.5px;
@@ -78,7 +78,7 @@ const Tag = styled.View`
 `;
 
 const TagText = styled.Text`
-  font-size: ${getFontSize(9)}px;
+  font-size: 9px;
   font-family: Pretendard-Medium;
   color: #fff;
   line-height: 12px;
@@ -86,7 +86,7 @@ const TagText = styled.Text`
 `;
 
 const CardTitle = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -101,7 +101,7 @@ const HashTagGroup = styled.View`
 `;
 
 const HashTagText = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 10px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -193,7 +193,7 @@ const style = StyleSheet.create({
 
 const Home = () => {
   const currentUser = useSelector(state => state.currentUser.value);
-
+  const [unreadCount, setUnreadCount] = useState(0);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const handleBackPress = () => {
@@ -228,7 +228,7 @@ const Home = () => {
     };
 
     ChannelIO.boot(settings).then(result => {
-      // ////console.log('ChannelIO.boot', result);
+      console.log('ChannelIO.boot', result);
     });
 
     // 기본 채널톡 버튼 숨기기
@@ -238,6 +238,20 @@ const Home = () => {
       ChannelIO.shutdown();
     };
   }, []);
+
+  useEffect(() => {
+    // onBadgeChanged 이벤트 리스너 등록
+    const badgeListener = ChannelIO.onBadgeChanged((count) => {
+      setUnreadCount(count);
+    });
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+   //   badgeListener.remove();
+    };
+  }, []);
+
+  
   const handleWithLogout = (accessToken) => {
     // 요청 헤더
     const headers = {
@@ -362,7 +376,8 @@ const Home = () => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-      SheetManager.show('Consulting', { payload: { navigation } });
+      navigation.push('ConsultingReservation');
+      // SheetManager.show('Consulting', { payload: { navigation } });
     }
   };
 
@@ -379,8 +394,8 @@ const Home = () => {
   };
 
   const goAppInformation = () => {
-   // SheetManager.show('InfoAppinformation');
-   navigation.navigate('Information');
+    // SheetManager.show('InfoAppinformation');
+    navigation.navigate('Information');
     return;
   };
 
@@ -395,21 +410,21 @@ const Home = () => {
   return (
     <Container>
       <HelloSection>
-        <HelloText>안녕하세요.</HelloText>
-        <MessageTitle>어떤 세금을 계산하시겠어요?</MessageTitle>
+        <HelloText >안녕하세요.</HelloText>
+        <MessageTitle >어떤 세금을 계산하시겠어요?</MessageTitle>
       </HelloSection>
       <ShadowContainer>
         <Card width={width} onPress={goAcquisigion}>
           <Tag>
-            <TagText>주택 매수</TagText>
+            <TagText >주택 매수</TagText>
           </Tag>
-          <CardTitle>취득세 계산하기</CardTitle>
+          <CardTitle >취득세 계산하기</CardTitle>
           <HashTagGroup
             style={{
               width: '70%',
             }}>
             {AC_HASHTAG_LIST.map((item, index) => (
-              <HashTagText key={index}>#{item}</HashTagText>
+              <HashTagText key={index} >#{item}</HashTagText>
             ))}
           </HashTagGroup>
           <IconView>
@@ -420,12 +435,12 @@ const Home = () => {
       <ShadowContainer>
         <Card width={width} onPress={goGainsTax}>
           <Tag>
-            <TagText>주택 양도</TagText>
+            <TagText >주택 양도</TagText>
           </Tag>
-          <CardTitle>양도소득세 계산하기</CardTitle>
+          <CardTitle >양도소득세 계산하기</CardTitle>
           <HashTagGroup>
             {GAIN_HASHTAG_LIST.map((item, index) => (
-              <HashTagText key={index}>#{item}</HashTagText>
+              <HashTagText key={index} >#{item}</HashTagText>
             ))}
           </HashTagGroup>
           <IconView>
@@ -437,15 +452,15 @@ const Home = () => {
       <ShadowContainer>
         <Card width={width} onPress={goConSulting}>
           <Tag>
-            <TagText>세금 상담</TagText>
+            <TagText >세금 상담</TagText>
           </Tag>
-          <CardTitle>세금 상담받기</CardTitle>
+          <CardTitle >세금 상담받기</CardTitle>
           <HashTagGroup
             style={{
               width: '80%',
             }}>
             {CONSULTING_HASHTAG_LIST.map((item, index) => (
-              <HashTagText key={index}>#{item}</HashTagText>
+              <HashTagText key={index} >#{item}</HashTagText>
             ))}
           </HashTagGroup>
           <IconView>
@@ -467,13 +482,16 @@ const Home = () => {
             shadowRadius: 10,
           }}>
           <ChanelTalkIconFloatButton
+            title={`Show Channel (${unreadCount})`}
             onPress={async () => {
+              ChannelIO.showMessenger()
+              //ChannelIO.showChannelButton();
               //console.log('currentUser',currentUser.accessToken);
             }}>
-            <ChanelTalkIcon />
-          </ChanelTalkIconFloatButton>
-        </DropShadow>
-      </ChanelTalkIconFloatContainer>
+          <ChanelTalkIcon />
+        </ChanelTalkIconFloatButton>
+      </DropShadow>
+    </ChanelTalkIconFloatContainer>
 
       {/*<LogOutIconFloatContainer>
         <DropShadow
@@ -497,28 +515,28 @@ const Home = () => {
         </DropShadow>
       </LogOutIconFloatContainer>
 */}
-      <AppInformationIconFloatContainer>
-        <DropShadow
-          style={{
-            shadowColor: '#2F87FF',
-            shadowOffset: {
-              width: 0,
-              height: 4,
-            },
-            shadowOpacity: 0.80,
-            shadowRadius: 10,
-          }}>
+  <AppInformationIconFloatContainer>
+    <DropShadow
+      style={{
+        shadowColor: '#2F87FF',
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.80,
+        shadowRadius: 10,
+      }}>
 
-          <AppInformationIconFloatButton
-            onPress={() => {
-              ////console.log('AppInformation');
-              goAppInformation();
-            }}>
-            <AppInformationIcon style={style.AppInformationIcon} />
-          </AppInformationIconFloatButton>
-        </DropShadow>
-      </AppInformationIconFloatContainer>
-    </Container>
+      <AppInformationIconFloatButton
+        onPress={() => {
+          ////console.log('AppInformation');
+          goAppInformation();
+        }}>
+        <AppInformationIcon style={style.AppInformationIcon} />
+      </AppInformationIconFloatButton>
+    </DropShadow>
+  </AppInformationIconFloatContainer>
+    </Container >
   );
 };
 

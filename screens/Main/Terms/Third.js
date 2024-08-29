@@ -8,22 +8,22 @@ import {
   ScrollView,
   BackHandler
 } from 'react-native';
-import React, {useLayoutEffect, useState, useEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import React, { useLayoutEffect, useState, useEffect, useRef } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
 import getFontSize from '../../../utils/getFontSize';
 import DropShadow from 'react-native-drop-shadow';
-import {SheetManager} from 'react-native-actions-sheet';
-import {useDispatch, useSelector} from 'react-redux';
-import {setCert} from '../../../redux/certSlice';
+import { SheetManager } from 'react-native-actions-sheet';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCert } from '../../../redux/certSlice';
 const Container = styled.View`
   flex: 1;
   background-color: #fff;
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -33,7 +33,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(18)}px;
+  font-size: 18px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 25px;
@@ -78,10 +78,12 @@ const ContentText = styled.Text`
 const Third = props => {
   const navigation = props.navigation;
   const dispatch = useDispatch();
-  const {type} = props.route.params;
-  const {width} = useWindowDimensions();
-  const [activeButton, setActiveButton] = useState(false);
-  const {certType, agreeCert, agreePrivacy, agreeThird} = useSelector(
+  const { type } = props.route.params;
+  const { width } = useWindowDimensions();
+  const [activeButton, setActiveButton] = useState(true);
+  const scrollViewRef = useRef(null);
+  const [buttonText, setButtonText] = useState('끝으로 이동하기');
+  const { certType, agreeCert, agreePrivacy, agreeThird } = useSelector(
     state => state.cert.value,
   );
   const handleBackPress = () => {
@@ -90,7 +92,7 @@ const Third = props => {
       SheetManager.show('cert', {
         payload: {
           cert: props.route.params.cert,
-          index : props.route.params.index,
+          index: props.route.params.index,
           navigation: navigation,
         },
       });
@@ -111,14 +113,14 @@ const Third = props => {
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.6}
-          hitSlop={{top: 20, bottom: 20, left: 20, right: 20}}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             navigation.goBack();
             setTimeout(() => {
               SheetManager.show('cert', {
                 payload: {
                   cert: props.route.params.cert,
-                  index : props.route.params.index,
+                  index: props.route.params.index,
                   navigation: navigation
                 },
               });
@@ -145,27 +147,30 @@ const Third = props => {
   return (
     <Container>
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={true}
-        contentContainerStyle={{paddingHorizontal: 20, paddingBottom: 80}}
-        // 스크롤이 하단에 도달했을 때
-        onScroll={({nativeEvent}) => {
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
+        onScroll={({ nativeEvent }) => {
           if (
             nativeEvent.contentOffset.y +
-              nativeEvent.layoutMeasurement.height >=
+            nativeEvent.layoutMeasurement.height >=
             nativeEvent.contentSize.height - 1
           ) {
-            setActiveButton(true);
+            setButtonText('동의 후 인증하기');
           } else {
-            setActiveButton(false);
+            setButtonText('끝으로 이동하기');
+
           }
-        }}>
-        <Title>(필수) 개인정보 제3자 제공 동의</Title>
-        <SubTitle>
+        }}
+        scrollEventThrottle={16} // 스크롤 이벤트 빈도 조절
+      >
+        <Title >(필수) 개인정보 제3자 제공 동의</Title>
+        <SubTitle >
           [필수]{' '}
           {certType === 'KB' ? 'KB' : certType === 'naver' ? '네이버' : '토스'}{' '}
           개인정보 제3자 정보제공 동의서
         </SubTitle>
-        <ContentText>
+        <ContentText >
           {`제1장 총칙
 제1조 (목적) 이 약관은 주식회사 하우택싱(이하 “회사”라 합니다)가 운영하는 주택세금계산서비스 “홈페이지”와 하우택싱 “애플리케이션”(이하 “홈페이지”와 “애플리케이션”을 “하우택싱”이라고 합니다)의 서비스 이용 및 제공에 관한 제반 사항의 규정을 목적으로 합니다.
 제2조 (용어의 정의) ① 이 약관에서 사용하는 용어의 정의는 다음과 같습니다.
@@ -296,29 +301,36 @@ const Third = props => {
           }}>
           <Button
             width={width}
-            active={activeButton || agreeThird}
+            active={(buttonText === '끝으로 이동하기' ? false : true) || agreeThird}
             disabled={!(activeButton || agreeThird)}
             onPress={() => {
-              dispatch(
-                setCert({
-                  certType,
-                  agreeCert, 
-                  agreePrivacy, 
-                  agreeThird : true,
-                }),
-              );
-              navigation.goBack();
-              setTimeout(() => {
-                SheetManager.show('cert', {
-                  payload: {
-                    cert: props.route.params.cert,
-                    navigation: navigation,
-                  },
-                });
-              }, 300);
+              if (buttonText === '끝으로 이동하기') {
+                if (scrollViewRef.current) {
+                  scrollViewRef.current.scrollTo({ y: 100000, animated: true });
+                }
+              } else {
+                dispatch(
+                  setCert({
+                    certType,
+                    agreeCert,
+                    agreePrivacy,
+                    agreeThird: true,
+                  }),
+                );
+                navigation.goBack();
+                setTimeout(() => {
+                  SheetManager.show('cert', {
+                    payload: {
+                      cert: props.route.params.cert,
+                      navigation: navigation,
+                    },
+                  });
+                }, 300);
+              }
             }}>
+
             <ButtonText active={activeButton || agreeThird}>
-            동의 후 인증하기
+              {buttonText}
             </ButtonText>
           </Button>
         </DropShadow>

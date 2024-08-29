@@ -22,7 +22,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -30,7 +30,7 @@ const ModalTitle = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #97989a;
   line-height: 20px;
@@ -53,7 +53,7 @@ const HoustInfoSection = styled.View`
 
 const HoustInfoTitle = styled.Text`
   width: 100%;
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -62,7 +62,7 @@ const HoustInfoTitle = styled.Text`
 `;
 
 const HoustInfoText = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 20px;
@@ -79,7 +79,7 @@ const HoustInfoBadge = styled.View`
 `;
 
 const HoustInfoBadgeText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Medium;
   color: #fff;
   line-height: 12px;
@@ -101,7 +101,7 @@ const HoustInfoButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const HoustInfoButtonText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Regular;
   color: #717274;
   line-height: 20px;
@@ -130,7 +130,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -168,7 +168,7 @@ const InfoContentItem = styled.View`
 `;
 
 const InfoContentLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #97989a;
   line-height: 20px;
@@ -176,7 +176,7 @@ const InfoContentLabel = styled.Text`
 `;
 
 const InfoContentText = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -193,7 +193,7 @@ const ConfirmSheet = props => {
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-  console.log('[ConfirmSheet] houseInfo', houseInfo);
+  //console.log('[ConfirmSheet] houseInfo', houseInfo);
   // console.log('houseInfo?.additionalAnswerList.find(item => item[Q_0007])', houseInfo?.additionalAnswerList.find(item => item['Q_0007']));
   /* const calculateTax = () => {
      const data = {
@@ -248,13 +248,13 @@ const ConfirmSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 700,
+        height: 620,
         width: width - 40,
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>수집된 정보를 모두 확인해주세요.</ModalTitle>
-          <SubTitle>
+          <ModalTitle >수집된 정보를 모두 확인해주세요.</ModalTitle>
+          <SubTitle >
             누락되거나 잘못 입력된 정보가 있다면{'\n'}취득세가 정확하지 않게
             계산될 수 있어요.
           </SubTitle>
@@ -285,10 +285,10 @@ const ConfirmSheet = props => {
                     flexDirection: 'row',
                     alignContent: 'center',
                   }}>
-                  <HoustInfoBadgeText>
+                  <HoustInfoBadgeText >
                     {HOUSE_TYPE.find(el => el.id === houseInfo?.houseType)?.name}
                   </HoustInfoBadgeText>
-                  {(houseInfo?.houseType !== '3' &&  houseInfo?.isMoveInRight === true) && <HoustInfoBadgeText style={{fontSize: 8}}>
+                  {(houseInfo?.houseType !== '3' &&  houseInfo?.isMoveInRight === true) && <HoustInfoBadgeText  style={{fontSize: 8}}>
                     {'(입주권)'}
                   </HoustInfoBadgeText>}
                 </HoustInfoBadge>
@@ -303,8 +303,8 @@ const ConfirmSheet = props => {
                   </HoustInfoBadgeText>
                 </HoustInfoBadge>*/}
               </View>
-              <HoustInfoTitle>{houseInfo?.houseName}</HoustInfoTitle>
-              <HoustInfoText>{houseInfo?.houseDetailName}</HoustInfoText>
+              <HoustInfoTitle >{houseInfo?.houseName}</HoustInfoTitle>
+              <HoustInfoText >{houseInfo?.houseDetailName}</HoustInfoText>
             </View>
             <HoustInfoButton
               onPress={() => {
@@ -318,44 +318,44 @@ const ConfirmSheet = props => {
                 });
                 //////console.log('Detail houseInfo', houseInfo);
               }}>
-              <HoustInfoButtonText>자세히 보기</HoustInfoButtonText>
+              <HoustInfoButtonText >자세히 보기</HoustInfoButtonText>
             </HoustInfoButton>
           </HoustInfoSection>
         </DropShadow>
         <InfoContentSection>
           <InfoContentItem>
-            <InfoContentLabel>계약일자</InfoContentLabel>
-            <InfoContentText>
+            <InfoContentLabel >계약일자</InfoContentLabel>
+            <InfoContentText >
               {dayjs(houseInfo?.contractDate).format('YYYY년 MM월 DD일')}
             </InfoContentText>
           </InfoContentItem>
           <InfoContentItem>
-            <InfoContentLabel>취득일자</InfoContentLabel>
-            <InfoContentText>
+            <InfoContentLabel >취득일자</InfoContentLabel>
+            <InfoContentText >
               {dayjs(houseInfo?.buyDate).format('YYYY년 MM월 DD일')}
             </InfoContentText>
           </InfoContentItem>
 
           <InfoContentItem>
-            <InfoContentLabel>취득금액</InfoContentLabel>
-            <InfoContentText>
+            <InfoContentLabel >취득금액</InfoContentLabel>
+            <InfoContentText >
               {numberToKorean(Number(houseInfo?.acAmount).toString())} 원
             </InfoContentText>
           </InfoContentItem>
 
-          <InfoContentItem>
-            <InfoContentLabel>종전주택 양도계획</InfoContentLabel>
-            <InfoContentText>
+          {/*<InfoContentItem>
+            <InfoContentLabel allowFontScaling={false}>종전주택 양도계획</InfoContentLabel>
+            <InfoContentText allowFontScaling={false}>
               {
-                houseInfo?.additionalAnswerList?.find(item => item['Q_0007'])?.['Q_0007'] === '01' ? '3년 이내 양도 계획' :
-                  houseInfo?.additionalAnswerList?.find(item => item['Q_0007'])?.['Q_0007'] === '02' ? '양도 계획 없음' : '양도 계획 없음'
+                houseInfo?.additionalAnswerList?.find(item => item['Q_0013'])?.['Q_0013'] === '01' ? '3년 이내 양도 계획' :
+                  houseInfo?.additionalAnswerList?.find(item => item['Q_0013'])?.['Q_0013'] === '02' ? '양도 계획 없음' : '양도 계획 없음'
               }
             </InfoContentText>
-          </InfoContentItem>
+          </InfoContentItem>*/}
 
           <InfoContentItem>
-            <InfoContentLabel style={{ width: '110%' }}>주택 보유 수</InfoContentLabel>
-            <InfoContentText>{houseInfo?.ownHouseCnt ? houseInfo?.ownHouseCnt : 0}채</InfoContentText>
+            <InfoContentLabel style={{ width: '110%' }} >주택 보유 수</InfoContentLabel>
+            <InfoContentText >{houseInfo?.ownHouseCnt ? houseInfo?.ownHouseCnt : 0}채</InfoContentText>
           </InfoContentItem>
         </InfoContentSection>
         <ModalButtonSection>
@@ -389,7 +389,7 @@ const ConfirmSheet = props => {
                 marginTop: 20,
                 marginBottom: 20,
               }}>
-              <ModalButtonText>확인하기</ModalButtonText>
+              <ModalButtonText >확인하기</ModalButtonText>
             </ModalButton>
           </DropShadow>
         </ModalButtonSection>

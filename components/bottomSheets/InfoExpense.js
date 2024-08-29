@@ -19,7 +19,7 @@ const SheetContainer = styled.View`
 
 const ModalTitle = styled.Text`
   width: 100%;
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -34,7 +34,7 @@ const BoldText = styled.Text`
 `;
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Bold;
   width:100%;
   color: #1b1c1f;
@@ -46,7 +46,7 @@ const ModalDescription = styled.Text`
 
 const Modaldetail = styled.Text`
   width: 100%;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -97,7 +97,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -140,14 +140,14 @@ const InfoExpense = props => {
       <SheetContainer width={width}>
         <ModalContentSection>
 
-          <ModalTitle>
+          <ModalTitle >
           {props.payload?.Title === '취득금액' ? '혹시 ' : ''}
-          <BoldText>{props.payload?.Title}</BoldText>
+          <BoldText >{props.payload?.Title}</BoldText>
           {props.payload?.Title === '취득금액' ? '이 기억이 안나시나요?' : '란?'}
           </ModalTitle>
           <View styled={{ width: '80%' }}>
-            <ModalDescription>{props.payload?.Description}</ModalDescription>
-            {props.payload?.Title === '상생임대인제도' && <Modaldetail>{props.payload?.Detail}</Modaldetail>}
+            <ModalDescription >{props.payload?.Description}</ModalDescription>
+            {props.payload?.Title === '상생임대인제도' && <Modaldetail >{props.payload?.Detail}</Modaldetail>}
           </View>
         </ModalContentSection>
 
@@ -162,14 +162,14 @@ const InfoExpense = props => {
               shadowOpacity: 0.15,
               shadowRadius: 2,
               alignSelf: 'center',
-              width: width - 120,
+              width: width - 80,
             }}>
             <Button
               onPress={() => {
 
                 actionSheetRef.current?.hide();
               }}>
-              <ButtonText>돌아가기</ButtonText>
+              <ButtonText >돌아가기</ButtonText>
             </Button>
           </DropShadow>
         </ButtonSection>

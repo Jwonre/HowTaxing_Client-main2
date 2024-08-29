@@ -179,11 +179,10 @@ const InfoContentText = styled.Text`
 
 
 const OwnedHouseDetail = props => {
-  const { item, prevSheet } = props.route.params;
+  const { item, prevSheet, houseFixType } = props.route.params;
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const currentUser = useSelector(state => state.currentUser.value);
-
   const [location, setLocation] = useState({
     latitude: 37.5326,
     longitude: 127.024612,
@@ -192,18 +191,38 @@ const OwnedHouseDetail = props => {
   const [data, setData] = useState(null);
   const ownHouseList = useSelector(state => state.ownHouseList.value);
   const dispatch = useDispatch();
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
 
 
 
-  useEffect(() => {
+  useEffect(async () => {
+
     //console.log('props?.payload?.prevSheet', prevSheet)
     /*if (item?.houseId !== '222') {*/
     if (prevSheet) {
       getHouseDetailInfo();
     }
 
+    if (houseFixType === 'A') {
+      await infoFixHouse();
+      await updateHouseDetailName('');
+    } else if(houseFixType === 'B') {
+      await infoFixHouse();
+      await updateAddress(houseFixType);
+    } else if(houseFixType === 'C') {
+      await infoFixHouse();
+      await updateAddress(houseFixType);
+    } else if(houseFixType === 'D') {
+      await infoFixHouse();
+      await updateBuyPrice();
+    } else if(houseFixType === 'E') {
+      await infoFixHouse();
+      await updateAddress(houseFixType);
+      await updateBuyDate(); 
+      await updateBuyPrice();
+    }
 
     /* } else {
        getHouseDirectDetailInfo();
@@ -214,18 +233,16 @@ const OwnedHouseDetail = props => {
 
   /* useEffect(() => {
      ////console.log('초기 data', data);
-   }, [data]);
+   }, [data]);*/
   //  useEffect(() => {
   //  }, [movingInRight]);
 
 
   const onAddressSelect = async (detailAddress2) => {
-    console.log('detailAddress2', detailAddress2);
-    return detailAddress2;
+    //console.log('detailAddress2', detailAddress2);
+    return detailAddress2
   };
 
-
-*/
   const handleHouseChange = async (target, newMoveInRight) => {
     //////console.log('[OwnedHouseDetail]onValueChange Yn', newMoveInRight);
     //////console.log('[OwnedHouseDetail]handleHouseChange tempMovingInRight:', tempMovingInRight);
@@ -466,6 +483,7 @@ const OwnedHouseDetail = props => {
     }
   };
 
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected) {
@@ -484,6 +502,21 @@ const OwnedHouseDetail = props => {
     });
   };
 
+  const infoFixHouse = async () => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      await SheetManager.show('infoFixHouseAlert', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          handleHouseChange,
+        },
+      });
+    }
+
+  };
 
   const updateHouseName = async () => {
     const state = await NetInfo.fetch();
@@ -516,28 +549,31 @@ const OwnedHouseDetail = props => {
 
   };
 
-  const updateAddress = async () => {
+  const updateAddress = async (houseFixType) => {
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-      var DongHo;
       await SheetManager.show('updateAddressAlert', {
         payload: {
+          houseFixType,
           navigation,
           data,
           prevSheet,
           handleHouseChange,
           getAPTLocation,
-          onAddressSelect: (detailAddress2) => {
-            //console.log('detailAddress2', detailAddress2);
-            DongHo = detailAddress2;
-          }
+          onAddressSelect,
         },
       });
-      //console.log('DongHo',DongHo);
-      await updateHouseDetailName(DongHo);
+      console.log('DongHo', DongHo);
+      if(houseFixType === 'B'){
+        await updateHouseDetailName2(DongHo);
+      } else if(houseFixType === 'C' || houseFixType === 'E'){
+        await updateHouseDetailName(DongHo);
+      } 
     }
   };
+
+  
 
 
   const updateHouseDetailName = async (DongHo) => {
@@ -551,6 +587,23 @@ const OwnedHouseDetail = props => {
           prevSheet,
           DongHo,
           handleHouseChange,
+        },
+      });
+    }
+
+  };
+
+
+  const updateHouseDetailName2 = async (DongHo) => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      await SheetManager.show('updateHouseDetailNameAlert2', {
+        payload: {
+          navigation,
+          data,
+          prevSheet,
+          DongHo,
         },
       });
     }
@@ -887,7 +940,7 @@ const OwnedHouseDetail = props => {
     }
 
     if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
-      dispatch(editOwnHouseList({ ...item, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType, isMoveInRight: data?.isMoveInRight }));
+      dispatch(editOwnHouseList({ ...item,  houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType, isMoveInRight: data?.isMoveInRight }));
     }
     navigation.goBack();
     if (!props.route.params?.prevSheet) return true;
@@ -1082,7 +1135,7 @@ const OwnedHouseDetail = props => {
               <TouchableOpacity activeOpacity={0.6}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 onPress={() => {
-                  updateHouseDetailName();
+                  updateHouseDetailName('');
                 }}>
                 <EditGreyIcon></EditGreyIcon>
               </TouchableOpacity>

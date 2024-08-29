@@ -42,7 +42,7 @@ const IconView = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(25)}px;
+  font-size: 25px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -52,7 +52,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 15px;
@@ -87,7 +87,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -128,8 +128,8 @@ const NetworkAlert = props => {
       <Wrapper>
         <IntroSection>
           <IconView><NetworkError /></IconView>
-          <Title>지금 네트워크가 불안정해요.</Title>
-          <SubTitle>인터넷 연결상태에 어떤 문제가 있는 것 같아요.{'\n'}통신 상태를 확인하신 후, 다시 시도해주세요.</SubTitle>
+          <Title >지금 네트워크가 불안정해요.</Title>
+          <SubTitle >인터넷 연결상태에 어떤 문제가 있는 것 같아요.{'\n'}통신 상태를 확인하신 후, 다시 시도해주세요.</SubTitle>
         </IntroSection>
         <ButtonSection>
           <DropShadow
@@ -150,7 +150,7 @@ const NetworkAlert = props => {
                   navigation.goBack();
                 } 
               }}>
-              <ButtonText>다시 시도하기</ButtonText>
+              <ButtonText >다시 시도하기</ButtonText>
             </Button>
           </DropShadow>
         </ButtonSection>

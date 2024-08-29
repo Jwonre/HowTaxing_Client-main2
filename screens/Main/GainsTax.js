@@ -9,6 +9,7 @@ import HomeIcon from '../../assets/images/home_home_lg.svg';
 import FastImage from 'react-native-fast-image';
 import DropShadow from 'react-native-drop-shadow';
 import NetInfo from "@react-native-community/netinfo";
+import getFontSize from '../../utils/getFontSize';
 
 const Container = styled.View`
   flex: 1;
@@ -129,7 +130,7 @@ const ChatBubble = styled.View`
 `;
 
 const ChatBubbleText = styled.Text`
-  font-size: 15px;
+  font-size: 13px;
   font-family: Pretendard-SemiBold;
   color: #000;
   line-height: 30px;
@@ -238,17 +239,17 @@ const GainsTax = () => {
       </IconView>
       <IntroSection>
         <Tag>
-          <TagText>주택 양도</TagText>
+          <TagText >주택 양도</TagText>
         </Tag>
-        <Title>양도소득세 계산하기</Title>
+        <Title >양도소득세 계산하기</Title>
 
-        <SubTitle>
+        <SubTitle >
           주택을 양도할 예정인데, 양도소득세가 얼마나 나올까요?
         </SubTitle>
         <HashTagGroup>
           {GAIN_HASHTAG_LIST.map((item, index) => (
             <HashTag key={index}>
-              <HashTagText>#{item}</HashTagText>
+              <HashTagText >#{item}</HashTagText>
             </HashTag>
           ))}
         </HashTagGroup>
@@ -261,7 +262,7 @@ const GainsTax = () => {
             }}
           />
           <ChatBubble>
-            <ChatBubbleText>
+            <ChatBubbleText >
               안녕하세요!{'\n'}지금부터 양도소득세를{'\n'}쉽고 정확하게
               계산해드릴 거에요.{'\n'}저만 믿고 끝까지 잘 따라와 주세요!
             </ChatBubbleText>
@@ -287,7 +288,7 @@ const GainsTax = () => {
               navigation.replace('GainsTaxChat');
             }
           }}>
-          <ButtonText>시작하기</ButtonText>
+          <ButtonText >시작하기</ButtonText>
         </Button>
       </DropShadow>
     </Container>

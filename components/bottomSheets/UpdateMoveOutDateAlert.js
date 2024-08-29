@@ -26,7 +26,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -51,7 +51,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -105,7 +105,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -224,11 +224,12 @@ const UpdateMoveOutDateAlert = props => {
         scrollEventThrottle={16}>
         <SheetContainer width={width}>
           <ModalInputSection>
-            <ModalTitle>전출일자를 선택해주세요.</ModalTitle>
+            <ModalTitle >전출일자를 선택해주세요.</ModalTitle>
             <View
               style={{
                 width: '100%',
-                height: 400,
+                height: 350,
+                marginTop: 20,
               }}>
               <Calendar
                 minDate={data?.moveInDate ? new Date(new Date(data?.moveInDate).setHours(0,0,0,0)) : data?.balanceDate ? new Date(new Date(data?.balanceDate).setHours(0,0,0,0)) : data?.constractDate ? new Date(new Date(data?.constractDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
@@ -254,7 +255,7 @@ const UpdateMoveOutDateAlert = props => {
                 <ButtonText
                   style={{
                     color: '#717274',
-                  }}>
+                  }} >
                   이전으로
                 </ButtonText>
               </Button>
@@ -272,7 +273,7 @@ const UpdateMoveOutDateAlert = props => {
                   backgroundColor: selectedDate ? '#2f87ff' : '#E8EAED',
                   borderColor: selectedDate ? '#2f87ff' : '#E8EAED',
                 }}>
-                <ButtonText active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ButtonText>
+                <ButtonText  active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>

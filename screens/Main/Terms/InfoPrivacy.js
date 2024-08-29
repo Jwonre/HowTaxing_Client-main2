@@ -14,7 +14,7 @@ const Container = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -24,7 +24,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(18)}px;
+  font-size: 18px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 25px;
@@ -92,10 +92,10 @@ const InfoPrivacy = props => {
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
       >
-        <Title>(필수) 개인정보 수집 및 이용 동의</Title>
-        <SubTitle>[필수] 개인정보 수집 및 이용 동의서</SubTitle>
-        <ContentText>
-          {`개인정보처리방침
+        <Title >하우택싱 개인정보처리방침</Title>
+        <SubTitle >하우택싱 개인정보 수집 및 이용 동의서</SubTitle>
+        <ContentText >
+          {`하우택싱 개인정보처리방침
 
 제1조 (목적)
 JS세무회계(이하 ‘회사’라고 함)는 회사가 제공하고자 하는 서비스(이하 ‘회사 서비스’)를 이용하는개인(이하 ‘이용자’ 또는 ‘개인’)의 정보(이하 ‘개인정보’)를 보호하기 위해，개인정보보호법, 정보통신망 이용촉진 및 정보보호 등에 관한 법률(이하 '정보통신망법’) 등 관련 법령을 준수하고, 서비스 이용자의 개인정보 보호 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보처리방침 (이하 ‘본 방침’)을 수립합니다.

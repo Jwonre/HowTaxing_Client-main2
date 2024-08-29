@@ -3,7 +3,7 @@ import React, {useRef} from 'react';
 import {useDispatch} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import NaverMapView, {Marker} from 'react-native-nmap';
-import getFontSize from '../utils/getFontSize';
+
 import DropShadow from 'react-native-drop-shadow';
 
 const MapView = props => {
@@ -31,7 +31,7 @@ const MapView = props => {
       const SIZE =
         item?.COMPLEX_NM1.length < 3
           ? 80
-          : item?.COMPLEX_NM1.length * getFontSize(10) + 30;
+          : item?.COMPLEX_NM1.length * 10 + 30;
 
       return (
         <Marker
@@ -57,8 +57,8 @@ const MapView = props => {
               overflow: 'visible',
             }}>
             <View style={{...styles.marker, width: SIZE}}>
-              <Text style={styles.markerTitle}>{item.COMPLEX_NM1}</Text>
-              <Text style={styles.markerSubTitle}>{item.UNIT_CNT}세대</Text>
+              <Text  style={styles.markerTitle}>{item.COMPLEX_NM1}</Text>
+              <Text  style={styles.markerSubTitle}>{item.UNIT_CNT}세대</Text>
               <View style={styles.markerTriangle} />
             </View>
           </DropShadow>
@@ -128,12 +128,12 @@ const styles = StyleSheet.create({
   markerTitle: {
     width: '100%',
     fontFamily: 'Pretendard-Bold',
-    fontSize: getFontSize(10),
+    fontSize: 10,
     color: '#fff',
   },
   markerSubTitle: {
     fontFamily: 'Pretendard-Regular',
-    fontSize: getFontSize(8),
+    fontSize: 8,
     color: '#fff',
   },
   markerTriangle: {

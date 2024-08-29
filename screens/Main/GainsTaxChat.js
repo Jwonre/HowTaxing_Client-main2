@@ -93,7 +93,7 @@ const ChatBubble = styled.View`
 `;
 
 const ChatBubbleText = styled.Text`
-  font-size: ${getFontSize(14)}px;
+  font-size: 14px;
   font-family: Pretendard-SemiBold;
   color: #000;
   line-height: 30px;
@@ -119,7 +119,7 @@ const SelectButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const SelectButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #000;
   line-height: 20px;
@@ -266,7 +266,7 @@ const ModalButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ModalButtonText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard-SemiBold;
   color: #fff;
   line-height: 20px;
@@ -281,8 +281,6 @@ const ButtonSection = styled.View`
   flex-direction: row;
   justify-content: space-between;
   padding: 10px;
-  border-top-width: 1px;
-  border-top-color: #e8eaed;
 `;
 
 
@@ -303,6 +301,11 @@ const GainsTaxChat = () => {
   const [isConnected, setIsConnected] = useState(true);
   const [Pdata, setPData] = useState({});
   const [currentItem, setCurrentItem] = useState(null);
+  const ownHouseList = useSelector(state => state.ownHouseList.value);
+
+  useEffect(() => {
+    console.log('ownHouseList', ownHouseList);
+  }, [ownHouseList])
 
   const getadditionalQuestion = async (questionId, answerValue, houseId, sellDate, sellPrice) => {
     /*
@@ -731,7 +734,7 @@ const GainsTaxChat = () => {
           Alert.alert('검색 결과가 없습니다.');
           return;
         }
-        //  ////console.log('[getOwnlist]list:', list);
+        console.log('[getOwnlist]list:', list);
         dispatch(
           setOwnHouseList([
             ...list,
@@ -783,7 +786,7 @@ const GainsTaxChat = () => {
       additionalAnswerList: houseInfo.additionalAnswerList === undefined ? [] : houseInfo.additionalAnswerList
       //planAnswer : houseInfo.planAnswer === undefined ? '' : houseInfo.planAnswer
     };
-    //console.log('양도소득세 파라미터', data);
+
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -802,7 +805,7 @@ const GainsTaxChat = () => {
               message: response.data.errMsg ? response.data.errMsg : '양도소득세 계산 중 오류가 발생했어요.',
               description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
               closeSheet: true,
-              navigation: props?.navigation,
+              navigation: navigation,
               buttontext: '확인하기',
             },
           });
@@ -825,7 +828,7 @@ const GainsTaxChat = () => {
             description: '양도소득세 계산 중 오류가 발생했습니다. 원하시면 주택\n전문 세무사와 상담을 연결시켜드릴게요. 아래 상담하\n기 버튼을 눌러보세요.',
             id: 'calculation',
             closeSheet: true,
-            navigation: props?.navigation,
+            navigation: navigation,
             buttontext: '확인하기',
           },
         });
@@ -914,7 +917,7 @@ const GainsTaxChat = () => {
       <>
         <MyChatItem>
           <MyChatBubble>
-            <MyChatBubbleText>
+            <MyChatBubbleText >
               {item?.message === '확인하기' ||
                 item?.message === '보유 주택 확인하기'
                 ? '확인 완료'
@@ -990,7 +993,7 @@ const GainsTaxChat = () => {
                 marginTop: 20,
                 marginBottom: 40,
               }}>
-              <ModalButtonText>계산하기</ModalButtonText>
+              <ModalButtonText >계산하기</ModalButtonText>
             </ModalButton>
           </DropShadow>
         )}
@@ -1033,6 +1036,7 @@ const GainsTaxChat = () => {
                     alignContent: 'center',
                   }}>
                   <Text
+                    
                     style={{
                       fontSize: 11,
                       fontFamily: 'Pretendard-Medium',
@@ -1046,7 +1050,7 @@ const GainsTaxChat = () => {
                     }
                   </Text>
                   {houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight === true &&
-                    <Text style={{
+                    <Text  style={{
                       fontSize: 9,
                       fontFamily: 'Pretendard-Medium',
                       color: '#fff',
@@ -1102,14 +1106,14 @@ const GainsTaxChat = () => {
                       color: '#fff',
                       lineHeight: 13,
                       letterSpacing: -0.5,
-                    }}>
+                    }} >
                     양도예정
                   </Text>
                 </View>
               </View>
               <Text ellipsizeMode='tail' numberOfLines={1}
                 style={{
-                  fontSize: getFontSize(15),
+                  fontSize: 15,
                   fontFamily: 'Pretendard-Bold',
                   color: '#1B1C1F',
                   lineHeight: 20,
@@ -1117,10 +1121,10 @@ const GainsTaxChat = () => {
                   marginTop: 10,
                   flex: 1, textAlign: 'left',
                   width: 170
-                }}>
+                }} >
                 {houseInfo?.houseName}
               </Text>
-              <Text ellipsizeMode='tail' numberOfLines={1}
+              <Text  ellipsizeMode='tail' numberOfLines={1}
                 style={{
                   fontSize: 13,
                   fontFamily: 'Pretendard-Regular',
@@ -1159,6 +1163,7 @@ const GainsTaxChat = () => {
                 borderColor: '#E8EAED',
               }}>
               <Text
+                
                 style={{
                   fontSize: 13,
                   fontFamily: 'Pretendard-Regular',
@@ -1220,7 +1225,7 @@ const GainsTaxChat = () => {
             padding: 20,
           }}>
           <CTACard />
-          <HouseInfo item={houseInfo} navigation={navigation} ChatType='GainsTaxChatlast' />
+          <HouseInfo item={houseInfo} navigation={navigation} ChatType='GainsTaxChat' />
           <TaxCard2 navigation={navigation} Pdata={Pdata} />
           <CalculationWarningCard />
           <TaxInfoCard2 Pdata={Pdata} />
@@ -1263,7 +1268,7 @@ const GainsTaxChat = () => {
                 }}>
                 <ModalButtonText style={{
                   color: '#717274',
-                }}>복사하기</ModalButtonText>
+                }} >복사하기</ModalButtonText>
               </ModalButton>
             </DropShadow>
             <DropShadow>
@@ -1283,7 +1288,7 @@ const GainsTaxChat = () => {
                   alignSelf: 'center',
                   marginTop: 10,
                 }}>
-                <ModalButtonText>확인하기</ModalButtonText>
+                <ModalButtonText >확인하기</ModalButtonText>
               </ModalButton>
             </DropShadow>
           </ButtonSection>
@@ -1307,7 +1312,7 @@ const GainsTaxChat = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}>
-                <ChatBubbleText>{item?.message}</ChatBubbleText>
+                <ChatBubbleText >{item?.message}</ChatBubbleText>
                 {(item?.id === 'landlord1' || item?.id === 'landlord2') && <TouchableOpacity
                   activeOpacity={0.8}
                   hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
@@ -1492,7 +1497,7 @@ const GainsTaxChat = () => {
                       }
                       }>
                       {item2?.icon ? item2.icon : null}
-                      <SelectButtonText>{item2?.name}</SelectButtonText>
+                      <SelectButtonText >{item2?.name}</SelectButtonText>
                     </SelectButton>
                   ))}
                 </SelectButtonGroup>
@@ -1516,7 +1521,7 @@ const GainsTaxChat = () => {
                   style={{
                     marginTop: 20,
                   }}>
-                  <SelectButtonText>확인하기</SelectButtonText>
+                  <SelectButtonText >확인하기</SelectButtonText>
                 </SelectButton>
               )}
             </ChatBubble>
@@ -1531,14 +1536,14 @@ const GainsTaxChat = () => {
                 <ChatBubbleText
                   style={{
                     textAlign: 'center',
-                  }}>
+                  }} >
                   부동산 전문 세무사에게 상담 받아보세요!
                 </ChatBubbleText>
                 <ProfileAvatar
                   source={require('../../assets/images/Minjungum_Lee.png')}
                 />
-                <ProfileName>이민정음 세무사</ProfileName>
-                <ProfileEmail>jsyoun@jstaxbiz.com</ProfileEmail>
+                <ProfileName >이민정음 세무사</ProfileName>
+                <ProfileEmail >jsyoun@jstaxbiz.com</ProfileEmail>
                 <KakaoButton
                   onPress={async () => {
                     const state = await NetInfo.fetch();
@@ -1548,7 +1553,7 @@ const GainsTaxChat = () => {
                   <SocialButtonIcon
                     source={require('../../assets/images/socialIcon/kakao_ico.png')}
                   />
-                  <KakaoButtonText>카카오톡으로 상담하기</KakaoButtonText>
+                  <KakaoButtonText >카카오톡으로 상담하기</KakaoButtonText>
                 </KakaoButton>
               </Card>
               <DropShadow
@@ -1569,7 +1574,7 @@ const GainsTaxChat = () => {
                   onPress={() => {
                     navigation.goBack();
                   }}>
-                  <ButtonText>돌아가기</ButtonText>
+                  <ButtonText >돌아가기</ButtonText>
                 </Button>
               </DropShadow>
             </>

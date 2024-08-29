@@ -39,7 +39,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -62,7 +62,7 @@ const ModalAddressInput = styled.TextInput.attrs(props => ({
   placeholder: '아파트명 혹은 지역명을 입력해주세요',
 }))`
   flex: 1;
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -104,7 +104,7 @@ const MapSearchResultHeader = styled.View`
 `;
 
 const MapSearchResultHeaderTitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 24px;
@@ -125,7 +125,7 @@ const MapSearchResultItem = styled.View`
 `;
 
 const MapSearchResultItemTitle = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -133,7 +133,7 @@ const MapSearchResultItemTitle = styled.Text`
 
 const MapSearchResultItemAddress = styled.Text`
   width: 90%;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -152,7 +152,7 @@ const AddressNumberBadge = styled.View`
 `;
 
 const AddressNumberText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Medium;
   color: #a3a5a8;
   line-height: 16px;
@@ -172,7 +172,7 @@ const MepSearchResultButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const MapSearchResultButtonText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Medium;
   color: #2f87ff;
   line-height: 16px;
@@ -188,7 +188,7 @@ const ApartmentInfoGroup = styled.View`
 
 const ApartmentInfoTitle = styled.Text`
   width: 80%;
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -205,7 +205,7 @@ const SelectGroup = styled.View`
 `;
 
 const SelectLabel = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 20px;
@@ -255,7 +255,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -624,7 +624,7 @@ const MapViewListSheet2 = props => {
       const SIZE =
         item?.COMPLEX_NM1.length < 3
           ? 80
-          : item?.COMPLEX_NM1.length * getFontSize(10) + 30;
+          : item?.COMPLEX_NM1.length * 10 + 30;
       return (
         <Marker
           key={'map' + index}
@@ -663,7 +663,7 @@ const MapViewListSheet2 = props => {
               <Text
                 style={{
                   fontFamily: 'Pretendard-Bold',
-                  fontSize: getFontSize(10),
+                  fontSize: 10,
                   color: '#fff',
                 }}>
                 {item.COMPLEX_NM1}
@@ -671,7 +671,7 @@ const MapViewListSheet2 = props => {
               <Text
                 style={{
                   fontFamily: 'Pretendard-Bold',
-                  fontSize: getFontSize(8),
+                  fontSize: 8,
                   color: 'rgba(255,255,255,0.6)',
                 }}>
                 {item.UNIT_CNT}세대
@@ -911,9 +911,11 @@ const MapViewListSheet2 = props => {
                     }}
                     itemTextStyle={{
                       fontFamily: 'Pretendard-Regular',
-                      fontSize: getFontSize(18),
+                      fontSize: 18,
                       color: '#1B1C1F',
+
                     }}
+                    allowFontScaling= {false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}
@@ -942,9 +944,11 @@ const MapViewListSheet2 = props => {
                     }}
                     itemTextStyle={{
                       fontFamily: 'Pretendard-Regular',
-                      fontSize: getFontSize(18),
+                      fontSize: 18,
                       color: '#1B1C1F',
+
                     }}
+                    allowFontScaling= {false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}

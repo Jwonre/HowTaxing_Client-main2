@@ -1,7 +1,7 @@
 // 개인정보 처리방침
 
 import { TouchableOpacity, useWindowDimensions, ScrollView } from 'react-native';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
@@ -17,7 +17,7 @@ const Container = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(20)}px;
+  font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -27,7 +27,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(18)}px;
+  font-size: 18px;
   font-family: Pretendard-Medium;
   color: #1b1c1f;
   line-height: 25px;
@@ -73,12 +73,14 @@ const Privacy2 = props => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
-  const [activeButton, setActiveButton] = useState(false);
+  const [activeButton, setActiveButton] = useState(true);
+  const scrollViewRef = useRef(null);
+  const [buttonText, setButtonText] = useState('끝으로 이동하기');
   const { agreeCert, agreePrivacy, agreeLocation, agreeAge, agreeMarketing } = useSelector(
     state => state.cert.value,
   );
 
-  
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -86,7 +88,7 @@ const Privacy2 = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
-            navigation.goBack({tokens: props?.route?.params?.tokens});
+            navigation.goBack({ tokens: props?.route?.params?.tokens });
           }}>
           <CloseIcon />
         </TouchableOpacity>
@@ -109,24 +111,27 @@ const Privacy2 = props => {
   return (
     <Container>
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
-        // 스크롤이 하단에 도달했을 때
         onScroll={({ nativeEvent }) => {
           if (
             nativeEvent.contentOffset.y +
             nativeEvent.layoutMeasurement.height >=
-            nativeEvent.contentSize.height  - 1
+            nativeEvent.contentSize.height - 1
           ) {
-            setActiveButton(true);
+            setButtonText('동의하기');
           } else {
-            setActiveButton(false);
+            setButtonText('끝으로 이동하기');
+
           }
-        }}>
-        <Title>(필수) 개인정보 수집 및 이용 동의</Title>
-        <SubTitle>[필수] 개인정보 수집 및 이용 동의서</SubTitle>
-        <ContentText>
-          {`개인정보처리방침
+        }}
+        scrollEventThrottle={16} // 스크롤 이벤트 빈도 조절
+      >
+        <Title >하우택싱 개인정보처리방침</Title>
+        <SubTitle >하우택싱 개인정보 수집 및 이용 동의서</SubTitle>
+        <ContentText >
+          {`하우택싱 개인정보처리방침
 
 제1조 (목적)
 JS세무회계(이하 ‘회사’라고 함)는 회사가 제공하고자 하는 서비스(이하 ‘회사 서비스’)를 이용하는개인(이하 ‘이용자’ 또는 ‘개인’)의 정보(이하 ‘개인정보’)를 보호하기 위해，개인정보보호법, 정보통신망 이용촉진 및 정보보호 등에 관한 법률(이하 '정보통신망법’) 등 관련 법령을 준수하고, 서비스 이용자의 개인정보 보호 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보처리방침 (이하 ‘본 방침’)을 수립합니다.
@@ -344,23 +349,29 @@ JS세무회계(이하 ‘회사’라고 함)는 회사가 제공하고자 하�
           }}>
           <Button
             width={width}
-            active={activeButton || agreePrivacy}
+            active={(buttonText === '끝으로 이동하기' ? false : true) || agreePrivacy}
             disabled={!(activeButton || agreePrivacy)}
             onPress={() => {
-              dispatch(
-                setCert({
-                  agreeAge,
-                  agreeLocation,
-                  agreeMarketing,
-                  agreeCert,
-                  agreePrivacy: true,
-                }),
-              );
-              navigation.goBack({tokens: props?.route?.params?.tokens});
+              if (buttonText === '끝으로 이동하기') {
+                if (scrollViewRef.current) {
+                  scrollViewRef.current.scrollTo({ y: 100000, animated: true });
+                }
+              } else {
+                dispatch(
+                  setCert({
+                    agreeAge,
+                    agreeLocation,
+                    agreeMarketing,
+                    agreeCert,
+                    agreePrivacy: true,
+                  }),
+                );
+                navigation.goBack({ tokens: props?.route?.params?.tokens });
 
+              }
             }}>
             <ButtonText active={activeButton || agreePrivacy}>
-            동의하기
+              {buttonText}
             </ButtonText>
           </Button>
         </DropShadow>

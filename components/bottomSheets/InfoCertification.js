@@ -27,7 +27,7 @@ const SheetContainer = styled.View`
 
 const ModalTitle = styled.Text`
   width: 80%;
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -37,7 +37,7 @@ const ModalTitle = styled.Text`
 `;
 
 const ModalDescription = styled.Text`
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 15px;
@@ -100,7 +100,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -206,9 +206,36 @@ const InfoCertification = props => {
         }
         return false;
       } else {
-        const list = response.data.data.list;
-        dispatch(setOwnHouseList(list));
-        return true;
+        setTimeout(async () => {
+          SheetManager.hide("infoCertification");
+        }, 300);
+        var list = response.data.data ? response.data.data : false;
+        //console.log('[hypenHouseAPI] list:', list);
+        const state = await NetInfo.fetch();
+        const canProceed = await handleNetInfoChange(state);
+        if (canProceed) {
+          list = list.map((item, index) => ({ ...item, index }));
+          //console.log('[hypenHouseAPI] list:', list);
+          if (list) {
+            if (list.some(item => item.complete === false)) {
+              setTimeout(async () => {
+                dispatch(
+                  setFixHouseList(
+                    list
+                  ));
+                // console.log('[hypenHouseAPI] props.payload?.isGainsTax:', props.payload?.isGainsTax);
+                navigation.push('FixedHouseList', { isGainsTax: props.payload?.isGainsTax === true ? true : false, chatListindex: props?.payload?.index });
+              }, 300);
+              return false;
+            } else {
+              await registerDirectHouse(list);
+              return true;
+            }
+          } else {
+            dispatch(setOwnHouseList([]));
+            return true;
+          }
+        }
       }
     } catch (error) {
       console.error('[hypenHouseAPI] An error occurred:', error);
@@ -228,7 +255,7 @@ const InfoCertification = props => {
   };
 
   const postOwnHouse = async () => {
-    const url = `${Config.APP_API_URL}house/search`;
+    const url = `${Config.APP_API_URL}house/loadHouse`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
@@ -277,7 +304,55 @@ const InfoCertification = props => {
     }
   };
 
+  const registerDirectHouse = async (list) => {
+    const state = await NetInfo.fetch();
+    const canProceed = await handleNetInfoChange(state);
+    if (canProceed) {
+      const accessToken = currentUser.accessToken;
+      // 요청 헤더
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      };
 
+      // 요청 바디
+      const data = list;
+      //console.log('data : ', data);
+      axios
+        .post(`${Config.APP_API_URL}house/saveAllHouse`, data, { headers: headers })
+        .then(async response => {
+          if (response.data.errYn === 'Y') {
+            SheetManager.show('info', {
+              payload: {
+                type: 'error',
+                message: response.data.errMsg ? response.data.errMsg : '보유주택 수정·등록 중 오류가 발생했습니다.',
+                description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+                buttontext: '확인하기',
+              },
+            });
+            return;
+
+            } else {  
+            const returndata = response.data.data;
+            dispatch(setOwnHouseList([
+              ...returndata,
+            ]));
+            //console.log('[hypenHouseAPI] response.data : ', response.data);
+          }
+        })
+        .catch(error => {
+          // 오류 처리
+          SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: '보유주택 수정·등록 중 오류가 발생했습니다.',
+              buttontext: '확인하기',
+            },
+          });
+          console.error(error);
+        });
+    }
+  };
 
   const CircularProgress = ({ size, strokeWidth, progress }) => {
     const rotation = useRef(new Animated.Value(0)).current;
@@ -297,10 +372,14 @@ const InfoCertification = props => {
     }, []);
 
     return (
-      <Animated.View style={{ transform: [{ rotate: rotation.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0deg', '360deg'],
-      }) }] }}>
+      <Animated.View style={{
+        transform: [{
+          rotate: rotation.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', '360deg'],
+          })
+        }]
+      }}>
         <Svg width={size} height={size}>
           <Path
             stroke="#d3d3d3"
@@ -399,7 +478,7 @@ const InfoCertification = props => {
                   return null;
               }
             })()}</View>
-          <ModalTitle>{props?.payload?.message}</ModalTitle>
+          <ModalTitle >{props?.payload?.message}</ModalTitle>
           {(ActiveYN === false) && <CircularProgress size={50} strokeWidth={5} progress={30} />}
         </ModalContentSection>
 

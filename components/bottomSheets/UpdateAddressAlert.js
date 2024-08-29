@@ -21,6 +21,8 @@ import CloseIcon from '../../assets/icons/close_button.svg';
 import SerchIcon from '../../assets/icons/search_map.svg';
 import SelectDropdown from 'react-native-select-dropdown';
 import ChevronDownIcon from '../../assets/icons/chevron_down.svg';
+import WheelPicker from 'react-native-wheely';
+import DropShadow from 'react-native-drop-shadow';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { AREA_LIST } from '../../data/areaData';
@@ -35,7 +37,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -60,7 +62,7 @@ const ModalAddressInput = styled.TextInput.attrs(props => ({
   placeholder: '주택명 혹은 지역명을 입력해주세요',
 }))`
   flex: 1;
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -71,7 +73,7 @@ const DetailAddressInput = styled.TextInput.attrs(props => ({
   placeholder: '나머지 상세주소를 입력해주세요',
 }))`
   flex: 1;
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -119,7 +121,7 @@ const SelectButtonContainer = styled.View`
 `;
 
 const SelectButtonText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-SemiBold;
   color: #a3a5a8;
   letter-spacing: -0.3px;
@@ -141,7 +143,7 @@ const SelectItem = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const SelectItemText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #1b1c1f;
   line-height: 20px;
@@ -160,7 +162,7 @@ const MapSearchResultItem = styled.View`
 `;
 
 const MapSearchResultItemTitle = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -168,7 +170,7 @@ const MapSearchResultItemTitle = styled.Text`
 
 const MapSearchResultItemAddress = styled.Text`
   width: 90%;
-  font-size: ${getFontSize(12)}px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -187,7 +189,7 @@ const AddressNumberBadge = styled.View`
 `;
 
 const AddressNumberText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Medium;
   color: #a3a5a8;
   line-height: 16px;
@@ -207,11 +209,30 @@ const MepSearchResultButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const MapSearchResultButtonText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Medium;
   color: #2f87ff;
   line-height: 16px;
 `;
+
+const ApartmentInfoGroup = styled.View`
+  width: 100%;
+  height: auto;
+  background-color: #fff;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ApartmentInfoTitle = styled.Text`
+  width: 80%;
+  font-size: 14px;
+  font-family: Pretendard-Medium;
+  color: #1b1c1f;
+  line-height: 30px;
+  text-align: center;
+  margin-bottom: auto;
+`;
+
 
 const ListFooterButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.6,
@@ -223,20 +244,77 @@ const ListFooterButton = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ListFooterButtonText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Bold;
   color: #a3a5a8;
   line-height: 20px;
 `;
 
+const ButtonSection = styled.View`
+  width: ${props => props.width - 40}px;
+  height: auto;
+  background-color: #fff;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px;
+  margin-top: 10px;
+`;
+
+const SelectGroup = styled.View`
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 10px 20px;
+`;
+
+const SelectLabel = styled.Text`
+  font-size: 12px;
+  font-family: Pretendard-Medium;
+  color: #1b1c1f;
+  line-height: 20px;
+`;
+
+const PickerContainer = styled.View`
+  width: 100%;
+  height: 187px;
+  background-color: #f5f7fa;
+  border-radius: 10px;
+  margin-top: 10px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Button = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.8,
+}))`
+  height: 50px;
+  border-radius: 25px;
+  background-color: #2f87ff;
+  align-items: center;
+  justify-content: center;
+  border-width: 1px;
+  border-color: #2f87ff;
+`;
+
+const ButtonText = styled.Text`
+  font-size: 16px;
+  font-family: Pretendard-Bold;
+  color: #fff;
+  line-height: 20px;
+`;
+
 const UpdateAddressAlert = props => {
-  const { handleHouseChange, data, getAPTLocation } = props.payload;
+  const { handleHouseChange, data, getAPTLocation} = props.payload;
   const actionSheetRef = useRef(null);
   const scrollViewRef = useRef(null);
   const selectRef2 = useRef(null);
   const selectRef = useRef(null);
   const dispatch = useDispatch();
   const { width, height } = useWindowDimensions();
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const scrollHandlers = useScrollHandlers('FlatList-1', actionSheetRef);
   const [isLastPage, setIsLastPage] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -246,10 +324,14 @@ const UpdateAddressAlert = props => {
   const [selectedAreaIndex, setSelectedAreaIndex] = useState(0);
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedArea2, setSelectedArea2] = useState('');
+  const [dongList, setDongList] = useState([]);
+  const [hoList, setHoList] = useState([]);
+  const [selectedDong, setSelectedDong] = useState('');
+  const [selectedHo, setSelectedHo] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const navigation = props.payload?.navigation;
   const currentUser = useSelector(state => state.currentUser.value);
-
+  // console.log('data', data);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -270,8 +352,8 @@ const UpdateAddressAlert = props => {
     };
   }, []);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -549,48 +631,7 @@ const UpdateAddressAlert = props => {
 
 
   // 주택 호 정보 가져오기
-  /*const getHoData = async (address, dongNm) => {
-    const API_KEY = 'devU01TX0FVVEgyMDI0MDQwMjIzMzI1NzExNDY1NTc=';
-    //const API_KEY = 'devU01TX0FVVEgyMDI0MDEwOTIzMDQ0MjExNDQxOTY=';
-
-    const url = 'https://business.juso.go.kr/addrlink/addrDetailApi.do';
-
-    await axios
-      .get(url, {
-        params: {
-          confmKey: API_KEY,
-          admCd: address.admCd,
-          rnMgtSn: address.rnMgtSn,
-          udrtYn: address.udrtYn,
-          buldMnnm: address.buldMnnm,
-          buldSlno: address.buldSlno,
-          searchType: 'floorho',
-          dongNm: dongNm,
-          resultType: 'json',
-        },
-      })
-      .then(function (result) {
-        if (result.data.errYn === 'Y') {
-          SheetManager.show('info', {
-            payload: {
-              type: 'error',
-              message: response.data.errMsg,
-              description: response.data.errMsgDtl,
-            },
-          });
-          return;
-        } else {
-          const ilst = result.data.results.juso.map(ho => {
-            return ho.hoNm.replace('호', '');
-          });
-          setHoList(ilst);
-          setSelectedHo(ilst[0]);
-        }
-
-      })
-      .catch(function (error) {
-        ////console.log(error);
-      });
+  const getHoData = async (address, dongNm, type) => {
     const url = `${Config.APP_API_URL}house/roadAddrDetail`;
     const headers = {
       'Content-Type': 'application/json',
@@ -611,33 +652,48 @@ const UpdateAddressAlert = props => {
       const response = await axios.post(url, data, { headers: headers });
       //////console.log('Holist response :', response.data.data.dongHoList);
       if (response.data.errYn === 'Y') {
-
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '주택의 호수를 불러오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
+            closemodal: true,
+            actionSheetRef: actionSheetRef,
+            buttontext: '확인하기',
           },
         });
-        return;
-
+        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+        dispatch(setChatDataList(newChatDataList));
+        if (type === 'init') {
+          return 0;
+        } else {
+          return;
+        }
       } else {
         const holist = response.data.data.dongHoList;
         setHoList(holist);
         setSelectedHo(holist[0]);
+        if (type === 'init') {
+          return holist.length;
+        } else {
+          return;
+        }
       }
 
     } catch (error) {
       SheetManager.show('info', {
         type: 'error',
-        message: error?.errMsg,
-        errorMessage: error?.errCode,
+        message: error?.errMsg ? error?.errMsg : '주택의 호수를 불러오는데 문제가 발생했습니다.',
+        errorMessage: error?.errCode ? error?.errCode : 'error',
+        closemodal: true,
+        actionSheetRef: actionSheetRef,
+        buttontext: '확인하기',
       });
-      ////console.log(error);
+      ////console.log(error ? error : 'error');
     }
-  };*/
+  };
 
-  /*const getDongData = async (address) => {
+  const getDongData = async (address) => {
     const url = `${Config.APP_API_URL}house/roadAddrDetail`;
     const headers = {
       'Content-Type': 'application/json',
@@ -655,32 +711,42 @@ const UpdateAddressAlert = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
+      //////console.log('Donglist response :', response.data);
       if (response.data.errYn === 'Y') {
-
         SheetManager.show('info', {
           payload: {
             type: 'error',
-            message: response.data.errMsg,
-            description: response.data.errMsgDtl,
+            message: response.data.errMsg ? response.data.errMsg : '주택의 동 목록을 불러오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
+            closemodal: true,
+            actionSheetRef: actionSheetRef,
+            buttontext: '확인하기',
           },
         });
-        return;
+        const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+        dispatch(setChatDataList(newChatDataList));
+        return 'dongerror';
 
       } else {
-        ////console.log('donglist response :', response.data.data.dongHoList);
+        // ////console.log('donglist response :', response.data.data.dongHoList);
         const donglist = response.data.data.dongHoList;
         setDongList(donglist);
         return donglist[0];
+
       }
     } catch (error) {
       SheetManager.show('info', {
         type: 'error',
-        message: error?.errMsg,
-        errorMessage: error?.errCode,
+        message: error?.errMsg ? error?.errMsg : '주택의 동 목록을 불러오는데 문제가 발생했습니다.',
+        errorMessage: error?.errCode ? error?.errCode : 'dongerror',
+        closemodal: true,
+        actionSheetRef: actionSheetRef,
+        buttontext: '확인하기',
       });
-      ////console.log(error);
+      ////console.log(error ? error : 'error');
+      return 'dongerror';
     }
-  };*/
+  };
 
 
   useEffect(() => {
@@ -713,10 +779,10 @@ const UpdateAddressAlert = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 850,
+        height: currentPageIndex === 0 ? 850 : 480,
         width: width - 40,
       }}>
-      <SheetContainer width={width}>
+      {currentPageIndex === 0 && (<SheetContainer width={width}>
         <FlatList
           data={listData}
           ref={scrollViewRef}
@@ -738,9 +804,10 @@ const UpdateAddressAlert = props => {
                 zIndex: 10,
               }}>
               <ModalInputSection>
-                <ModalTitle>주택을 검색해주세요.</ModalTitle>
+                <ModalTitle >주택을 검색해주세요.</ModalTitle>
                 <ModalAddressInputContainer>
                   <ModalAddressInput
+
                     placeholder="동(읍/면/리)명 또는 도로명주소를 입력해주세요"
                     value={searchText}
                     onChangeText={setSearchText}
@@ -826,7 +893,7 @@ const UpdateAddressAlert = props => {
                             alignItems: 'center',
                             justifyContent: 'center',
                           }}>
-                          <SelectButtonText>
+                          <SelectButtonText >
                             {selectedArea ? selectedArea : '시/도'}
                           </SelectButtonText>
                           <ChevronDownIcon />
@@ -852,7 +919,7 @@ const UpdateAddressAlert = props => {
                             }
                             selectRef.current?.closeDropdown();
                           }}>
-                          <SelectItemText>{item.name}</SelectItemText>
+                          <SelectItemText >{item.name}</SelectItemText>
                         </SelectItem>
                       );
                     }}
@@ -875,7 +942,7 @@ const UpdateAddressAlert = props => {
                             alignItems: 'center',
                             justifyContent: 'center',
                           }}>
-                          <SelectButtonText>
+                          <SelectButtonText >
                             {selectedArea2 ? selectedArea2 : '시/군/구'}
                           </SelectButtonText>
                           <ChevronDownIcon />
@@ -896,7 +963,7 @@ const UpdateAddressAlert = props => {
                             setSelectedArea2(item);
                             selectRef2.current?.closeDropdown();
                           }}>
-                          <SelectItemText>{item}</SelectItemText>
+                          <SelectItemText >{item}</SelectItemText>
                         </SelectItem>
                       );
                     }}
@@ -939,7 +1006,7 @@ const UpdateAddressAlert = props => {
                     }
                   }
                 }}>
-                <ListFooterButtonText>더 보기</ListFooterButtonText>
+                <ListFooterButtonText >더 보기</ListFooterButtonText>
               </ListFooterButton>
             )
           }
@@ -949,7 +1016,7 @@ const UpdateAddressAlert = props => {
                 style={{
                   width: '72%',
                 }}>
-                <MapSearchResultItemTitle>
+                <MapSearchResultItemTitle >
                   {item?.roadAddr}
                 </MapSearchResultItemTitle>
                 <View
@@ -960,9 +1027,9 @@ const UpdateAddressAlert = props => {
                     marginTop: 6,
                   }}>
                   <AddressNumberBadge>
-                    <AddressNumberText>지번</AddressNumberText>
+                    <AddressNumberText >지번</AddressNumberText>
                   </AddressNumberBadge>
-                  <MapSearchResultItemAddress>
+                  <MapSearchResultItemAddress >
                     {item?.jibunAddr}
                   </MapSearchResultItemAddress>
                 </View>
@@ -974,6 +1041,7 @@ const UpdateAddressAlert = props => {
                   if (canProceed) {
                     //////console.log('[UpdateAddressAlert]onPress item:', item);
                     setAddress(item?.roadAddr);
+                    setSelectedItem(item);
                     /*         if (item?.detBdNmList !== '') {
                                const list = item?.detBdNmList?.split(', ').map(dong => {
                                  return dong.replace('동', '');
@@ -983,29 +1051,230 @@ const UpdateAddressAlert = props => {
                              } else {
                                getHoData(item);
                              }*/
-                    setSelectedItem(item);
-
-                    var p = data;
-                    p.houseName = item.bdNm;
-                    p.jibunAddr = item.jibunAddr;
-                    p.bdMgtSn = item.bdMgtSn;
-                    p.roadAddr = item.roadAddrPart1;
-                    p.roadAddrRef = item.roadAddrPart2;
-                    //////console.log('[UpdateAddressAlert]onPress p:', p);
-                    handleHouseChange(p, p?.isMoveInRight);
-                    getAPTLocation(item?.roadAddr);
-
-                    actionSheetRef.current?.hide();
+                    if (data?.houseType === '2' || data?.houseType === '1') {
+                      const firstDong = await getDongData(item);
+                      console.log('firstDong', firstDong);
+                      if (firstDong !== 'dongerror') {
+                        const Hodata = await getHoData(item, firstDong, 'init');
+                        console.log('Hodata', Hodata);
+                        if (Hodata > 0) {
+                          setSelectedItem(item);
+                          var p = data;
+                          p.houseName = item.bdNm;
+                          p.jibunAddr = item.jibunAddr;
+                          p.bdMgtSn = item.bdMgtSn;
+                          p.roadAddr = item.roadAddrPart1;
+                          p.roadAddrRef = item.roadAddrPart2;
+                          //////console.log('[UpdateAddressAlert]onPress p:', p);
+                          handleHouseChange(p, p?.isMoveInRight);
+                          getAPTLocation(item?.roadAddr);
+                          setCurrentPageIndex(1);
+                        } else {
+                          //setCurrentPageIndex(2);
+                          setSelectedItem(item);
+                          var p = data;
+                          p.houseName = item.bdNm;
+                          p.jibunAddr = item.jibunAddr;
+                          p.bdMgtSn = item.bdMgtSn;
+                          p.roadAddr = item.roadAddrPart1;
+                          p.roadAddrRef = item.roadAddrPart2;
+                          //////console.log('[UpdateAddressAlert]onPress p:', p);
+                          handleHouseChange(p, p?.isMoveInRight);
+                          getAPTLocation(item?.roadAddr);
+                          actionSheetRef.current?.hide();
+                          return null;
+                        }
+                      } else {
+                        setSelectedItem(item);
+                        //setCurrentPageIndex(2);
+                        var p = data;
+                        p.houseName = item.bdNm;
+                        p.jibunAddr = item.jibunAddr;
+                        p.bdMgtSn = item.bdMgtSn;
+                        p.roadAddr = item.roadAddrPart1;
+                        p.roadAddrRef = item.roadAddrPart2;
+                        //////console.log('[UpdateAddressAlert]onPress p:', p);
+                        handleHouseChange(p, p?.isMoveInRight);
+                        getAPTLocation(item?.roadAddr);
+                        actionSheetRef.current?.hide();
+                        return null;
+                      }
+                    } else {
+                      setSelectedItem(item);
+                      //////console.log('item', item);
+                      //setCurrentPageIndex(2);
+                      var p = data;
+                      p.houseName = item.bdNm;
+                      p.jibunAddr = item.jibunAddr;
+                      p.bdMgtSn = item.bdMgtSn;
+                      p.roadAddr = item.roadAddrPart1;
+                      p.roadAddrRef = item.roadAddrPart2;
+                      //////console.log('[UpdateAddressAlert]onPress p:', p);
+                      handleHouseChange(p, p?.isMoveInRight);
+                      getAPTLocation(item?.roadAddr);
+                      actionSheetRef.current?.hide();
+                      return null;
+                    }
                   }
                 }}>
-                <MapSearchResultButtonText>선택</MapSearchResultButtonText>
+                <MapSearchResultButtonText >선택</MapSearchResultButtonText>
               </MepSearchResultButton>
             </MapSearchResultItem>
           )}
           keyExtractor={(item, index) => index.toString()}
         />
       </SheetContainer>
-    </ActionSheet>
+      )}
+      {currentPageIndex === 1 && (
+        <SheetContainer>
+          <ModalTitle
+            style={{
+              marginBottom: 20,
+            }} >
+            {data?.houseType !== '1' ? '취득하실 주택 동과 호를 선택해주세요.' : '취득하실 아파트 동과 호를 선택해주세요.'}
+          </ModalTitle>
+          <ApartmentInfoGroup>
+            <ApartmentInfoTitle >
+              {selectedItem?.bdNm}  {selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : ''}
+              {selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : ''}
+            </ApartmentInfoTitle>
+          </ApartmentInfoGroup>
+          <SelectGroup>
+            <View style={{ width: '48%' }}>
+              <SelectLabel >동 선택</SelectLabel>
+              <PickerContainer>
+                {dongList[0] && (
+                  <WheelPicker
+                    selectedIndex={
+                      selectedDong ? dongList.indexOf(selectedDong) : 0
+                    }
+                    containerStyle={{
+                      width: 120,
+                      height: 180,
+                      borderRadius: 10,
+                    }}
+                    itemTextStyle={{
+                      fontFamily: 'Pretendard-Regular',
+                      fontSize: 18,
+                      color: '#1B1C1F',
+                    }}
+                    allowFontScaling= {false}
+                    selectedIndicatorStyle={{
+                      backgroundColor: 'transparent',
+                    }}
+                    itemHeight={40}
+                    options={dongList}
+                    onChange={index => {
+                      setSelectedDong(dongList[index]);
+                      setHoList([]);
+                      getHoData(selectedItem, dongList[index], 'change');
+                    }}
+                  />
+                )}
+              </PickerContainer>
+            </View>
+            <View style={{ width: '48%' }}>
+              <SelectLabel >호 선택</SelectLabel>
+
+              <PickerContainer>
+                {hoList?.length > 0 && (
+                  <WheelPicker
+                    selectedIndex={
+                      hoList.indexOf(selectedHo) >= 0
+                        ? hoList.indexOf(selectedHo)
+                        : 0
+                    }
+                    containerStyle={{
+                      width: 120,
+                      height: 180,
+                      borderRadius: 10,
+                    }}
+                    itemTextStyle={{
+                      fontFamily: 'Pretendard-Regular',
+                      fontSize: 18,
+                      color: '#1B1C1F',
+                    }}
+                    allowFontScaling= {false}
+                    selectedIndicatorStyle={{
+                      backgroundColor: 'transparent',
+                    }}
+                    itemHeight={40}
+                    options={hoList}
+                    onChange={index => {
+                      setSelectedHo(hoList[index]);
+                    }}
+                  />
+                )}
+              </PickerContainer>
+            </View>
+          </SelectGroup>
+          {/*<Button
+            onPress={() => {
+              setCurrentPageIndex(2);
+            }}
+            style={{
+              width: width - 80,
+              backgroundColor: '#fff',
+              borderColor: '#E8EAED',
+              alignSelf: 'center',
+              marginTop: 10,
+            }}>
+            <ButtonText
+              style={{
+                color: '#717274',
+              }}>
+              직접 입력하기
+            </ButtonText>
+          </Button> 직접입력하기 삭제*/}
+          <ButtonSection
+            style={{
+              marginTop: 0,
+            }}>
+            <DropShadow
+              style={{
+                shadowColor: '#fff',
+                width: '48%',
+              }}>
+              <Button
+                onPress={() => {
+                  setCurrentPageIndex(0);
+                  setSelectedDong('');
+                  setSelectedHo('');
+                  setHoList([]);
+                  setDongList([]);
+                }}
+                style={{
+                  backgroundColor: '#fff',
+                  borderColor: '#E8EAED',
+                }}>
+                <ButtonText
+                  style={{
+                    color: '#717274',
+                  }} >
+                  이전으로
+                </ButtonText>
+              </Button>
+            </DropShadow>
+
+            <DropShadow style={styles.dropshadow}>
+              <Button onPress={async () => {
+                const state = await NetInfo.fetch();
+                const canProceed = await handleNetInfoChange(state);
+                if (canProceed) {
+                  var detailAddress2 = (selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : '') + (selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : '');
+                  console.log('detailAddress2', detailAddress2);
+                  props?.payload.onAddressSelect(detailAddress2); // 콜백 함수 호출
+                  actionSheetRef.current?.hide();
+                }
+              }}>
+                <ButtonText>다음으로</ButtonText>
+              </Button>
+            </DropShadow>
+          </ButtonSection>
+        </SheetContainer>
+      )
+      }
+    </ActionSheet >
   );
 };
 
@@ -1027,7 +1296,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-SemiBold',
     color: '#A3A5A8',
     letterSpacing: -0.3,
@@ -1043,7 +1312,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8EAED',
   },
   rowTextStyle: {
-    fontSize: getFontSize(13),
+    fontSize: 13,
     fontFamily: 'Pretendard-Regular',
     color: '#1B1C1F',
     letterSpacing: -0.3,

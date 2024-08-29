@@ -25,7 +25,7 @@ const SheetContainer = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  font-size: ${getFontSize(17)}px;
+  font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 26px;
@@ -33,7 +33,7 @@ const ModalTitle = styled.Text`
 `;
 
 const ModalLabel = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 15px;
   font-family: Pretendard;
   color: #000;
   line-height: 18px;
@@ -41,7 +41,7 @@ const ModalLabel = styled.Text`
 `;
 
 const ModalSubtitle = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard;
   color: #1b1c1f;
   line-height: 20px;
@@ -142,7 +142,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(16)}px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -154,7 +154,7 @@ const ButtonText = styled.Text`
 const UpdateAreaMeterAlert = props => {
 
   const { handleHouseChange, data, navigation, prevSheet } = props.payload;
-  
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const dispatch = useDispatch();
@@ -191,8 +191,8 @@ const UpdateAreaMeterAlert = props => {
     };
   }, []);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -219,7 +219,7 @@ const UpdateAreaMeterAlert = props => {
       var p = data;
       p.area = areaMeter;
       await handleHouseChange(p, p?.isMoveInRight);
-       
+
       actionSheetRef.current?.hide();
     }
   };
@@ -233,7 +233,7 @@ const UpdateAreaMeterAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -254,8 +254,8 @@ const UpdateAreaMeterAlert = props => {
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle>전용면적을 입력해주세요.</ModalTitle>
-          <ModalSubtitle>{areaMeter}㎡</ModalSubtitle>
+          <ModalTitle >전용면적을 입력해주세요.</ModalTitle>
+          <ModalSubtitle >{areaMeter}㎡</ModalSubtitle>
           <View
             style={{
               paddingHorizontal: 20,
@@ -267,11 +267,12 @@ const UpdateAreaMeterAlert = props => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
               }}>
-              <ModalLabel>제곱미터</ModalLabel>
+              <ModalLabel >제곱미터</ModalLabel>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <ModalInputContainer>
                 <StyledInput
+                  
                   placeholder="전용면적을 입력해주세요."
                   keyboardType="number-pad"
                   value={areaMeter ? areaMeter?.toLocaleString() : null}
@@ -303,7 +304,7 @@ const UpdateAreaMeterAlert = props => {
                   onPress={() => {
                     setAreaMeter(item);
                   }}>
-                  <ModalSelectButtonText>
+                  <ModalSelectButtonText >
                     {item}
                   </ModalSelectButtonText>
                 </ModalSelectButton>
@@ -330,7 +331,7 @@ const UpdateAreaMeterAlert = props => {
               <ButtonText
                 style={{
                   color: '#717274',
-                }}>
+                }} >
                 돌아가기
               </ButtonText>
             </Button>
@@ -341,7 +342,7 @@ const UpdateAreaMeterAlert = props => {
                 // 주택 정보 업데이트
                 nextHandler();
               }}>
-              <ButtonText>입력하기</ButtonText>
+              <ButtonText >입력하기</ButtonText>
             </Button>
           </ButtonShadow>
         </ButtonSection>

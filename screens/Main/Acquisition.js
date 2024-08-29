@@ -27,14 +27,14 @@ const Tag = styled.View`
   width: 68px;
   height: 26px;
   background-color: #fff;
-  border-radius: ${getFontSize(16)}px;
+  border-radius: 16px;
   align-items: center;
   justify-content: center;
   border: 1px solid #2f87ff;
 `;
 
 const TagText = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Medium;
   color: #2f87ff;
   line-height: 16px;
@@ -42,7 +42,7 @@ const TagText = styled.Text`
 `;
 
 const Title = styled.Text`
-  font-size: ${getFontSize(25)}px;
+  font-size: 25px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 30px;
@@ -52,7 +52,7 @@ const Title = styled.Text`
 `;
 
 const SubTitle = styled.Text`
-  font-size: ${getFontSize(13)}px;
+  font-size: 13px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -79,7 +79,7 @@ const HashTag = styled.View`
 `;
 
 const HashTagText = styled.Text`
-  font-size: ${getFontSize(10)}px;
+  font-size: 10px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -129,7 +129,7 @@ const ChatBubble = styled.View`
 `;
 
 const ChatBubbleText = styled.Text`
-  font-size: ${getFontSize(15)}px;
+  font-size: 13px;
   font-family: Pretendard-SemiBold;
   color: #000;
   line-height: 30px;
@@ -155,7 +155,7 @@ const Button = styled.TouchableOpacity.attrs(props => ({
 `;
 
 const ButtonText = styled.Text`
-  font-size: ${getFontSize(18)}px;
+  font-size: 18px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -242,15 +242,15 @@ const Acquisition = () => {
       </IconView>
       <IntroSection>
         <Tag>
-          <TagText>주택 매수</TagText>
+          <TagText >주택 매수</TagText>
         </Tag>
-        <Title>취득세 계산하기</Title>
+        <Title >취득세 계산하기</Title>
 
-        <SubTitle>주택을 매수할 예정인데, 취득세가 얼마나 나올까요?</SubTitle>
+        <SubTitle >주택을 매수할 예정인데, 취득세가 얼마나 나올까요?</SubTitle>
         <HashTagGroup>
           {AC_HASHTAG_LIST.map((item, index) => (
             <HashTag key={index}>
-              <HashTagText>#{item}</HashTagText>
+              <HashTagText >#{item}</HashTagText>
             </HashTag>
           ))}
         </HashTagGroup>
@@ -263,7 +263,7 @@ const Acquisition = () => {
             }}
           />
           <ChatBubble>
-            <ChatBubbleText>
+            <ChatBubbleText >
               안녕하세요!{'\n'}지금부터 취득세를{'\n'}쉽고 정확하게 계산해드릴
               거에요.{'\n'}저만 믿고 끝까지 잘 따라와 주세요!
             </ChatBubbleText>
@@ -281,7 +281,7 @@ const Acquisition = () => {
                 navigation.replace('AcquisitionChat');
               }
             }}>
-            <ButtonText>시작하기</ButtonText>
+            <ButtonText >시작하기</ButtonText>
           </Button>
         </ShadowContainer>
       </ButtonSection>
