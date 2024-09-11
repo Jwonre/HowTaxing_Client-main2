@@ -342,8 +342,8 @@ const Calendar = props => {
         }}>
         <View
           style={{
-            width: 42,
-            height: 42,
+            width: 38,
+            height: 38,
             borderRadius: 21,
             backgroundColor: isSelected ? '#1B1C1F' : '#fff',
             alignItems: 'center',

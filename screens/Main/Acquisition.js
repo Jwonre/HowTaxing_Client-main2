@@ -172,12 +172,12 @@ const Acquisition = () => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const AC_HASHTAG_LIST = ['취득세 계산', '조정 지역', '주택 매수'];
-  
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-  
+
   const [isConnected, setIsConnected] = useState(true);
-  
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -195,7 +195,7 @@ const Acquisition = () => {
       }
     });
   };
-  
+
   const handleBackPress = () => {
     navigation.goBack();
     return true;
@@ -258,9 +258,9 @@ const Acquisition = () => {
       <ChatSection>
         <ChatItem>
           <Avatar
-            source={{
-              uri: 'https://www.handmk.com/news/photo/202306/16714_40371_5250.jpg',
-            }}
+            source={
+              require('../../assets/images/womanAvatar.png')
+            }
           />
           <ChatBubble>
             <ChatBubbleText >

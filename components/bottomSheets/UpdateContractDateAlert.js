@@ -211,6 +211,7 @@ const UpdateContractDateAlert = props => {
                 marginTop: 20,
               }}>
               <Calendar
+                currentPageIndex={1}
                 currentDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0, 0, 0, 0)) : data?.buyDate ? new Date(data?.buyDate) > new Date() ? new Date(new Date().setHours(0, 0, 0, 0)) : new Date(new Date(data?.buyDate).setHours(0, 0, 0, 0)) : new Date(new Date().setHours(0, 0, 0, 0))}
                 maxDate={data?.buyDate ? new Date(new Date(data?.buyDate).setHours(0, 0, 0, 0)) : new Date('2150-12-31')}
                 setSelectedDate={setSelectedDate}

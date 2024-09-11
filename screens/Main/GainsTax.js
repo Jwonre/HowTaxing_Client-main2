@@ -257,9 +257,9 @@ const GainsTax = () => {
       <ChatSection>
         <ChatItem>
           <Avatar
-            source={{
-              uri: 'https://www.handmk.com/news/photo/202306/16714_40371_5250.jpg',
-            }}
+            source={
+              require('../../assets/images/manAvatar.png')
+            }
           />
           <ChatBubble>
             <ChatBubbleText >

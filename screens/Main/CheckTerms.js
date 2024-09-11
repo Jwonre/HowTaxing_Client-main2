@@ -120,17 +120,6 @@ const ListItemButtonText = styled.Text`
   text-decoration-color: #717274;
 `;
 
-
-const Avatar = styled(FastImage).attrs(props => ({
-  resizeMode: 'cover',
-}))`
-  width: 35px;
-  height: 35px;
-  border-radius: 17.5px;
-  background-color: '#F0F3F8';
-`;
-
-
 const ButtonSection = styled.View`
   flex: 0.3;
   padding: 0 20px;

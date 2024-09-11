@@ -496,14 +496,14 @@ const HouseDetail = props => {
                 style={{
                   marginLeft: 'auto',
                 }}>
-                <InfoContentText >{item?.area ? item?.area + 'm2' : (item?.isAreaOver85 === true ? '국민평형(85m2) 초과' : item?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}</InfoContentText>
+                <InfoContentText >{item?.area ? item?.area + 'm²' : (item?.isAreaOver85 === true ? '국민평형(85m2) 초과' : item?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}</InfoContentText>
                 {item?.area !== 0 || undefined && <InfoContentText
                   
                   style={{
                     fontSize: 10,
                     color: '#A3A5A8',
                   }}>
-                  {item?.area + 'm2'}
+                  {item?.area + 'm²'}
                 </InfoContentText>}
               </View>
             </InfoContentItem>

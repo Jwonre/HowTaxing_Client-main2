@@ -3,7 +3,6 @@
 import { View, Text } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
-
 import { HOUSE_TYPE } from '../constants/colors';
 import NetInfo from "@react-native-community/netinfo";
 import { useNavigation } from '@react-navigation/native';
@@ -22,7 +21,7 @@ const HoustInfoSection = styled.View`
 `;
 
 const HoustInfoTitle = styled.Text`
-  width: 105%;
+  width: 100%;
   font-size: 20px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
@@ -128,7 +127,7 @@ const HouseInfo = props => {
         <HoustInfoTitle >{props.item?.houseName}</HoustInfoTitle>
         <HoustInfoText >{props.item?.houseDetailName}</HoustInfoText>
       </View>
-      <HoustInfoButton
+      {props.reservationYn === 'N' && <HoustInfoButton
         onPress={async () => {
           const state = await NetInfo.fetch();
           const canProceed = await handleNetInfoChange(state);
@@ -145,7 +144,7 @@ const HouseInfo = props => {
         }
         }>
         <HoustInfoButtonText >자세히 보기</HoustInfoButtonText>
-      </HoustInfoButton>
+      </HoustInfoButton>}
     </HoustInfoSection>
   );
 };

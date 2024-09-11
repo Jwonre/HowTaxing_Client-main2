@@ -21,7 +21,7 @@ import Config from 'react-native-config'
 import { setResend } from '../../redux/resendSlice';
 import NetInfo from '@react-native-community/netinfo';
 import { setFixHouseList } from '../../redux/fixHouseListSlice';
-import { setHouseInfo } from '../../redux/houseInfoSlice';
+import { setAddHouseList } from '../../redux/addHouseListSlice';
 
 const SheetContainer = styled.View`
   flex: 1;
@@ -322,6 +322,14 @@ const CertSheet = props => {
     };
   }, []);
 
+  useEffect(() => {
+    dispatch(
+      setFixHouseList([]),
+      setAddHouseList([]),
+      setOwnHouseList([]),
+    );
+  }, []);
+
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -332,7 +340,6 @@ const CertSheet = props => {
   const input1 = useRef(null);
   const input2 = useRef(null);
   const input3 = useRef(null);
-  const [scrollHeight, setScrollHeight] = useState(420);
 
 
   const registerDirectHouse = async (list) => {
@@ -347,7 +354,7 @@ const CertSheet = props => {
       };
 
       // 요청 바디
-      const data = list;
+      const data = list ? list : [];
       //console.log('data : ', data);
       axios
         .post(`${Config.APP_API_URL}house/saveAllHouse`, data, { headers: headers })
@@ -361,13 +368,14 @@ const CertSheet = props => {
                 buttontext: '확인하기',
               },
             });
-            return;
+            return false;
 
-            } else {  
+          } else {
             const returndata = response.data.data;
             dispatch(setOwnHouseList([
               ...returndata,
             ]));
+            return true;
             //console.log('[hypenHouseAPI] response.data : ', response.data);
           }
         })
@@ -381,6 +389,8 @@ const CertSheet = props => {
             },
           });
           console.error(error);
+
+          return false;
         });
     }
   };
@@ -408,8 +418,8 @@ const CertSheet = props => {
   const hypenHouseAPI = async (url, data, headers) => {
     try {
       const response = await axios.post(url, data, { headers });
-      //console.log('response', response);
-      //console.log('response.data', response.data);
+      console.log('response', response);
+      console.log('response.data', response.data);
       if (response.data.errYn === 'Y') {
         if (response.data.errCode === 'HOUSE-005') {
           //console.log('response.data.errMsg.includes([LOGIN)', response.data.errMsg.includes('[LOGIN'));
@@ -535,33 +545,64 @@ const CertSheet = props => {
         setTimeout(async () => {
           SheetManager.hide("infoCertification");
         }, 300);
-        var list = response.data.data ? response.data.data : false;
+
+        var list = response.data.data ? response.data.data : undefined;
         //console.log('[hypenHouseAPI] list:', list);
-        const state = await NetInfo.fetch();
-        const canProceed = await handleNetInfoChange(state);
-        if (canProceed) {
-          list = list.map((item, index) => ({ ...item, index }));
-          //console.log('[hypenHouseAPI] list:', list);
-          if (list) {
-            if (list.some(item => item.complete === false)) {
-              setTimeout(async () => {
-                dispatch(
-                  setFixHouseList(
-                    list
-                  ));
-               // console.log('[hypenHouseAPI] props.payload?.isGainsTax:', props.payload?.isGainsTax);
-                navigation.push('FixedHouseList',{isGainsTax : props.payload?.isGainsTax === true ? true : false, chatListindex : props?.payload?.index});
-              }, 300);
-              return false;
+
+        list = list.map((item, index) => ({ ...item, index }));
+        //console.log('[hypenHouseAPI] list:', list);
+        if (list) {
+          dispatch(setResend(false));
+          if (list.some(item => item.complete === false)) {
+            setTimeout(async () => {
+              dispatch(
+                setFixHouseList(
+                  list
+                ));
+              // console.log('[hypenHouseAPI] props.payload?.isGainsTax:', props.payload?.isGainsTax);
+              navigation.push('FixedHouseList', { isGainsTax: props.payload?.isGainsTax === true ? true : false, chatListindex: props?.payload?.index });
+            }, 300);
+            return false;
+          } else {
+            const registerDirectHouseResult = await registerDirectHouse();
+            if (registerDirectHouseResult) {
+              const getEtcHouseReturn = await getEtcHouse();
+              if (getEtcHouseReturn === 'getEtcHouseNull') {
+                return true;
+              } else if (getEtcHouseReturn === 'getEtcHouse') {
+                navigation.navigate('AddHouseList', { chatListindex: props?.payload?.index });
+                return false;
+              } else if(getEtcHouseReturn === 'getEtcHouseFailed') {
+                const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+                dispatch(setChatDataList(newChatDataList));
+                return false;
+              }
             } else {
-              await registerDirectHouse(list);
+              const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+              dispatch(setChatDataList(newChatDataList));
+              return false;
+            }
+          }
+        } else {
+          const registerDirectHouseResult = await registerDirectHouse();
+          dispatch(setResend(false));
+          if (registerDirectHouseResult) {
+
+            const getEtcHouseReturn = await getEtcHouse();
+            if (getEtcHouseReturn === 'getEtcHouseNull') {
               return true;
+            } else if (getEtcHouseReturn === 'getEtcHouse') {
+              navigation.navigate('AddHouseList', { chatListindex: props?.payload?.index });
+              return false;
             }
           } else {
-            dispatch(setOwnHouseList([]));
-            return true;
+            const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+            dispatch(setChatDataList(newChatDataList));
+            return false;
           }
+
         }
+
 
       }
     } catch (error) {
@@ -734,8 +775,59 @@ const CertSheet = props => {
         dispatch(setChatDataList([...chatDataList, chatItem]));
 
       }
-    } else {
-      actionSheetRef.current?.hide();
+    }
+  };
+
+  const getEtcHouse = async () => {
+    const url = `${Config.APP_API_URL}house/getEtcHouse`;
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentUser.accessToken}`
+    };
+    try {
+      const response = await axios.get(url, { headers: headers });
+      if (response.data.errYn === 'Y') {
+        setFixHouseFinishAndWait(true);
+        await SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: response.data.errMsg ? response.data.errMsg : '기타 재산세 보유주택을 불러오는데 문제가 발생했어요.',
+            description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+            buttontext: '확인하기',
+          },
+        });
+        return 'getEtcHouseFailed';
+      } else {
+        console.log('response.data.data2 : ', response.data.data);
+        console.log('response.data.data2.length : ', response.data.data.length);
+        if (response.data.data.length === 0) {
+          setFixHouseFinishAndWait(true);
+          const isGainsTax = props?.route?.params?.isGainsTax;
+          const chatItem = isGainsTax
+            ? gainTax.find(el => el.id === 'allHouse1')
+            : acquisitionTax.find(el => el.id === 'moment1');
+          dispatch(setChatDataList([...chatDataList, chatItem]), setFixHouseList([]));
+          return 'getEtcHouseNull';
+        } else {
+          setFixHouseFinishAndWait(false)
+          // console.log('response.data.data : ', response.data.data);
+          var list = response.data.data.map((item, index) => ({ ...item, index }));
+          dispatch(setFixHouseList(list));
+          return 'getEtcHouse';
+        }
+      }
+    } catch (error) {
+      setFixHouseFinishAndWait(true);
+      //console.log(error);
+      SheetManager.show('info', {
+        payload: {
+          message: '기타 재산세 보유주택을 불러오는데 문제가 발생했어요.',
+          description: error.message ? error.message : '오류가 발생했습니다.',
+          type: 'error',
+          buttontext: '확인하기',
+        }
+      });
+      return 'getEtcHouseFailed';
     }
   };
 

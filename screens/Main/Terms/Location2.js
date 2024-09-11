@@ -268,7 +268,7 @@ const Location2 = props => {
                     }}>
                     <Button
                         width={width}
-                        active={activeButton || agreeLocation}
+                        active={(buttonText === '끝으로 이동하기' ? false : true) || agreeLocation}
                         disabled={!(activeButton || agreeLocation)}
                         onPress={() => {
                             if (buttonText === '끝으로 이동하기') {

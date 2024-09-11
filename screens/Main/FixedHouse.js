@@ -22,15 +22,11 @@ import Calendar from '../../components/Calendar';
 import Config from 'react-native-config'
 import { HOUSE_TYPE } from '../../constants/colors';
 import { setFixHouseList, editFixHouseList } from '../../redux/fixHouseListSlice';
+import FixedHouseList from './FixedHouseList';
 
 const Container = styled.View`
   flex: 1.0;
   background-color: #fff;
-`;
-
-const IntroSection = styled.View`
-  flex: 0.85;
-  width: 100%;
 `;
 
 const IntroSection2 = styled.View`
@@ -38,20 +34,6 @@ const IntroSection2 = styled.View`
   padding: 20px 20px 10px 20px;
 `;
 
-const IntroSection3 = styled.View`
-  width: 100%;
-  padding: 10px;
-`;
-
-const ProfileAvatar = styled(FastImage).attrs(props => ({
-  resizeMode: 'contain',
-}))`
-  width: 100%;
-  height: 100%;
-  border-radius: 0px;
-  background-color: #F0F3F8;
-  align-self: center;
-`;
 
 const ProgressSection = styled.View`
   flex-direction: row;
@@ -99,15 +81,6 @@ const ModalInput = styled.TextInput.attrs(props => ({
 
 `;
 
-
-const ModalTitle = styled.Text`
-  font-size: 16px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 26px;
-  text-align: center;
-`;
-
 const ModalAddressInputContainer = styled.View`
   width: 100%;
   height: 50px;
@@ -129,17 +102,6 @@ const ModalAddressInput = styled.TextInput.attrs(props => ({
   font-family: Pretendard-bold;
   color: #1b1c1f;
   line-height: 19px;
-`;
-
-const DetailAddressInput = styled.TextInput.attrs(props => ({
-  placeholderTextColor: '#A3A5A8',
-  placeholder: '상세주소를 입력해주세요.',
-}))`
-  flex: 1;
-  font-size: 13px;
-  font-family: Pretendard-Regular;
-  color: #1b1c1f;
-  line-height: 20px;
 `;
 
 const ModalInputButton = styled.TouchableOpacity.attrs(props => ({
@@ -223,25 +185,6 @@ const MapSearchResultButtonText = styled.Text`
 `;
 
 
-const ApartmentInfoGroup = styled.View`
-  width: 100%;
-  height: auto;
-  background-color: #fff;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ApartmentInfoTitle = styled.Text`
-  width: 80%;
-  font-size: 14px;
-  font-family: Pretendard-Medium;
-  color: #1b1c1f;
-  line-height: 30px;
-  text-align: center;
-  margin-bottom: auto;
-`;
-
-
 const SelectGroup = styled.View`
   width: 100%;
   flex-direction: row;
@@ -315,26 +258,6 @@ const HoustInfoText = styled.Text`
   line-height: 20px;
 `;
 
-const HoustInfoBadge = styled.View`
-  width: auto;
-  margin-right: auto;
-  height: 22px;
-  padding: 0 10px;
-  border-radius: 11px;
-  align-items: center;
-  justify-content: center;
-  background-color: #1fc9a8;
-`;
-
-const HoustInfoBadgeText = styled.Text`
-  font-size: 10px;
-  font-family: Pretendard-Medium;
-  color: #fff;
-  line-height: 12px;
-  letter-spacing: -0.5px;
-`;
-
-
 const Title = styled.Text`
   font-size: 19px;
   font-family: Pretendard-Bold;
@@ -343,14 +266,6 @@ const Title = styled.Text`
   letter-spacing: -0.5px;
 `;
 
-const SubTitle = styled.Text`
-  font-size: 19px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 30px;
-  margin-top: 10px;
-  
-`;
 
 const SubTitle2 = styled.Text`
   font-size: 12px;
@@ -361,34 +276,6 @@ const SubTitle2 = styled.Text`
   margin-bottom: 20px;
   text-align: left;
 `;
-
-
-const SubTitle3 = styled.Text`
-  font-size: 12px;
-  font-family: Pretendard-Regular;
-  color: #FF7401;
-  line-height: 15px;
-  margin-top: 10px;
-`;
-
-const SubTitle4 = styled.Text`
-  font-size: 16px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 20px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-`;
-
-const TimeTitle = styled.Text`
-  font-size: 16px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 30px;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
-`;
-
 
 
 const ButtonSection = styled.View`
@@ -458,7 +345,6 @@ const FixedHouse = props => {
   const dispatch = useDispatch();
   const currentUser = useSelector(state => state.currentUser.value);
   const fixHouseList = useSelector(state => state.fixHouseList.value);
-  const [fixHouseInfo, setFixHouseInfo] = useState([]);
   const [directacquisitionDate, setDirectAcquisitionDate] = useState(false);
 
   for (let i = 9; i <= 11; i++) {
@@ -470,12 +356,9 @@ const FixedHouse = props => {
     if (i < 18) afternoonTimes.push(`${i}:30`);
   }
   const handleBackPress = () => {
+    foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
     if (currentPageIndex === 0) {
-      if (props?.route?.params?.AddorFix === 'Add') {
-        navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
-      } else {
-        navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
-      }
+      navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
     } else {
       if (currentPageIndex === 1) {
         setCurrentPageIndex(0);
@@ -487,23 +370,73 @@ const FixedHouse = props => {
 
       } else if (currentPageIndex === 2) {
         setCurrentPageIndex(0);
+        setSelectedDong('');
+        setSelectedHo('');
+        setHoList([]);
+        setDongList([]);
+        setDetailAddress3('');
       } else if (currentPageIndex === 3) {
-        if (selectedHo) {
-          setCurrentPageIndex(1);
-        } else {
-          setCurrentPageIndex(2);
-        }
-      } else {
-        if (directacquisitionDate === false) {
-          if (selectedHo) {
-            setCurrentPageIndex(1);
+        if (foundItem.admCd) {
+          if (foundItem.detailAdr) {
+            if (selectedHo) {
+              setCurrentPageIndex(1);
+            } else {
+              if (searchText !== '') {
+                setCurrentPageIndex(2);
+              } else {
+                navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
+              }
+            }
           } else {
-            setCurrentPageIndex(2);
+            setCurrentPageIndex(0);
+            setSelectedDong('');
+            setSelectedHo('');
+            setHoList([]);
+            setDongList([]);
+            setDetailAddress3('');
+          }
+        } else {
+          setCurrentPageIndex(0);
+          setSelectedDong('');
+          setSelectedHo('');
+          setHoList([]);
+          setDongList([]);
+          setDetailAddress3('');
+        }
+
+
+      } else {
+        if (directacquisitionDate === true) {
+          if (foundItem.admCd) {
+            if (foundItem.detailAdr) {
+              if (selectedHo) {
+                setCurrentPageIndex(1);
+              } else {
+                if (searchText !== '') {
+                  setCurrentPageIndex(2);
+                } else {
+                  navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
+                }
+              }
+            } else {
+              setCurrentPageIndex(0);
+              setSelectedDong('');
+              setSelectedHo('');
+              setHoList([]);
+              setDongList([]);
+              setDetailAddress3('');
+            }
+          } else {
+            setCurrentPageIndex(0);
+            setSelectedDong('');
+            setSelectedHo('');
+            setHoList([]);
+            setDongList([]);
+            setDetailAddress3('');
           }
         } else {
           setCurrentPageIndex(3);
         }
-
       }
     }
     return true;
@@ -536,8 +469,23 @@ const FixedHouse = props => {
   }, [currentPageIndex2]);
 */
   useEffect(() => {
-    //setCurrentPageIndex(4);
-    //console.log('props.route.params', props?.route.params);
+    var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
+    setAddress(foundItem.roadAddr ? foundItem.roadAddr + '\n' + (foundItem.houseName ? foundItem.houseName : '') : foundItem.jibunAddr ? foundItem.jibunAddr + '\n' + (foundItem.houseName ? foundItem.houseName : '') : '');
+    if (!(foundItem.admCd)) {
+      setCurrentPageIndex(0);
+    } else if (!foundItem.buyDate) {
+      if (foundItem.detailAdr) {
+        setCurrentPageIndex(3);
+      } else {
+        setCurrentPageIndex(0);
+      }
+    } else if (!foundItem.buyPrice) {
+      if (foundItem.detailAdr) {
+        setCurrentPageIndex(4);
+      } else {
+        setCurrentPageIndex(0);
+      }
+    }
   }, []);
 
   const handleNetInfoChange = (state) => {
@@ -810,23 +758,27 @@ const FixedHouse = props => {
             buttontext: '확인하기',
           },
         });
+        return { acquisitionDate: null };
       } else {
         const result = response.data;
         if (result.data?.property?.acquisitionDate) {
-          if (result.data?.property?.acquisitionDate !== null) {
+          if (result.data?.property?.acquisitionDate !== null && result.data?.property?.acquisitionDate !== undefined) {
             const acquisitionDate = result.data.property.acquisitionDate;
             const year = acquisitionDate.substring(0, 4);
             const month = acquisitionDate.substring(4, 6) - 1; // 월은 0부터 시작하므로 1을 빼줍니다.
             const day = acquisitionDate.substring(6, 8);
-            setFixHouseInfo([{ acquisitionDate: new Date(year, month, day) }]);
+            setBuyPrice(result.data?.buillding?.publishedPrice ? result.data?.buillding?.publishedPrice : 0);
             setDirectAcquisitionDate(true);
+            return { acquisitionDate: new Date(year, month, day) };
           } else {
-            setFixHouseInfo([{ acquisitionDate: null }]);
+            setBuyPrice(result.data?.buillding?.publishedPrice ? result.data?.buillding?.publishedPrice : 0);
             setDirectAcquisitionDate(false);
+            return { acquisitionDate: null };
           }
         } else {
-          setFixHouseInfo([{ acquisitionDate: null }]);
+          setBuyPrice(result.data?.buillding?.publishedPrice ? result.data?.buillding?.publishedPrice : 0);
           setDirectAcquisitionDate(false);
+          return { acquisitionDate: null };
         }
 
 
@@ -842,6 +794,7 @@ const FixedHouse = props => {
           buttontext: '확인하기',
         }
       });
+      return { acquisitionDate: null };
     }
   };
 
@@ -863,16 +816,12 @@ const FixedHouse = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
+            var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
             //console.log('currentPageIndex', currentPageIndex);
             if (currentPageIndex === 0) {
-              if (props?.route?.params?.AddorFix === 'Add') {
-                navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
-              } else {
-                navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
-              }
+              navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
 
             } else {
-              // setCurrentPageIndex2(0);
               if (currentPageIndex === 1) {
                 setCurrentPageIndex(0);
                 setSelectedDong('');
@@ -880,25 +829,76 @@ const FixedHouse = props => {
                 setHoList([]);
                 setDongList([]);
                 setDetailAddress3('');
+
               } else if (currentPageIndex === 2) {
                 setCurrentPageIndex(0);
+                setSelectedDong('');
+                setSelectedHo('');
+                setHoList([]);
+                setDongList([]);
+                setDetailAddress3('');
               } else if (currentPageIndex === 3) {
-                if (selectedHo) {
-                  setCurrentPageIndex(1);
-                } else {
-                  setCurrentPageIndex(2);
-                }
-              } else {
-                if (directacquisitionDate === false) {
-                  if (selectedHo) {
-                    setCurrentPageIndex(1);
+                if (foundItem.admCd) {
+                  if (foundItem.detailAdr) {
+                    if (selectedHo) {
+                      setCurrentPageIndex(1);
+                    } else {
+                      if (searchText !== '') {
+                        setCurrentPageIndex(2);
+                      } else {
+                        navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
+                      }
+                    }
                   } else {
-                    setCurrentPageIndex(2);
+                    setCurrentPageIndex(0);
+                    setSelectedDong('');
+                    setSelectedHo('');
+                    setHoList([]);
+                    setDongList([]);
+                    setDetailAddress3('');
+                  }
+                } else {
+                  setCurrentPageIndex(0);
+                  setSelectedDong('');
+                  setSelectedHo('');
+                  setHoList([]);
+                  setDongList([]);
+                  setDetailAddress3('');
+                }
+
+
+              } else {
+                if (directacquisitionDate === true) {
+                  if (foundItem.admCd) {
+                    if (foundItem.detailAdr) {
+                      if (selectedHo) {
+                        setCurrentPageIndex(1);
+                      } else {
+                        if (searchText !== '') {
+                          setCurrentPageIndex(2);
+                        } else {
+                          navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
+                        }
+                      }
+                    } else {
+                      setCurrentPageIndex(0);
+                      setSelectedDong('');
+                      setSelectedHo('');
+                      setHoList([]);
+                      setDongList([]);
+                      setDetailAddress3('');
+                    }
+                  } else {
+                    setCurrentPageIndex(0);
+                    setSelectedDong('');
+                    setSelectedHo('');
+                    setHoList([]);
+                    setDongList([]);
+                    setDetailAddress3('');
                   }
                 } else {
                   setCurrentPageIndex(3);
                 }
-
               }
             }
           }} >
@@ -1074,6 +1074,7 @@ const FixedHouse = props => {
                             buyPrice: foundItem.buyPrice,
                             complete: false,
                             detailAdr: foundItem.detailAdr,
+                            houseName: item.bdNm
                           }));
                           const firstDong = await getDongData(item);
                           if (firstDong !== 'dongerror') {
@@ -1237,7 +1238,6 @@ const FixedHouse = props => {
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
                     setCurrentPageIndex(0);
-                    setFixHouseInfo([]);
                     setSelectedDong('');
                     setSelectedHo('');
                     setDongList([]);
@@ -1277,8 +1277,8 @@ const FixedHouse = props => {
                   if (canProceed) {
                     var detailAddress2 = (selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : '') + (selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : '');;
                     //console.log('detailAddress2', detailAddress2);
-                    await getHouseInfo();
-                    //console.log('selectedDate', selectedDate);
+                    const fixHouseInfo = await getHouseInfo();
+
                     var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
                     if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
@@ -1292,6 +1292,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: foundItem.houseName
                       }));
                       setCurrentPageIndex(3);
                     } else if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1306,6 +1307,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: foundItem.houseName
                       }));
                       setCurrentPageIndex(3);
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
@@ -1320,6 +1322,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: foundItem.houseName
                       }));
                       setCurrentPageIndex(4);
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1334,9 +1337,12 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: true,
                         detailAdr: detailAddress2,
+                        houseName: foundItem.houseName
                       }));
                       navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
                     }
+
+
                   }
                 }} style={{
                   width: '100%',
@@ -1384,8 +1390,9 @@ const FixedHouse = props => {
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
                     //console.log('detailAddress2', detailAddress2);
-                    await getHouseInfo();
-                    //console.log('selectedDate', selectedDate);
+                    const fixHouseInfo = await getHouseInfo();
+                    console.log('fixHouseInfo', fixHouseInfo);
+                    console.log('fixHouseInfo.acquisitionDate', fixHouseInfo.acquisitionDate);
                     var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
                     if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
@@ -1399,6 +1406,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress3,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1413,6 +1421,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress3,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
@@ -1427,6 +1436,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress3,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(4);
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1441,6 +1451,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: true,
                         detailAdr: detailAddress3,
+                        houseName: selectedItem.bdNm
                       }));
                       navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
                     }
@@ -1510,7 +1521,6 @@ const FixedHouse = props => {
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
                     setCurrentPageIndex(0);
-                    setFixHouseInfo([]);
                     setSelectedDong('');
                     setSelectedHo('');
                     setDongList([]);
@@ -1550,10 +1560,9 @@ const FixedHouse = props => {
                   if (canProceed) {
                     var detailAddress2 = (selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : '') + (selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : '');;
                     //console.log('detailAddress2', detailAddress2);
-                    await getHouseInfo();
-                    //console.log('selectedDate', selectedDate);
+                    const fixHouseInfo = await getHouseInfo();
                     console.log('fixHouseInfo', fixHouseInfo);
-                    console.log('directacquisitionDate', directacquisitionDate);
+                    console.log('fixHouseInfo.acquisitionDate', fixHouseInfo.acquisitionDate);
                     var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
                     if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
@@ -1567,6 +1576,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1581,6 +1591,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
@@ -1595,6 +1606,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(4);
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1609,6 +1621,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: true,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
                     }
@@ -1639,7 +1652,22 @@ const FixedHouse = props => {
         <ProgressSection>
         </ProgressSection>
         <><IntroSection2 style={{ width: width }}>
-          <Title>취득일자를 입력해주세요.</Title>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          }}>
+            <Title>취득일자를 입력해주세요.</Title>
+            {/*<TouchableOpacity
+              activeOpacity={0.8}
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+              <InfoIcon
+                onPress={() => {
+                  SheetManager.show('InfoBuyDate');
+                }}
+              />
+            </TouchableOpacity>*/}
+          </View>
           <SubTitle2>보유한 주택의 취득일자를 정확히 입력해주세요.</SubTitle2>
           <HoustInfoSection>
             <View
@@ -1659,16 +1687,7 @@ const FixedHouse = props => {
               width: '100%',
               height: 350,
             }}>
-            {fixHouseInfo?.acquisitionDate && <Calendar
-              ReservationYn='N'
-              currentPageIndex={1}
-              //      minDate={new Date(new Date('2024-05-02').setHours(0, 0, 0, 0))}
-              setSelectedDate={setSelectedDate}
-              selectedDate={fixHouseInfo.acquisitionDate ? fixHouseInfo.acquisitionDate.setHours(0, 0, 0, 0) : new Date().setHours(0, 0, 0, 0)}
-              currentDate={fixHouseInfo.acquisitionDate ? fixHouseInfo.acquisitionDate.setHours(0, 0, 0, 0) : new Date().setHours(0, 0, 0, 0)}
-            //      maxDate={new Date(new Date('2025-12-10').setHours(0, 0, 0, 0))}
-            />}
-            {!fixHouseInfo?.acquisitionDate && <Calendar
+            <Calendar
               ReservationYn='N'
               currentPageIndex={1}
               //      minDate={new Date(new Date('2024-05-02').setHours(0, 0, 0, 0))}
@@ -1676,7 +1695,7 @@ const FixedHouse = props => {
               selectedDate={new Date(selectedDate ? selectedDate : new Date().setHours(0, 0, 0, 0))}
               currentDate={new Date(selectedDate ? selectedDate : new Date().setHours(0, 0, 0, 0))}
             //      maxDate={new Date(new Date('2025-12-10').setHours(0, 0, 0, 0))}
-            />}
+            />
           </View>
           <ButtonSection width={width} style={{
             marginTop: 10,
@@ -1697,10 +1716,34 @@ const FixedHouse = props => {
                   const state = await NetInfo.fetch();
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
-                    if (selectedHo) {
-                      setCurrentPageIndex(1);
+                    var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
+                    console.log('foundItem', foundItem);
+                    if (foundItem.admCd) {
+                      if (foundItem.detailAdr) {
+                        if (selectedHo) {
+                          setCurrentPageIndex(1);
+                        } else {
+                          if (searchText !== '') {
+                            setCurrentPageIndex(2);
+                          } else {
+                            navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
+                          }
+                        }
+                      } else {
+                        setCurrentPageIndex(0);
+                        setSelectedDong('');
+                        setSelectedHo('');
+                        setHoList([]);
+                        setDongList([]);
+                        setDetailAddress3('');
+                      }
                     } else {
-                      setCurrentPageIndex(2);
+                      setCurrentPageIndex(0);
+                      setSelectedDong('');
+                      setSelectedHo('');
+                      setHoList([]);
+                      setDongList([]);
+                      setDetailAddress3('');
                     }
                   }
                 }}
@@ -1747,6 +1790,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: foundItem.detailAdr,
+                        houseName: foundItem.houseName
                       }));
                       setCurrentPageIndex(4);
                     } else {
@@ -1761,6 +1805,7 @@ const FixedHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: true,
                         detailAdr: foundItem.detailAdr,
+                        houseName: foundItem.houseName
                       }));
                       navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
                     }
@@ -1799,7 +1844,7 @@ const FixedHouse = props => {
             justifyContent: 'flex-start',
           }}>
             <Title>취득금액을 입력해주세요.</Title>
-            <TouchableOpacity
+            {/*<TouchableOpacity
               activeOpacity={0.8}
               hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
               <InfoIcon
@@ -1807,7 +1852,7 @@ const FixedHouse = props => {
                   SheetManager.show('InfoBuyPrice');
                 }}
               />
-            </TouchableOpacity>
+            </TouchableOpacity>*/}
           </View>
           <SubTitle2>보유한 주택의 취득할 당시의 취득금액을 정확히 입력해주세요.</SubTitle2>
         </IntroSection2>
@@ -1842,6 +1887,7 @@ const FixedHouse = props => {
                       buyPrice: buyprice,
                       complete: true,
                       detailAdr: foundItem.detailAdr,
+                      houseName: foundItem.houseName
                     }));
                     //console.log('fixHouseList', fixHouseList);
                     navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
@@ -1872,11 +1918,34 @@ const FixedHouse = props => {
                   const state = await NetInfo.fetch();
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
-                    if (directacquisitionDate === false) {
-                      if (selectedHo) {
-                        setCurrentPageIndex(1);
+                    var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
+                    if (directacquisitionDate === true) {
+                      if (foundItem.admCd) {
+                        if (foundItem.detailAdr) {
+                          if (selectedHo) {
+                            setCurrentPageIndex(1);
+                          } else {
+                            if (searchText !== '') {
+                              setCurrentPageIndex(2);
+                            } else {
+                              navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
+                            }
+                          }
+                        } else {
+                          setCurrentPageIndex(0);
+                          setSelectedDong('');
+                          setSelectedHo('');
+                          setHoList([]);
+                          setDongList([]);
+                          setDetailAddress3('');
+                        }
                       } else {
-                        setCurrentPageIndex(2);
+                        setCurrentPageIndex(0);
+                        setSelectedDong('');
+                        setSelectedHo('');
+                        setHoList([]);
+                        setDongList([]);
+                        setDetailAddress3('');
                       }
                     } else {
                       setCurrentPageIndex(3);
@@ -1927,12 +1996,9 @@ const FixedHouse = props => {
                       buyPrice: buyprice,
                       complete: true,
                       detailAdr: foundItem.detailAdr,
+                      houseName: foundItem.houseName
                     }));
-                    if (props?.route?.params?.AddorFix === 'Add') {
-                      navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
-                    } else {
-                      navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
-                    }
+                    navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
                   }
                 }} style={{
                   width: '100%',

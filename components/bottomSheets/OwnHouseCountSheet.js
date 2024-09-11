@@ -47,6 +47,15 @@ const ModalInputSection = styled.View`
   background-color: #fff;
 `;
 
+const ModalSubTitle = styled.Text`
+  font-size: 12px;
+  font-family: Pretendard-Bold;
+  color: #FF7401;
+  line-height: 15px;
+  margin-top: 10px;
+  text-align: center;
+`;
+
 const ModalButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
@@ -222,12 +231,13 @@ const OwnHouseCountSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 320,
+        height: 340,
         width: width - 40,
       }}>
       <SheetContainer width={width}>
         <ModalInputSection>
-          <ModalTitle >취득하실 주택 외에 보유 주택수를{'\n'}입력해주세요.</ModalTitle>
+          <ModalTitle >취득하실 주택 외에{'\n'}보유 주택수를 입력해주세요.</ModalTitle>
+          <ModalSubTitle>단, 기준시가 1억원 이하 주택은{'\n'}보유 주택수에서 제외해주세요.</ModalSubTitle>
           <View
             style={{
               flexDirection: 'row',
@@ -420,7 +430,7 @@ const OwnHouseCountSheet = props => {
               style={{
                 width: width - 120,
                 alignSelf: 'center',
-                marginTop: 20,
+                marginTop: 10,
                 marginBottom: 50,
               }}>
               <ModalButtonText >다음으로</ModalButtonText>

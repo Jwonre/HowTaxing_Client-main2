@@ -154,21 +154,21 @@ export const acquisitionTax = [
         id: 'KB',
         name: 'KB 간편인증',
         icon: <KBICon />,
-        openSheet: 'cert',
+        openSheet: 'cert_ori',
         prevchat: 'AcquisitionChat'
       },
       {
         id: 'naver',
         name: '네이버 간편인증',
         icon: <NaverIcon />,
-        openSheet: 'cert',
+        openSheet: 'cert_ori',
         prevchat: 'AcquisitionChat'
       },
       {
         id: 'toss',
         name: '토스 인증',
         icon: <TossIcon />,
-        openSheet: 'cert',
+        openSheet: 'cert_ori',
         prevchat: 'AcquisitionChat'
       },
       {
@@ -360,7 +360,7 @@ export const gainTax = [
   {
     id: 'type',
     user: 'system',
-    message: '주택 임대 사업자이신가요?\n(주택임대사업자등록증 대상)',
+    message: '혹시 주택임대사업자로\n등록하셨나요?',
     progress: 1,
     select: [
       {

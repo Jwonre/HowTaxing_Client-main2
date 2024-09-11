@@ -97,7 +97,7 @@ const ButtonText = styled.Text`
 
 const UpdateBuyDateAlert = props => {
 
-  
+
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const { handleHouseChange, data, navigation, prevSheet } = props.payload;
@@ -109,8 +109,8 @@ const UpdateBuyDateAlert = props => {
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
-    const [isConnected, setIsConnected] = useState(true);
-  
+  const [isConnected, setIsConnected] = useState(true);
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -158,7 +158,7 @@ const UpdateBuyDateAlert = props => {
       p.buyDate = selectedDate;
       // ////console.log('[UpdateBuyDateAlert]nextHandler p:', p);
       await handleHouseChange(p, p?.isMoveInRight);
-       
+
       actionSheetRef.current?.hide();
     }
   };
@@ -172,7 +172,7 @@ const UpdateBuyDateAlert = props => {
           <Pressable
             hitSlop={20}
             onPress={() => {
-               
+
               actionSheetRef.current?.hide();
             }}>
             <CloseIcon width={16} height={16} />
@@ -210,9 +210,10 @@ const UpdateBuyDateAlert = props => {
                 marginTop: 20,
               }}>
               <Calendar
-                minDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0,0,0,0)) : ''}
-                currentDate={data?.buyDate ? new Date(new Date(data?.buyDate).setHours(0,0,0,0)) : data?.contractDate ? new Date(data?.contractDate) > new Date() ? new Date(new Date(data?.contractDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))}
-                selectedDate={data?.buyDate ? new Date(new Date(data?.buyDate).setHours(0,0,0,0)) : data?.contractDate ? new Date(data?.contractDate) > new Date() ? new Date(new Date(data?.contractDate).setHours(0,0,0,0)) : new Date(new Date().setHours(0,0,0,0))  : new Date(new Date().setHours(0,0,0,0))}
+                currentPageIndex={1}
+                minDate={data?.contractDate ? new Date(new Date(data?.contractDate).setHours(0, 0, 0, 0)) : ''}
+                currentDate={data?.buyDate ? new Date(new Date(data?.buyDate).setHours(0, 0, 0, 0)) : data?.contractDate ? new Date(data?.contractDate) > new Date() ? new Date(new Date(data?.contractDate).setHours(0, 0, 0, 0)) : new Date(new Date().setHours(0, 0, 0, 0)) : new Date(new Date().setHours(0, 0, 0, 0))}
+                selectedDate={data?.buyDate ? new Date(new Date(data?.buyDate).setHours(0, 0, 0, 0)) : data?.contractDate ? new Date(data?.contractDate) > new Date() ? new Date(new Date(data?.contractDate).setHours(0, 0, 0, 0)) : new Date(new Date().setHours(0, 0, 0, 0)) : new Date(new Date().setHours(0, 0, 0, 0))}
                 setSelectedDate={setSelectedDate}
               />
             </View>
@@ -251,7 +252,7 @@ const UpdateBuyDateAlert = props => {
                   backgroundColor: selectedDate ? '#2f87ff' : '#E8EAED',
                   borderColor: selectedDate ? '#2f87ff' : '#E8EAED',
                 }}>
-                <ButtonText  active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ButtonText>
+                <ButtonText active={selectedDate} style={{ color: selectedDate ? '#fff' : '#717274' }}>다음으로</ButtonText>
               </Button>
             </ButtonShadow>
           </ButtonSection>

@@ -38,6 +38,7 @@ export const addHouseListSlice = createSlice({
         state.value[houseIndex].rnMgtSn = rnMgtSn;
         state.value[houseIndex].complete = complete;
         state.value[houseIndex].detailAdr = detailAdr;
+        state.value[houseIndex].houseName = houseName;
         
 
         //   ////console.log('to be source houseType value:' + state.value[houseIndex].houseType);

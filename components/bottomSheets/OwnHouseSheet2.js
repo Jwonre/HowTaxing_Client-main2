@@ -44,11 +44,10 @@ const TitleSection = styled.View`
 `;
 
 const SubTitle = styled.Text`
-  font-size: 12px;
+  font-size: 11px;
   font-family: Pretendard-Medium;
   color: #97989a;
   line-height: 25px;
-  margin-bottom: 10px;
   
 `;
 
@@ -93,7 +92,7 @@ const Title = styled.Text`
 `;
 
 const InfoMessage = styled.Text`
-  font-size: 13px;
+  font-size: 12px;
   font-family: Pretendard-Regular;
   color: #FF7401;
   line-height: 20px;
@@ -347,7 +346,7 @@ const OwnHouseSheet2 = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) ? 820 : 800,
+        height: ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) ? 720 : 700,
         width: width,
       }}>
       <SheetContainer width={width}>

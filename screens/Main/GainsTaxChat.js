@@ -226,7 +226,7 @@ const KakaoButtonText = styled.Text`
   line-height: 20px;
 `;
 
-const SocialButtonIcon = styled.Image.attrs(props => ({
+const SocialButtonIcons = styled.Image.attrs(props => ({
   resizeMode: 'contain',
 }))`
   width: 22px;
@@ -1036,7 +1036,7 @@ const GainsTaxChat = () => {
                     alignContent: 'center',
                   }}>
                   <Text
-                    
+
                     style={{
                       fontSize: 11,
                       fontFamily: 'Pretendard-Medium',
@@ -1050,7 +1050,7 @@ const GainsTaxChat = () => {
                     }
                   </Text>
                   {houseInfo?.houseType !== '3' && houseInfo?.isMoveInRight === true &&
-                    <Text  style={{
+                    <Text style={{
                       fontSize: 9,
                       fontFamily: 'Pretendard-Medium',
                       color: '#fff',
@@ -1111,83 +1111,75 @@ const GainsTaxChat = () => {
                   </Text>
                 </View>
               </View>
-              <Text ellipsizeMode='tail' numberOfLines={1}
-                style={{
-                  fontSize: 15,
-                  fontFamily: 'Pretendard-Bold',
-                  color: '#1B1C1F',
-                  lineHeight: 20,
-                  letterSpacing: -0.5,
-                  marginTop: 10,
-                  flex: 1, textAlign: 'left',
-                  width: 170
-                }} >
-                {houseInfo?.houseName}
-              </Text>
-              <Text  ellipsizeMode='tail' numberOfLines={1}
-                style={{
-                  fontSize: 13,
-                  fontFamily: 'Pretendard-Regular',
-                  marginTop: 4,
-                  flex: 1, textAlign: 'left',
-                  width: 170
-                }}>
-                {houseInfo?.houseDetailName}
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={async () => {
-                const state = await NetInfo.fetch();
-                const canProceed = await handleNetInfoChange(state);
-                if (canProceed) {
-                  //  ////console.log('gain houseinfo', houseInfo);
-                  navigation.push(
-                    'HouseDetail',
-                    {
-                      prevSheet: 'GainsTaxChat',
-                      item: houseInfo,
-                    },
-                    'HouseDetail',
-                  );
-                }
-              }}
-              activeOpacity={0.8}
-              style={{
-                width: 100,
-                height: 32,
-                borderRadius: 20,
-                backgroundColor: '#fff',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderWidth: 1,
-                borderColor: '#E8EAED',
-              }}>
-              <Text
-                
-                style={{
-                  fontSize: 13,
-                  fontFamily: 'Pretendard-Regular',
-                  color: '#717274',
-                  lineHeight: 20,
-                  letterSpacing: -0.5,
-                }}>
-                자세히 보기
-              </Text>
-              <View
-                style={{
-                  position: 'absolute',
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  backgroundColor: '#F0F3F8',
+              <View style={{ width: width - 80, height: 'auto', flexWrap: 'wrap', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{
+                  flexDirection: 'column',
+                  alignContent: 'center',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  bottom: -6,
-                  right: -6,
                 }}>
-                <EditIcon />
+                  <Text ellipsizeMode='tail' numberOfLines={1}
+                    style={{
+                      fontSize: 15,
+                      fontFamily: 'Pretendard-Bold',
+                      color: '#1B1C1F',
+                      lineHeight: 20,
+                      letterSpacing: -0.5,
+                      marginTop: 10,
+                      flex: 1, textAlign: 'left',
+                    }} >
+                    {houseInfo?.houseName}
+                  </Text>
+                  <Text ellipsizeMode='tail' numberOfLines={1}
+                    style={{
+                      fontSize: 13,
+                      fontFamily: 'Pretendard-Regular',
+                      marginTop: 4,
+                      flex: 1, textAlign: 'left',
+                    }}>
+                    {houseInfo?.houseDetailName}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={async () => {
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      //  ////console.log('gain houseinfo', houseInfo);
+                      navigation.push(
+                        'HouseDetail',
+                        {
+                          prevSheet: 'GainsTaxChat',
+                          item: houseInfo,
+                        },
+                        'HouseDetail',
+                      );
+                    }
+                  }}
+                  activeOpacity={0.8}
+                  style={{
+                    width: 100,
+                    height: 32,
+                    borderRadius: 20,
+                    backgroundColor: '#fff',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderWidth: 1,
+                    borderColor: '#E8EAED',
+                  }}>
+                  <Text
+
+                    style={{
+                      fontSize: 13,
+                      fontFamily: 'Pretendard-Regular',
+                      color: '#717274',
+                      lineHeight: 20,
+                      letterSpacing: -0.5,
+                    }}>
+                    자세히 보기
+                  </Text>
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
+            </View>
           </View>
         )}
       </>
@@ -1224,8 +1216,8 @@ const GainsTaxChat = () => {
           style={{
             padding: 20,
           }}>
-          <CTACard />
-          <HouseInfo item={houseInfo} navigation={navigation} ChatType='GainsTaxChat' />
+          <CTACard houseInfo={houseInfo} Pdata={Pdata ? Pdata : null} IsGainTax={false} />
+          <HouseInfo reservationYn={'N'} item={houseInfo} navigation={navigation} ChatType='GainsTaxChat' />
           <TaxCard2 navigation={navigation} Pdata={Pdata} />
           <CalculationWarningCard />
           <TaxInfoCard2 Pdata={Pdata} />
@@ -1301,9 +1293,9 @@ const GainsTaxChat = () => {
             animation="fadeInUp"
             isLast={chatDataList.length - 1 === index}>
             <Avatar
-              source={{
-                uri: 'https://dnvefa72aowie.cloudfront.net/business-profile/bizPlatform/profile/40388181/1674021254765/MWJlMWNjOGNiMDMzMzE0ZTUwM2ZiZTllZjJkOTZiMGViYTgzNDQxNTE0YWY4ZDU0ZWI3MWQ1N2MzMWU5ZTdmYS5qcGc=.jpeg?q=95&s=1440x1440&t=inside',
-              }}
+              source={
+                require('../../assets/images/manAvatar.png')
+              }
             />
             <ChatBubble style={{ width: item?.id === 'certInfo' ? '95%' : '80%' }}>
               <View style={{
@@ -1548,9 +1540,11 @@ const GainsTaxChat = () => {
                   onPress={async () => {
                     const state = await NetInfo.fetch();
                     const canProceed = await handleNetInfoChange(state);
-                    if (canProceed) { Linking.openURL('http://pf.kakao.com/_sxdxdxgG') }
+                    if (canProceed) {
+                      Linking.openURL('http://pf.kakao.com/_sxdxdxgG');
+                    }
                   }}>
-                  <SocialButtonIcon
+                  <SocialButtonIcons
                     source={require('../../assets/images/socialIcon/kakao_ico.png')}
                   />
                   <KakaoButtonText >카카오톡으로 상담하기</KakaoButtonText>

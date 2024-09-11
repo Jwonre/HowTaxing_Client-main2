@@ -466,18 +466,34 @@ const SearchHouseSheet2 = props => {
           });
           return;
         } else {
-          const list = response.data.data.jusoList;
-          if (list.length === 0) {
+
+          var list = [];
+          if (response.data.data) {
+            list = response.data.data.jusoList;
+            if (list.length === 0) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'error',
+                  message: '검색 결과가 없어요.',
+                  buttontext: '확인하기',
+                },
+              });
+            } else {
+              list.length < 5 && setIsLastPage(true);
+            }
+          } else {
             SheetManager.show('info', {
               payload: {
                 type: 'error',
-                message: '검색 결과가 없어요.',
+                message: response.data.errMsg ? response.data.errMsg : '주소 검색 중 오류가 발생했어요.',
+                description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+                closemodal: true,
+                actionSheetRef: actionSheetRef,
                 buttontext: '확인하기',
               },
             });
-          } else {
-            list.length < 5 && setIsLastPage(true);
           }
+
           setListData([...list]);
         }
         // 성공적인 응답 처리 
@@ -590,19 +606,33 @@ const SearchHouseSheet2 = props => {
           });
           return;
         } else {
-          const list = response.data.data.jusoList;
-          if (list.length === 0) {
+          var list = [];
+          if (response.data.data) {
+            list = response.data.data.jusoList;
+            //  ////console.log('response', response.data.data)
+            if (list.length === 0) {
+              SheetManager.show('info', {
+                payload: {
+                  type: 'error',
+                  message: '검색 결과가 없어요.',
+                  buttontext: '확인하기',
+                },
+              });
+            } else if (list.length < 5) {
+              setIsLastPage(true);
+            }
+          } else {
             SheetManager.show('info', {
               payload: {
                 type: 'error',
-                message: '검색 결과가 없습니다.',
+                message: response.data.errMsg ? response.data.errMsg : '주소 검색 중 오류가 발생했어요.',
+                description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+                closemodal: true,
+                actionSheetRef: actionSheetRef,
                 buttontext: '확인하기',
               },
             });
-          } else if (list.length < 5) {
-            setIsLastPage(true);
           }
-
           setListData([...listData, ...list]);
         }
         // 성공적인 응답 처리 
@@ -845,7 +875,7 @@ const SearchHouseSheet2 = props => {
                   <ModalTitle >등록할 주택을 검색해주세요.</ModalTitle>
                   <ModalAddressInputContainer>
                     <ModalAddressInput
-                      
+
                       placeholder="동(읍/면/리)명 또는 도로명주소를 입력해주세요"
                       value={searchText}
                       onChangeText={setSearchText}
@@ -1152,7 +1182,7 @@ const SearchHouseSheet2 = props => {
                       fontSize: 18,
                       color: '#1B1C1F',
                     }}
-                    allowFontScaling= {false}
+                    allowFontScaling={false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}
@@ -1188,7 +1218,7 @@ const SearchHouseSheet2 = props => {
                       fontSize: 18,
                       color: '#1B1C1F',
                     }}
-                    allowFontScaling= {false}
+                    allowFontScaling={false}
                     selectedIndicatorStyle={{
                       backgroundColor: 'transparent',
                     }}

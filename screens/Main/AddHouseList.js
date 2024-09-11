@@ -3,7 +3,6 @@
 import { TouchableOpacity, useWindowDimensions, BackHandler, View, Text, ScrollView, Animated, StyleSheet, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useRef, useLayoutEffect, useState, useCallback, useEffect } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import BackIcon from '../../assets/icons/back_button.svg';
 import styled from 'styled-components';
 import {
   SheetManager,
@@ -17,6 +16,7 @@ import DropShadow from 'react-native-drop-shadow';
 import axios from 'axios';
 import NetInfo from "@react-native-community/netinfo";
 import CloseIcon from '../../assets/icons/close_button.svg';
+import BackIcon from '../../assets/icons/back_button.svg';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setFixHouseList } from '../../redux/fixHouseListSlice';
 import { setAddHouseList } from '../../redux/addHouseListSlice';
@@ -155,18 +155,17 @@ const SubTitle = styled.Text`
 
 const SubTitle2 = styled.Text`
   font-size: 12px;
-  font-family: Pretendard-Regular;
+  font-family: Pretendard-Bold;
   color: #a3a5a8;
   line-height: 14px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 10px;
   text-align: left;
 `;
 
 
 const SubTitle3 = styled.Text`
   font-size: 12px;
-  font-family: Pretendard-Regular;
+  font-family: Pretendard-Bold;
   color: #FF7401;
   line-height: 15px;
   margin-top: 10px;
@@ -186,7 +185,7 @@ const ButtonSection = styled.View`
   flex: 1;
   padding: 20px;
   align-items: center;
-  bottom: 0px;
+  bottom: 10px;
   width: 100%;
 `;
 const Button = styled.TouchableOpacity.attrs(_props => ({
@@ -237,6 +236,8 @@ const AddHouseList = props => {
     }
     if (AddHouseList.length === cnt) {
       setaddHouseFinish(true);
+    } else {
+      setaddHouseFinish(false);
     }
   }, [AddHouseList])
 
@@ -250,6 +251,7 @@ const AddHouseList = props => {
 
   const handleBackPress = () => {
     if (currentPageIndex === 0) {
+
       dispatch(setFixHouseList([]), setAddHouseList([]));
       navigation.navigate('GainsTaxChat');
       const newChatDataList = chatDataList.slice(0, props.route?.params.chatListindex + 1);
@@ -295,13 +297,13 @@ const AddHouseList = props => {
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
       navigation.push('AddHouse', { index: index, chatListindex: props.route?.params.chatListindex });
-    } 
-  console.log('addHouse', AddHouseList);
-  console.log('index',index);
+    }
+    console.log('addHouse', AddHouseList);
+    console.log('index', index);
   };
 
   const registerDirectHouse = async () => {
- 
+
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
@@ -313,7 +315,7 @@ const AddHouseList = props => {
       };
 
       // 요청 바디
-      var loadHouseList = AddHouseList;
+      var loadHouseList = AddHouseList ? AddHouseList.filter(house => house.complete === true) : [];
       const data = loadHouseList.map(({ index, ...rest }) => rest);
       console.log('[hypenHouseAPI] data : ', data);
 
@@ -334,7 +336,7 @@ const AddHouseList = props => {
           } else {
             const returndata = response.data.data;
             dispatch(setOwnHouseList([
-              ...ownHouseList, 
+              ...ownHouseList,
               ...returndata,
             ]));
 
@@ -368,8 +370,8 @@ const AddHouseList = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
-            dispatch(setFixHouseList([]), setAddHouseList([]));
             if (currentPageIndex === 0) {
+              dispatch(setFixHouseList([]), setAddHouseList([]));
               navigation.navigate('GainsTaxChat');
               const newChatDataList = chatDataList.slice(0, props.route?.params.chatListindex + 1);
               dispatch(setChatDataList(newChatDataList));
@@ -378,7 +380,7 @@ const AddHouseList = props => {
             }
 
           }}>
-          <CloseIcon />
+          {currentPageIndex === 0 ? <CloseIcon /> : <BackIcon />}
         </TouchableOpacity>
       ),
       headerTitleAlign: 'center',
@@ -395,7 +397,7 @@ const AddHouseList = props => {
         letterSpacing: -0.8,
       },
     });
-  }, []);
+  }, [currentPageIndex]);
 
   return (
     <ScrollView
@@ -497,18 +499,16 @@ const AddHouseList = props => {
                   const state = await NetInfo.fetch();
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
-                    if(selectedList.length === 0){
-                      await registerDirectHouse();
+                    if (selectedList.length === 0) {
                       const chatItem = gainTax.find(el => el.id === 'allHouse1')
-                      dispatch(setChatDataList([...chatDataList, chatItem]), setFixHouseList([]),setAddHouseList([]));
+                      dispatch(setChatDataList([...chatDataList, chatItem]), setFixHouseList([]), setAddHouseList([]));
                       navigation.navigate('GainsTaxChat');
                     } else {
-                      console.log('selectedList : ', selectedList);
+                      //console.log('selectedList : ', selectedList);
                       let sortSelectList = [...selectedList].sort((a, b) => a.index - b.index);
                       dispatch(setAddHouseList(sortSelectList));
-                      setCurrentPageIndex(1);  
+                      setCurrentPageIndex(1);
                     }
-
 
                   }
                 }} style={{
@@ -537,9 +537,9 @@ const AddHouseList = props => {
         <ProgressSection>
         </ProgressSection>
         <><IntroSection2 style={{ width: width, marginBottom: 20 }}>
-          <Title>주택 재산세 정보를 가져왔어요.{console.log(selectedList)}</Title>
-          <Title>실제 보유 중인 주택만 선택해주세요.</Title>
-          <SubTitle3>매매 외의 방식으로 주택을 취득한 경우 주택 거래내역에서{'\n'}가져올 수 없기 떄문에 재산세 목록을 한 번 더 확인해요.{'\n'}아래 목록에서 선택하지 않은 주택은 사라져요.</SubTitle3>
+          <Title>매매 외 방식으로 주택을 취득한 경우{'\n'}정보를 추가적으로 알려주세요.</Title>
+          <SubTitle2>주로 상속이나 증여, 재산 분할 등으로 주택을 취득하신 경우가{'\n'}매매 외의 방식에 해당해요.</SubTitle2>
+          <SubTitle3>추가정보 입력이 필요한 주택이 있을 경우 다음 단계로 넘어갈 수{'\n'}없어요. 추가 입력을 선택하신 후 필요한 정보들을 알려주세요.</SubTitle3>
         </IntroSection2>
 
           <InfoContentSection overScrollMode="never" style={{ width: width, height: height - 370 }}>
@@ -651,7 +651,7 @@ const AddHouseList = props => {
                   if (canProceed) {
                     await registerDirectHouse();
                     const chatItem = gainTax.find(el => el.id === 'allHouse1')
-                    dispatch(setChatDataList([...chatDataList, chatItem]), setFixHouseList([]),setAddHouseList([]));
+                    dispatch(setChatDataList([...chatDataList, chatItem]), setFixHouseList([]), setAddHouseList([]));
                     navigation.navigate('GainsTaxChat');
                   }
                 }} style={{

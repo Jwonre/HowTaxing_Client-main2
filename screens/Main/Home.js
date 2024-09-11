@@ -470,7 +470,7 @@ const Home = () => {
       </ShadowContainer>
 
 
-      <ChanelTalkIconFloatContainer>
+      {/*<ChanelTalkIconFloatContainer>
         <DropShadow
           style={{
             shadowColor: '#2F87FF',
@@ -491,7 +491,7 @@ const Home = () => {
           <ChanelTalkIcon />
         </ChanelTalkIconFloatButton>
       </DropShadow>
-    </ChanelTalkIconFloatContainer>
+    </ChanelTalkIconFloatContainer>*/}
 
       {/*<LogOutIconFloatContainer>
         <DropShadow

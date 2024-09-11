@@ -1195,7 +1195,7 @@ const OwnedHouseDetail = props => {
                   marginLeft: 'auto',
                 }}>
                 <InfoContentText >
-                  {data?.area ? data?.area + 'm2' : (data?.isAreaOver85 === true ? '국민평형(85m2) 초과' : data?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}
+                  {data?.area ? data?.area + 'm²' : (data?.isAreaOver85 === true ? '국민평형(85m2) 초과' : data?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}
                 </InfoContentText>
               </View>
               <TouchableOpacity activeOpacity={0.6}
@@ -1312,7 +1312,7 @@ const OwnedHouseDetail = props => {
                   marginLeft: 'auto',
                 }}>
                 <InfoContentText >
-                  {data?.area ? data?.area + 'm2' : (data?.isAreaOver85 === true ? '국민평형(85m2) 초과' : data?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}
+                  {data?.area ? data?.area + 'm²' : (data?.isAreaOver85 === true ? '국민평형(85m2) 초과' : data?.isAreaOver85 === undefined ? '' : '국민평형(85m2) 이하')}
                 </InfoContentText>
               </View>
               <TouchableOpacity activeOpacity={0.6}

@@ -69,7 +69,7 @@ const KakaoButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
   flex-direction: row;
-  width: 90%;
+  width: 100%;
   height: 50px;
   border-radius: 25px;
   background-color: #fbe54d;
@@ -180,7 +180,7 @@ const InfoAlert = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: errorMessage ? (props?.payload?.id === 'calculation' ? 450 : 430) : props?.payload?.type === 'error' ? (props?.payload?.id === 'calculation' ? 350 : 330) : 300,
+        height: errorMessage ? (props?.payload?.id === 'calculation' ? 460 : 430) : props?.payload?.type === 'error' ? (props?.payload?.id === 'calculation' ? 360 : 330) : 300,
         width: width - 40
       }}>
       <SheetContainer width={width}>
@@ -199,7 +199,7 @@ const InfoAlert = props => {
         <ButtonSection>
           {(props?.payload?.type == 'info' || props?.payload?.type == 'error') && (<View
             style={{
-              width: '90%',
+              width: '100%',
               flexDirection: 'column',
               alignContent: 'center'
             }}

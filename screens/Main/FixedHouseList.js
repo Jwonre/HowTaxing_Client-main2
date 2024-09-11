@@ -37,21 +37,6 @@ const IntroSection2 = styled.View`
   padding: 20px 20px 0px 20px;
 `;
 
-const IntroSection3 = styled.View`
-  width: 100%;
-  padding: 10px;
-`;
-
-const ProfileAvatar = styled(FastImage).attrs(_props => ({
-  resizeMode: 'contain',
-}))`
-  width: 100%;
-  height: 100%;
-  border-radius: 0px;
-  background-color: #F0F3F8;
-  align-self: center;
-`;
-
 const ProgressSection = styled.View`
   flex-direction: row;
   width: 100%;
@@ -149,7 +134,7 @@ const SubTitle2 = styled.Text`
 
 const SubTitle3 = styled.Text`
   font-size: 12px;
-  font-family: Pretendard-Regular;
+  font-family: Pretendard-Bold;
   color: #FF7401;
   line-height: 15px;
   margin-top: 10px;
@@ -169,7 +154,7 @@ const ButtonSection = styled.View`
   flex: 1;
   padding: 0 20px;
   align-items: center;
-  bottom: 0px;
+  bottom: 10px;
   width: 100%;
 `;
 const Button = styled.TouchableOpacity.attrs(_props => ({
@@ -281,48 +266,37 @@ const FixedHouseList = props => {
       };
 
       // 요청 바디
-
-      var loadHouseList = fixHouseList;
+      var loadHouseList = fixHouseList ? fixHouseList : [];
       const data = loadHouseList.map(({ index, ...rest }) => rest);
-      axios
-        .post(`${Config.APP_API_URL}house/saveAllHouse`, data, { headers: headers })
-        .then(async response => {
-          if (response.data.errYn === 'Y') {
-            await SheetManager.show('info', {
-              payload: {
-                type: 'error',
-                message: response.data.errMsg ? response.data.errMsg : '보유주택 수정·등록 중 오류가 발생했습니다.',
-                description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
-                buttontext: '확인하기',
-              },
-            });
-            setfixHouseLoadFinish(false);
-            return false;
-          } else {
-            console.log('response.data.data1 : ', response.data.data);
-            const returndata = response.data.data;
-            dispatch(setOwnHouseList([
-              ...returndata,
-            ]));
-            setfixHouseLoadFinish(true);
-            return true;
-            //console.log('[hypenHouseAPI] home response.data : ', response.data.data);
-            //console.log('[hypenHouseAPI] ownhouse : ', ownHouseList);
-          }
-        })
-        .catch(async error => {
-          // 오류 처리
+
+      try {
+        const response = await axios.post(`${Config.APP_API_URL}house/saveAllHouse`, data, { headers: headers });
+        if (response.data.errYn === 'Y') {
           await SheetManager.show('info', {
             payload: {
               type: 'error',
-              message: '보유주택 수정·등록 중 오류가 발생했습니다.',
+              message: response.data.errMsg ? response.data.errMsg : '보유주택 수정·등록 중 오류가 발생했습니다.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
               buttontext: '확인하기',
             },
           });
-          console.error(error);
-          setfixHouseLoadFinish(false);
           return false;
+        } else {
+          const returndata = response.data.data;
+          dispatch(setOwnHouseList([...returndata]));
+          return true;
+        }
+      } catch (error) {
+        await SheetManager.show('info', {
+          payload: {
+            type: 'error',
+            message: '보유주택 수정·등록 중 오류가 발생했습니다.',
+            buttontext: '확인하기',
+          },
         });
+        console.error(error);
+        return false;
+      }
     }
   };
 
@@ -347,6 +321,7 @@ const FixedHouseList = props => {
         return 'getEtcHouseFailed';
       } else {
         console.log('response.data.data2 : ', response.data.data);
+        console.log('response.data.data2.length : ', response.data.data.length);
         if (response.data.data.length === 0) {
           setFixHouseFinishAndWait(true);
           const isGainsTax = props?.route?.params?.isGainsTax;
@@ -357,16 +332,15 @@ const FixedHouseList = props => {
           return 'getEtcHouseNull';
         } else {
           setFixHouseFinishAndWait(false)
+          // console.log('response.data.data : ', response.data.data);
           var list = response.data.data.map((item, index) => ({ ...item, index }));
-          dispatch(setFixHouseList([
-            ...list
-          ]))
+          dispatch(setFixHouseList(list));
           return 'getEtcHouse';
         }
       }
     } catch (error) {
       setFixHouseFinishAndWait(true);
-      console.log(error);
+      //console.log(error);
       SheetManager.show('info', {
         payload: {
           message: '기타 재산세 보유주택을 불러오는데 문제가 발생했어요.',
@@ -483,23 +457,14 @@ const FixedHouseList = props => {
                 const state = await NetInfo.fetch();
                 const canProceed = await handleNetInfoChange(state);
                 if (canProceed) {
-                  console.log('fixHouseLoadFinish : ', fixHouseLoadFinish);
-                  if (fixHouseLoadFinish === false) {
-                    const registerDirectHouseResult = registerDirectHouse();
-                    if (registerDirectHouseResult) {
-                      const getEtcHouseReturn = await getEtcHouse();
-                      if (getEtcHouseReturn === 'getEtcHouseNull') {
-                        const chatItem = gainTax.find(el => el.id === 'allHouse1')
-                        dispatch(setChatDataList([...chatDataList, chatItem]), setFixHouseList([]));
-                      } else if (getEtcHouseReturn === 'getEtcHouse') {
-                        navigation.navigate('AddHouseList', { chatListindex: props.route?.params.chatListindex });
-                      }
-                    }
-                  } else {
+                  const registerDirectHouseResult = await registerDirectHouse();
+                 //console.log('registerDirectHouseResult : ', registerDirectHouseResult);
+                  if (registerDirectHouseResult) {
                     const getEtcHouseReturn = await getEtcHouse();
                     if (getEtcHouseReturn === 'getEtcHouseNull') {
                       const chatItem = gainTax.find(el => el.id === 'allHouse1')
                       dispatch(setChatDataList([...chatDataList, chatItem]), setFixHouseList([]));
+                      navigation.navigate('GainsTaxChat');
                     } else if (getEtcHouseReturn === 'getEtcHouse') {
                       navigation.navigate('AddHouseList', { chatListindex: props.route?.params.chatListindex });
                     }

@@ -20,7 +20,6 @@ import WheelPicker from 'react-native-wheely';
 import NetInfo from "@react-native-community/netinfo";
 import Calendar from '../../components/Calendar';
 import Config from 'react-native-config'
-import { HOUSE_TYPE } from '../../constants/colors';
 import { setAddHouseList, editAddHouseList } from '../../redux/addHouseListSlice';
 
 const Container = styled.View`
@@ -38,20 +37,6 @@ const IntroSection2 = styled.View`
   padding: 20px 20px 10px 20px;
 `;
 
-const IntroSection3 = styled.View`
-  width: 100%;
-  padding: 10px;
-`;
-
-const ProfileAvatar = styled(FastImage).attrs(props => ({
-  resizeMode: 'contain',
-}))`
-  width: 100%;
-  height: 100%;
-  border-radius: 0px;
-  background-color: #F0F3F8;
-  align-self: center;
-`;
 
 const ProgressSection = styled.View`
   flex-direction: row;
@@ -470,6 +455,7 @@ const AddHouse = props => {
     if (i < 18) afternoonTimes.push(`${i}:30`);
   }
   const handleBackPress = () => {
+    var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
     if (currentPageIndex === 0) {
       navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
     } else {
@@ -483,27 +469,78 @@ const AddHouse = props => {
 
       } else if (currentPageIndex === 2) {
         setCurrentPageIndex(0);
+        setSelectedDong('');
+        setSelectedHo('');
+        setHoList([]);
+        setDongList([]);
+        setDetailAddress3('');
       } else if (currentPageIndex === 3) {
-        if (selectedHo) {
-          setCurrentPageIndex(1);
-        } else {
-          setCurrentPageIndex(2);
-        }
-      } else {
-        if (directacquisitionDate === false) {
-          if (selectedHo) {
-            setCurrentPageIndex(1);
+        if (foundItem.admCd) {
+          if (foundItem.detailAdr) {
+            if (selectedHo) {
+              setCurrentPageIndex(1);
+            } else {
+              if (searchText !== '') {
+                setCurrentPageIndex(2);
+              } else {
+                navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
+              }
+            }
           } else {
-            setCurrentPageIndex(2);
+            setCurrentPageIndex(0);
+            setSelectedDong('');
+            setSelectedHo('');
+            setHoList([]);
+            setDongList([]);
+            setDetailAddress3('');
+          }
+        } else {
+          setCurrentPageIndex(0);
+          setSelectedDong('');
+          setSelectedHo('');
+          setHoList([]);
+          setDongList([]);
+          setDetailAddress3('');
+        }
+
+
+      } else {
+        if (directacquisitionDate === true) {
+          if (foundItem.admCd) {
+            if (foundItem.detailAdr) {
+              if (selectedHo) {
+                setCurrentPageIndex(1);
+              } else {
+                if (searchText !== '') {
+                  setCurrentPageIndex(2);
+                } else {
+                  navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
+                }
+              }
+            } else {
+              setCurrentPageIndex(0);
+              setSelectedDong('');
+              setSelectedHo('');
+              setHoList([]);
+              setDongList([]);
+              setDetailAddress3('');
+            }
+          } else {
+            setCurrentPageIndex(0);
+            setSelectedDong('');
+            setSelectedHo('');
+            setHoList([]);
+            setDongList([]);
+            setDetailAddress3('');
           }
         } else {
           setCurrentPageIndex(3);
         }
-
       }
     }
     return true;
   }
+
   useFocusEffect(
     useCallback(() => {
       BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -532,8 +569,24 @@ const AddHouse = props => {
   }, [currentPageIndex2]);
 */
   useEffect(() => {
-    //setCurrentPageIndex(4);
-    //console.log('props.route.params', props?.route.params);
+    console.log('addHouseList.roadAddr, jibunAddr 데이터 확인', addHouseList.roadAddr, addHouseList.jibunAddr);
+    var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
+    setAddress(foundItem.roadAddr ? foundItem.roadAddr + '\n' + (foundItem.houseName ? foundItem.houseName : '') : foundItem.jibunAddr ? foundItem.jibunAddr + '\n' + (foundItem.houseName ? foundItem.houseName : '') : '');
+    if (!(foundItem.admCd)) {
+      setCurrentPageIndex(0);
+    } else if (!foundItem.buyDate) {
+      if (foundItem.detailAdr) {
+        setCurrentPageIndex(3);
+      } else {
+        setCurrentPageIndex(0);
+      }
+    } else if (!foundItem.buyPrice) {
+      if (foundItem.detailAdr) {
+        setCurrentPageIndex(4);
+      } else {
+        setCurrentPageIndex(0);
+      }
+    }
   }, []);
 
   const handleNetInfoChange = (state) => {
@@ -806,6 +859,7 @@ const AddHouse = props => {
             buttontext: '확인하기',
           },
         });
+        return { acquisitionDate: null };
       } else {
         const result = response.data;
         if (result.data?.property?.acquisitionDate) {
@@ -814,15 +868,17 @@ const AddHouse = props => {
             const year = acquisitionDate.substring(0, 4);
             const month = acquisitionDate.substring(4, 6) - 1; // 월은 0부터 시작하므로 1을 빼줍니다.
             const day = acquisitionDate.substring(6, 8);
-            setaddHouseInfo([{ acquisitionDate: new Date(year, month, day) }]);
+            setBuyPrice(result.data?.buillding?.publishedPrice ? result.data?.buillding?.publishedPrice : 0);
             setDirectAcquisitionDate(true);
+            return { acquisitionDate: new Date(year, month, day) };
           } else {
-            setaddHouseInfo([{ acquisitionDate: null }]);
-            setDirectAcquisitionDate(false);
+            setBuyPrice(result.data?.buillding?.publishedPrice ? result.data?.buillding?.publishedPrice : 0);
+            return { acquisitionDate: null };
           }
         } else {
-          setaddHouseInfo([{ acquisitionDate: null }]);
+          setBuyPrice(result.data?.buillding?.publishedPrice ? result.data?.buillding?.publishedPrice : 0);
           setDirectAcquisitionDate(false);
+          return { acquisitionDate: null };
         }
 
 
@@ -838,6 +894,7 @@ const AddHouse = props => {
           buttontext: '확인하기',
         }
       });
+      return { acquisitionDate: null };
     }
   };
 
@@ -859,12 +916,12 @@ const AddHouse = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
+            var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
             //console.log('currentPageIndex', currentPageIndex);
             if (currentPageIndex === 0) {
               navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
 
             } else {
-              // setCurrentPageIndex2(0);
               if (currentPageIndex === 1) {
                 setCurrentPageIndex(0);
                 setSelectedDong('');
@@ -872,25 +929,76 @@ const AddHouse = props => {
                 setHoList([]);
                 setDongList([]);
                 setDetailAddress3('');
+
               } else if (currentPageIndex === 2) {
                 setCurrentPageIndex(0);
+                setSelectedDong('');
+                setSelectedHo('');
+                setHoList([]);
+                setDongList([]);
+                setDetailAddress3('');
               } else if (currentPageIndex === 3) {
-                if (selectedHo) {
-                  setCurrentPageIndex(1);
-                } else {
-                  setCurrentPageIndex(2);
-                }
-              } else {
-                if (directacquisitionDate === false) {
-                  if (selectedHo) {
-                    setCurrentPageIndex(1);
+                if (foundItem.admCd) {
+                  if (foundItem.detailAdr) {
+                    if (selectedHo) {
+                      setCurrentPageIndex(1);
+                    } else {
+                      if (searchText !== '') {
+                        setCurrentPageIndex(2);
+                      } else {
+                        navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
+                      }
+                    }
                   } else {
-                    setCurrentPageIndex(2);
+                    setCurrentPageIndex(0);
+                    setSelectedDong('');
+                    setSelectedHo('');
+                    setHoList([]);
+                    setDongList([]);
+                    setDetailAddress3('');
+                  }
+                } else {
+                  setCurrentPageIndex(0);
+                  setSelectedDong('');
+                  setSelectedHo('');
+                  setHoList([]);
+                  setDongList([]);
+                  setDetailAddress3('');
+                }
+
+
+              } else {
+                if (directacquisitionDate === true) {
+                  if (foundItem.admCd) {
+                    if (foundItem.detailAdr) {
+                      if (selectedHo) {
+                        setCurrentPageIndex(1);
+                      } else {
+                        if (searchText !== '') {
+                          setCurrentPageIndex(2);
+                        } else {
+                          navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
+                        }
+                      }
+                    } else {
+                      setCurrentPageIndex(0);
+                      setSelectedDong('');
+                      setSelectedHo('');
+                      setHoList([]);
+                      setDongList([]);
+                      setDetailAddress3('');
+                    }
+                  } else {
+                    setCurrentPageIndex(0);
+                    setSelectedDong('');
+                    setSelectedHo('');
+                    setHoList([]);
+                    setDongList([]);
+                    setDetailAddress3('');
                   }
                 } else {
                   setCurrentPageIndex(3);
                 }
-
               }
             }
           }} >
@@ -1054,10 +1162,10 @@ const AddHouse = props => {
                         if (canProceed) {
                           setAddress(item.roadAddr);
                           setSelectedItem(item);
-                        console.log('item', item);
+                          //console.log('item', item);
                           var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
-                          console.log('addHouseList', addHouseList);
-                          console.log('foundItem', foundItem);
+                          //console.log('addHouseList', addHouseList);
+                          //console.log('foundItem', foundItem);
                           dispatch(editAddHouseList({
                             ...foundItem,
                             jibunAddr: item.jibunAddr,
@@ -1069,6 +1177,7 @@ const AddHouse = props => {
                             buyPrice: foundItem.buyPrice,
                             complete: false,
                             detailAdr: foundItem.detailAdr,
+                            houseName: item.bdNm
                           }));
                           const firstDong = await getDongData(item);
                           if (firstDong !== 'dongerror') {
@@ -1272,8 +1381,8 @@ const AddHouse = props => {
                   if (canProceed) {
                     var detailAddress2 = (selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : '') + (selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : '');;
                     //console.log('detailAddress2', detailAddress2);
-                    await getHouseInfo();
-                    //console.log('selectedDate', selectedDate);
+                    const addHouseInfo = await getHouseInfo();
+                    console.log('selectedDate', selectedDate);
                     var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
                     if (!addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editAddHouseList({
@@ -1287,6 +1396,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (!addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1301,6 +1411,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
@@ -1314,7 +1425,7 @@ const AddHouse = props => {
                         buyDate: addHouseInfo.acquisitionDate ? addHouseInfo.acquisitionDate : foundItem.buyDate,
                         buyPrice: foundItem.buyPrice,
                         complete: false,
-                        detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(4);
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1329,10 +1440,11 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: true,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
                     }
-                    console.log('addHouseList2', addHouseList);
+                    //console.log('addHouseList2', addHouseList);
                   }
                 }} style={{
                   width: '100%',
@@ -1380,7 +1492,7 @@ const AddHouse = props => {
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
                     //console.log('detailAddress2', detailAddress2);
-                    await getHouseInfo();
+                    const addHouseInfo = await getHouseInfo();
                     //console.log('selectedDate', selectedDate);
                     var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
                     if (!addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
@@ -1395,6 +1507,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress3,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (!addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1409,6 +1522,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress3,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
@@ -1423,6 +1537,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress3,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(4);
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1437,6 +1552,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: true,
                         detailAdr: detailAddress3,
+                        houseName: selectedItem.bdNm
                       }));
                       navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
                     }
@@ -1546,7 +1662,7 @@ const AddHouse = props => {
                   if (canProceed) {
                     var detailAddress2 = (selectedDong ? selectedDong + '동 ' : dongList[0] ? dongList[0] + '동 ' : '') + (selectedHo ? selectedHo + '호' : hoList[0] ? hoList[0] + '호' : '');;
                     //console.log('detailAddress2', detailAddress2);
-                    await getHouseInfo();
+                    const addHouseInfo = await getHouseInfo();
                     //console.log('selectedDate', selectedDate);
                     console.log('addHouseInfo', addHouseInfo);
                     console.log('directacquisitionDate', directacquisitionDate);
@@ -1563,6 +1679,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (!addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1577,6 +1694,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(3);
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
@@ -1591,6 +1709,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       setCurrentPageIndex(4);
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
@@ -1605,6 +1724,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: true,
                         detailAdr: detailAddress2,
+                        houseName: selectedItem.bdNm
                       }));
                       navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
                     }
@@ -1635,7 +1755,22 @@ const AddHouse = props => {
         <ProgressSection>
         </ProgressSection>
         <><IntroSection2 style={{ width: width }}>
-          <Title>취득일자를 입력해주세요.</Title>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          }}>
+            <Title>취득일자를 입력해주세요.</Title>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+              <InfoIcon
+                onPress={() => {
+                  SheetManager.show('InfoBuyDate');
+                }}
+              />
+            </TouchableOpacity>
+          </View>
           <SubTitle2>보유한 주택의 취득일자를 정확히 입력해주세요.</SubTitle2>
           <HoustInfoSection>
             <View
@@ -1690,14 +1825,38 @@ const AddHouse = props => {
               }}>
               <Button
                 onPress={async () => {
+                  var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
                   const state = await NetInfo.fetch();
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
-                    if (selectedHo) {
-                      setCurrentPageIndex(1);
+                    if (foundItem.admCd) {
+                      if (foundItem.detailAdr) {
+                        if (selectedHo) {
+                          setCurrentPageIndex(1);
+                        } else {
+                          if (searchText !== '') {
+                            setCurrentPageIndex(2);
+                          } else {
+                            navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
+                          }
+                        }
+                      } else {
+                        setCurrentPageIndex(0);
+                        setSelectedDong('');
+                        setSelectedHo('');
+                        setHoList([]);
+                        setDongList([]);
+                        setDetailAddress3('');
+                      }
                     } else {
-                      setCurrentPageIndex(2);
+                      setCurrentPageIndex(0);
+                      setSelectedDong('');
+                      setSelectedHo('');
+                      setHoList([]);
+                      setDongList([]);
+                      setDetailAddress3('');
                     }
+
                   }
                 }}
                 style={{
@@ -1743,6 +1902,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: false,
                         detailAdr: foundItem.detailAdr,
+                        houseName: foundItem.houseName
                       }));
                       setCurrentPageIndex(4);
                     } else {
@@ -1757,6 +1917,7 @@ const AddHouse = props => {
                         buyPrice: foundItem.buyPrice,
                         complete: true,
                         detailAdr: foundItem.detailAdr,
+                        houseName: foundItem.houseName
                       }));
                       navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
                     }
@@ -1838,6 +1999,7 @@ const AddHouse = props => {
                       buyPrice: buyprice,
                       complete: true,
                       detailAdr: foundItem.detailAdr,
+                      houseName: foundItem.houseName
                     }));
                     //console.log('addHouseList', addHouseList);
                     navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
@@ -1866,14 +2028,37 @@ const AddHouse = props => {
               }}>
               <Button
                 onPress={async () => {
+                  var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
                   const state = await NetInfo.fetch();
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
-                    if (directacquisitionDate === false) {
-                      if (selectedHo) {
-                        setCurrentPageIndex(1);
+                    if (directacquisitionDate === true) {
+                      if (foundItem.admCd) {
+                        if (foundItem.detailAdr) {
+                          if (selectedHo) {
+                            setCurrentPageIndex(1);
+                          } else {
+                            if (searchText !== '') {
+                              setCurrentPageIndex(2);
+                            } else {
+                              navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
+                            }
+                          }
+                        } else {
+                          setCurrentPageIndex(0);
+                          setSelectedDong('');
+                          setSelectedHo('');
+                          setHoList([]);
+                          setDongList([]);
+                          setDetailAddress3('');
+                        }
                       } else {
-                        setCurrentPageIndex(2);
+                        setCurrentPageIndex(0);
+                        setSelectedDong('');
+                        setSelectedHo('');
+                        setHoList([]);
+                        setDongList([]);
+                        setDetailAddress3('');
                       }
                     } else {
                       setCurrentPageIndex(3);
@@ -1912,7 +2097,7 @@ const AddHouse = props => {
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
 
-                    foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
+                    var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
                     dispatch(editAddHouseList({
                       ...foundItem,
                       jibunAddr: foundItem.jibunAddr,
@@ -1924,6 +2109,7 @@ const AddHouse = props => {
                       buyPrice: buyprice,
                       complete: true,
                       detailAdr: foundItem.detailAdr,
+                      houseName: foundItem.houseName
                     }));
                     navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
                   }

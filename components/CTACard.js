@@ -3,7 +3,7 @@
 import { Linking } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
-
+import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import FastImage from 'react-native-fast-image';
 import NetInfo from "@react-native-community/netinfo";
@@ -70,7 +70,7 @@ const KakaoButton = styled.TouchableOpacity.attrs(props => ({
   width: 100%;
   height: 50px;
   border-radius: 25px;
-  background-color: #fbe54d;
+  background-color: #2F87FF;
   align-items: center;
   justify-content: center;
   margin-top: 15px;
@@ -78,8 +78,8 @@ const KakaoButton = styled.TouchableOpacity.attrs(props => ({
 
 const KakaoButtonText = styled.Text`
   font-size: 15px;
-  font-family: Pretendard-Regular;
-  color: #3b1f1e;
+  font-family: Pretendard-bold;
+  color: #fff;
   line-height: 20px;
 `;
 
@@ -93,12 +93,12 @@ const SocialButtonIcon = styled.Image.attrs(props => ({
 
 
 
-const CTACard = () => {
+const CTACard = props => {
   
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
-
-    const [isConnected, setIsConnected] = useState(true);
+  const [isConnected, setIsConnected] = useState(true);
+  const navigation = useNavigation();
   
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
@@ -117,13 +117,16 @@ const CTACard = () => {
       }
     });
   };
-
   const openKakaoLink = async () => {
+    console.log('props', props);
     const state = await NetInfo.fetch();
     const canProceed = await handleNetInfoChange(state);
     if (canProceed) {
-  
-      Linking.openURL('http://pf.kakao.com/_sxdxdxgG');
+      navigation.push('ConsultingReservation2', {
+        IsGainTax: props?.IsGainTax,
+        houseInfo: props?.houseInfo,
+        Pdata: props?.Pdata,
+      });
     }
   };
 
@@ -149,10 +152,7 @@ const CTACard = () => {
       />
       <ProfileName >이민정음 세무사</ProfileName>
       <KakaoButton onPress={() => openKakaoLink()}>
-        <SocialButtonIcon
-          source={require('../assets/images/socialIcon/kakao_ico.png')}
-        />
-        <KakaoButtonText >카카오톡으로 상담하기</KakaoButtonText>
+        <KakaoButtonText >상담 예약하기</KakaoButtonText>
       </KakaoButton>
     </Card>
   );

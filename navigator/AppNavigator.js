@@ -16,10 +16,13 @@ import Acquisition from '../screens/Main/Acquisition';
 import CheckTerms from '../screens/Main/CheckTerms';
 import GainsTax from '../screens/Main/GainsTax';
 import ConsultingReservation from '../screens/Main/ConsultingReservation';
+import ConsultingReservation2 from '../screens/Main/ConsultingReservation2';
 import FixedHouse from '../screens/Main/FixedHouse';
 import AddHouse from '../screens/Main/AddHouse';
 import FixedHouseList from '../screens/Main/FixedHouseList';
 import AddHouseList from '../screens/Main/AddHouseList';
+import ReservationList from '../screens/Main/ReservationList';
+import ReservationDetail from '../screens/Main/ReservationDetail';
 import AcquisitionChat from '../screens/Main/AcquisitionChat';
 import FamilyHouse from '../screens/Main/FamilyHouse';
 import RegisterFamilyHouse from '../screens/Main/RegisterFamilyHouse';
@@ -44,15 +47,18 @@ import GainSheet from '../components/bottomSheets/GainSheet';
 import ExpenseSheet from '../components/bottomSheets/ExpenseSheet';
 import ConsultingSheet from '../components/bottomSheets/ConsultingSheet';
 import DeleteHouseAlert from '../components/bottomSheets/DeleteHouseAlert';
+import InfoReservationCancel from '../components/bottomSheets/InfoReservationCancel';
 import InfoAlert from '../components/bottomSheets/InfoAlert';
 import InfoCertification from '../components/bottomSheets/InfoCertification';
 import InfoConsulting from '../components/bottomSheets/InfoConsulting';
 import InfoBuyPrice from '../components/bottomSheets/InfoBuyPrice';
+import InfoBuyDate from '../components/bottomSheets/InfoBuyDate';
 import InfoExpense from '../components/bottomSheets/InfoExpense';
 import LogOutSheet from '../components/bottomSheets/LogOutSheet';
 import MapViewListSheet from '../components/bottomSheets/MapViewListSheet';
 import AcquisitionSheet from '../components/bottomSheets/AcquisitionSheet';
 import CertSheet from '../components/bottomSheets/CertSheet';
+import CertSheet_ori from '../components/bottomSheets/CertSheet_ori';
 import CertSheet2 from '../components/bottomSheets/CertSheet2';
 import JointSheet from '../components/bottomSheets/JointSheet';
 import OwnHouseCountSheet from '../components/bottomSheets/OwnHouseCountSheet';
@@ -123,12 +129,15 @@ const AppNavigator = () => {
     registerSheet('searchHouse2', SearchHouseSheet2);
     registerSheet('acquisition', AcquisitionSheet);
     registerSheet('cert', CertSheet);
+    registerSheet('cert_ori', CertSheet_ori);
     registerSheet('cert2', CertSheet2);
     registerSheet('infoExpense', InfoExpense);
     registerSheet('info', InfoAlert);
     registerSheet('infoCertification', InfoCertification);
     registerSheet('InfoConsulting', InfoConsulting);
     registerSheet('InfoBuyPrice', InfoBuyPrice);
+    registerSheet('InfoBuyDate', InfoBuyDate);
+    registerSheet('InfoReservationCancel', InfoReservationCancel);
     registerSheet('joint', JointSheet);
     registerSheet('ownHouseCount', OwnHouseCountSheet);
     registerSheet('confirm', ConfirmSheet);
@@ -159,6 +168,7 @@ const AppNavigator = () => {
     registerSheet('updateContractDateAlert', UpdateContractDateAlert);
 
 
+
   }, []);
 
   return (
@@ -182,6 +192,7 @@ const AppNavigator = () => {
               <Stack.Screen name="Acquisition" component={Acquisition} />
               <Stack.Screen name="GainsTax" component={GainsTax} />
               <Stack.Screen name="ConsultingReservation" component={ConsultingReservation} />
+              <Stack.Screen name="ConsultingReservation2" component={ConsultingReservation2} />
               <Stack.Screen name="FamilyHouse" component={FamilyHouse} />
               <Stack.Screen
                 name="Information"
@@ -224,6 +235,14 @@ const AppNavigator = () => {
               <Stack.Screen
                 name="AddHouseList"
                 component={AddHouseList}
+              />
+              <Stack.Screen
+                name="ReservationList"
+                component={ReservationList}
+              />
+              <Stack.Screen
+                name="ReservationDetail"
+                component={ReservationDetail}
               />
               <Stack.Screen
                 name="FixedHouseDetail"

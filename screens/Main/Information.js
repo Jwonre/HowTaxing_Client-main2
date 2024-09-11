@@ -271,6 +271,14 @@ const Information = props => {
           <OptionText >공지사항</OptionText>
         </Option>
         <Divider />
+        <Option>
+          <OptionText onPress={async () => {
+          const state = await NetInfo.fetch();
+          const canProceed = await handleNetInfoChange(state);
+          if (canProceed) { navigation.navigate('ReservationList') }
+        }}>상담예약</OptionText>
+        </Option>
+        <Divider />
         <Option style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <OptionText >버전정보</OptionText>
           <OptionText >v1.0.0</OptionText>

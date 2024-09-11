@@ -45,4 +45,5 @@ export const HOUSE_TYPE = [
     name: '입주권',
     color: '#FF7F00',
   },
+
 ];

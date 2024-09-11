@@ -1,6 +1,6 @@
 // 정보 또는 경고 알림창 컴포넌트
 
-import { useWindowDimensions, Pressable, View } from 'react-native';
+import { useWindowDimensions, Pressable, View, Text } from 'react-native';
 import React, { useRef, useState } from 'react';
 import ActionSheet from 'react-native-actions-sheet';
 import styled from 'styled-components';
@@ -29,7 +29,7 @@ const ModalTitle = styled.Text`
 
 
 const BoldText = styled.Text`
-  font-family: Pretendard-Bold;
+  font-family: Pretendard-Regular;
   font-weight: 600;
 `;
 
@@ -133,17 +133,17 @@ const InfoBuyPrice = () => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 640,
+        height: 560,
         width: width - 40,
       }}>
       <SheetContainer width={width}>
         <ModalContentSection>
 
           <ModalTitle>
-            <BoldText>매매 외 취득원인 및 취득금액이란?</BoldText>
+            <BoldText>매매 외 방식으로 주택 취득 시{'\n'}<Text style={{ fontFamily: 'Pretendard-Bold' }}>취득금액</Text>은 어떤 금액인가요?</BoldText>
           </ModalTitle>
-          <View style={{ height: 450}}>
-            <ModalDescription>{'1) 상속으로 취득 :\n상속개시일 당시 상속세 및 증여세법 규정에\n따라 평가한 가액(거래가액, 감정가액, 매매사\n례가액, 기준시가 등)\n2) 증여로 취득 :\n증여일 당시 상속세 및 증여세법 규정에 따라\n평가한 가액(거래가액, 감정가액, 매매사례가\n액, 기준시가 등)\n3) 재산분할청구권의 행사로 배우자로부터 취\n득하는 재산 :\n전 소유자(배우자) 취득 당시의 취득가액\n4) 이혼위자료의 대가로 배우자로부터 취득하\n는 재산 :\n위자료에 갈음하여 대물변제한 가액\n5) 교환자산 :\n교환 당시 취득자산의 기준시가 또는 실지거래\n가액\n6) 이월과세대상 자산 :\n배우자 등의 당초 취득가액'}</ModalDescription>
+          <View style={{ height: 350}}>
+            <ModalDescription>{'1) 상속으로 취득 : 상속개시일 당시 상속세 및\n증여세법 규정에 따라 평가한 가액(거래가액,\n감정가액, 매매사례가액, 기준시가 등)\n2) 증여로 취득 : 증여일 당시 상속세 및 증여\n세법 규정에 따라 평가한 가액(거래가액, 감정\n가액, 매매사례가액, 기준시가 등)\n3) 재산분할청구권의 행사로 배우자로부터 취\n득하는 재산 : 전 소유자(배우자) 취득 당시의\n취득가액\n4) 이혼위자료의 대가로 배우자로부터 취득하\n는 재산 : 위자료에 갈음하여 대물변제한 가액\n5) 교환자산 :교환 당시 취득자산의 기준시가\n또는 실지거래가액\n6) 이월과세대상 자산 : 배우자 등의 당초 취득\n가액'}</ModalDescription>
           </View>
         </ModalContentSection>
 
