@@ -27,7 +27,7 @@ const CardHeader = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: 15px;
+  font-size: 14px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;
@@ -84,7 +84,7 @@ const TaxInfoCard2 = props => {
           }}>
           <ChatBubbleIcon />
         </View>
-        <Title >계산된 양도소득세에 대해 설명드릴게요</Title>
+        <Title>계산된 양도소득세에 대해 설명드릴게요</Title>
       </CardHeader>
       {Array.from({ length: commentaryListCnt }).map((_, index) => (
         <React.Fragment key={index}>

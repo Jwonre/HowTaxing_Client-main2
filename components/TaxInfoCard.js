@@ -27,7 +27,7 @@ const CardHeader = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: 15px;
+  font-size: 14px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
   line-height: 20px;

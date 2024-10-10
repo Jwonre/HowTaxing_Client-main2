@@ -7,6 +7,7 @@
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-permission android:name="android.permission.VIBRATE" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
   <application
     android:name=".MainApplication"
@@ -20,6 +21,7 @@
 
     <activity
       android:name=".MainActivity"
+      android:screenOrientation="portrait"
       android:label="@string/app_name"
       android:launchMode="singleTask"
       android:windowSoftInputMode="adjustPan"
@@ -38,20 +40,6 @@
           android:scheme="howtaxing"
           android:host="naverlogin"
         />
-        <data android:host="oauth"
-          android:scheme="kakao9b9f977d588a05bbf9d5d2f77a327e8c" />
-      </intent-filter>
-    </activity>
-
-    <activity
-      android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
-      android:exported="true">
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-
-        <!-- Redirect URI: "kakao${NATIVE_APP_KEY}://oauth" -->
         <data android:host="oauth"
           android:scheme="kakao9b9f977d588a05bbf9d5d2f77a327e8c" />
       </intent-filter>

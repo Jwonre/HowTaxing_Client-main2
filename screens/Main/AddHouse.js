@@ -21,6 +21,8 @@ import NetInfo from "@react-native-community/netinfo";
 import Calendar from '../../components/Calendar';
 import Config from 'react-native-config'
 import { setAddHouseList, editAddHouseList } from '../../redux/addHouseListSlice';
+import Bottompolygon from '../../assets/icons/blue_bottom_polygon.svg';
+
 
 const Container = styled.View`
   flex: 1.0;
@@ -77,20 +79,11 @@ const ModalInput = styled.TextInput.attrs(props => ({
   font-size: 13px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
-  line-height: 30px;
+  line-height: 25px;
   text-align: left;
   text-align-vertical: top;
   overflow: hidden; 
 
-`;
-
-
-const ModalTitle = styled.Text`
-  font-size: 16px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 26px;
-  text-align: center;
 `;
 
 const ModalAddressInputContainer = styled.View`
@@ -116,17 +109,6 @@ const ModalAddressInput = styled.TextInput.attrs(props => ({
   line-height: 19px;
 `;
 
-const DetailAddressInput = styled.TextInput.attrs(props => ({
-  placeholderTextColor: '#A3A5A8',
-  placeholder: '상세주소를 입력해주세요.',
-}))`
-  flex: 1;
-  font-size: 13px;
-  font-family: Pretendard-Regular;
-  color: #1b1c1f;
-  line-height: 20px;
-`;
-
 const ModalInputButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.6,
   hitSlop: { top: 20, bottom: 20, left: 20, right: 20 },
@@ -141,7 +123,10 @@ const ModalInputSection2 = styled.View`
   margin-top: 0px;
   background-color: #fff;
 `;
-const MapSearchResultItem = styled.View`
+
+const MapSearchResultItem = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.9,
+}))`
   width: 100%;
   height: auto;
   min-height: 60px;
@@ -161,7 +146,7 @@ const MapSearchResultItemTitle = styled.Text`
 `;
 
 const MapSearchResultItemAddress = styled.Text`
-  width: 90%;
+  width: 80%;
   font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
@@ -169,18 +154,18 @@ const MapSearchResultItemAddress = styled.Text`
   margin-left: 4px;
 `;
 
-const AddressNumberBadge = styled.View`
-  width: 37px;
+const AddressDetailBadge = styled.View`
+  width: 55px;
   height: 22px;
   border-radius: 11px;
+  border-width: 1px;
+  border-color: #e8eaed;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  border-width: 1px;
-  border-color: #e8eaed;
 `;
 
-const AddressNumberText = styled.Text`
+const AddressDetailText = styled.Text`
   font-size: 10px;
   font-family: Pretendard-Medium;
   color: #a3a5a8;
@@ -189,42 +174,26 @@ const AddressNumberText = styled.Text`
 
 const MepSearchResultButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.9,
+  hitSlop: { top: 10, bottom: 10, left: 10, right: 10 },
 }))`
-  width: 65px;
-  height: 36px;
-  border-radius: 18px;
-  flex-direction: row;
+  width: 55px;
+  height: 22px;
+  border-radius: 11px;
+  border-width: 1px;
+  border-color: #e8eaed;
   align-items: center;
   justify-content: center;
-  border-width: 1px;
-  border-color: #2F87FF;
+  align-self: right;
+  background-color: #F0F3F8;
 `;
 
 const MapSearchResultButtonText = styled.Text`
-  font-size: 13px;
-  font-family: Pretendard-Medium;
-  color: #2f87ff;
-  line-height: 16px;
+  font-size: 10px;
+  font-family: Pretendard-Bold;
+  color: #2F87FF;
+  line-height: 20px;
 `;
 
-
-const ApartmentInfoGroup = styled.View`
-  width: 100%;
-  height: auto;
-  background-color: #fff;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ApartmentInfoTitle = styled.Text`
-  width: 80%;
-  font-size: 14px;
-  font-family: Pretendard-Medium;
-  color: #1b1c1f;
-  line-height: 30px;
-  text-align: center;
-  margin-bottom: auto;
-`;
 
 
 const SelectGroup = styled.View`
@@ -300,25 +269,6 @@ const HoustInfoText = styled.Text`
   line-height: 20px;
 `;
 
-const HoustInfoBadge = styled.View`
-  width: auto;
-  margin-right: auto;
-  height: 22px;
-  padding: 0 10px;
-  border-radius: 11px;
-  align-items: center;
-  justify-content: center;
-  background-color: #1fc9a8;
-`;
-
-const HoustInfoBadgeText = styled.Text`
-  font-size: 10px;
-  font-family: Pretendard-Medium;
-  color: #fff;
-  line-height: 12px;
-  letter-spacing: -0.5px;
-`;
-
 
 const Title = styled.Text`
   font-size: 19px;
@@ -328,50 +278,15 @@ const Title = styled.Text`
   letter-spacing: -0.5px;
 `;
 
-const SubTitle = styled.Text`
-  font-size: 19px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 30px;
-  margin-top: 10px;
-  
-`;
 
 const SubTitle2 = styled.Text`
   font-size: 12px;
-  font-family: Pretendard-Regular;
+  font-family: Pretendard-Bold;
   color: #a3a5a8;
   line-height: 14px;
   margin-top: 20px;
   margin-bottom: 20px;
   text-align: left;
-`;
-
-
-const SubTitle3 = styled.Text`
-  font-size: 12px;
-  font-family: Pretendard-Regular;
-  color: #FF7401;
-  line-height: 15px;
-  margin-top: 10px;
-`;
-
-const SubTitle4 = styled.Text`
-  font-size: 16px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 20px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-`;
-
-const TimeTitle = styled.Text`
-  font-size: 16px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 30px;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
 `;
 
 
@@ -433,6 +348,7 @@ const AddHouse = props => {
   const [selectedDong, setSelectedDong] = useState('');
   const [selectedHo, setSelectedHo] = useState('');
   const [selectedItem, setSelectedItem] = useState({});
+  const [initItem, setInitItem] = useState({});
   const [searchText, setSearchText] = useState('');
   const [buyprice, setBuyPrice] = useState(0);
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
@@ -445,6 +361,7 @@ const AddHouse = props => {
   const addHouseList = useSelector(state => state.addHouseList.value);
   const [addHouseInfo, setaddHouseInfo] = useState([]);
   const [directacquisitionDate, setDirectAcquisitionDate] = useState(false);
+  const [expandedItems, setExpandedItems] = useState({});
 
   for (let i = 9; i <= 11; i++) {
     morningTimes.push(`${i}:00`);
@@ -454,9 +371,30 @@ const AddHouse = props => {
     afternoonTimes.push(`${i}:00`);
     if (i < 18) afternoonTimes.push(`${i}:30`);
   }
+
+  const toggleExpand = (index) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
   const handleBackPress = () => {
     var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
     if (currentPageIndex === 0) {
+      dispatch(editAddHouseList({
+        ...foundItem,
+        jibunAddr: initItem.jibunAddr,
+        roadAddr: initItem.roadAddr,
+        bdMgtSn: initItem.bdMgtSn,
+        admCd: initItem.admCd,
+        rnMgtSn: initItem.rnMgtSn,
+        buyDate: initItem.buyDate,
+        buyPrice: initItem.buyPrice,
+        complete: false,
+        detailAdr: initItem.detailAdr,
+        houseName: initItem.houseName
+      }));
       navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
     } else {
       if (currentPageIndex === 1) {
@@ -569,8 +507,9 @@ const AddHouse = props => {
   }, [currentPageIndex2]);
 */
   useEffect(() => {
-    console.log('addHouseList.roadAddr, jibunAddr 데이터 확인', addHouseList.roadAddr, addHouseList.jibunAddr);
     var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
+    console.log('foundItem 데이터 확인', foundItem);
+    setInitItem(foundItem);
     setAddress(foundItem.roadAddr ? foundItem.roadAddr + '\n' + (foundItem.houseName ? foundItem.houseName : '') : foundItem.jibunAddr ? foundItem.jibunAddr + '\n' + (foundItem.houseName ? foundItem.houseName : '') : '');
     if (!(foundItem.admCd)) {
       setCurrentPageIndex(0);
@@ -919,8 +858,20 @@ const AddHouse = props => {
             var foundItem = addHouseList?.find((el) => el.index === props?.route.params.index);
             //console.log('currentPageIndex', currentPageIndex);
             if (currentPageIndex === 0) {
+              dispatch(editAddHouseList({
+                ...foundItem,
+                jibunAddr: initItem.jibunAddr,
+                roadAddr: initItem.roadAddr,
+                bdMgtSn: initItem.bdMgtSn,
+                admCd: initItem.admCd,
+                rnMgtSn: initItem.rnMgtSn,
+                buyDate: initItem.buyDate,
+                buyPrice: initItem.buyPrice,
+                complete: false,
+                detailAdr: initItem.detailAdr,
+                houseName: initItem.houseName
+              }));
               navigation.navigate('AddHouseList', { chatListindex: props.route.params.chatListindex });
-
             } else {
               if (currentPageIndex === 1) {
                 setCurrentPageIndex(0);
@@ -1019,7 +970,7 @@ const AddHouse = props => {
         letterSpacing: -0.8,
       },
     });
-  }, [currentPageIndex]);
+  }, [currentPageIndex, initItem, directacquisitionDate, searchText, addHouseList, selectedHo]);
 
   return (
     <ScrollView
@@ -1130,31 +1081,10 @@ const AddHouse = props => {
                     </ListFooterButton>
                   )
                 }
-                renderItem={({ item, index }) => (
-                  <MapSearchResultItem>
-                    <View
-                      style={{
-                        width: '70%',
-                      }}>
-                      <MapSearchResultItemTitle >
-                        {item?.roadAddr}
-                      </MapSearchResultItemTitle>
-                      <View
-                        style={{
-                          width: '100%',
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          marginTop: 6,
-                        }}>
-                        <AddressNumberBadge>
-                          <AddressNumberText >지번</AddressNumberText>
-                        </AddressNumberBadge>
-                        <MapSearchResultItemAddress >
-                          {item?.jibunAddr}
-                        </MapSearchResultItemAddress>
-                      </View>
-                    </View>
-                    <MepSearchResultButton
+                renderItem={({ item, index }) => {
+                  const sortedList = item?.detBdNmList ? item.detBdNmList.split(",").map(name => name.trim()).sort((a, b) => a.localeCompare(b)) : [];
+                  return (
+                    <MapSearchResultItem
                       onPress={async () => {
                         //console.log('item', item);
                         const state = await NetInfo.fetch();
@@ -1193,10 +1123,59 @@ const AddHouse = props => {
                           }
                         }
                       }}>
-                      <MapSearchResultButtonText >선택</MapSearchResultButtonText>
-                    </MepSearchResultButton>
-                  </MapSearchResultItem>
-                )}
+                      <View
+                        style={{
+                          width: '80%',
+                        }}>
+                        <MapSearchResultItemTitle>
+                          {item?.roadAddr}
+                        </MapSearchResultItemTitle>
+                        <View
+                          style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginTop: 6,
+                          }}>
+                          <AddressDetailBadge>
+                            <AddressDetailText>상세주소</AddressDetailText>
+                          </AddressDetailBadge>
+                          {!expandedItems[index] ? (
+                            <MapSearchResultItemAddress ellipsizeMode='tail' numberOfLines={1}>
+                              {sortedList.join(',')}
+                            </MapSearchResultItemAddress>
+                          ) : (
+                            <MapSearchResultItemAddress>
+                              {sortedList.join(',')}
+                            </MapSearchResultItemAddress>
+                          )}
+                          {sortedList.length > 5 && <MepSearchResultButton onPress={() => { toggleExpand(index) }}>
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                              {!expandedItems[index] ? (
+                                <Bottompolygon style={{ marginTop: 1, color: '#2F87FF' }} />
+                              ) : (
+                                <Bottompolygon style={{
+                                  marginTop: 1,
+                                  transform: [{ rotate: '180deg' }],
+                                  color: '#2F87FF',
+                                }} />
+                                
+                              )}
+                              <MapSearchResultButtonText>{expandedItems[index] ? '접기' : '펼치기'}</MapSearchResultButtonText>
+                            </View>
+                          </MepSearchResultButton>}
+                        </View>
+                      </View>
+                    </MapSearchResultItem>
+                  )
+                }}
+
+
+
                 keyExtractor={(item, index) => index.toString()}
               />
             </Container>
@@ -1387,6 +1366,7 @@ const AddHouse = props => {
                     if (!addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1402,6 +1382,7 @@ const AddHouse = props => {
                     } else if (!addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1417,6 +1398,7 @@ const AddHouse = props => {
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1431,6 +1413,7 @@ const AddHouse = props => {
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1498,6 +1481,7 @@ const AddHouse = props => {
                     if (!addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1513,6 +1497,7 @@ const AddHouse = props => {
                     } else if (!addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1528,6 +1513,7 @@ const AddHouse = props => {
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1543,6 +1529,7 @@ const AddHouse = props => {
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1670,6 +1657,7 @@ const AddHouse = props => {
                     if (!addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1685,6 +1673,7 @@ const AddHouse = props => {
                     } else if (!addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1700,6 +1689,7 @@ const AddHouse = props => {
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1715,6 +1705,7 @@ const AddHouse = props => {
                     } else if (addHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1893,6 +1884,7 @@ const AddHouse = props => {
                     if (foundItem.buyPrice === null) {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: foundItem.jibunAddr,
                         roadAddr: foundItem.roadAddr,
                         bdMgtSn: foundItem.bdMgtSn,
@@ -1908,6 +1900,7 @@ const AddHouse = props => {
                     } else {
                       dispatch(editAddHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: foundItem.jibunAddr,
                         roadAddr: foundItem.roadAddr,
                         bdMgtSn: foundItem.bdMgtSn,

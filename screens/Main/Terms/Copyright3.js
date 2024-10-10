@@ -1,11 +1,11 @@
 // 개인정보 처리방침
 
-import { TouchableOpacity, useWindowDimensions, ScrollView, BackHandler } from 'react-native';
+import { View, TouchableOpacity, useWindowDimensions, ScrollView, BackHandler } from 'react-native';
 import React, { useLayoutEffect, useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import styled from 'styled-components';
 import CloseIcon from '../../../assets/icons/close_button.svg';
-import getFontSize from '../../../utils/getFontSize';
+import { WebView } from 'react-native-webview';
 import DropShadow from 'react-native-drop-shadow';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,28 +16,8 @@ const Container = styled.View`
   background-color: #fff;
 `;
 
-const Title = styled.Text`
-  font-size: 20px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 30px;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
-  margin-top: 20px;
-`;
-
-const SubTitle = styled.Text`
-  font-size: 18px;
-  font-family: Pretendard-Medium;
-  color: #1b1c1f;
-  line-height: 25px;
-  margin-top: 10px;
-  letter-spacing: -0.5px;
-`;
-
 const ButtonSection = styled.View`
-  position: absolute;
-  bottom: 20px;
+  bottom: 10px;
   width: 100%;
 `;
 
@@ -61,21 +41,19 @@ const ButtonText = styled.Text`
   line-height: 20px;
 `;
 
-const ContentText = styled.Text`
-  font-size: 13px;
-  font-family: Pretendard-Regular;
-  color: #1b1c1f;
-  line-height: 25px;
-  margin-top: 20px;
+const ProgressSection = styled.View`
+  flex-direction: row;
+  width: 100%;
+  height: 5px;
+  background-color: #2f87ff;
 `;
+
 
 const Copyright3 = props => {
   const navigation = props.navigation;
   const dispatch = useDispatch();
   const { width } = useWindowDimensions();
-  const [activeButton, setActiveButton] = useState(true);
-  const scrollViewRef = useRef(null);
-  const [buttonText, setButtonText] = useState('끝으로 이동하기');
+  const webviewRef = useRef(null);
   const { certType, agreeCert, agreePrivacy, agreeCopyright, agreeGov24 } = useSelector(
     state => state.cert.value,
   );
@@ -122,7 +100,7 @@ const Copyright3 = props => {
         </TouchableOpacity>
       ),
       headerTitleAlign: 'center',
-      title: '하우택싱',
+      title: '약관 조회하기',
       headerShadowVisible: false,
       contentStyle: {
         borderTopWidth: 0,
@@ -138,37 +116,20 @@ const Copyright3 = props => {
 
   return (
     <Container>
-      <ScrollView
-        ref={scrollViewRef}
-        showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 80 }}
-        onScroll={({ nativeEvent }) => {
-          if (
-            nativeEvent.contentOffset.y +
-            nativeEvent.layoutMeasurement.height >=
-            nativeEvent.contentSize.height - 1
-          ) {
-            setButtonText('동의 후 인증하기');
-          } else {
-            setButtonText('끝으로 이동하기');
+      <ProgressSection>
+      </ProgressSection>
+      <View style={{ flex: 1 }}>
+        <WebView
+          ref={webviewRef}
+          source={{ uri: 'https://deep-hortensia-87c.notion.site/24-1116041b8ebc8026bfd7e32c4d1fe76f?pvs=25' }}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          startInLoadingState={false}
+          scalesPageToFit={true}
+          mixedContentMode="always"
+        />
 
-          }
-        }}
-        scrollEventThrottle={16} // 스크롤 이벤트 빈도 조절
-      >
-
-        <Title >정부24 저작권보호정책</Title>
-        <SubTitle >정부24 저작권보호정책</SubTitle>
-        <ContentText >
-          {`저작권보호정책
-정부24의 내용은 저작권법에 의한 보호를 받는 저작물로서, 이에 대한 무단 복제 및 배포를 원칙적으로 금합니다.
-이를 무단 복제 · 배포하는 경우 저작권법 제136조의5 에 의한 저작재산권 침해 죄에 해당될 수 있습니다.
-정부24에서 제공하는 자료로 수익을 얻거나 이에 상응하는 혜택을 누리고자 하는 경우에는 시스템 운영자와 사전에 별도의 협의를 하거나 허락을 얻어야 하며, 협의 또는 허락에 의한 경우에도 출처가 정부24임을 반드시 명시하여야 합니다.
-정부24의 자료를 적법한 절차에 따라 다른 인터넷 사이트에 게재하는 경우에도 단순한 오류 정정 이외에 내용의 무단변경을 금지하며, 이를 위반할 때에는 형사 처벌을 받을 수 있습니다. 또한, 다른 인터넷 사이트에서 정부24로 링크하는 경우에는 정부24의 첫 화면이외의 세부화면(서브도메인)으로 링크시키거나 페이지를 프레임안에 넣는 것은 허용되지 않고, 링크 사실을 시스템 운영자에 반드시 통지하여야 합니다.
-※ 단, 저작권법 제24조의2 (공공저작물의 자유이용)에 따라 국가 또는 지방자치단체가 업무상 작성하여 공표한 저작물이나 계약에 따라 정부24에서 저작재산권의 전부를 보유한 저작물은 "이용허락범위 제한 없음"을 표시하고 있으므로 저작물의 출처를 구체적으로 표시하고 자유롭게 이용할 수 있습니다.
-`}
-        </ContentText>
-      </ScrollView>
+      </View>
       <ButtonSection>
         <DropShadow
           style={{
@@ -182,37 +143,32 @@ const Copyright3 = props => {
           }}>
           <Button
             width={width}
-            active={(buttonText === '끝으로 이동하기' ? false : true) || agreeCopyright}
-            disabled={!(activeButton || agreeCopyright)}
+            active={agreeCopyright}
             onPress={() => {
-              if (buttonText === '끝으로 이동하기') {
-                if (scrollViewRef.current) {
-                  scrollViewRef.current.scrollTo({ y: 100000, animated: true });
-                }
-              } else {
-                dispatch(
-                  setCert({
-                    certType,
-                    agreePrivacy,
-                    agreeCert,
-                    agreeCopyright: true,
-                    agreeGov24,
-                  }),
-                );
-                navigation.goBack();
 
-                setTimeout(() => {
-                  SheetManager.show('cert2', {
-                    payload: {
-                      index: props.route.params.index,
-                      navigation: navigation,
-                    },
-                  });
-                }, 300);
-              }
-            }}>
-            <ButtonText active={activeButton || agreeCopyright}>
-              {buttonText}
+              dispatch(
+                setCert({
+                  certType,
+                  agreePrivacy,
+                  agreeCert,
+                  agreeCopyright: true,
+                  agreeGov24,
+                }),
+              );
+              navigation.goBack();
+
+              setTimeout(() => {
+                SheetManager.show('cert2', {
+                  payload: {
+                    index: props.route.params.index,
+                    navigation: navigation,
+                  },
+                });
+              }, 300);
+            }
+            }>
+            <ButtonText active={agreeCopyright}>
+              {'동의하기'}
             </ButtonText>
           </Button>
         </DropShadow>

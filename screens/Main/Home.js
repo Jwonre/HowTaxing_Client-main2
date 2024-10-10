@@ -1,9 +1,10 @@
 // 홈 페이지
 
 import { useWindowDimensions, StatusBar, StyleSheet, BackHandler } from 'react-native';
-import React, { useLayoutEffect, useEffect, useState, useRef } from 'react';
+import React, { useLayoutEffect, useEffect, useState, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import DropShadow from 'react-native-drop-shadow';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import HomeIcon from '../../assets/images/home_home.svg';
 import SignTagIcon from '../../assets/images/home_signtag.svg';
@@ -23,7 +24,9 @@ import { setCurrentUser } from '../../redux/currentUserSlice';
 import Config from 'react-native-config'
 import { setResend } from '../../redux/resendSlice';
 import axios from 'axios';
-
+import { setAddHouseList } from '../../redux/addHouseListSlice';
+import { setFixHouseList } from '../../redux/fixHouseListSlice';
+import { setAdBanner } from '../../redux/adBannerSlice';
 
 const Container = styled.View`
   flex: 1;
@@ -101,7 +104,7 @@ const HashTagGroup = styled.View`
 `;
 
 const HashTagText = styled.Text`
-  font-size: 10px;
+  font-size: 11px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
   line-height: 16px;
@@ -122,20 +125,6 @@ const IconView = styled.View`
   border: 1px solid #e8eaed;
 `;
 
-const ChanelTalkIconFloatContainer = styled.View`
-  position: absolute;
-  bottom: 25px;
-  right: 110px;
-
-`;
-
-const LogOutIconFloatContainer = styled.View`
-  position: absolute;
-  bottom: 25px;
-  right: 110px;
-
-`;
-
 const AppInformationIconFloatContainer = styled.View`
   position: absolute;
   bottom: 25px;
@@ -143,23 +132,6 @@ const AppInformationIconFloatContainer = styled.View`
 
 `;
 
-const ChanelTalkIconFloatButton = styled.TouchableOpacity.attrs(props => ({
-  activeOpacity: 0.8,
-}))`
-  width: 55px;
-  height: 55px;
-  border-radius: 30px;
-  background-color: #2f87ff;
-  align-items: center;
-  justify-content: center;
-`;
-const LogOutIconFloatButton = styled.TouchableOpacity.attrs(props => ({
-  activeOpacity: 0.8,
-}))`
-  width: 55px;
-  height: 55px;
-  border-radius: 30px;
-`;
 
 const AppInformationIconFloatButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
@@ -210,6 +182,53 @@ const Home = () => {
 
   }, [handleBackPress]);
 
+
+
+  useFocusEffect(
+    useCallback(() => {
+      const checkModalStatus = async () => {
+        const adBannerdata = await getAdBanner();
+        console.log('adBannerdata', adBannerdata);
+        if(adBannerdata){
+          const lastClosed = await AsyncStorage.getItem('lastClosed');
+          if (!lastClosed) {
+            if (adBannerdata.isPost && adBannerdata.imageUrl !== null) {
+              dispatch(setAdBanner(true));
+            } else {
+              dispatch(setAdBanner(false));
+            }
+          } else {
+            const now = new Date();
+            const lastClosedDate = new Date(lastClosed);
+            const hoursDifference = Math.abs(now - lastClosedDate) / 36e5;
+            console.log('hoursDifference', hoursDifference);
+            if (hoursDifference >= 24) {
+              if (adBannerdata.isPost && adBannerdata.imageUrl !== null) {
+                dispatch(setAdBanner(true));
+              } else {
+                dispatch(setAdBanner(false));
+              }
+            } else {
+              dispatch(setAdBanner(false));
+            }
+          }
+  
+          SheetManager.show('AdBanner', {
+            payload: {
+              adBannerdata: adBannerdata,
+            },
+          });
+        } else {
+          dispatch(setAdBanner(false));
+        }
+
+      };
+      checkModalStatus();
+      //dispatch(setAdBanner(true));
+
+    }, [])
+  );
+
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
@@ -247,11 +266,30 @@ const Home = () => {
 
     // 컴포넌트 언마운트 시 이벤트 리스너 제거
     return () => {
-   //   badgeListener.remove();
+      //   badgeListener.remove();
     };
   }, []);
 
+  const getAdBanner = async () => {
+    try {
+      const url = `${Config.APP_API_URL}main/mainPopup`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.accessToken}`,
+      };
   
+      const response = await axios.get(url, { headers });
+      const result = response.data;
+      const data = result.data !== undefined ? result.data : null;
+  
+      return data;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
+  
+
   const handleWithLogout = (accessToken) => {
     // 요청 헤더
     const headers = {
@@ -295,6 +333,8 @@ const Home = () => {
       dispatch(setChatDataList([]));
       dispatch(setHouseInfo(null));
       dispatch(setOwnHouseList([]));
+      dispatch(setFixHouseList([]));
+      dispatch(setAddHouseList([]));
       dispatch(setResend(false));
       dispatch(
         setCert({
@@ -515,27 +555,27 @@ const Home = () => {
         </DropShadow>
       </LogOutIconFloatContainer>
 */}
-  <AppInformationIconFloatContainer>
-    <DropShadow
-      style={{
-        shadowColor: '#2F87FF',
-        shadowOffset: {
-          width: 0,
-          height: 4,
-        },
-        shadowOpacity: 0.80,
-        shadowRadius: 10,
-      }}>
+      <AppInformationIconFloatContainer>
+        <DropShadow
+          style={{
+            shadowColor: '#2F87FF',
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.80,
+            shadowRadius: 10,
+          }}>
 
-      <AppInformationIconFloatButton
-        onPress={() => {
-          ////console.log('AppInformation');
-          goAppInformation();
-        }}>
-        <AppInformationIcon style={style.AppInformationIcon} />
-      </AppInformationIconFloatButton>
-    </DropShadow>
-  </AppInformationIconFloatContainer>
+          <AppInformationIconFloatButton
+            onPress={() => {
+              ////console.log('AppInformation');
+              goAppInformation();
+            }}>
+            <AppInformationIcon style={style.AppInformationIcon} />
+          </AppInformationIconFloatButton>
+        </DropShadow>
+      </AppInformationIconFloatContainer>
     </Container >
   );
 };

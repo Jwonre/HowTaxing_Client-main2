@@ -96,7 +96,7 @@ const ChatBubbleText = styled.Text`
   font-size: 14px;
   font-family: Pretendard-SemiBold;
   color: #000;
-  line-height: 30px;
+  line-height: 25px;
   letter-spacing: -0.5px;
 `;
 
@@ -213,7 +213,7 @@ const KakaoButton = styled.TouchableOpacity.attrs(props => ({
   width: 100%;
   height: 50px;
   border-radius: 25px;
-  background-color: #fbe54d;
+  background-color: #2F87FF;
   align-items: center;
   justify-content: center;
   margin-top: 15px;
@@ -221,8 +221,8 @@ const KakaoButton = styled.TouchableOpacity.attrs(props => ({
 
 const KakaoButtonText = styled.Text`
   font-size: 15px;
-  font-family: Pretendard-Regular;
-  color: #3b1f1e;
+  font-family: Pretendard-bold;
+  color: #fff;
   line-height: 20px;
 `;
 
@@ -1216,7 +1216,7 @@ const GainsTaxChat = () => {
           style={{
             padding: 20,
           }}>
-          <CTACard houseInfo={houseInfo} Pdata={Pdata ? Pdata : null} IsGainTax={false} />
+          <CTACard houseInfo={houseInfo} Pdata={Pdata ? Pdata : null} IsGainTax={true} />
           <HouseInfo reservationYn={'N'} item={houseInfo} navigation={navigation} ChatType='GainsTaxChat' />
           <TaxCard2 navigation={navigation} Pdata={Pdata} />
           <CalculationWarningCard />
@@ -1297,9 +1297,9 @@ const GainsTaxChat = () => {
                 require('../../assets/images/manAvatar.png')
               }
             />
-            <ChatBubble style={{ width: item?.id === 'certInfo' ? '95%' : '80%' }}>
+            <ChatBubble style={{ width: '80%' }}>
               <View style={{
-                width: '101%',
+                width: '105%',
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center'
@@ -1541,13 +1541,10 @@ const GainsTaxChat = () => {
                     const state = await NetInfo.fetch();
                     const canProceed = await handleNetInfoChange(state);
                     if (canProceed) {
-                      Linking.openURL('http://pf.kakao.com/_sxdxdxgG');
+                      navigation.push('ConsultingReservation');
                     }
                   }}>
-                  <SocialButtonIcons
-                    source={require('../../assets/images/socialIcon/kakao_ico.png')}
-                  />
-                  <KakaoButtonText >카카오톡으로 상담하기</KakaoButtonText>
+                  <KakaoButtonText >상담 예약하기</KakaoButtonText>
                 </KakaoButton>
               </Card>
               <DropShadow

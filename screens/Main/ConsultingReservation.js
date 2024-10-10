@@ -39,7 +39,7 @@ const IntroSection3 = styled.View`
 const ProfileAvatar = styled(FastImage).attrs(props => ({
   resizeMode: 'stretch',
 }))`
-  width: 110%;
+  width: 100%;
   height: 100%;
   background-color: #F0F3F8;
   align-self: center;
@@ -107,7 +107,7 @@ const Title = styled.Text`
 
 const SubTitle = styled.Text`
   font-size: 12px;
-  font-family: Pretendard-Regular;
+  font-family: Pretendard-Bold;
   color: #a3a5a8;
   line-height: 15px;
   margin-top: 10px;
@@ -115,7 +115,7 @@ const SubTitle = styled.Text`
 
 const SubTitle2 = styled.Text`
   font-size: 12px;
-  font-family: Pretendard-Regular;
+  font-family: Pretendard-Bold;
   color: #a3a5a8;
   line-height: 14px;
   margin-top: 20px;
@@ -126,7 +126,7 @@ const SubTitle2 = styled.Text`
 
 const SubTitle3 = styled.Text`
   font-size: 12px;
-  font-family: Pretendard-Regular;
+  font-family: Pretendard-Bold;
   color: #FF7401;
   line-height: 15px;
   margin-top: 10px;
@@ -145,7 +145,7 @@ const TimeTitle = styled.Text`
   font-size: 16px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
-  line-height: 30px;
+  line-height: 25px;
   margin-bottom: 8px;
   letter-spacing: -0.5px;
 `;
@@ -158,17 +158,19 @@ const ReservationtimeSection = styled.View`
 `;
 
 const TimeContainer = styled.View`
+  width: 100%;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
+  align-items: center;
 
 `;
 
 const TimeBox = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
-  width: 73px;
-  height: 35px;
+  width: 24%;
+  height: 40px;
   background-color: #fff;
   justify-content: center;
   align-items: center;
@@ -218,7 +220,6 @@ const Tag = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
   flex-direction: row;
-  margin-right: auto;
   width: 67px;
   height: 22px;
   align-items: center;
@@ -226,9 +227,9 @@ const Tag = styled.TouchableOpacity.attrs(props => ({
   border-radius: 11px;
   border-width: 1px;
   border-color: #CFD1D5;
-  padding: 0 10px;
   margin-bottom: 20px;
-  align-self: flex-start;
+  align-self: flex-start; 
+
 `;
 
 const TagText = styled.Text`
@@ -359,10 +360,11 @@ const ConsultingReservation = () => {
     morningTimes.push(`${i}:00`);
     morningTimes.push(`${i}:30`);
   }
-  for (let i = 12; i <= 18; i++) {
+  for (let i = 12; i < 18; i++) {
     afternoonTimes.push(`${i}:00`);
-    if (i < 18) afternoonTimes.push(`${i}:30`);
+    afternoonTimes.push(`${i}:30`);
   }
+
   const handleBackPress = () => {
     if (currentPageIndex === 0) {
       navigation.goBack();
@@ -444,7 +446,7 @@ const ConsultingReservation = () => {
         { headers: headers }
       )
       .then(response => {
-        console.log('response.data', response.data);
+        console.log('response.data.dateList', response.data.dateList ? response.data.dateList : []);
         if (response.data.errYn === 'Y') {
           SheetManager.show('info', {
             payload: {
@@ -547,23 +549,15 @@ const ConsultingReservation = () => {
     try {
       const response = await axios.post(`${Config.APP_API_URL}consulting/reservationApply`, data, { headers: headers });
       if (response.data.errYn === 'Y') {
-        SheetManager.show('info', {
-          payload: {
-            type: 'error',
-            message: response.data.errMsg ? response.data.errMsg : '상담 예약 중 오류가 발생했어요.',
-            description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
-            buttontext: '확인하기',
-          },
-        });
         if (response.data.errCode === 'CONSULTING-013') {
           setCurrentPageIndex(3);
           setTimeout(async () => {
             await getDateTimelist('1', '');
             if (dataList.length === 0) {
-              SheetManager.show('info', {
+              await SheetManager.show('info', {
                 payload: {
                   type: 'info',
-                  message: '앗, 현재 예약가능한 날짜가 없어요.\n나중에 다시 시도해주세요.',
+                  message: '앗, 현재 모든 예약이 완료되었어요.\n나중에 다시 시도해주세요.',
                   buttontext: '확인하기',
                 },
               });
@@ -573,6 +567,15 @@ const ConsultingReservation = () => {
               setSelectedList([]);
             }
           }, 300);
+        } else {
+          await SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg ? response.data.errMsg : '상담 예약 중 오류가 발생했어요.',
+              description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
+              buttontext: '확인하기',
+            },
+          });
         }
         return false;
       } else {
@@ -812,7 +815,9 @@ const ConsultingReservation = () => {
                   const state = await NetInfo.fetch();
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
-                    setCurrentPageIndex(3);
+                    if (phone.length > 10) {
+                      setCurrentPageIndex(3);
+                    }
                   }
                 }}
               />
@@ -822,11 +827,11 @@ const ConsultingReservation = () => {
             <ShadowContainer>
               <Button
                 style={{
-                  backgroundColor: phone.length < 1 ? '#E8EAED' : '#2F87FF',
-                  color: phone.length < 1 ? '#1b1c1f' : '#FFFFFF',
+                  backgroundColor: phone.length < 11 ? '#E8EAED' : '#2F87FF',
+                  color: phone.length < 11 ? '#1b1c1f' : '#FFFFFF',
                 }}
-                disabled={phone.length < 1}
-                active={phone.length > 0}
+                disabled={phone.length < 11}
+                active={phone.length > 10}
                 width={width}
                 onPress={async () => {
                   const state = await NetInfo.fetch();
@@ -891,7 +896,6 @@ const ConsultingReservation = () => {
                   height: 350,
                   borderBottomWidth: 1,
                   borderBottomColor: '#E8EAED',
-                  marginBottom: 20,
                 }}>
                 <Calendar
                   setSelectedDate={setSelectedDate}
@@ -903,7 +907,7 @@ const ConsultingReservation = () => {
               </View>
               <ReservationtimeSection>
                 <TimeTitle>오전</TimeTitle>
-                <TimeContainer>
+                <TimeContainer style={{ marginBottom: 10 }}>
                   {morningTimes.map((item, index) => (
                     <TimeBox
                       disabled={timeList.indexOf(item) < 0}
@@ -923,7 +927,7 @@ const ConsultingReservation = () => {
                   ))}
                 </TimeContainer>
                 <TimeTitle>오후</TimeTitle>
-                <TimeContainer style={{ marginBottom: 60 }}>
+                <TimeContainer style={{ marginBottom: 70 }}>
                   {afternoonTimes.map((item, index) => (
                     <TimeBox
                       disabled={timeList.indexOf(item) < 0}
@@ -1015,7 +1019,7 @@ const ConsultingReservation = () => {
             }}>
               <Title style={{ marginBottom: 10, marginTop: 10 }}>상세 내용을 알려주세요.</Title>
               <SubTitle4>세금종류</SubTitle4>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
+              <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 {ConsultingList.map((item, index) => (
                   <Tag
                     style={{
@@ -1028,7 +1032,8 @@ const ConsultingReservation = () => {
                               ? '#2F87FF'
                               : item === '증여세'
                                 ? '#2F87FF'
-                                : '#E8EAED'
+                                : '#E8EAED',
+                      margin: 5 // 각 Tag 간에 5px의 간격을 추가
                     }}
                     //disabled={taxTypeList.indexOf(item) < 0}
                     active={taxTypeList.indexOf(item) > -1}

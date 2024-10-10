@@ -263,7 +263,7 @@ const CheckTerms = props => {
           activeOpacity={0.6}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
-            navigation.goBack();
+            navigation.navigate('Login');
           }}>
           <BackIcon />
         </TouchableOpacity>
@@ -492,7 +492,7 @@ const CheckTerms = props => {
             }
 
             style={{
-              width: width - 80,
+              width: width - 40,
               alignSelf: 'center',
               marginTop: 20,
               marginBottom: 50,

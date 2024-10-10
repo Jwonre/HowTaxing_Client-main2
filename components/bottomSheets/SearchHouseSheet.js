@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setHouseInfo } from '../../redux/houseInfoSlice';
 import { AREA_LIST } from '../../data/areaData';
+import Bottompolygon from '../../assets/icons/blue_bottom_polygon.svg';
 import NetInfo from "@react-native-community/netinfo";
 import Config from 'react-native-config'
 
@@ -149,7 +150,9 @@ const SelectItemText = styled.Text`
   line-height: 20px;
 `;
 
-const MapSearchResultItem = styled.View`
+const MapSearchResultItem = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.9,
+}))`
   width: 100%;
   height: auto;
   min-height: 60px;
@@ -169,7 +172,7 @@ const MapSearchResultItemTitle = styled.Text`
 `;
 
 const MapSearchResultItemAddress = styled.Text`
-  width: 90%;
+  width: 80%;
   font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
@@ -177,18 +180,18 @@ const MapSearchResultItemAddress = styled.Text`
   margin-left: 4px;
 `;
 
-const AddressNumberBadge = styled.View`
-  width: 37px;
+const AddressDetailBadge = styled.View`
+  width: 55px;
   height: 22px;
   border-radius: 11px;
+  border-width: 1px;
+  border-color: #e8eaed;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  border-width: 1px;
-  border-color: #e8eaed;
 `;
 
-const AddressNumberText = styled.Text`
+const AddressDetailText = styled.Text`
   font-size: 10px;
   font-family: Pretendard-Medium;
   color: #a3a5a8;
@@ -197,22 +200,24 @@ const AddressNumberText = styled.Text`
 
 const MepSearchResultButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.9,
+  hitSlop: { top: 10, bottom: 10, left: 10, right: 10 },
 }))`
-  width: 65px;
-  height: 36px;
-  border-radius: 18px;
-  flex-direction: row;
+  width: 55px;
+  height: 22px;
+  border-radius: 11px;
+  border-width: 1px;
+  border-color: #e8eaed;
   align-items: center;
   justify-content: center;
-  border-width: 1px;
-  border-color: #2f87ff;
+  align-self: right;
+  background-color: #F0F3F8;
 `;
 
 const MapSearchResultButtonText = styled.Text`
-  font-size: 13px;
-  font-family: Pretendard-Medium;
-  color: #2f87ff;
-  line-height: 16px;
+  font-size: 10px;
+  font-family: Pretendard-Bold;
+  color: #2F87FF;
+  line-height: 20px;
 `;
 
 const ApartmentInfoGroup = styled.View`
@@ -305,6 +310,7 @@ const ListFooterButtonText = styled.Text`
   line-height: 20px;
 `;
 
+
 const SearchHouseSheet = props => {
   const actionSheetRef = useRef(null);
   const scrollViewRef = useRef(null);
@@ -332,11 +338,12 @@ const SearchHouseSheet = props => {
   const chatDataList = useSelector(state => state.chatDataList.value);
   const houseInfo = useSelector(state => state.houseInfo.value);
   const currentUser = useSelector(state => state.currentUser.value);
-
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const navigation = props.payload.navigation;
-  //////console.log('houseInfo?.houseType', houseInfo?.houseType)
+  const [expandedItems, setExpandedItems] = useState({});
+
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -357,6 +364,14 @@ const SearchHouseSheet = props => {
     };
 
   }, []);
+
+
+  const toggleExpand = (index) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
@@ -469,6 +484,7 @@ const SearchHouseSheet = props => {
         } else {
           // 성공적인 응답 처리 
           var list = [];
+          //console.log('response.data.data', response.data.data);
           if (response.data.data) {
             list = response.data.data.jusoList;
             if (list.length === 0) {
@@ -745,7 +761,7 @@ const SearchHouseSheet = props => {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      //////console.log('Donglist response :', response.data);
+      console.log('Donglist response :', response.data);
       if (response.data.errYn === 'Y') {
         SheetManager.show('info', {
           payload: {
@@ -1537,41 +1553,20 @@ const SearchHouseSheet = props => {
                 </ListFooterButton>
               )
             }
-            renderItem={({ item, index }) => (
-              <MapSearchResultItem>
-                <View
-                  style={{
-                    width: '72%',
-                  }}>
-                  <MapSearchResultItemTitle >
-                    {item?.roadAddr}
-                  </MapSearchResultItemTitle>
-                  <View
-                    style={{
-                      width: '100%',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: 6,
-                    }}>
-                    <AddressNumberBadge>
-                      <AddressNumberText >지번</AddressNumberText>
-                    </AddressNumberBadge>
-                    <MapSearchResultItemAddress >
-                      {item?.jibunAddr}
-                    </MapSearchResultItemAddress>
-                  </View>
-                </View>
-                <MepSearchResultButton
+            renderItem={({ item, index }) => {
+              const sortedList = item?.detBdNmList ? item.detBdNmList.split(",").map(name => name.trim()).sort((a, b) => a.localeCompare(b)) : [];
+              return (
+                <MapSearchResultItem
                   onPress={async () => {
                     const state = await NetInfo.fetch();
                     const canProceed = await handleNetInfoChange(state);
                     if (canProceed) {
-                      //          ////console.log('선택 item', item);
+                      console.log('선택 item', item);
                       setAddress(item?.roadAddr);
                       setSelectedItem(item);
                       if (props.payload?.data === 'villa' || props.payload?.data === 'apartment') {
                         const firstDong = await getDongData(item);
-                        //////console.log('firstDong', firstDong);
+                        console.log('firstDong', firstDong);
                         if (firstDong !== 'dongerror') {
                           const Hodata = await getHoData(item, firstDong, 'init');
                           //////console.log('Hodata', Hodata);
@@ -1595,10 +1590,56 @@ const SearchHouseSheet = props => {
                       actionSheetRef.current?.hide();
                     }
                   }}>
-                  <MapSearchResultButtonText >선택</MapSearchResultButtonText>
-                </MepSearchResultButton>
-              </MapSearchResultItem>
-            )}
+                  <View
+                    style={{
+                      width: '72%',
+                    }}>
+                    <MapSearchResultItemTitle>
+                      {item?.roadAddr}
+                    </MapSearchResultItemTitle>
+                    <View
+                      style={{
+                        width: '100%',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginTop: 6,
+                      }}>
+                      <AddressDetailBadge>
+                        <AddressDetailText>상세주소</AddressDetailText>
+                      </AddressDetailBadge>
+                      {!expandedItems[index] ? (
+                        <MapSearchResultItemAddress ellipsizeMode='tail' numberOfLines={1}>
+                          {sortedList.join(',')}
+                        </MapSearchResultItemAddress>
+                      ) : (
+                        <MapSearchResultItemAddress>
+                          {sortedList.join(',')}
+                        </MapSearchResultItemAddress>
+                      )}
+                      {sortedList.length > 4 && <MepSearchResultButton onPress={() => { toggleExpand(index) }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}>
+                          {!expandedItems[index] ? (
+                            <Bottompolygon style={{ marginTop: 1, color: '#2F87FF' }} />
+                          ) : (
+                            <Bottompolygon style={{
+                              marginTop: 1,
+                              transform: [{ rotate: '180deg' }],
+                              color: '#2F87FF',
+                            }} />
+                          )}
+                          <MapSearchResultButtonText>{expandedItems[index] ? '접기' : '펼치기'}</MapSearchResultButtonText>
+                        </View>
+                      </MepSearchResultButton>}
+                    </View>
+                  </View>
+                </MapSearchResultItem>
+              );
+            }}
+
             keyExtractor={(item, index) => index.toString()}
           />
         </SheetContainer>

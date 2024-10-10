@@ -17,6 +17,7 @@ import DropShadow from 'react-native-drop-shadow';
 import axios from 'axios';
 import NetInfo from "@react-native-community/netinfo";
 import CloseIcon from '../../assets/icons/close_button.svg';
+import XCircleIcon from '../../assets/icons/x_circle.svg';
 import { setChatDataList } from '../../redux/chatDataListSlice';
 import { setFixHouseList } from '../../redux/fixHouseListSlice';
 import { setOwnHouseList } from '../../redux/ownHouseListSlice';
@@ -108,22 +109,15 @@ const Title = styled.Text`
   font-size: 19px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
-  line-height: 30px;
+  line-height: 25px;
+  margin-bottom: 5px;
   letter-spacing: -0.5px;
 `;
 
-const SubTitle = styled.Text`
-  font-size: 19px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 30px;
-  margin-top: 10px;
-  
-`;
 
 const SubTitle2 = styled.Text`
   font-size: 12px;
-  font-family: Pretendard-Regular;
+  font-family: Pretendard-Bold;
   color: #a3a5a8;
   line-height: 14px;
   margin-top: 20px;
@@ -180,20 +174,17 @@ const ButtonText = styled.Text`
 
 const FixedHouseList = props => {
   LogBox.ignoreLogs(['to contain units']);
-  const actionSheetRef = useRef(null);
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
   const [hasNavigatedBack, setHasNavigatedBack] = useState(false);
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const currentUser = useSelector(state => state.currentUser.value);
   const chatDataList = useSelector(state => state.chatDataList.value);
-  const ownHouseList = useSelector(state => state.ownHouseList.value);
   const dispatch = useDispatch();
   const fixHouseList = useSelector(state => state.fixHouseList.value);
   const [fixHouseFinish, setFixHouseFinish] = useState(false);
-  const [fixHouseLoadFinish, setfixHouseLoadFinish] = useState(false);
   const [fixHouseFinishAndWait, setFixHouseFinishAndWait] = useState(true);
-
+  
   //const Pdata = props?.Pdata;
   //console.log('ori fixHouseList', fixHouseList);
   useEffect(() => {
@@ -266,6 +257,7 @@ const FixedHouseList = props => {
       };
 
       // 요청 바디
+      console.log('last fixHouseList', fixHouseList);
       var loadHouseList = fixHouseList ? fixHouseList : [];
       const data = loadHouseList.map(({ index, ...rest }) => rest);
 
@@ -282,6 +274,7 @@ const FixedHouseList = props => {
           });
           return false;
         } else {
+          console.log('returndata',response.data.data);
           const returndata = response.data.data;
           dispatch(setOwnHouseList([...returndata]));
           return true;
@@ -324,11 +317,6 @@ const FixedHouseList = props => {
         console.log('response.data.data2.length : ', response.data.data.length);
         if (response.data.data.length === 0) {
           setFixHouseFinishAndWait(true);
-          const isGainsTax = props?.route?.params?.isGainsTax;
-          const chatItem = isGainsTax
-            ? gainTax.find(el => el.id === 'allHouse1')
-            : acquisitionTax.find(el => el.id === 'moment1');
-          dispatch(setChatDataList([...chatDataList, chatItem]), setFixHouseList([]));
           return 'getEtcHouseNull';
         } else {
           setFixHouseFinishAndWait(false)
@@ -391,9 +379,9 @@ const FixedHouseList = props => {
       <ProgressSection>
       </ProgressSection>
       <><IntroSection2 style={{ width: width, marginBottom: 20 }}>
-        <Title>주택 거래내역 정보를 가져왔어요.</Title>
-        <Title>주택의 정보를 추가적으로 알려주세요.</Title>
-        <SubTitle3>추가정보 입력이 필요한 주택이 있을 경우 다음단계로 넘어갈 수 없어요. 추가입력을 선택하신 후 필요한 정보들을 알려주세요.</SubTitle3>
+        <Title>보유 주택의 정보를 가져오는 중{'\n'}일부 미비한 정보가 있어요.</Title>
+        <Title>추가정보를 입력해주세요.</Title>
+        <SubTitle3>만약 현재 보유하고 있지 않은 주택이 있다면, 삭제를 해주세요.</SubTitle3>
       </IntroSection2>
 
         <InfoContentSection overScrollMode="never" style={{ width: width, height: height - 370 }}>
@@ -405,8 +393,8 @@ const FixedHouseList = props => {
               key={index}>
               <View
                 style={{
-                  width: '60%',
-                  marginRight: '10%',
+                  width: item.complete === true ? '60%' : '55%',
+                  marginRight: item.complete === true ? '10%' : '2%',
                 }}>
                 <HoustInfoTitle style={{ color: item.complete === true ? '#CFD1D5' : '#000000', }}>
                   {item.roadAddr !== null
@@ -423,6 +411,7 @@ const FixedHouseList = props => {
                 disabled={item.complete === true}
                 onPress={() => goFixedHouse(item.index)}
                 style={{
+                  marginRight: item.complete === true ? 0 : '3%',
                   height: 30,
                   width: '30%',
                   justifyContent: 'center',
@@ -435,6 +424,15 @@ const FixedHouseList = props => {
                   {item.complete === true ? '완료' : '추가 입력'}
                 </HoustInfoBadgeText>
               </HoustInfoBadge>
+              {(item.complete === false) && <TouchableOpacity activeOpacity={0.6}
+                onPress={async () => {console.log('fixHouseList', fixHouseList);
+                  SheetManager.show('InfoFixHouseDelete', {
+                    payload: {
+                      index: index,
+                    },
+                  });
+                  
+                }}><XCircleIcon /></TouchableOpacity>}
             </HoustInfoSection>
           ))}
         </InfoContentSection>
@@ -458,7 +456,7 @@ const FixedHouseList = props => {
                 const canProceed = await handleNetInfoChange(state);
                 if (canProceed) {
                   const registerDirectHouseResult = await registerDirectHouse();
-                 //console.log('registerDirectHouseResult : ', registerDirectHouseResult);
+                  //console.log('registerDirectHouseResult : ', registerDirectHouseResult);
                   if (registerDirectHouseResult) {
                     const getEtcHouseReturn = await getEtcHouse();
                     if (getEtcHouseReturn === 'getEtcHouseNull') {

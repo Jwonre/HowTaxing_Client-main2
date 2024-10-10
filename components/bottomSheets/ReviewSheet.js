@@ -274,7 +274,7 @@ const ReviewSheet = props => {
         backgroundColor: '#fff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: keyboardShow ? 500 : 460,
+        height: keyboardShow ? 500 : 470,
         width: width - 40,
       }}>
       <SheetContainer width={width}>
@@ -308,6 +308,7 @@ const ReviewSheet = props => {
                     setText(input);
                   }
                 }}
+                blurOnSubmit={true}
                 value={text.slice(0, 1000)}
               />
               <TextLength >{encodeURI(text).split(/%..|./).length - 1}/1000</TextLength>

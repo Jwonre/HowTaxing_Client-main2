@@ -45,7 +45,7 @@ const Title = styled.Text`
   font-size: 25px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
-  line-height: 30px;
+  line-height: 25px;
   margin-bottom: 8px;
   margin-top: 20px;
   letter-spacing: -0.5px;
@@ -117,7 +117,7 @@ const Avatar = styled(FastImage).attrs(props => ({
 `;
 
 const ChatBubble = styled.View`
-  width: 80%;
+  width: 90%;
   height: auto;
   border-radius: 10px;
   background-color: #f0f3f8;
@@ -129,11 +129,10 @@ const ChatBubble = styled.View`
 `;
 
 const ChatBubbleText = styled.Text`
-  font-size: 13px;
+  font-size: 14px;
   font-family: Pretendard-SemiBold;
   color: #000;
-  line-height: 30px;
-  letter-spacing: -0.5px;
+  line-height: 25px;
 `;
 
 const ButtonSection = styled.View`

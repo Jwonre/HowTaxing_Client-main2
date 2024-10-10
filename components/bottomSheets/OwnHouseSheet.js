@@ -42,7 +42,7 @@ const TitleSection = styled.View`
   width: 100%;
   height: auto;
   background-color: #fff;
-  padding: 10px 20px;
+  padding: 5px 10px 10px 20px;
 `;
 
 const SubTitle = styled.Text`
@@ -254,6 +254,21 @@ const OwnHouseSheet = props => {
   const hasNavigatedBackRef = useRef(hasNavigatedBack);
   const CARD_WIDTH = 180 + 22;
 
+  useEffect(() => {
+    if(ownHouseList.length > 0 && props.payload.isGainsTax === false) {
+      SheetManager.show('InfoOwnHouse', {
+        payload: {
+          message: '주택을 불러오기 전 유의사항이 있어요.',
+          description: '부동산 계약 시 거래 신고된  데이터 기준으로 하기 때문에, 계약내용 변경 등의 사유로 정확하지 않을 수 있으니 \'자세히보기\'를 통해 확인 및 수정해주세요.',
+          buttontext: '확인하기',
+          height: 370,
+          isGainsTax: false,
+        },
+      })
+    }
+  }, [])
+
+
 
   const getadditionalQuestion = async (questionId, answerValue, houseId, buyDate, buyPrice) => {
     /*
@@ -394,18 +409,18 @@ const OwnHouseSheet = props => {
       <SheetContainer width={width}>
         <TitleSection>
           {ownHouseList.length !== 0 && (<Title >
-            보유하신 주택을 모두 불러왔어요.{'\n'}불러온 주택들을 확인해주세요.
+            보유하신 주택을 모두 불러왔어요.
           </Title>)}
           {ownHouseList.length === 0 && props.payload?.data === 'ok' && props.payload?.chungYackYn === true && (<Title >
-            청약통장을 가지고 있지 않다면{'\n'}보유하신 주택을 직접 등록해주세요.
+            청약통장을 가지고 있지 않다면{'\n'}보유주택을 직접 등록해주세요.
           </Title>)}
           {ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) && (<Title >
-            주택을 불러오지 못했어요.{'\n'}보유하신 주택이 있다면 직접 등록해주세요.
+            주택을 불러오지 못했어요.{'\n'}보유주택이 있다면 직접 등록해주세요.
           </Title>)}
 
           <InfoMessage >
-            주택을 취득하기 이전에 기존 보유 주택의 양도 계획이 있다면,{'\n'}양도할 주택은
-            반드시 체크 해제해주세요.
+            주택을 취득하기 이전에 기존 보유 주택의 매도 계획이 있다면,{'\n'}매도할 주택은
+            반드시 삭제해주세요.
           </InfoMessage>
         </TitleSection>
 
@@ -589,8 +604,8 @@ const OwnHouseSheet = props => {
                 paddingHorizontal: 20,
                 paddingBottom: 20,
               }} >
-              주거용 오피스텔을 소유하고 계실 경우, 반드시 직접 등록해주세요.{'\n'}
-              불러오지 못한 주택이 있을 경우, 정확한 세금계산이 어려워요.
+              보유 중인 추가 주택이 있으신 경우, 직접 등록해주세요.{'\n'}
+              보유하지 않은 주택이 있으신 경우, 삭제해주세요.
             </SubTitle>
           </HouseSection>
           :

@@ -73,6 +73,7 @@ const HoustInfoText = styled.Text`
   font-size: 12px;
   font-family: Pretendard-Regular;
   line-height: 20px;
+  color: #a3a5a8;
 `;
 
 const HoustInfoBadge = styled.TouchableOpacity.attrs(_props => ({
@@ -246,7 +247,7 @@ const ReservationList = () => {
         </TouchableOpacity>
       ),
       headerTitleAlign: 'center',
-      title: '상담 예약 관리',
+      title: '마이 페이지',
       headerShadowVisible: false,
       contentStyle: {
         borderTopColor: '#F7F7F7',

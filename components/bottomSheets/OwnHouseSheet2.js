@@ -39,7 +39,7 @@ const TitleSection = styled.View`
   width: 100%;
   height: auto;
   background-color: #fff;
-  padding: 10px 20px;
+  padding: 5px 10px 10px 20px;
   
 `;
 
@@ -252,6 +252,21 @@ const OwnHouseSheet2 = props => {
   const currentUser = useSelector(state => state.currentUser.value);
   const [isConnected, setIsConnected] = useState(true);
 
+  useEffect(() => {
+    if(ownHouseList.length > 0 && props?.payload?.isGainsTax ===  true) {
+      SheetManager.show('InfoOwnHouse', {
+        payload: {
+          message: '주택을 불러오기 전 유의사항이 있어요.',
+          description: '부동산 계약 시 거래 신고된  데이터 기준으로 하기 때문에, 계약내용 변경 등의 사유로 정확하지 않을 수 있으니 \'자세히보기\'를 통해 확인 및 수정해주세요.',
+          description2: '취득원인이 일반매매가 아닌 주택은 취득일을 산정하는 방법이 다를 수 있어요. 반드시 전문가에게 상담을 요청해주세요.',
+          buttontext: '확인하기',
+          height: 460,
+          isGainsTax: true
+        },
+      })
+    }
+  }, [])
+
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
       if (!state.isConnected && isConnected) {
@@ -355,10 +370,10 @@ const OwnHouseSheet2 = props => {
             보유하신 주택을 모두 불러왔어요.{'\n'}양도할 주택을 선택해주세요.
           </Title>)}
           {ownHouseList.length === 0 && props.payload?.data === 'ok' && props.payload?.chungYackYn === true && (<Title >
-            청약통장을 가지고 있지 않다면{'\n'}보유하신 주택을 직접 등록해주세요.
+            청약통장을 가지고 있지 않다면{'\n'}보유주택을 직접 등록해주세요.
           </Title>)}
           {ownHouseList.length === 0 && ((props.payload?.data === 'ok' && props.payload?.chungYackYn === false) || (props.payload?.data === undefined)) && (<Title >
-            주택을 불러오지 못했어요.{'\n'}보유하신 주택이 있다면 직접 등록해주세요.
+            주택을 불러오지 못했어요.{'\n'}보유주택이 있다면 직접 등록해주세요.
           </Title>)}
           <InfoMessage >
             불러온 주택들이 있다면,{'\n'}“자세히 보기”를 통해
@@ -430,9 +445,9 @@ const OwnHouseSheet2 = props => {
                         <TagText >
                           {HOUSE_TYPE.find(color => color.id === item.houseType).name}
                         </TagText>
-                        {(item?.houseType !== '3' && item?.isMoveInRight === true) && <TagText  style={{ fontSize: 8 }}>
-                        {'(입주권)'}
-                      </TagText>}
+                        {(item?.houseType !== '3' && item?.isMoveInRight === true) && <TagText style={{ fontSize: 8 }}>
+                          {'(입주권)'}
+                        </TagText>}
                       </Tag>
                       {/*(item.houseType !== '3' &&item?.isMoveInRight) && <Tag
                       style={{
@@ -657,12 +672,12 @@ const OwnHouseSheet2 = props => {
               const state = await NetInfo.fetch();
               const canProceed = await handleNetInfoChange(state);
               if (canProceed) {
-                 ////console.log('[OwnHouseSheet2] selectedList:',
-                  /* ownHouseList?.find(
-                     item => item.houseId === selectedList[0].houseId,
-                   ),
-                 );
-                if (ownHouseList?.some(item => item.complete === true)) {
+                ////console.log('[OwnHouseSheet2] selectedList:',
+                //   ownHouseList?.find(
+                //</DropShadow>     item => item.houseId === selectedList[0].houseId,
+                //</SheetContainer>   ),
+                //  );
+                if (ownHouseList?.some(item => item.isRequiredDataMissing === true)) {
                   SheetManager.show('info', {
                     payload: {
                       type: 'info',
@@ -671,7 +686,7 @@ const OwnHouseSheet2 = props => {
                     },
                   });
                   return;
-                }else*/  
+                } else {
                   const response = await getHouseDetailInfo(ownHouseList?.find(
                     item => item.houseId === selectedList[0].houseId,
                   ))
@@ -709,15 +724,15 @@ const OwnHouseSheet2 = props => {
                     dispatch(setChatDataList(newChatDataList));
 
                   }
+                }
 
-                
               } else {
                 const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
                 dispatch(setChatDataList(newChatDataList));
                 actionSheetRef.current?.hide();
               }
             }}>
-            <ButtonText  active={selectedList.length > 0}>선택하기</ButtonText>
+            <ButtonText active={selectedList.length > 0}>선택하기</ButtonText>
           </Button>
         </DropShadow>
       </SheetContainer>

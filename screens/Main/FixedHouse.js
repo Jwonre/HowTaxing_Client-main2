@@ -12,17 +12,14 @@ import {
 } from 'react-native-actions-sheet';
 import { useDispatch, useSelector } from 'react-redux';
 import SerchIcon from '../../assets/icons/search_map.svg';
-import InfoIcon from '../../assets/icons/info_tooltip_ico.svg';
-import FastImage from 'react-native-fast-image';
 import DropShadow from 'react-native-drop-shadow';
 import axios from 'axios';
 import WheelPicker from 'react-native-wheely';
 import NetInfo from "@react-native-community/netinfo";
 import Calendar from '../../components/Calendar';
 import Config from 'react-native-config'
-import { HOUSE_TYPE } from '../../constants/colors';
 import { setFixHouseList, editFixHouseList } from '../../redux/fixHouseListSlice';
-import FixedHouseList from './FixedHouseList';
+import Bottompolygon from '../../assets/icons/blue_bottom_polygon.svg';
 
 const Container = styled.View`
   flex: 1.0;
@@ -74,7 +71,7 @@ const ModalInput = styled.TextInput.attrs(props => ({
   font-size: 13px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
-  line-height: 30px;
+  line-height: 25px;
   text-align: left;
   text-align-vertical: top;
   overflow: hidden; 
@@ -118,7 +115,10 @@ const ModalInputSection2 = styled.View`
   margin-top: 0px;
   background-color: #fff;
 `;
-const MapSearchResultItem = styled.View`
+
+const MapSearchResultItem = styled.TouchableOpacity.attrs(props => ({
+  activeOpacity: 0.9,
+}))`
   width: 100%;
   height: auto;
   min-height: 60px;
@@ -138,7 +138,7 @@ const MapSearchResultItemTitle = styled.Text`
 `;
 
 const MapSearchResultItemAddress = styled.Text`
-  width: 90%;
+  width: 80%;
   font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
@@ -146,18 +146,18 @@ const MapSearchResultItemAddress = styled.Text`
   margin-left: 4px;
 `;
 
-const AddressNumberBadge = styled.View`
-  width: 37px;
+const AddressDetailBadge = styled.View`
+  width: 55px;
   height: 22px;
   border-radius: 11px;
+  border-width: 1px;
+  border-color: #e8eaed;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  border-width: 1px;
-  border-color: #e8eaed;
 `;
 
-const AddressNumberText = styled.Text`
+const AddressDetailText = styled.Text`
   font-size: 10px;
   font-family: Pretendard-Medium;
   color: #a3a5a8;
@@ -166,22 +166,24 @@ const AddressNumberText = styled.Text`
 
 const MepSearchResultButton = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.9,
+  hitSlop: { top: 10, bottom: 10, left: 10, right: 10 },
 }))`
-  width: 65px;
-  height: 36px;
-  border-radius: 18px;
-  flex-direction: row;
+  width: 55px;
+  height: 22px;
+  border-radius: 11px;
+  border-width: 1px;
+  border-color: #e8eaed;
   align-items: center;
   justify-content: center;
-  border-width: 1px;
-  border-color: #2F87FF;
+  align-self: right;
+  background-color: #F0F3F8;
 `;
 
 const MapSearchResultButtonText = styled.Text`
-  font-size: 13px;
-  font-family: Pretendard-Medium;
-  color: #2f87ff;
-  line-height: 16px;
+  font-size: 10px;
+  font-family: Pretendard-Bold;
+  color: #2F87FF;
+  line-height: 20px;
 `;
 
 
@@ -269,7 +271,7 @@ const Title = styled.Text`
 
 const SubTitle2 = styled.Text`
   font-size: 12px;
-  font-family: Pretendard-Regular;
+  font-family: Pretendard-Bold;
   color: #a3a5a8;
   line-height: 14px;
   margin-top: 20px;
@@ -331,6 +333,7 @@ const FixedHouse = props => {
   const [detailAddress, setDetailAddress] = useState('');
   const [detailAddress3, setDetailAddress3] = useState('');
   const [dongList, setDongList] = useState([]);
+  const [initItem, setInitItem] = useState({});
   const [hoList, setHoList] = useState([]);
   const [selectedDong, setSelectedDong] = useState('');
   const [selectedHo, setSelectedHo] = useState('');
@@ -346,6 +349,7 @@ const FixedHouse = props => {
   const currentUser = useSelector(state => state.currentUser.value);
   const fixHouseList = useSelector(state => state.fixHouseList.value);
   const [directacquisitionDate, setDirectAcquisitionDate] = useState(false);
+  const [expandedItems, setExpandedItems] = useState({});
 
   for (let i = 9; i <= 11; i++) {
     morningTimes.push(`${i}:00`);
@@ -355,9 +359,33 @@ const FixedHouse = props => {
     afternoonTimes.push(`${i}:00`);
     if (i < 18) afternoonTimes.push(`${i}:30`);
   }
+
+  const toggleExpand = (index) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
+
+
   const handleBackPress = () => {
     foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
     if (currentPageIndex === 0) {
+      dispatch(editFixHouseList({
+        ...foundItem,
+        houseId: foundItem.houseId,
+        jibunAddr: initItem.jibunAddr,
+        roadAddr: initItem.roadAddr,
+        bdMgtSn: initItem.bdMgtSn,
+        admCd: initItem.admCd,
+        rnMgtSn: initItem.rnMgtSn,
+        buyDate: initItem.buyDate,
+        buyPrice: initItem.buyPrice,
+        complete: false,
+        detailAdr: initItem.detailAdr,
+        houseName: initItem.houseName
+      }));
       navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
     } else {
       if (currentPageIndex === 1) {
@@ -470,6 +498,7 @@ const FixedHouse = props => {
 */
   useEffect(() => {
     var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
+    setInitItem(foundItem);
     setAddress(foundItem.roadAddr ? foundItem.roadAddr + '\n' + (foundItem.houseName ? foundItem.houseName : '') : foundItem.jibunAddr ? foundItem.jibunAddr + '\n' + (foundItem.houseName ? foundItem.houseName : '') : '');
     if (!(foundItem.admCd)) {
       setCurrentPageIndex(0);
@@ -819,6 +848,20 @@ const FixedHouse = props => {
             var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
             //console.log('currentPageIndex', currentPageIndex);
             if (currentPageIndex === 0) {
+              dispatch(editFixHouseList({
+                ...foundItem,
+                houseId: foundItem.houseId,
+                jibunAddr: initItem.jibunAddr,
+                roadAddr: initItem.roadAddr,
+                bdMgtSn: initItem.bdMgtSn,
+                admCd: initItem.admCd,
+                rnMgtSn: initItem.rnMgtSn,
+                buyDate: initItem.buyDate,
+                buyPrice: initItem.buyPrice,
+                complete: false,
+                detailAdr: initItem.detailAdr,
+                houseName: initItem.houseName
+              }));
               navigation.navigate('FixedHouseList', { chatListindex: props.route.params.chatListindex });
 
             } else {
@@ -919,7 +962,7 @@ const FixedHouse = props => {
         letterSpacing: -0.8,
       },
     });
-  }, [currentPageIndex]);
+  }, [currentPageIndex, initItem, directacquisitionDate, searchText, fixHouseList, selectedHo]);
 
   return (
     <ScrollView
@@ -1030,31 +1073,10 @@ const FixedHouse = props => {
                     </ListFooterButton>
                   )
                 }
-                renderItem={({ item, index }) => (
-                  <MapSearchResultItem>
-                    <View
-                      style={{
-                        width: '70%',
-                      }}>
-                      <MapSearchResultItemTitle >
-                        {item?.roadAddr}
-                      </MapSearchResultItemTitle>
-                      <View
-                        style={{
-                          width: '100%',
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          marginTop: 6,
-                        }}>
-                        <AddressNumberBadge>
-                          <AddressNumberText >지번</AddressNumberText>
-                        </AddressNumberBadge>
-                        <MapSearchResultItemAddress >
-                          {item?.jibunAddr}
-                        </MapSearchResultItemAddress>
-                      </View>
-                    </View>
-                    <MepSearchResultButton
+                renderItem={({ item, index }) => {
+                  const sortedList = item?.detBdNmList ? item.detBdNmList.split(",").map(name => name.trim()).sort((a, b) => a.localeCompare(b)) : [];
+                  return (
+                    <MapSearchResultItem
                       onPress={async () => {
                         //console.log('item', item);
                         const state = await NetInfo.fetch();
@@ -1065,6 +1087,7 @@ const FixedHouse = props => {
                           var foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
                           dispatch(editFixHouseList({
                             ...foundItem,
+                            houseId: foundItem.houseId,
                             jibunAddr: item.jibunAddr,
                             roadAddr: item.roadAddr,
                             bdMgtSn: item.bdMgtSn,
@@ -1090,10 +1113,55 @@ const FixedHouse = props => {
                           }
                         }
                       }}>
-                      <MapSearchResultButtonText >선택</MapSearchResultButtonText>
-                    </MepSearchResultButton>
-                  </MapSearchResultItem>
-                )}
+                      <View
+                        style={{
+                          width: '80%',
+                        }}>
+                        <MapSearchResultItemTitle>
+                          {item?.roadAddr}
+                        </MapSearchResultItemTitle>
+                        <View
+                          style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginTop: 6,
+                          }}>
+                          <AddressDetailBadge>
+                            <AddressDetailText>상세주소</AddressDetailText>
+                          </AddressDetailBadge>
+                          {!expandedItems[index] ? (
+                            <MapSearchResultItemAddress ellipsizeMode='tail' numberOfLines={1}>
+                              {sortedList.join(',')}
+                            </MapSearchResultItemAddress>
+                          ) : (
+                            <MapSearchResultItemAddress>
+                              {sortedList.join(',')}
+                            </MapSearchResultItemAddress>
+                          )}
+                          {sortedList.length > 5 && <MepSearchResultButton onPress={() => { toggleExpand(index) }}>
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                              {!expandedItems[index] ? (
+                                <Bottompolygon style={{ marginTop: 1, color: '#2F87FF' }} />
+                              ) : (
+                                <Bottompolygon style={{
+                                  marginTop: 1,
+                                  transform: [{ rotate: '180deg' }],
+                                  color: '#2F87FF',
+                                }} />
+                              )}
+                              <MapSearchResultButtonText>{expandedItems[index] ? '접기' : '펼치기'}</MapSearchResultButtonText>
+                            </View>
+                          </MepSearchResultButton>}
+                        </View>
+                      </View>
+                    </MapSearchResultItem>
+                  )
+                }}
                 keyExtractor={(item, index) => index.toString()}
               />
             </Container>
@@ -1283,6 +1351,7 @@ const FixedHouse = props => {
                     if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1298,6 +1367,7 @@ const FixedHouse = props => {
                     } else if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1313,6 +1383,7 @@ const FixedHouse = props => {
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1328,6 +1399,7 @@ const FixedHouse = props => {
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1397,6 +1469,7 @@ const FixedHouse = props => {
                     if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1412,6 +1485,7 @@ const FixedHouse = props => {
                     } else if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1427,6 +1501,7 @@ const FixedHouse = props => {
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1442,6 +1517,7 @@ const FixedHouse = props => {
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1567,6 +1643,7 @@ const FixedHouse = props => {
                     if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1582,6 +1659,7 @@ const FixedHouse = props => {
                     } else if (!fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1597,6 +1675,7 @@ const FixedHouse = props => {
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1612,6 +1691,7 @@ const FixedHouse = props => {
                     } else if (fixHouseInfo.acquisitionDate && foundItem.buyPrice !== null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: selectedItem.jibunAddr,
                         roadAddr: selectedItem.roadAddr,
                         bdMgtSn: selectedItem.bdMgtSn,
@@ -1781,6 +1861,7 @@ const FixedHouse = props => {
                     if (foundItem.buyPrice === null) {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: foundItem.jibunAddr,
                         roadAddr: foundItem.roadAddr,
                         bdMgtSn: foundItem.bdMgtSn,
@@ -1796,6 +1877,7 @@ const FixedHouse = props => {
                     } else {
                       dispatch(editFixHouseList({
                         ...foundItem,
+                        houseId: foundItem.houseId,
                         jibunAddr: foundItem.jibunAddr,
                         roadAddr: foundItem.roadAddr,
                         bdMgtSn: foundItem.bdMgtSn,
@@ -1878,6 +1960,7 @@ const FixedHouse = props => {
                     foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
                     dispatch(editFixHouseList({
                       ...foundItem,
+                      houseId: foundItem.houseId,
                       jibunAddr: foundItem.jibunAddr,
                       roadAddr: foundItem.roadAddr,
                       bdMgtSn: foundItem.bdMgtSn,
@@ -1987,6 +2070,7 @@ const FixedHouse = props => {
                     foundItem = fixHouseList?.find((el) => el.index === props?.route.params.index);
                     dispatch(editFixHouseList({
                       ...foundItem,
+                      houseId: foundItem.houseId,
                       jibunAddr: foundItem.jibunAddr,
                       roadAddr: foundItem.roadAddr,
                       bdMgtSn: foundItem.bdMgtSn,

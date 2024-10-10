@@ -38,20 +38,6 @@ const IntroSection2 = styled.View`
   padding: 20px 20px 0px 20px;
 `;
 
-const IntroSection3 = styled.View`
-  width: 100%;
-  padding: 10px;
-`;
-
-const ProfileAvatar = styled(FastImage).attrs(_props => ({
-  resizeMode: 'contain',
-}))`
-  width: 100%;
-  height: 100%;
-  border-radius: 0px;
-  background-color: #F0F3F8;
-  align-self: center;
-`;
 
 const ProgressSection = styled.View`
   flex-direction: row;
@@ -144,14 +130,6 @@ const Title = styled.Text`
   letter-spacing: -0.5px;
 `;
 
-const SubTitle = styled.Text`
-  font-size: 19px;
-  font-family: Pretendard-Bold;
-  color: #1b1c1f;
-  line-height: 30px;
-  margin-top: 10px;
-  
-`;
 
 const SubTitle2 = styled.Text`
   font-size: 12px;
@@ -315,6 +293,7 @@ const AddHouseList = props => {
       };
 
       // 요청 바디
+      console.log('last AddHouseList', AddHouseList);
       var loadHouseList = AddHouseList ? AddHouseList.filter(house => house.complete === true) : [];
       const data = loadHouseList.map(({ index, ...rest }) => rest);
       console.log('[hypenHouseAPI] data : ', data);
@@ -334,13 +313,14 @@ const AddHouseList = props => {
             return;
 
           } else {
+            console.log('[hypenHouseAPI] ownHouseList : ', ownHouseList);
+            console.log('[hypenHouseAPI] home response.data : ', response.data.data);
             const returndata = response.data.data;
             dispatch(setOwnHouseList([
-              ...ownHouseList,
               ...returndata,
             ]));
 
-            console.log('[hypenHouseAPI] home response.data : ', response.data.data);
+           //console.log('[hypenHouseAPI] home response.data : ', response.data.data);
             //console.log('[hypenHouseAPI] ownhouse : ', ownHouseList);
           }
         })

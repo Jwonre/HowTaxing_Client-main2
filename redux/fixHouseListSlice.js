@@ -29,6 +29,7 @@ export const fixHouseListSlice = createSlice({
         //    ////console.log('as is source houseType value:' + state.value[houseIndex].houseType);
         //    ////console.log('as is source detailAdr value:' + state.value[houseIndex].detailAdr);
         //    ////console.log('as is source houseName value:' + state.value[houseIndex].houseName);
+        state.value[houseIndex].houseId = houseId;
         state.value[houseIndex].buyDate = buyDate;
         state.value[houseIndex].buyPrice = buyPrice;
         state.value[houseIndex].jibunAddr = jibunAddr;

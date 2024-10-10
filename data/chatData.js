@@ -148,7 +148,7 @@ export const acquisitionTax = [
     id: 'certType',
     type: 'system',
     progress: 5,
-    message: '공공기관에서 여러 인증방식을 제공해요.\n인증방식을 선택해주세요.\n청약통장이 없다면 인증이 어려우므로\n보유 중인 주택들을 직접 등록해주세요.',
+    message: '공공기관에서 여러 인증방식을 제공해요. 인증방식을 선택해주세요.\n청약통장이 없다면 인증이 어려우므로 보유 중인 주택들을 직접 등록해주세요.',
     select: [
       {
         id: 'KB',
@@ -455,7 +455,7 @@ export const gainTax = [
     id: 'certType',
     type: 'system',
     progress: 3,
-    message: '공공기관에서 여러 인증방식을 제공해요.\n인증방식을 선택해주세요.\n청약통장이 없다면 인증이 어려우므로\n보유 중인 주택들을 직접 등록해주세요.',
+    message: '공공기관에서 여러 인증방식을 제공해요. 인증방식을 선택해주세요.\n청약통장이 없다면 인증이 어려우므로 보유 중인 주택들을 직접 등록해주세요.',
     select: [
       {
         id: 'KB',
@@ -489,7 +489,7 @@ export const gainTax = [
     id: 'certType12',
     type: 'system',
     progress: 3,
-    message: '공공기관에서 여러 인증방식을 제공해요.\n인증방식을 선택해주세요.\n청약통장이 없다면 인증이 어려우므로\n보유 중인 주택들을 직접 등록해주세요.',
+    message: '공공기관에서 여러 인증방식을 제공해요. 인증방식을 선택해주세요.\n청약통장이 없다면 인증이 어려우므로 보유 중인 주택들을 직접 등록해주세요.',
     select: [
       {
         id: 'KB',
@@ -518,7 +518,7 @@ export const gainTax = [
     id: 'certType2',
     type: 'system',
     progress: 3,
-    message: '공공기관에서 여러 인증방식을 제공해요.\n인증방식을 선택해주세요.',
+    message: '공공기관에서 여러 인증방식을 제공해요. 인증방식을 선택해주세요.',
     select: [
       {
         id: 'PASS',

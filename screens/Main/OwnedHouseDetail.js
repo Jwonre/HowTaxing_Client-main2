@@ -733,7 +733,7 @@ const OwnedHouseDetail = props => {
               }); return;
             }
             if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
-              dispatch(editOwnHouseList({ ...item, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType, isMoveInRight: data?.isMoveInRight }));
+              dispatch(editOwnHouseList({ ...item, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType, isMoveInRight: data?.isMoveInRight, isRequiredDataMissing: false }));
             }
 
 
@@ -887,7 +887,7 @@ const OwnedHouseDetail = props => {
     }
 
     if (ownHouseList?.find(item => item.houseId === data?.houseId)) {
-      dispatch(editOwnHouseList({ ...item, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType, isMoveInRight: data?.isMoveInRight }));
+      dispatch(editOwnHouseList({ ...item, houseName: data?.houseName, detailAdr: data?.detailAdr, houseType: data?.houseType, isMoveInRight: data?.isMoveInRight, isRequiredDataMissing: false }));
     }
     navigation.goBack();
     if (!props.route.params?.prevSheet) return true;

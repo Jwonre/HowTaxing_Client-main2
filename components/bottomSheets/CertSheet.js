@@ -323,11 +323,9 @@ const CertSheet = props => {
   }, []);
 
   useEffect(() => {
-    dispatch(
-      setFixHouseList([]),
-      setAddHouseList([]),
-      setOwnHouseList([]),
-    );
+    dispatch(setFixHouseList([]));
+    dispatch(setAddHouseList([]));
+    dispatch(setOwnHouseList([]));
   }, []);
 
   const [id, setId] = useState('');
@@ -343,57 +341,53 @@ const CertSheet = props => {
 
 
   const registerDirectHouse = async (list) => {
-    const state = await NetInfo.fetch();
-    const canProceed = await handleNetInfoChange(state);
-    if (canProceed) {
+    try {
+      const state = await NetInfo.fetch();
+      const canProceed = await handleNetInfoChange(state);
+
+      if (!canProceed) return false;
+
       const accessToken = currentUser.accessToken;
-      // 요청 헤더
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`
       };
 
-      // 요청 바디
-      const data = list ? list : [];
-      //console.log('data : ', data);
-      axios
-        .post(`${Config.APP_API_URL}house/saveAllHouse`, data, { headers: headers })
-        .then(async response => {
-          if (response.data.errYn === 'Y') {
-            SheetManager.show('info', {
-              payload: {
-                type: 'error',
-                message: response.data.errMsg ? response.data.errMsg : '보유주택 수정·등록 중 오류가 발생했습니다.',
-                description: response.data.errMsgDtl ? response.data.errMsgDtl : '',
-                buttontext: '확인하기',
-              },
-            });
-            return false;
+      const data = list || [];
+      console.log('data : ', data);
 
-          } else {
-            const returndata = response.data.data;
-            dispatch(setOwnHouseList([
-              ...returndata,
-            ]));
-            return true;
-            //console.log('[hypenHouseAPI] response.data : ', response.data);
-          }
-        })
-        .catch(error => {
-          // 오류 처리
-          SheetManager.show('info', {
-            payload: {
-              type: 'error',
-              message: '보유주택 수정·등록 중 오류가 발생했습니다.',
-              buttontext: '확인하기',
-            },
-          });
-          console.error(error);
+      const response = await axios.post(`${Config.APP_API_URL}house/saveAllHouse`, data, { headers });
 
-          return false;
-        });
+      console.log('response : ', response);
+
+      if (response.data.errYn === 'Y') {
+        await showErrorMessage(response.data.errMsg, response.data.errMsgDtl);
+        return false;
+      } else {
+        dispatch(setOwnHouseList([...response.data.data]));
+        return true;
+      }
+    } catch (error) {
+      await showErrorMessage();
+      console.error(error); // 여기서 error 변수를 사용
+      return false;
     }
   };
+
+  const showErrorMessage = async (errMsg = '보유주택 수정·등록 중 오류가 발생했습니다.', errMsgDtl = '') => {
+    await new Promise((resolve) => {
+      SheetManager.show('info', {
+        payload: {
+          type: 'error',
+          message: errMsg,
+          description: errMsgDtl,
+          buttontext: '확인하기',
+          onClose: resolve, // 사용자가 확인 버튼을 누르면 resolve 호출
+        },
+      });
+    });
+  };
+
 
 
   //https://www.npmjs.com/package/react-native-mask-input
@@ -526,6 +520,38 @@ const CertSheet = props => {
             });
           }
 
+        } else if (response.data.errCode === 'HOUSE-018') {
+          await SheetManager.hide('infoCertification');
+          await SheetManager.show('info', {
+            payload: {
+              type: 'error',
+              message: response.data.errMsg ? response.data.errMsg : '청약홈 인증 중\n오류가 발생했어요.\n입력하신 정보를 다시 확인해주세요.',
+              description: response.data?.errMsgDtl ? response.data?.errMsgDtl : '',
+              buttontext: '다시 확인하기',
+            },
+          });
+          dispatch(setResend(false));
+          setTimeout(async () => {
+            const networkState = await NetInfo.fetch();
+            // 네트워크가 연결되어 있을 때만 updateHouseDetailName() 함수를 실행합니다.
+            if (networkState.isConnected) {
+              SheetManager.show('cert', {
+                payload: {
+                  cert: cert,
+                  index: props.payload?.index,
+                  currentPageIndex,
+                  name,
+                  phone,
+                  id,
+                  password,
+                  residentNumber,
+                  failreturn: true,
+                },
+              });
+            }
+          }, 300);
+          const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
+          dispatch(setChatDataList(newChatDataList));
         } else {
 
           setTimeout(async () => {
@@ -546,12 +572,11 @@ const CertSheet = props => {
           SheetManager.hide("infoCertification");
         }, 300);
 
-        var list = response.data.data ? response.data.data : undefined;
-        //console.log('[hypenHouseAPI] list:', list);
 
-        list = list.map((item, index) => ({ ...item, index }));
-        //console.log('[hypenHouseAPI] list:', list);
-        if (list) {
+
+        if (response.data.data && response.data.data.length > 0) {
+          list = response.data.data.map((item, index) => ({ ...item, index }));
+          console.log('[hypenHouseAPI] list:', list);
           dispatch(setResend(false));
           if (list.some(item => item.complete === false)) {
             setTimeout(async () => {
@@ -564,15 +589,18 @@ const CertSheet = props => {
             }, 300);
             return false;
           } else {
-            const registerDirectHouseResult = await registerDirectHouse();
+            const registerDirectHouseResult = await registerDirectHouse(list);
             if (registerDirectHouseResult) {
+
               const getEtcHouseReturn = await getEtcHouse();
+              console.log('getEtcHouseReturn : ', getEtcHouseReturn);
               if (getEtcHouseReturn === 'getEtcHouseNull') {
+                console.log('getEtcHouseNull');
                 return true;
               } else if (getEtcHouseReturn === 'getEtcHouse') {
                 navigation.navigate('AddHouseList', { chatListindex: props?.payload?.index });
                 return false;
-              } else if(getEtcHouseReturn === 'getEtcHouseFailed') {
+              } else if (getEtcHouseReturn === 'getEtcHouseFailed') {
                 const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
                 dispatch(setChatDataList(newChatDataList));
                 return false;
@@ -584,18 +612,15 @@ const CertSheet = props => {
             }
           }
         } else {
-          const registerDirectHouseResult = await registerDirectHouse();
           dispatch(setResend(false));
-          if (registerDirectHouseResult) {
-
-            const getEtcHouseReturn = await getEtcHouse();
-            if (getEtcHouseReturn === 'getEtcHouseNull') {
-              return true;
-            } else if (getEtcHouseReturn === 'getEtcHouse') {
-              navigation.navigate('AddHouseList', { chatListindex: props?.payload?.index });
-              return false;
-            }
-          } else {
+          const getEtcHouseReturn = await getEtcHouse();
+          if (getEtcHouseReturn === 'getEtcHouseNull') {
+            dispatch(setOwnHouseList([]));
+            return true;
+          } else if (getEtcHouseReturn === 'getEtcHouse') {
+            navigation.navigate('AddHouseList', { chatListindex: props?.payload?.index });
+            return false;
+          } else if (getEtcHouseReturn === 'getEtcHouseFailed') {
             const newChatDataList = chatDataList.slice(0, props.payload?.index + 1);
             dispatch(setChatDataList(newChatDataList));
             return false;
@@ -784,10 +809,11 @@ const CertSheet = props => {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${currentUser.accessToken}`
     };
+    console.log('headers : ', headers);
+    console.log('url : ', url);
     try {
       const response = await axios.get(url, { headers: headers });
       if (response.data.errYn === 'Y') {
-        setFixHouseFinishAndWait(true);
         await SheetManager.show('info', {
           payload: {
             type: 'error',
@@ -800,26 +826,22 @@ const CertSheet = props => {
       } else {
         console.log('response.data.data2 : ', response.data.data);
         console.log('response.data.data2.length : ', response.data.data.length);
-        if (response.data.data.length === 0) {
-          setFixHouseFinishAndWait(true);
-          const isGainsTax = props?.route?.params?.isGainsTax;
-          const chatItem = isGainsTax
-            ? gainTax.find(el => el.id === 'allHouse1')
-            : acquisitionTax.find(el => el.id === 'moment1');
-          dispatch(setChatDataList([...chatDataList, chatItem]), setFixHouseList([]));
-          return 'getEtcHouseNull';
+        const result = response.data.data ? response.data.data : undefined;
+        if (result) {
+          if (response.data.data.length === 0) {
+            return 'getEtcHouseNull';
+          } else {
+            var list = response.data.data.map((item, index) => ({ ...item, index }));
+            dispatch(setFixHouseList(list));
+            return 'getEtcHouse';
+          }
         } else {
-          setFixHouseFinishAndWait(false)
-          // console.log('response.data.data : ', response.data.data);
-          var list = response.data.data.map((item, index) => ({ ...item, index }));
-          dispatch(setFixHouseList(list));
-          return 'getEtcHouse';
+          return 'getEtcHouseFailed';
         }
+
       }
     } catch (error) {
-      setFixHouseFinishAndWait(true);
-      //console.log(error);
-      SheetManager.show('info', {
+      await SheetManager.show('info', {
         payload: {
           message: '기타 재산세 보유주택을 불러오는데 문제가 발생했어요.',
           description: error.message ? error.message : '오류가 발생했습니다.',
@@ -830,7 +852,6 @@ const CertSheet = props => {
       return 'getEtcHouseFailed';
     }
   };
-
 
 
   return (

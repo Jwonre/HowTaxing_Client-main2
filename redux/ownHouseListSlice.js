@@ -14,7 +14,7 @@ export const ownHouseListSlice = createSlice({
       state.value = action.payload;
     },
     editOwnHouseList: (state, action) => {
-      const { houseId, houseType, houseName, detailAdr, complete, isMoveInRight } = action.payload;
+      const { houseId, houseType, houseName, detailAdr, isRequiredDataMissing, isMoveInRight } = action.payload;
 
     //  ////console.log('target HouseId HouseType:' + houseId + ':' + houseType + ':' + detailAdr + ':' + houseName);
 
@@ -32,7 +32,7 @@ export const ownHouseListSlice = createSlice({
         state.value[houseIndex].houseType = houseType;
         state.value[houseIndex].detailAdr = detailAdr;
         state.value[houseIndex].houseName = houseName;
-        state.value[houseIndex].complete = complete;
+        state.value[houseIndex].isRequiredDataMissing = isRequiredDataMissing;
         state.value[houseIndex].isMoveInRight = isMoveInRight;
 
      //   ////console.log('to be source houseType value:' + state.value[houseIndex].houseType);

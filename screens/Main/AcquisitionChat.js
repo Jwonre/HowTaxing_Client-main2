@@ -253,6 +253,7 @@ const SocialButtonIcon = styled.Image.attrs(props => ({
   height: 20px;
   margin-right: 16px;
 `;
+
 const Button = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.6,
 }))`
@@ -1580,6 +1581,7 @@ const AcquisitionChat = () => {
                                   data: item2.id,
                                   data2: item.id,
                                   index,
+                                  isGainsTax: false,
                                   currentPageIndex: item2?.currentPageIndex,
                                   chungYackYn: item2?.chungYackYn
                                 },
@@ -1591,6 +1593,7 @@ const AcquisitionChat = () => {
                                   data: item2.id,
                                   data2: item.id,
                                   index,
+                                  isGainsTax: false,
                                   currentPageIndex: item2?.currentPageIndex,
                                   chungYackYn: item2?.chungYackYn
                                 },
@@ -1602,6 +1605,7 @@ const AcquisitionChat = () => {
                                   data: item2.id,
                                   data2: item.id,
                                   index,
+                                  isGainsTax: false,
                                   currentPageIndex: item2?.currentPageIndex,
                                 },
                               });

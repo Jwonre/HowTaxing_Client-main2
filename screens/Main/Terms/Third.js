@@ -75,6 +75,14 @@ const ContentText = styled.Text`
   margin-top: 20px;
 `;
 
+const ProgressSection = styled.View`
+  flex-direction: row;
+  width: 100%;
+  height: 5px;
+  background-color: #2f87ff;
+`;
+
+
 const Third = props => {
   const navigation = props.navigation;
   const dispatch = useDispatch();
@@ -130,7 +138,7 @@ const Third = props => {
         </TouchableOpacity>
       ),
       headerTitleAlign: 'center',
-      title: '하우택싱',
+      title: '약관 조회하기',
       headerShadowVisible: false,
       contentStyle: {
         borderTopWidth: 0,
@@ -146,6 +154,8 @@ const Third = props => {
 
   return (
     <Container>
+      <ProgressSection>
+      </ProgressSection>
       <ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={true}

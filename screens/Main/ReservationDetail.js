@@ -18,6 +18,7 @@ import TaxCard2 from '../../components/TaxCard2';
 import TaxInfoCard2 from '../../components/TaxInfoCard2';
 import HouseInfo from '../../components/HouseInfo';
 import Bottompolygon from '../../assets/icons/bottom_polygon.svg';
+import EditButtom from '../../assets/icons/edit_Reservation.svg';
 
 const Container = styled.View`
   flex: 1.0;
@@ -60,13 +61,9 @@ const ModalInput = styled.ScrollView.attrs(_props => ({
 }))`
   width: 100%;
   height: 100px;
-  padding: 10px 20px;
+  padding: 10px 10px 10px 20px;
   background-color: #F5F7FA;
-  font-family: Pretendard-regular;
   color: #A3A5A8;
-  line-height: 30px;
-  text-align: left;
-  text-align-vertical: top;
   overflow: hidden; 
   border-radius: 8px;
 `;
@@ -75,7 +72,7 @@ const ModalInputText = styled.Text`
   font-size: 13px;
   font-family: Pretendard-regular;
   color: #A3A5A8;
-  line-height: 30px;
+  line-height: 15px;
   text-align: left;
   text-align-vertical: top;
   overflow: hidden;
@@ -115,7 +112,7 @@ const SubTitle = styled.Text`
   font-size: 17px;
   font-family: Pretendard-Bold;
   color: #1b1c1f;
-  line-height: 30px;
+  line-height: 25px;
   
 `;
 
@@ -213,6 +210,22 @@ const ReservationDetail = props => {
     return true;
   }
 
+  const handleHouseChange1 = async (Date, Time) => {
+    setReservationDetail(prevDetail => ({
+      ...prevDetail,
+      reservationDate: Date,
+      reservationStartTime: Time,
+    }));
+  };
+
+  const handleHouseChange2 = async (Content, Type) => {
+    setReservationDetail(prevDetail => ({
+      ...prevDetail,
+      consultingType: Type,
+      consultingRequestContent: Content,
+    }));
+  };
+
   useFocusEffect(
     useCallback(() => {
       BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -222,6 +235,12 @@ const ReservationDetail = props => {
     }, [handleBackPress])
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      console.log('consultingReservationId', props.route?.params?.consultingReservationId);
+      getReservationDetail(props.route?.params?.consultingReservationId);
+    }, [])
+  );
   const [isConnected, setIsConnected] = useState(true);
 
   /*useEffect(() => {
@@ -232,9 +251,7 @@ const ReservationDetail = props => {
     });
   }, [currentPageIndex2]);
 */
-  useEffect(() => {
-    getReservationDetail(props.route?.params?.consultingReservationId);
-  }, []);
+
 
   const handleNetInfoChange = (state) => {
     return new Promise((resolve, reject) => {
@@ -358,7 +375,6 @@ const ReservationDetail = props => {
     'FINISH': '#A82BC6'
   };
 
-  const consultingTypes = reservationDetail.consultingType?.split(',').map(type => consultingTypeMap[type]);
 
   return (
 
@@ -387,8 +403,42 @@ const ReservationDetail = props => {
                   <SubTitle>상담 예약일시</SubTitle>
                   <SubTitle2>확정된 상담 예약 날짜와 시간이에요.</SubTitle2>
                   <ModalInput
-                    style={{ height: 50, textAlignVertical: 'top' }}
-                  ><ModalInputText>{new Date(reservationDetail.reservationDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) + ' ' + reservationDetail.reservationStartTime}</ModalInputText></ModalInput>
+                    style={{ height: 50, textAlignVertical: 'top', paddingTop: reservationDetail.consultingStatus === 'WAITING' ? 10 : 20 }}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <ModalInputText style={{ textAlignVertical: 'center', width: '90%' }}>
+                        {new Date(reservationDetail.reservationDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) + ' ' + reservationDetail.reservationStartTime}
+                      </ModalInputText>
+                      {reservationDetail.consultingStatus === 'WAITING' && (<TouchableOpacity
+                        style={{ paddingTop: 5 }}
+                        activeOpacity={0.6}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        onPress={() => {
+                          //  console.log('reservationDetail', reservationDetail);
+                          SheetManager.show('updateConsultingDateAndTimeAlert', {
+                            payload: {
+                              navigation,
+                              consultingReservationId: props.route?.params?.consultingReservationId,
+                              handleHouseChange1,
+                            },
+                          });
+                        }}>
+                        <DropShadow style={{
+                          width: '100%',
+                          shadowColor: '#000',
+                          shadowOffset: {
+                            width: 0,
+                            height: 3,
+                          },
+                          shadowOpacity: 0.2,
+                          shadowRadius: 1,
+                        }}>
+                          <EditButtom />
+                        </DropShadow>
+                      </TouchableOpacity>)}
+
+                    </View>
+                  </ModalInput>
                 </ModalInputContainer>
               </ModalInputSection>
               <ModalInputSection style={{ width: '100%' }}>
@@ -396,15 +446,45 @@ const ReservationDetail = props => {
                   <SubTitle>상담 내용</SubTitle>
                   <SubTitle2>상담을 원하시는 세금 종류와 상담 내용이에요.</SubTitle2>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 }}>
-                    {reservationDetail.consultingType && consultingTypes.map((type) => (
+                    {reservationDetail.consultingType && reservationDetail.consultingType?.split(',').map(type => consultingTypeMap[type]).map((type) => (
                       <HoustInfoBadge key={type} style={{ backgroundColor: '#2F87FF', marginRight: 10 }}>
                         <HoustInfoBadgeText>{type}</HoustInfoBadgeText>
                       </HoustInfoBadge>
                     ))}
                   </View>
                   <ModalInput
-                    style={{ height: reservationDetail.consultingInflowPath && reservationDetail.consultingInflowPath !== '00' ? 130 : 150, textAlignVertical: 'top' }}>
-                    <ModalInputText>{ }</ModalInputText>
+                    style={{ height: reservationDetail.consultingInflowPath && reservationDetail.consultingInflowPath !== '00' ? 130 : 150, textAlignVertical: 'top', paddingTop: reservationDetail.consultingStatus === 'WAITING' ? 10 : 20 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <ModalInputText style={{ width: '90%', paddingTop: 10 }}>{reservationDetail.consultingRequestContent}</ModalInputText>
+                      {reservationDetail.consultingStatus === 'WAITING' && (<TouchableOpacity
+                        style={{ paddingTop: 5 }}
+                        activeOpacity={0.6}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        onPress={() => {
+                          SheetManager.show('updateConsultingContentAlert', {
+                            payload: {
+                              navigation,
+                              consultingReservationId: props.route?.params?.consultingReservationId,
+                              consultingRequestContent: reservationDetail.consultingRequestContent,
+                              consultingType: reservationDetail.consultingType,
+                              handleHouseChange2,
+                            },
+                          });
+                        }}>
+                        <DropShadow style={{
+                          width: '100%',
+                          shadowColor: '#000',
+                          shadowOffset: {
+                            width: 0,
+                            height: 3,
+                          },
+                          shadowOpacity: 0.2,
+                          shadowRadius: 1,
+                        }}>
+                          <EditButtom />
+                        </DropShadow>
+                      </TouchableOpacity>)}
+                    </View>
                   </ModalInput>
                 </ModalInputContainer>
               </ModalInputSection>
@@ -440,8 +520,8 @@ const ReservationDetail = props => {
 
               {isExpanded && (<>
                 {/*reservationDetail.consultingInflowPath !== '02' ? <HouseInfo item={houseInfo} navigation={navigation} ChatType='AcquisitionChat' /> : <HouseInfo item={houseInfo} navigation={navigation} ChatType='GainsTaxChat' />*/}
-                {reservationDetail.consultingInflowPath !== '02' ? <TaxCard navigation={navigation} Pdata={reservationDetail.calculationBuyResultResponse !== null ? reservationDetail.calculationBuyResultResponse.list : null} /> : <TaxCard2 navigation={navigation} Pdata={reservationDetail.calculationSellResultResponse !== null ? reservationDetail.calculationSellResultResponse.list : null} />}
-                {reservationDetail.consultingInflowPath !== '02' ? <TaxInfoCard Pdata={reservationDetail.calculationBuyResultResponse !== null ? reservationDetail.calculationBuyResultResponse.commentaryList : null} /> : <TaxInfoCard2 Pdata={reservationDetail.calculationSellResultResponse !== null ? reservationDetail.calculationSellResultResponse.commentaryList : null} />}
+                {reservationDetail.consultingInflowPath !== '02' ? <TaxCard navigation={navigation} Pdata={reservationDetail.calculationBuyResultResponse !== null ? reservationDetail.calculationBuyResultResponse : null} /> : <TaxCard2 navigation={navigation} Pdata={reservationDetail.calculationSellResultResponse !== null ? reservationDetail.calculationSellResultResponse : null} />}
+                {reservationDetail.consultingInflowPath !== '02' ? <TaxInfoCard Pdata={reservationDetail.calculationBuyResultResponse !== null ? reservationDetail.calculationBuyResultResponse : null} /> : <TaxInfoCard2 Pdata={reservationDetail.calculationSellResultResponse !== null ? reservationDetail.calculationSellResultResponse : null} />}
               </>)
               }
             </IntroSection>
@@ -462,9 +542,9 @@ const ReservationDetail = props => {
                       shadowColor: '#000',
                       shadowOffset: {
                         width: 0,
-                        height: 3,
+                        height: 0,
                       },
-                      shadowOpacity: 0.2,
+                      shadowOpacity: 0,
                       shadowRadius: 1,
                     }}>
                     <Button

@@ -118,7 +118,7 @@ const Avatar = styled(FastImage).attrs(props => ({
 `;
 
 const ChatBubble = styled.View`
-  width: 80%;   
+  width: 90%;   
   height: auto;
   border-radius: 10px;
   background-color: #f0f3f8;
@@ -130,10 +130,10 @@ const ChatBubble = styled.View`
 `;
 
 const ChatBubbleText = styled.Text`
-  font-size: 13px;
+  font-size: 14px;
   font-family: Pretendard-SemiBold;
   color: #000;
-  line-height: 30px;
+  line-height: 25px;
 `;
 
 const Button = styled.TouchableOpacity.attrs(props => ({

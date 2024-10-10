@@ -27,7 +27,7 @@ const IconView = styled.View`
   position: absolute;
   right: 25px;
   border: 1px solid #e8eaed;
-  margin-top: 30px;
+  margin-top: 0px;
 `;
 const ListItem = styled.View`
   flex-direction: column;
@@ -39,7 +39,7 @@ const IntroSection = styled.View`
   flex: 0.6;
   width: 100%;
   padding: 25px;
-  justify-content: flex-end;
+  margin-top: 20px;
 `;
 
 const Title = styled.Text`
@@ -129,55 +129,7 @@ const Information = props => {
     });
   }, []);
 
-  const handleWithDraw = (accessToken) => {
-    // 요청 헤더
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`
-    };
 
-    // 요청 바디
-
-    axios
-      .delete(`${Config.APP_API_URL}user/withdraw`, { headers: headers })
-      .then(async response => {
-        if (response.data.errYn === 'Y') {
-          await SheetManager.show('info', {
-            payload: {
-              type: 'error',
-              message: response.data.errMsg ? response.data.errMsg : '회원탈퇴에 문제가 발생했어요.',
-              description: response.data.errMsgDtl ? response.data.errMsgDtl : null,
-              buttontext: '확인하기',
-            },
-          });
-          return;
-        } else {
-          await SheetManager.show('info', {
-            payload: {
-              type: 'info',
-              message: '회원탈퇴에 성공했어요.',
-              buttontext: '확인하기',
-            },
-          });
-          dispatch(setCurrentUser(null));
-          // 성공적인 응답 처리
-          // const { id } = response.data;
-          //    ////console.log("1111111", response);
-        }
-      })
-      .catch(error => {
-        // 오류 처리
-        SheetManager.show('info', {
-          payload: {
-            message: '회원탈퇴에 실패했어요.',
-            description: error?.message,
-            type: 'error',
-            buttontext: '확인하기',
-          }
-        });
-        return;
-      });
-  };
   const handleWithLogout = (accessToken) => {
     // 요청 헤더
     const headers = {
@@ -230,7 +182,7 @@ const Information = props => {
       });
       return;
     }
-
+``
   };
 
   const handlePress = buttonIndex => {
@@ -260,23 +212,24 @@ const Information = props => {
 
   return (
     <Container>
-      <IconView>
-        <InformationIcon />
-      </IconView>
       <IntroSection>
+        <IconView>
+          <InformationIcon />
+        </IconView>
+
         <Title >앱 정보</Title>
       </IntroSection>
       <ListItem>
         <Option>
-          <OptionText >공지사항</OptionText>
+          <OptionText>공지사항</OptionText>
         </Option>
         <Divider />
         <Option>
           <OptionText onPress={async () => {
-          const state = await NetInfo.fetch();
-          const canProceed = await handleNetInfoChange(state);
-          if (canProceed) { navigation.navigate('ReservationList') }
-        }}>상담예약</OptionText>
+            const state = await NetInfo.fetch();
+            const canProceed = await handleNetInfoChange(state);
+            if (canProceed) { navigation.navigate('ReservationList') }
+          }}>마이페이지</OptionText>
         </Option>
         <Divider />
         <Option style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -326,7 +279,11 @@ const Information = props => {
           const state = await NetInfo.fetch();
           const canProceed = await handleNetInfoChange(state);
           if (canProceed) {
-            handleWithDraw(currentUser.accessToken);
+            SheetManager.show('InfoHandleWithDraw', {
+              payload: {
+                navigation: navigation,
+              },
+            });
           }
         }
         }>

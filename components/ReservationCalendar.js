@@ -1,8 +1,11 @@
-import {View, Text, FlatList, TouchableOpacity, Pressable} from 'react-native';
-import React, {useState, useEffect} from 'react';
+import { View, Text, FlatList, TouchableOpacity, Pressable } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import getFontSize from '../utils/getFontSize';
 import dayjs from 'dayjs';
+import BottomAngleBracket from '../assets/icons/bottom_angle_bracket.svg';
+import LeftAngleBracket from '../assets/icons/Left_angle_bracket.svg';
+import RightAngleBracket from '../assets/icons/Left_angle_bracket.svg';
 import ArrowIcon from '../assets/icons/previous_arrow_ico.svg';
 
 const CalendarSection = styled.View`
@@ -42,11 +45,11 @@ const Calendar = props => {
   useEffect(() => {
     props.setSelectedDate(selectedDate);
   }, [selectedDate]);
-/*
-  useEffect(() => {
-    setSelectedDate(props.selectedDate);
-  }, [props.selectedDate]);
-*/
+  /*
+    useEffect(() => {
+      setSelectedDate(props.selectedDate);
+    }, [props.selectedDate]);
+  */
   useEffect(() => {
     setDataList(props.dateList);
     setSelectedDate(new Date(props.dateList[0]));
@@ -90,8 +93,8 @@ const Calendar = props => {
     lastDayOfMonth.getDate() + (6 - lastDayOfMonth.getDay()),
   );
 
-  const renderDay = ({item}) => {
-     //const isPast = item < props.minDate;
+  const renderDay = ({ item }) => {
+    //const isPast = item < props.minDate;
     const isAvailable = dateList.includes(item.toISOString().split('T')[0]);
     const isSunday = item.getDay() === 0;
     const isSaturday = item.getDay() === 6;
@@ -129,14 +132,14 @@ const Calendar = props => {
               },
               isAvailable
                 ? {
-                    color: isSelected
-                      ? '#fff'
-                      : isSaturday
+                  color: isSelected
+                    ? '#fff'
+                    : isSaturday
                       ? '#4E63FF'
                       : isSunday
-                      ? '#FF2C65'
-                      : '#545463',
-                  }
+                        ? '#FF2C65'
+                        : '#545463',
+                }
                 : null,
             ]}>
             {item.getDate()}
@@ -164,23 +167,22 @@ const Calendar = props => {
         flex: 1,
         backgroundColor: '#fff',
       }}>
-      <ModalSubtitle>
-        {dayjs(selectedDate).format('YYYY년 MM월 DD일')}
-      </ModalSubtitle>
       <View
         style={{
           width: '100%',
           borderTopWidth: 1,
           borderTopColor: '#E8EAED',
           paddingHorizontal: 10,
+
         }}>
         <View
           style={{
-            width: 200,
+            width: '90%',
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
             alignSelf: 'center',
+
           }}>
           <TouchableOpacity
             activeOpacity={0.8}
@@ -192,10 +194,16 @@ const Calendar = props => {
             }}
             onPress={() => {
               setCurrentDate(dayjs(currentDate).subtract(1, 'M').toDate());
-            }}>
-            <ArrowIcon />
+            }}
+
+          >
+            <LeftAngleBracket />
           </TouchableOpacity>
-          <ModalSubtitle>{dayjs(currentDate).format('YYYY.MM')}</ModalSubtitle>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <ModalSubtitle style={{ marginRight: 10 }} >
+              {currentDate.getFullYear() === selectedDate.getFullYear() && currentDate.getMonth() === selectedDate.getMonth() ? dayjs(selectedDate).format('YYYY년 MM월 DD일') : dayjs(currentDate).format('YYYY년 MM월')}
+            </ModalSubtitle>
+          </View>
           <TouchableOpacity
             activeOpacity={0.8}
             hitSlop={{
@@ -206,10 +214,12 @@ const Calendar = props => {
             }}
             onPress={() => {
               setCurrentDate(dayjs(currentDate).add(1, 'M').toDate());
-            }}>
-            <ArrowIcon
+            }}
+
+          >
+            <RightAngleBracket
               style={{
-                transform: [{rotate: '180deg'}],
+                transform: [{ rotate: '180deg' }],
               }}
             />
           </TouchableOpacity>
@@ -219,7 +229,7 @@ const Calendar = props => {
       <CalendarSection>
         <FlatList
           key={currentDate.getMonth()}
-          scrollEnabled={false}
+          scrollEnabled={true}
           data={calendarData}
           numColumns={7}
           keyExtractor={item => item.toISOString()}
@@ -227,6 +237,7 @@ const Calendar = props => {
           columnWrapperStyle={{
             justifyContent: 'space-between',
           }}
+          nestedScrollEnabled={true} // 추가
         />
       </CalendarSection>
     </View>

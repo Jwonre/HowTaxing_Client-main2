@@ -231,6 +231,7 @@ const ButtonText = styled.Text`
 const CertSheet_ori = props => {
   LogBox.ignoreLogs(['to contain units']);
   const actionSheetRef = useRef(null);
+  const scrollViewRef = useRef(null);
   const cert = props.payload.data;
   const navigation = props.payload?.navigation;
   ////console.log('navigation', navigation);
@@ -299,7 +300,13 @@ const CertSheet_ori = props => {
     // 키보드가 보여질 때 높이를 설정
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
-      (e) => setKeyboardHeight(e.endCoordinates.height)
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+        //console.log('scrollViewRef.current', scrollViewRef.current);
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToPosition(0, 100, true);
+        }
+      }
     );
 
     // 키보드가 사라질 때 높이를 초기화
@@ -875,8 +882,9 @@ const CertSheet_ori = props => {
 
       {currentPageIndex === 1 && (
         <KeyboardAwareScrollView
-          style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
-          extraScrollHeight={keyboardHeight}
+          ref={scrollViewRef}
+          style={{ flex: 1 }}
+          keyboardShouldPersistTaps="always"
         >
           <SheetContainer width={width}>
             <ModalInputSection>
@@ -984,8 +992,9 @@ const CertSheet_ori = props => {
       }
       {currentPageIndex === 2 && (
         <KeyboardAwareScrollView
-          style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
-          extraScrollHeight={keyboardHeight}
+          ref={scrollViewRef}
+          style={{ flex: 1 }}
+          keyboardShouldPersistTaps="always"
         >
           <SheetContainer width={width}>
             <ModalInputSection>
@@ -1095,8 +1104,9 @@ const CertSheet_ori = props => {
       {
         currentPageIndex === 3 && (
           <KeyboardAwareScrollView
-            style={{ flex: 1, keyboardShouldPersistTaps: "always" }}
-            extraScrollHeight={keyboardHeight}
+            ref={scrollViewRef}
+            style={{ flex: 1 }}
+            keyboardShouldPersistTaps="always"
           >
             <SheetContainer width={width}>
               <ModalInputSection>
