@@ -457,7 +457,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.xmonster.howtaxing;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xmonster.howtaxingapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/howtaxing.app/howtaxing";
 			};
@@ -482,7 +482,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.xmonster.howtaxing;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xmonster.howtaxingapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/howtaxing.app/howtaxing";
 			};
@@ -509,7 +509,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.xmonster.howtaxing;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xmonster.howtaxingapp;
 				PRODUCT_NAME = howtaxing;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -537,7 +537,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.xmonster.howtaxing;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xmonster.howtaxingapp;
 				PRODUCT_NAME = howtaxing;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

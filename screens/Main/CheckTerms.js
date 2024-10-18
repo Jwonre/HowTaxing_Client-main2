@@ -402,7 +402,7 @@ const CheckTerms = props => {
           {agreePrivacy && <CheckOnIcon />}
         </CheckCircle>
         <ListItemTitle >
-          [필수] 개인정보처리방침
+          [필수] 개인정보 수집 및 이용 동의 
         </ListItemTitle>
         <ListItemButton
           onPress={() => {
@@ -455,7 +455,7 @@ const CheckTerms = props => {
           {agreeMarketing && <CheckOnIcon />}
         </CheckCircle>
         <ListItemTitle >
-          [선택] 마케팅 수신동의
+          [선택] 마케팅 및 프로모션 수신동의
         </ListItemTitle>
 
       </ListItem>

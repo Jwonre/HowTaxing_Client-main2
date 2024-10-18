@@ -54,6 +54,7 @@ import InfoAlert from '../components/bottomSheets/InfoAlert';
 import InfoCertification from '../components/bottomSheets/InfoCertification';
 import InfoFixHouseDelete from '../components/bottomSheets/InfoFixHouseDelete';
 import InfoConsulting from '../components/bottomSheets/InfoConsulting';
+import InfoConsultingCancel from '../components/bottomSheets/InfoConsultingCancel';
 import InfoOwnHouse from '../components/bottomSheets/InfoOwnHouse';
 import InfoBuyPrice from '../components/bottomSheets/InfoBuyPrice';
 import InfoBuyDate from '../components/bottomSheets/InfoBuyDate';
@@ -142,6 +143,7 @@ const AppNavigator = () => {
     registerSheet('info', InfoAlert);
     registerSheet('infoCertification', InfoCertification);
     registerSheet('InfoConsulting', InfoConsulting);
+    registerSheet('InfoConsultingCancel', InfoConsultingCancel);
     registerSheet('InfoOwnHouse', InfoOwnHouse);
     registerSheet('InfoFixHouseDelete', InfoFixHouseDelete);
     registerSheet('InfoBuyPrice', InfoBuyPrice);

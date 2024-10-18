@@ -6,9 +6,11 @@ import {
   Pressable,
   ScrollView,
   Keyboard,
+  StyleSheet,
 } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
+import { FlatList } from 'react-native-gesture-handler';
 import styled from 'styled-components';
 import CloseIcon from '../../assets/icons/close_button.svg';
 import DropShadow from 'react-native-drop-shadow';
@@ -37,6 +39,7 @@ const ModalInputSection = styled.View`
   width: 100%;
   height: auto;
   background-color: #fff;
+  margin-bottom: 10px;
 `;
 
 
@@ -66,17 +69,18 @@ const ReservationtimeSection = styled.View`
 `;
 
 const TimeContainer = styled.View`
+  width: 100%;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  margin-left: 2%;
 
 `;
 
 const TimeBox = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
-  width: 73px;
-  height: 35px;
+  flex: 0 0 26%;
+  height: 40px;
   background-color: #fff;
   justify-content: center;
   align-items: center;
@@ -84,8 +88,9 @@ const TimeBox = styled.TouchableOpacity.attrs(props => ({
   border-width: 1px;
   border-color: ${props => (props?.active ? '#2F87FF' : '#E8EAED')};
   margin-bottom: 15px;
-  margin-right: 3px;
+  margin-right: 2%;
 `;
+
 
 const TimeText = styled.Text`
   font-size: 12px;
@@ -436,7 +441,7 @@ const UpdateConsultingDateAndTimeAlert = props => {
             <View
               style={{
                 width: '100%',
-                height: 480,
+                height: 500,
                 marginTop: 20,
               }}>
               <Calendar
@@ -483,43 +488,53 @@ const UpdateConsultingDateAndTimeAlert = props => {
             <ReservationtimeSection style={{ alignItems: 'center' }}>
               <TimeTitle>오전</TimeTitle>
               <TimeContainer style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
-                {morningTimes.map((item, index) => (
-                  <TimeBox
-                    disabled={timeList.indexOf(item) < 0}
-                    active={selectedList.indexOf(item) > -1}
-                    onPress={() => {
-                      if (selectedList.indexOf(item) > -1) {
-                        setSelectedList(
-                          selectedList.filter(selectedItem => selectedItem !== item),
-                        );
-                      } else {
-                        setSelectedList([item]);
-                      }
-                    }}
-                    key={index}>
-                    <TimeText style={{ color: timeList.indexOf(item) < 0 ? '#E8EAED' : '#1b1c1f' }}>{item}</TimeText>
-                  </TimeBox>
-                ))}
+                <FlatList
+                  contentContainerStyle={styles.container}
+                  data={morningTimes}
+                  renderItem={({ item }) => (
+                    <TimeBox
+                      disabled={timeList.indexOf(item) < 0}
+                      active={selectedList.indexOf(item) > -1}
+                      onPress={() => {
+                        if (selectedList.indexOf(item) > -1) {
+                          setSelectedList(
+                            selectedList.filter(selectedItem => selectedItem !== item),
+                          );
+                        } else {
+                          setSelectedList([item]);
+                        }
+                      }}>
+                      <TimeText style={{ color: timeList.indexOf(item) < 0 ? '#E8EAED' : '#1b1c1f' }}>{item}</TimeText>
+                    </TimeBox>
+                  )}
+                  keyExtractor={(item, index) => index.toString()}
+                  numColumns={3} // 한 줄에 4개의 
+                ></FlatList>
               </TimeContainer>
               <TimeTitle>오후</TimeTitle>
               <TimeContainer style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
-                {afternoonTimes.map((item, index) => (
-                  <TimeBox
-                    disabled={timeList.indexOf(item) < 0}
-                    active={selectedList.indexOf(item) > -1}
-                    onPress={() => {
-                      if (selectedList.indexOf(item) > -1) {
-                        setSelectedList(
-                          selectedList.filter(selectedItem => selectedItem !== item),
-                        );
-                      } else {
-                        setSelectedList([item]);
-                      }
-                    }}
-                    key={index}>
-                    <TimeText style={{ color: timeList.indexOf(item) < 0 ? '#E8EAED' : '#1b1c1f' }}>{item}</TimeText>
-                  </TimeBox>
-                ))}
+                <FlatList
+                  contentContainerStyle={styles.container}
+                  data={afternoonTimes}
+                  renderItem={({ item }) => (
+                    <TimeBox
+                      disabled={timeList.indexOf(item) < 0}
+                      active={selectedList.indexOf(item) > -1}
+                      onPress={() => {
+                        if (selectedList.indexOf(item) > -1) {
+                          setSelectedList(
+                            selectedList.filter(selectedItem => selectedItem !== item),
+                          );
+                        } else {
+                          setSelectedList([item]);
+                        }
+                      }}>
+                      <TimeText style={{ color: timeList.indexOf(item) < 0 ? '#E8EAED' : '#1b1c1f' }}>{item}</TimeText>
+                    </TimeBox>
+                  )}
+                  keyExtractor={(item, index) => index.toString()}
+                  numColumns={3} // 한 줄에 4개의 
+                ></FlatList>
               </TimeContainer>
             </ReservationtimeSection>
           </ModalInputSection>
@@ -573,5 +588,12 @@ const UpdateConsultingDateAndTimeAlert = props => {
     </ActionSheet >
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+});
 
 export default UpdateConsultingDateAndTimeAlert;

@@ -291,13 +291,6 @@ const InfoAlert = props => {
                 style={{
                   flexDirection: 'row',
                   alignContent: 'center',
-                  shadowColor: 'rgba(0,0,0,0.25)',
-                  shadowOffset: {
-                    width: 0,
-                    height: 4,
-                  },
-                  shadowOpacity: 0.15,
-                  shadowRadius: 2,
                   alignSelf: 'center',
                   width: 130,
                   marginRight: 10,

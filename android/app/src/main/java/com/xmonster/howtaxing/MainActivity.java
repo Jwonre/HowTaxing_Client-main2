@@ -1,4 +1,4 @@
-package com.xmonster.howtaxing;
+package com.xmonster.howtaxingapp;
 
 import android.os.Bundle;
 import android.content.Context;

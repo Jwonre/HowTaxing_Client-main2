@@ -146,7 +146,7 @@ const MapSearchResultItemTitle = styled.Text`
 `;
 
 const MapSearchResultItemAddress = styled.Text`
-  width: 80%;
+  width: 64%;
   font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
@@ -1125,7 +1125,7 @@ const AddHouse = props => {
                       }}>
                       <View
                         style={{
-                          width: '80%',
+                          width: '100%',
                         }}>
                         <MapSearchResultItemTitle>
                           {item?.roadAddr}
@@ -1141,7 +1141,7 @@ const AddHouse = props => {
                             <AddressDetailText>상세주소</AddressDetailText>
                           </AddressDetailBadge>
                           {!expandedItems[index] ? (
-                            <MapSearchResultItemAddress ellipsizeMode='tail' numberOfLines={1}>
+                            <MapSearchResultItemAddress style={{ width: sortedList.length > 6 ? '64%' : '76%' }} ellipsizeMode='tail' numberOfLines={1}>
                               {sortedList.join(',')}
                             </MapSearchResultItemAddress>
                           ) : (
@@ -1149,7 +1149,7 @@ const AddHouse = props => {
                               {sortedList.join(',')}
                             </MapSearchResultItemAddress>
                           )}
-                          {sortedList.length > 5 && <MepSearchResultButton onPress={() => { toggleExpand(index) }}>
+                          {sortedList.length > 6 && <MepSearchResultButton onPress={() => { toggleExpand(index) }}>
                             <View
                               style={{
                                 flexDirection: 'row',

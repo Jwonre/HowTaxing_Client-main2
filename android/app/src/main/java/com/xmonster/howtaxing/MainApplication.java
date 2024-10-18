@@ -1,4 +1,4 @@
-package com.xmonster.howtaxing;
+package com.xmonster.howtaxingapp;
 
 import android.app.Application;
 import com.facebook.react.PackageList;
@@ -8,6 +8,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
+import com.microsoft.codepush.react.CodePush;
 import java.util.List;
 import com.zoyi.channel.plugin.android.ChannelIO;
 import com.zoyi.channel.rn.RNChannelIOPackage;
@@ -47,6 +48,10 @@ public class MainApplication extends Application implements ReactApplication {
     protected Boolean isHermesEnabled() {
       return BuildConfig.IS_HERMES_ENABLED;
     }
+
+    protected String getJSBundleFile() {
+      return CodePush.getJSBundleFile();
+  }
   };
 
   @Override

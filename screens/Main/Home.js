@@ -35,7 +35,7 @@ const Container = styled.View`
 
 const HelloSection = styled.View`
   flex: 0.5;
-  padding: 25px;
+  padding: 25px 25px 0px 25px;
   justify-content: flex-end;
   align-items: flex-start;
   margin-top: 50px;
@@ -146,7 +146,7 @@ const ShadowContainer = styled(DropShadow)`
   shadow-color: #ececef;
   shadow-offset: 0px 9px;
   shadow-opacity: 1;
-  shadow-radius: 8px;
+  shadow-radius: 6px;
 `;
 
 const style = StyleSheet.create({
@@ -451,7 +451,7 @@ const Home = () => {
     <Container>
       <HelloSection>
         <HelloText >안녕하세요.</HelloText>
-        <MessageTitle >어떤 세금을 계산하시겠어요?</MessageTitle>
+        <MessageTitle>어떤 서비스를 이용하시겠어요?</MessageTitle>
       </HelloSection>
       <ShadowContainer>
         <Card width={width} onPress={goAcquisigion}>

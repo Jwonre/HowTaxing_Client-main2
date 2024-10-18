@@ -160,18 +160,19 @@ const ReservationtimeSection = styled.View`
   justify-content: flex-end;
 `;
 
+
 const TimeContainer = styled.View`
   width: 100%;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
+  margin-left: 1%;
+
 `;
 
 const TimeBox = styled.TouchableOpacity.attrs(props => ({
   activeOpacity: 0.8,
 }))`
-  width: 24%;
+  flex: 0 0 24%;
   height: 40px;
   background-color: #fff;
   justify-content: center;
@@ -180,7 +181,7 @@ const TimeBox = styled.TouchableOpacity.attrs(props => ({
   border-width: 1px;
   border-color: ${props => (props?.active ? '#2F87FF' : '#E8EAED')};
   margin-bottom: 15px;
-  margin-right: 3px;
+  margin-right: 1%;
 `;
 
 const TimeText = styled.Text`
@@ -335,7 +336,7 @@ const Button2 = styled.TouchableOpacity.attrs(props => ({
 
 
 const ButtonText = styled.Text`
-  font-size: 18px;
+  font-size: 16px;
   font-family: Pretendard-Bold;
   color: #fff;
   line-height: 20px;
@@ -376,8 +377,14 @@ const ConsultingReservation = props => {
   };
 
   for (let i = 9; i <= 11; i++) {
-    morningTimes.push(`${i}:00`);
-    morningTimes.push(`${i}:30`);
+    if (i < 10) {
+      morningTimes.push(`0${i}:00`);
+      morningTimes.push(`0${i}:30`);
+    } else {
+      morningTimes.push(`${i}:00`);
+      morningTimes.push(`${i}:30`);
+    }
+
   }
   for (let i = 12; i < 18; i++) {
     afternoonTimes.push(`${i}:00`);
@@ -386,11 +393,16 @@ const ConsultingReservation = props => {
 
   const handleBackPress = () => {
     if (currentPageIndex === 0) {
-      navigation.goBack();
+      SheetManager.show('InfoConsultingCancel', {
+        payload: {
+          type: 'info',
+          message: '상담 예약을 다음에 하시겠어요?',
+          onPress: { handlePress },
+        },
+      });
     } else {
       setCurrentPageIndex(currentPageIndex - 1);
     }
-
     return true;
   }
   useFocusEffect(
@@ -437,7 +449,6 @@ const ConsultingReservation = props => {
   };
 
   useEffect(() => {
-    getDateTimelist('1', '');
     if (props.route.params.IsGainTax !== undefined) {
       if (props.route.params.IsGainTax) {
         setTaxTypeList(['양도소득세']);
@@ -447,6 +458,27 @@ const ConsultingReservation = props => {
     }
     console.log('props.route.params.IsGainTax', props.route.params.IsGainTax);
   }, []);
+
+  useEffect(() => {
+    if (currentPageIndex === 2) {
+      getDateTimelist('1', '');
+    }
+  }, [currentPageIndex]);
+
+
+  useEffect(() => {
+    const focusInput = () => {
+      if (currentPageIndex === 1 && input1.current) {
+        input1.current.focus();
+      } else if (currentPageIndex === 2 && input2.current) {
+        input2.current.focus();
+      } else if (currentPageIndex === 4 && input3.current) {
+        input3.current.focus();
+      }
+    };
+
+    focusInput();
+  }, [currentPageIndex]);
 
 
   useEffect(() => {
@@ -633,13 +665,15 @@ const ConsultingReservation = props => {
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           onPress={() => {
             console.log('currentPageIndex', currentPageIndex);
-            if (currentPageIndex === 0) {
-              navigation.goBack();
-            } else {
-              setCurrentPageIndex(currentPageIndex - 1);
-            }
+            SheetManager.show('InfoConsultingCancel', {
+              payload: {
+                type: 'info',
+                message: '상담 예약을 다음에 하시겠어요?',
+                onPress: { handlePress },
+              },
+            });
           }}>
-          {currentPageIndex === 0 ? <CloseIcon /> : <BackIcon />}
+          <CloseIcon />
         </TouchableOpacity>
       ),
       headerTitleAlign: 'center',
@@ -657,6 +691,12 @@ const ConsultingReservation = props => {
       },
     });
   }, [currentPageIndex]);
+
+  const handlePress = buttonIndex => {
+    if (buttonIndex === 'YES') {
+      navigation.goBack();
+    }
+  };
 
   return (
     <ScrollView
@@ -745,6 +785,7 @@ const ConsultingReservation = props => {
               <ModalInput
                 ref={input1}
                 //  onSubmitEditing={() => input2.current.focus()}
+                autoFocus={currentPageIndex === 1}
                 placeholder="이름을 입력해주세요."
                 value={name}
                 onChangeText={setName}
@@ -755,7 +796,9 @@ const ConsultingReservation = props => {
                   const state = await NetInfo.fetch();
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
-                    setCurrentPageIndex(2);
+                    if (name.length > 0) {
+                      setCurrentPageIndex(2);
+                    }
                   }
                 }}
               />
@@ -823,6 +866,7 @@ const ConsultingReservation = props => {
               <ModalInput
                 ref={input2}
                 //  onSubmitEditing={() => input2.current.focus()}
+                autoFocus={currentPageIndex === 2}
                 placeholder="전화번호를 입력해주세요."
                 value={phone}
                 onChangeText={setPhone}
@@ -833,7 +877,7 @@ const ConsultingReservation = props => {
                   const state = await NetInfo.fetch();
                   const canProceed = await handleNetInfoChange(state);
                   if (canProceed) {
-                    if(phone.length > 10){
+                    if (phone.length > 10) {
                       setCurrentPageIndex(3);
                     }
 
@@ -843,25 +887,69 @@ const ConsultingReservation = props => {
             </ModalInputContainer>
           </ModalInputSection>
           <ButtonSection>
-            <ShadowContainer>
-              <Button
-                style={{
-                  backgroundColor: phone.length < 11 ? '#E8EAED' : '#2F87FF',
-                  color: phone.length < 11 ? '#1b1c1f' : '#FFFFFF',
-                }}
-                disabled={phone.length < 11}
-                active={phone.length > 10}
-                width={width}
-                onPress={async () => {
-                  const state = await NetInfo.fetch();
-                  const canProceed = await handleNetInfoChange(state);
-                  if (canProceed) {
-                    setCurrentPageIndex(3);
-                  }
-                }}>
-                <ButtonText >다음으로</ButtonText>
-              </Button>
-            </ShadowContainer>
+            <View
+              style={{
+                alignItems: 'center', // align-items를 camelCase로 변경
+                flexDirection: 'row', // flex-direction을 camelCase로 변경
+                justifyContent: 'space-between', // justify-content를 camelCase로 변경 
+              }}>
+              <View style={{ width: '49%', marginRight: '1%' }}>
+                <Button
+                  style={{
+                    backgroundColor: '#fff',
+                    color: '#1b1c1f',
+                    width: '100%',
+                    height: 50, // height 값을 숫자로 변경하고 단위 제거
+                    alignItems: 'center', // align-items를 camelCase로 변경
+                    justifyContent: 'center', // justify-content를 camelCase로 변경
+                    borderWidth: 1, // border-width를 camelCase로 변경하고 단위 제거
+                    borderColor: '#E8EAED',
+                  }}
+                  width={width}
+                  onPress={async () => {
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      setCurrentPageIndex(1);
+                    }
+                  }}>
+                  <ButtonText style={{ color: '#717274' }}>이전으로</ButtonText>
+                </Button>
+              </View>
+              <ShadowContainer style={{
+                width: '49%', marginLeft: '1%', shadowColor: 'rgba(0,0,0,0.25)',
+                shadowOffset: {
+                  width: 0,
+                  height: 4,
+                },
+                shadowOpacity: 0.15,
+                shadowRadius: 2,
+              }}>
+                <Button
+                  style={{
+                    backgroundColor: phone.length < 11 ? '#E8EAED' : '#2F87FF',
+                    color: phone.length < 11 ? '#1b1c1f' : '#FFFFFF',
+                    width: '100%',
+                    height: 50, // height 값을 숫자로 변경하고 단위 제거
+                    alignItems: 'center', // align-items를 camelCase로 변경
+                    justifyContent: 'center', // justify-content를 camelCase로 변경
+                    borderWidth: 1, // border-width를 camelCase로 변경하고 단위 제거
+                    borderColor: '#E8EAED',
+                  }}
+                  disabled={phone.length < 11}
+                  active={phone.length > 10}
+                  width={width}
+                  onPress={async () => {
+                    const state = await NetInfo.fetch();
+                    const canProceed = await handleNetInfoChange(state);
+                    if (canProceed) {
+                      setCurrentPageIndex(3);
+                    }
+                  }}>
+                  <ButtonText >다음으로</ButtonText>
+                </Button>
+              </ShadowContainer>
+            </View>
             <View
               style={{
                 marginTop: 5,
@@ -906,8 +994,8 @@ const ConsultingReservation = props => {
           ListHeaderComponent={
             <>
               <IntroSection2>
-                <Title>날짜와 시간을 선택해주세요.</Title>
-                <SubTitle3>예약과 동시에 일정이 확정되니, 신중하게 선택해 주세요.{'\n'}그리고 상담예약은 하루 한 번, 15분 동안 가능해요.</SubTitle3>
+              <Title>예약일자와 시간을 선택해주세요.</Title>
+              <SubTitle3>예약과 동시에 일정이 확정되니, 신중하게 선택해 주세요.{'\n'}상담을 전화로 진행될 거예요.</SubTitle3>
               </IntroSection2>
               <View
                 style={{
@@ -918,51 +1006,61 @@ const ConsultingReservation = props => {
                 }}>
                 <Calendar
                   setSelectedDate={setSelectedDate}
-                  selectedDate={new Date(selectedDate ? new Date(selectedDate).setHours(0, 0, 0, 0) : new Date().setHours(0, 0, 0, 0))}
-                  currentDate={new Date(selectedDate ? new Date(selectedDate).setHours(0, 0, 0, 0) : new Date().setHours(0, 0, 0, 0))}
+                  selectedDate={dataList ? new Date(dataList[0]).setHours(0, 0, 0, 0) : new Date().setHours(0, 0, 0, 0)}
+                  currentDate={dataList ? new Date(dataList[0]).setHours(0, 0, 0, 0) : new Date().setHours(0, 0, 0, 0)}
                   dateList={dataList}
                 />
               </View>
               <ReservationtimeSection>
                 <TimeTitle>오전</TimeTitle>
                 <TimeContainer style={{ marginBottom: 10 }}>
-                  {morningTimes.map((item, index) => (
-                    <TimeBox
-                      disabled={timeList.indexOf(item) < 0}
-                      active={selectedList.indexOf(item) > -1}
-                      onPress={() => {
-                        if (selectedList.indexOf(item) > -1) {
-                          setSelectedList(
-                            selectedList.filter(selectedItem => selectedItem !== item),
-                          );
-                        } else {
-                          setSelectedList([item]);
-                        }
-                      }}
-                      key={index}>
-                      <TimeText style={{ color: timeList.indexOf(item) < 0 ? '#E8EAED' : '#1b1c1f' }}>{item}</TimeText>
-                    </TimeBox>
-                  ))}
+                  <FlatList
+                    //contentContainerStyle={styles.container}
+                    data={morningTimes}
+                    renderItem={({ item }) => (
+                      <TimeBox
+                        disabled={timeList.indexOf(item) < 0}
+                        active={selectedList.indexOf(item) > -1}
+                        onPress={() => {
+                          if (selectedList.indexOf(item) > -1) {
+                            setSelectedList(
+                              selectedList.filter(selectedItem => selectedItem !== item),
+                            );
+                          } else {
+                            setSelectedList([item]);
+                          }
+                        }}>
+                        <TimeText style={{ color: timeList.indexOf(item) < 0 ? '#E8EAED' : '#1b1c1f' }}>{item}</TimeText>
+                      </TimeBox>
+                    )}
+                    keyExtractor={(item, index) => index.toString()}
+                    numColumns={4} // 한 줄에 4개의 
+                  ></FlatList>
                 </TimeContainer>
                 <TimeTitle>오후</TimeTitle>
                 <TimeContainer>
-                  {afternoonTimes.map((item, index) => (
-                    <TimeBox
-                      disabled={timeList.indexOf(item) < 0}
-                      active={selectedList.indexOf(item) > -1}
-                      onPress={() => {
-                        if (selectedList.indexOf(item) > -1) {
-                          setSelectedList(
-                            selectedList.filter(selectedItem => selectedItem !== item),
-                          );
-                        } else {
-                          setSelectedList([item]);
-                        }
-                      }}
-                      key={index}>
-                      <TimeText style={{ color: timeList.indexOf(item) < 0 ? '#E8EAED' : '#1b1c1f' }}>{item}</TimeText>
-                    </TimeBox>
-                  ))}
+                  <FlatList
+                    //contentContainerStyle={styles.container}
+                    data={afternoonTimes}
+                    renderItem={({ item }) => (
+                      <TimeBox
+                        disabled={timeList.indexOf(item) < 0}
+                        active={selectedList.indexOf(item) > -1}
+                        onPress={() => {
+                          if (selectedList.indexOf(item) > -1) {
+                            setSelectedList(
+                              selectedList.filter(selectedItem => selectedItem !== item),
+                            );
+                          } else {
+                            setSelectedList([item]);
+                          }
+                        }}>
+                        <TimeText style={{ color: timeList.indexOf(item) < 0 ? '#E8EAED' : '#1b1c1f' }}>{item}</TimeText>
+                      </TimeBox>
+                    )}
+                    keyExtractor={(item, index) => index.toString()}
+                    numColumns={4} // 한 줄에 4개의 
+                  ></FlatList>
                 </TimeContainer>
                 <View style={{
                   marginBottom: 60
@@ -974,25 +1072,69 @@ const ConsultingReservation = props => {
           }
           ListFooterComponent={
             <><ButtonSection>
-              <ShadowContainer>
-                <Button
-                  style={{
-                    backgroundColor: selectedList.length < 1 ? '#E8EAED' : '#2F87FF',
-                    color: selectedList.length < 1 ? '#1b1c1f' : '#FFFFFF',
-                  }}
-                  disabled={selectedList.length < 1}
-                  active={selectedList.length > 0}
-                  width={width}
-                  onPress={async () => {
-                    const state = await NetInfo.fetch();
-                    const canProceed = await handleNetInfoChange(state);
-                    if (canProceed) {
-                      setCurrentPageIndex(4);
-                    }
-                  }}>
-                  <ButtonText>다음으로</ButtonText>
-                </Button>
-              </ShadowContainer>
+              <View
+                style={{
+                  alignItems: 'center', // align-items를 camelCase로 변경
+                  flexDirection: 'row', // flex-direction을 camelCase로 변경
+                  justifyContent: 'space-between', // justify-content를 camelCase로 변경 
+                }}>
+                <View style={{ width: '49%', marginRight: '1%' }}>
+                  <Button
+                    style={{
+                      backgroundColor: '#fff',
+                      color: '#1b1c1f',
+                      width: '100%',
+                      height: 50, // height 값을 숫자로 변경하고 단위 제거
+                      alignItems: 'center', // align-items를 camelCase로 변경
+                      justifyContent: 'center', // justify-content를 camelCase로 변경
+                      borderWidth: 1, // border-width를 camelCase로 변경하고 단위 제거
+                      borderColor: '#E8EAED',
+                    }}
+                    width={width}
+                    onPress={async () => {
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        setCurrentPageIndex(2);
+                      }
+                    }}>
+                    <ButtonText style={{ color: '#717274' }}>이전으로</ButtonText>
+                  </Button>
+                </View>
+                <ShadowContainer style={{
+                  width: '49%', marginLeft: '1%', shadowColor: 'rgba(0,0,0,0.25)',
+                  shadowOffset: {
+                    width: 0,
+                    height: 4,
+                  },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 2,
+                }}>
+                  <Button
+                    style={{
+                      backgroundColor: selectedList.length < 1 ? '#E8EAED' : '#2F87FF',
+                      color: selectedList.length < 1 ? '#1b1c1f' : '#FFFFFF',
+                      width: '100%',
+                      height: 50, // height 값을 숫자로 변경하고 단위 제거
+                      alignItems: 'center', // align-items를 camelCase로 변경
+                      justifyContent: 'center', // justify-content를 camelCase로 변경
+                      borderWidth: 1, // border-width를 camelCase로 변경하고 단위 제거
+                      borderColor: '#E8EAED',
+                    }}
+                    disabled={selectedList.length < 1}
+                    active={selectedList.length > 0}
+                    width={width}
+                    onPress={async () => {
+                      const state = await NetInfo.fetch();
+                      const canProceed = await handleNetInfoChange(state);
+                      if (canProceed) {
+                        setCurrentPageIndex(4);
+                      }
+                    }}>
+                    <ButtonText>다음으로</ButtonText>
+                  </Button>
+                </ShadowContainer>
+              </View>
               <View
                 style={{
                   marginTop: 5,
@@ -1065,7 +1207,7 @@ const ConsultingReservation = props => {
                                   : item === '증여세'
                                     ? '#2F87FF'
                                     : '#E8EAED',
-                                    margin: 5
+                          margin: 5
                         }}
                         //disabled={taxTypeList.indexOf(item) < 0}
                         active={taxTypeList.indexOf(item) > -1}
@@ -1106,6 +1248,7 @@ const ConsultingReservation = props => {
                     <ScrollView>
                       <ConsultingInput
                         ref={input3}
+                        autoFocus={currentPageIndex === 4}
                         multiline={false}
                         width={width}
                         placeholder="정확한 상담을 위해 사실 관계 및 문의사항을 자세하게 입력해주세요."
@@ -1167,28 +1310,64 @@ const ConsultingReservation = props => {
           ListFooterComponent={
             <>
               <ButtonSection2>
-                <ShadowContainer>
-                  <Button
-                    style={{
-                      backgroundColor: text === '' ? '#E8EAED' : '#2F87FF',
-                      color: text === '' ? '#1b1c1f' : '#FFFFFF',
-                    }}
-                    disabled={!text}
-                    active={text}
-                    width={width}
-                    onPress={async () => {
-                      const state = await NetInfo.fetch();
-                      const canProceed = await handleNetInfoChange(state);
-                      if (canProceed) {
-                        const result = await requestReservation();
-                        if (result) {
-                          navigation.goBack();
+                <View
+                  style={{
+                    alignItems: 'center', // align-items를 camelCase로 변경
+                    flexDirection: 'row', // flex-direction을 camelCase로 변경
+                    justifyContent: 'space-between', // justify-content를 camelCase로 변경 
+                  }}>
+                  <View style={{ width: '49%', marginRight: '1%' }}>
+                    <Button
+                      style={{
+                        backgroundColor: '#fff',
+                        color: '#1b1c1f',
+                        width: '100%',
+                        height: 50, // height 값을 숫자로 변경하고 단위 제거
+                        alignItems: 'center', // align-items를 camelCase로 변경
+                        justifyContent: 'center', // justify-content를 camelCase로 변경
+                        borderWidth: 1, // border-width를 camelCase로 변경하고 단위 제거
+                        borderColor: '#E8EAED',
+                      }}
+                      width={width}
+                      onPress={async () => {
+                        const state = await NetInfo.fetch();
+                        const canProceed = await handleNetInfoChange(state);
+                        if (canProceed) {
+                          setCurrentPageIndex(3);
                         }
-                      }
-                    }}>
-                    <ButtonText>동의 후 상담 예약하기</ButtonText>
-                  </Button>
-                </ShadowContainer>
+                      }}>
+                      <ButtonText style={{ color: '#717274' }}>이전으로</ButtonText>
+                    </Button>
+                  </View>
+                  <ShadowContainer style={{ width: '49%', marginLeft: '1%' }}>
+                    <Button
+                      style={{
+                        backgroundColor: text === '' ? '#E8EAED' : '#2F87FF',
+                        color: text === '' ? '#1b1c1f' : '#FFFFFF',
+                        width: '100%',
+                        height: 50, // height 값을 숫자로 변경하고 단위 제거
+                        alignItems: 'center', // align-items를 camelCase로 변경
+                        justifyContent: 'center', // justify-content를 camelCase로 변경
+                        borderWidth: 1, // border-width를 camelCase로 변경하고 단위 제거
+                        borderColor: '#E8EAED',
+                      }}
+                      disabled={!text}
+                      active={text}
+                      width={width}
+                      onPress={async () => {
+                        const state = await NetInfo.fetch();
+                        const canProceed = await handleNetInfoChange(state);
+                        if (canProceed) {
+                          const result = await requestReservation();
+                          if (result) {
+                            navigation.goBack();
+                          }
+                        }
+                      }}>
+                      <ButtonText>동의 후 상담 예약하기</ButtonText>
+                    </Button>
+                  </ShadowContainer>
+                </View>
                 <View
                   style={{
                     marginTop: 5,

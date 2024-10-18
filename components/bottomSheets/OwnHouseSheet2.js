@@ -367,7 +367,7 @@ const OwnHouseSheet2 = props => {
       <SheetContainer width={width}>
         <TitleSection>
           {ownHouseList.length !== 0 && (<Title >
-            보유하신 주택을 모두 불러왔어요.{'\n'}양도할 주택을 선택해주세요.
+            보유하신 주택을 모두 불러왔어요.{'\n'}매도할 주택을 선택해주세요.
           </Title>)}
           {ownHouseList.length === 0 && props.payload?.data === 'ok' && props.payload?.chungYackYn === true && (<Title >
             청약통장을 가지고 있지 않다면{'\n'}보유주택을 직접 등록해주세요.
@@ -376,8 +376,7 @@ const OwnHouseSheet2 = props => {
             주택을 불러오지 못했어요.{'\n'}보유주택이 있다면 직접 등록해주세요.
           </Title>)}
           <InfoMessage >
-            불러온 주택들이 있다면,{'\n'}“자세히 보기”를 통해
-            필수 입력 값들을 반드시 등록해주세요.
+            “자세히 보기”를 통해 주택정보를 확인해주세요.
           </InfoMessage>
         </TitleSection>
         {ownHouseList?.length > 0 ?

@@ -138,7 +138,7 @@ const MapSearchResultItemTitle = styled.Text`
 `;
 
 const MapSearchResultItemAddress = styled.Text`
-  width: 80%;
+  width: 64%;
   font-size: 12px;
   font-family: Pretendard-Regular;
   color: #a3a5a8;
@@ -1115,7 +1115,7 @@ const FixedHouse = props => {
                       }}>
                       <View
                         style={{
-                          width: '80%',
+                          width: '100%',
                         }}>
                         <MapSearchResultItemTitle>
                           {item?.roadAddr}
@@ -1131,7 +1131,7 @@ const FixedHouse = props => {
                             <AddressDetailText>상세주소</AddressDetailText>
                           </AddressDetailBadge>
                           {!expandedItems[index] ? (
-                            <MapSearchResultItemAddress ellipsizeMode='tail' numberOfLines={1}>
+                            <MapSearchResultItemAddress style={{ width: sortedList.length > 6 ? '64%' : '76%' }} ellipsizeMode='tail' numberOfLines={1}>
                               {sortedList.join(',')}
                             </MapSearchResultItemAddress>
                           ) : (
@@ -1139,7 +1139,7 @@ const FixedHouse = props => {
                               {sortedList.join(',')}
                             </MapSearchResultItemAddress>
                           )}
-                          {sortedList.length > 5 && <MepSearchResultButton onPress={() => { toggleExpand(index) }}>
+                          {sortedList.length > 6 && <MepSearchResultButton onPress={() => { toggleExpand(index) }}>
                             <View
                               style={{
                                 flexDirection: 'row',
@@ -2052,7 +2052,6 @@ const FixedHouse = props => {
                     color: '#717274',
                     fontSize: 16, // font-size를 camelCase로 변경하고 단위 제거
                     fontFamily: 'Pretendard-Bold', // font-family를 camelCase로 변경
-                    color: '#717274', // color 값을 중복 제거
                     lineHeight: 20, // line-height를 camelCase로 변경하고 단위 제거
                   }}>
                   이전으로

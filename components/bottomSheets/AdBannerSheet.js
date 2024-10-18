@@ -13,18 +13,21 @@ import NetInfo from '@react-native-community/netinfo';
 
 const SheetContainer = styled.View`
   background-color: #fff;
-  width: ${props => props.width - 40}px;
-  height: auto;
-  
+  width: 100%;
+  height: 45.4%;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  margin-bottom: 35%;
 `;
 
 const ModalContentSection = styled.View`
   width: 100%;
-  height: 300px;
+  height: 105%;
   background-color: #fff;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 `;
 
 const ButtonSection = styled.View`
@@ -34,8 +37,9 @@ const ButtonSection = styled.View`
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  margin-bottom: 10px;
-  padding: 20px 10px 10px 10px;
+  padding: 20px 20px 20px 20px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 `;
 
 const Button = styled.TouchableOpacity.attrs(props => ({
@@ -61,7 +65,7 @@ const ButtonText = styled.Text`
 const AdBannerMainImage = styled.Image.attrs(props => ({
   resizeMode: 'stretch',
 }))`
-  width: 100%;
+  width: 100.3%;
   height: 100%;
 `;
 
@@ -112,8 +116,9 @@ const AdBannerSheet = props => {
 
 
   return (
-    <Modal isVisible={addBanner} onBackdropPress={toggleModal}>
-      <SheetContainer style = {{ borderRadius: 8 }}>
+    <Modal isVisible={addBanner} onBackdropPress={toggleModal} backdropColor="#000" // 원하는 색으로 설정
+      backdropOpacity={0.4}>
+      <SheetContainer style={{ borderRadius: 8 }}>
         <ModalContentSection>
           {adBannerdata.targetUrl && <TouchableOpacity style={{ width: '100%', height: '100%' }} activeOpacity={0.8}
             hitSlop={{
@@ -129,10 +134,10 @@ const AdBannerSheet = props => {
               }
             }
             }>
-            <AdBannerMainImage source={{ uri: adBannerdata.imageUrl }}/>
+            <AdBannerMainImage source={{ uri: adBannerdata.imageUrl }} />
           </TouchableOpacity>}
           {!adBannerdata.targetUrl &&
-            <AdBannerMainImage source={{ uri: adBannerdata.imageUrl }}/>
+            <AdBannerMainImage source={{ uri: adBannerdata.imageUrl }} />
           }
         </ModalContentSection>
         <ButtonSection>
@@ -155,7 +160,7 @@ const AdBannerSheet = props => {
           </DropShadow>
         </ButtonSection>
       </SheetContainer>
-    </Modal>
+    </Modal >
   );
 };
 
